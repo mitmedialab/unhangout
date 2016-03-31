@@ -1,0 +1,14 @@
+django<1.10
+channels
+pytz
+asgi_redis
+jsonfield
+django-timezone-field
+bleach
+bleach-whitelist
+django-debug-toolbar
+django-gravatar2
+django-webpack-loader
+django-registration>=2.0.4
+pillow
+sorl-thumbnail

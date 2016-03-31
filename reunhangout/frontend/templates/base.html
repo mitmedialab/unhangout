@@ -1,0 +1,25 @@
+{% load render_bundle from webpack_loader %}
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel='icon' href='{% static "img/favicon.png" %}'>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% endblock %}{% block site_title %} - reunhangout{% endblock %}</title>
+  {% block styles %}
+    {% render_bundle 'main' 'css' %}
+  {% endblock %}
+</head>
+<body>
+<div id='wrapper'>
+  <div id='body'>
+    {% block navbar %}{% include "_navbar.html" %}{% endblock %}
+    {% block content %}{% endblock %}
+  </div>
+  <footer>{% block footer %}{% include "_footer.html" %}{% endblock %}</footer>
+</div>
+{% block scripts %}
+  {% render_bundle 'main' 'js' %}
+{% endblock %}
+</body>
+</html>

@@ -1,0 +1,83 @@
+{% load static %}
+{% load thumbnail %}
+{% load gravatar %}
+
+<div class='navbar navbar-inverse'>
+  <div class='container-fluid'>
+    <div class='navbar-header'>
+      <button type='button' class='navbar-toggle' data-toggle='collapse' data-target='#navbar-ex-collapse'>
+        <span class='sr-only'>Toggle navigation</span>
+        <span class='icon-bar'></span>
+        <span class='icon-bar'></span>
+        <span class='icon-bar'></span>
+      </button>
+      {% if not brandless %}
+        <a class='navbar-brand' href='/'>
+          {% thumbnail "assets/nav-bar-logo-full.png" "x34" format="PNG" as logo %}
+            <img src='{{ logo.url }}' alt='Unhangout' />
+          {% endthumbnail %}
+        </a>
+      {% endif %}
+    </div>
+    <div class='collapse navbar-collapse' id='navbar-ex-collapse'>
+      {% if not hidenav %}
+      <ul class='nav navbar-nav alt'>
+      </ul>
+      {% endif %}
+      <ul class='nav navbar-nav navbar-right'>
+        {% if user.is_authenticated %}
+          <li>
+            <a href='{% url "accounts_profile" %}'
+               class='dropdown-toggle user-name'
+               data-toggle='dropdown'
+               role='button'
+               aria-haspopup='true'
+               aria-expanded='false'>
+              {% gravatar user.email 32 %}
+              <span>{{ user }}</span>
+            </a>
+            <ul class='dropdown-menu'>
+              {% if user.is_staff %}
+                <li><a href='{% url "admin:index" %}'>Admin</a></li>
+              {% endif %}
+              <li><a href='{% url "accounts_profile" %}'>Profile</a></li>
+              <li>
+                <a href='{% url "accounts_settings" %}'>
+                  <i class='fa fa-cog'></i> Settings
+                </a>
+              </li>
+              <li role='separator' class='divider'></li>
+              <li><a href='{% url "auth_logout" %}'>Logout</a></li>
+            </ul>
+          </li>
+        {% else %}
+          <li>
+            <a href='{% url "registration_register" %}' class='js-register-modal'>Sign up</a>
+          </li>
+          <li>
+            <a href='{% url "auth_login" %}' class='js-login-modal'>Login</a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% block messages %}
+  {% if messages %}
+    <div class='messages container'>
+      {% for message in messages %}
+        <div role='alert'
+          {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+            class='alert alert-dismissible alert-danger'
+          {% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
+            class='alert alert-dismissible alert-warning'
+          {% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+            class='alert alert-dismissible alert-success'
+          {% else %}
+            class='alert alert-dismissible alert-info'
+          {% endif %}
+          >{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endblock %}
