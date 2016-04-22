@@ -26,6 +26,7 @@ class Series(models.Model):
         return self.name
 
     class Meta:
+        verbose_name = _("Series")
         verbose_name_plural = _("Series")
 
 # Create your models here.
@@ -37,12 +38,17 @@ class Plenary(models.Model):
     image = models.ImageField(upload_to="plenaries", blank=True, null=True)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
+    time_zone = TimeZoneField(default='America/New_York',
+        help_text=_("Default time zone to display times in."))
     public = models.BooleanField(default=False,
         help_text=_("Check to display this plenary on the public events list"))
     description = models.TextField(default="", blank=True,)
     whiteboard = models.TextField(default="", blank=True)
-    time_zone = TimeZoneField(default='America/New_York',
-        help_text=_("Default time zone to display times in."))
+    session_mode = models.CharField(max_length=20, choices=(
+        ("admin", _("Admin controlled")),
+        ("user", _("Participant proposed")),
+        ("randomized", _("Randomized breakouts")),
+    ))
 
     embeds = JSONField(blank=True, null=True)
     history = JSONField(blank=True, null=True)
@@ -63,4 +69,21 @@ class Plenary(models.Model):
         return self.name
 
     class Meta:
-        verbose_name_plural = _("plenaries")
+        verbose_name = _("Plenary")
+        verbose_name_plural = _("Plenaries")
+
+class ChatMessage(models.Model):
+    plenary = models.ForeignKey(Plenary)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    created = models.DateTimeField(auto_now_add=True)
+    message = models.TextField(default="", blank=True)
+
+    def safe_message(self):
+        return sanitize(self.message)
+
+    def __str__(self):
+        return "%s: %s" % (self.user, self.message)
+
+    class Meta:
+        verbose_name = _("Chat message")
+        verbose_name_plural = _("Chat messages")

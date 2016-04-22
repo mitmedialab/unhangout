@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.sites',
     'django.contrib.staticfiles',
+
+    'channels',
 ]
 MIGRATION_MODULES = {
     'thumbnail': 'frontend.sorl_migrations'
@@ -139,3 +141,13 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'public')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+# Channels
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "asgiref.inmemory.ChannelLayer",
+        "ROUTING": "reunhangout.routing.channel_routing",
+    }
+}
+

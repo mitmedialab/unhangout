@@ -1,11 +1,27 @@
 from django import forms
 from django.utils.safestring import mark_safe
-from django.utils import six
 from webpack_loader.templatetags.webpack_loader import get_files
 import bleach
 from bleach_whitelist.bleach_whitelist import markdown_tags, markdown_attrs
 
-class RichTextualizeForm(forms.Form):
+class RichTextMedia:
+    class Media:
+        js = [f['publicPath'] for f in get_files("main", "js") + get_files("editor", "js")]
+        css = {'all': [
+            f['publicPath'] for f in get_files("main", "css") + get_files("editor", "css")
+        ]}
+
+class RichTextWidget(forms.Textarea, RichTextMedia):
+    def __init__(self, attrs=None):
+        default_attrs = {'class': 'js-rich-text-editor'}
+        if attrs:
+            default_attrs.update(attrs)
+        super(RichTextWidget, self).__init__(default_attrs)
+
+class RichTextField(forms.CharField):
+    widget = RichTextWidget
+
+class RichTextualizeForm(forms.Form, RichTextMedia):
     def __init__(self, *args, **kwargs):
         super(RichTextualizeForm, self).__init__(*args, **kwargs)
         for name,field in self.fields.items():
@@ -14,24 +30,19 @@ class RichTextualizeForm(forms.Form):
                     field.widget.attrs.get('class', ''), "js-rich-text-editor"
                 )).strip()
 
-    class Media:
-        js = [f['publicPath'] for f in get_files('editor', 'js')]
-        css = []
+def _p_attributes(name, value):
+    return name == "class" and value in ("dropcap", "smallcap")
 
-class RichTextualizedModelForm(forms.ModelForm, RichTextualizeForm):
-    pass
+def _span_attributes(name, value):
+    return name == "class" and value in ("smallcaps",)
 
-class RichTextualizedAdminForm(forms.ModelForm, RichTextualizeForm):
-    @property
-    def media(self):
-        super_js = super(RichTextualizedAdminForm, self).media.js
-        return forms.Media(
-            js=list(super_js) + [static("admin/js/%s" % path) for path in js]
-        )
-
+valid_attrs = {}
+valid_attrs.update(markdown_attrs)
+valid_attrs['p'] = _p_attributes
+valid_attrs['span'] = _span_attributes
 
 def sanitize(html):
     return mark_safe(bleach.linkify(bleach.clean(
-        html, markdown_tags, markdown_attrs, []
+        html, markdown_tags, valid_attrs, []
     )))
 
