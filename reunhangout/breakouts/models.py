@@ -3,6 +3,7 @@ from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.translation import ugettext_lazy as _
 from jsonfield import JSONField
+from richtext.utils import sanitize
 
 class GoogleHangout(models.Model):
     url = models.CharField(max_length=255)
@@ -41,6 +42,26 @@ class Breakout(models.Model):
             settings.AUTH_USER_MODEL,
             related_name='voted_on_breakouts',
             blank=True)
+
+    def safe_description(self):
+        return sanitize(self.description)
+
+    def serialize(self):
+        return {
+            'title': title,
+            'slug': slug,
+            'description': self.safe_description(),
+            'max_attendees': self.max_attendees,
+            'activities': self.activities,
+            'history': self.history,
+            'plenary': self.plenary.id if self.plenary else None,
+            'is_hoa': self.is_hoa,
+            'is_proposal': self.is_proposal,
+            'google_hangout': self.google_hangout.url if self.google_hangout else None,
+            'google_hoa': self.google_hoa,
+            'proposed_by': self.proposed_by.serialize_public(),
+            'votes': [v.serialize_public() for v in self.votes.all()]
+        }
 
     def save(self, *args, **kwargs):
         if not self.slug:

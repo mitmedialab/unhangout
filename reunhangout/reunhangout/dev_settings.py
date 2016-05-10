@@ -7,6 +7,7 @@ AUTH_PASSWORD_VALIDATORS = []
 
 WEBPACK_LOADER = {
     'DEFAULT': {
+        'CACHE': not DEBUG,
         'BUNDLE_DIR_NAME': 'bundles/',
         'STATS_FILE': os.path.join(BASE_DIR, 'static', 'webpack-stats.json'),
         'POLL_INTERVAL': 0.1,

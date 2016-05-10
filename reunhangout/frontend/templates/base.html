@@ -3,12 +3,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <link rel='icon' href='{% static "img/favicon.png" %}'>
+  <meta http-equiv="X-UA-Compatible" content="IE=EDGE">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel='icon' href='{% static "img/favicon.png" %}'>
   <title>{% block title %}{% endblock %}{% block site_title %} - reunhangout{% endblock %}</title>
   {% block styles %}
     {% render_bundle 'main' 'css' %}
   {% endblock %}
+  {% block head %}{% endblock %}
 </head>
 <body>
 <div id='wrapper'>

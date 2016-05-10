@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 from richtext.utils import sanitize
 
@@ -44,7 +45,7 @@ class Plenary(models.Model):
         help_text=_("Check to display this plenary on the public events list"))
     description = models.TextField(default="", blank=True,)
     whiteboard = models.TextField(default="", blank=True)
-    session_mode = models.CharField(max_length=20, choices=(
+    breakout_mode = models.CharField(max_length=20, choices=(
         ("admin", _("Admin controlled")),
         ("user", _("Participant proposed")),
         ("randomized", _("Randomized breakouts")),
@@ -60,10 +61,39 @@ class Plenary(models.Model):
     admins = models.ManyToManyField(settings.AUTH_USER_MODEL)
 
     def safe_description(self):
-        return sanitize(self.description)
+        return sanitize(self.description) if self.description else ""
 
     def safe_whiteboard(self):
-        return sanitize(self.whiteboard)
+        return sanitize(self.whiteboard) if self.whiteboard else ""
+
+    def get_absolute_url(self):
+        return reverse("plenary_detail", kwargs={'id_or_slug': self.slug})
+
+    def serialize(self):
+        return {
+            'plenary': {
+                'series_name': self.series and self.series.name,
+                'name': self.name,
+                'slug': self.slug,
+                'url': self.get_absolute_url(),
+                'organizer': self.organizer,
+                'image': self.image.url if self.image else None,
+                'start_date': self.start_date.isoformat(),
+                'end_date': self.end_date.isoformat(),
+                'time_zone': str(self.time_zone),
+                'public': self.public,
+                'description': self.safe_description(),
+                'whiteboard': self.safe_whiteboard(),
+                'breakout_mode': self.breakout_mode,
+                'embeds': self.embeds,
+                'history': self.history,
+                'open': self.open,
+                'breakouts_open': self.breakouts_open,
+                'admins': [admin.username for admin in self.admins.all()],
+            },
+            'breakouts': [breakout.serialize() for breakout in self.breakout_set.all()],
+            'chat_messages': [msg.serialize() for msg in self.chatmessage_set.all()],
+        }
 
     def __str__(self):
         return self.name
@@ -79,11 +109,19 @@ class ChatMessage(models.Model):
     message = models.TextField(default="", blank=True)
 
     def safe_message(self):
-        return sanitize(self.message)
+        return self.message
 
     def __str__(self):
         return "%s: %s" % (self.user, self.message)
 
+    def serialize(self):
+        return {
+            'user': self.user.serialize_public(),
+            'created': self.created.isoformat(),
+            'message': self.safe_message()
+        }
+
     class Meta:
+        ordering = ['created']
         verbose_name = _("Chat message")
         verbose_name_plural = _("Chat messages")

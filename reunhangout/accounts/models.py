@@ -42,6 +42,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
 
+    def serialize_public(self):
+        return {
+            'username': self.username,
+            'image': None, #TODO
+        }
+
     def get_short_name(self):
         return self.username
 

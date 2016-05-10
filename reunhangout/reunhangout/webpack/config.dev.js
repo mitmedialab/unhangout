@@ -20,7 +20,7 @@ module.exports = {
       'webpack-dev-server/client?http://localhost:3000',
       'webpack/hot/only-dev-server',
       path.join(root, 'static', 'less', 'editor.less'),
-      path.join(root, 'static', 'js', 'editor.js')
+      path.join(root, 'static', 'js', 'editor/index.js')
     ]
   },
   output: {

@@ -16,7 +16,7 @@ module.exports = {
     ],
     'editor': [
       path.join(root, 'static', 'less', 'editor.less'),
-      path.join(root, 'static', 'js', 'editor.js')
+      path.join(root, 'static', 'js', 'editor/index.js')
     ]
   },
   output: {

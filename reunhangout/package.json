@@ -21,6 +21,7 @@
     "babel-preset-stage-2": "^6.5.0",
     "bootstrap": "^3.3.6",
     "css-loader": "^0.23.1",
+    "deep-freeze": "0.0.1",
     "extract-text-webpack-plugin": "^1.0.1",
     "file-loader": "^0.8.5",
     "font-awesome": "^4.5.0",
@@ -30,7 +31,10 @@
     "lodash": "^4.6.1",
     "prosemirror": "^0.6.1",
     "react": "^15.0.1",
+    "react-bootstrap": "^0.29.3",
     "react-dom": "^15.0.1",
+    "react-redux": "^4.4.5",
+    "redux": "^3.5.2",
     "rimraf": "^2.5.2",
     "script-loader": "^0.7.0",
     "style-loader": "^0.13.1",
@@ -38,5 +42,8 @@
     "webpack": "^1.12.14",
     "webpack-bundle-tracker": "0.0.93",
     "webpack-dev-server": "^1.14.1"
+  },
+  "devDependencies": {
+    "redux-logger": "^2.6.1"
   }
 }

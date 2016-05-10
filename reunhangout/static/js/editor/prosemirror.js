@@ -24,7 +24,7 @@ const replaceTextarea = function (textarea) {
     doc: textarea.value,
     docFormat: "html"
   });
-  editor.on("change", () => $(textarea).val(editor.getContent("html")))
+  editor.on("change", () => textarea.value = editor.getContent("html"))
 };
 const replaceAllTextareas = function() {
   ready(function() {
