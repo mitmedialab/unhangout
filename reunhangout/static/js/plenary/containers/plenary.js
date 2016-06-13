@@ -7,11 +7,13 @@ import Whiteboard from './Whiteboard';
 import ContactInfo from './ContactInfo';
 import ConnectedUsers from './ConnectedUsers';
 import Chat from './Chat';
+import {ConnectionStatus} from '../../transport';
 import * as A from '../actions';
 
 class Plenary extends React.Component {
   render() {
     return <div className='plenary'>
+      <ConnectionStatus />
       <BS.Navbar>
         <BS.Navbar.Header>
           <BS.Navbar.Brand>

@@ -43,3 +43,4 @@ def plenary_detail(request, id_or_slug):
 
 def plenary_list(request):
     pass
+

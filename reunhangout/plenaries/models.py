@@ -1,3 +1,5 @@
+import re
+
 from django.db import models
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -30,6 +32,14 @@ class Series(models.Model):
         verbose_name = _("Series")
         verbose_name_plural = _("Series")
 
+class PlenaryManager(models.Manager):
+    def get_from_path(self, path):
+        match = re.match('^/event/(.*)/$', path)
+        if match:
+            return self.get(slug=match.group(1))
+        else:
+            raise Plenary.DoesNotExist
+
 # Create your models here.
 class Plenary(models.Model):
     series = models.ForeignKey(Series, on_delete=models.CASCADE, blank=True, null=True)
@@ -59,6 +69,8 @@ class Plenary(models.Model):
             help_text=_("Check to allow people to join breakouts associated with this plenary"))
 
     admins = models.ManyToManyField(settings.AUTH_USER_MODEL)
+
+    objects = PlenaryManager()
 
     def safe_description(self):
         return sanitize(self.description) if self.description else ""

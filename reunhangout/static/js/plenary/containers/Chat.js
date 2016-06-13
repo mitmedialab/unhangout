@@ -76,13 +76,27 @@ class ChatMessage extends React.Component {
 };
 
 class Chat extends React.Component {
+  onSubmit(event) {
+    event.preventDefault();
+    console.log(this.props);
+    this.props.onSendMessage({message: this.state.value});
+    this.setState({value: ""});
+  }
+
   render() {
     return <div>
       {this.props.chat_messages.map((msg, i) => {
         return <ChatMessage msg={msg} plenary={this.props.plenary} key={`${i}`} />
       })}
-      <form className='chat-input' onSubmit={this.onSubmit}>
+      <form className={
+              `chat-input${this.props.plenary.chat.state === "error" ? " has-error" : ""}`
+            }
+            onSubmit={(e) => this.onSubmit(e)}>
+        {this.props.plenary.chat.state === "error" ?
+          <BS.HelpBlock>{this.props.plenary.chat.error}</BS.HelpBlock> : "" }
         <BS.FormControl type='text' placeholder='Chat...'
+          disabled={this.props.plenary.chat.state === "sending"}
+          value={(this.state && this.state.value) || ""}
           onChange={(e) => this.setState({value: e.target.value})} />
       </form>
     </div>
@@ -97,6 +111,6 @@ export default connect(
     auth: state.auth,
   }),
   (dispatch, ownProps) => ({
-    onSendMessage: (details) => dispatch(A.sendMessage(details))
+    onSendMessage: (details) => dispatch(A.sendChatMessage(details))
   })
 )(Chat);
