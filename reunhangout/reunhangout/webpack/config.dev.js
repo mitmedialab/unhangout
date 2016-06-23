@@ -13,13 +13,13 @@ module.exports = {
     'main': [
       'webpack-dev-server/client?http://localhost:3000',
       'webpack/hot/only-dev-server',
-      path.join(root, 'static', 'less', 'index.less'),
+      path.join(root, 'static', 'scss', 'index.scss'),
       path.join(root, 'static', 'js', 'index.js'),
     ],
     'editor': [
       'webpack-dev-server/client?http://localhost:3000',
       'webpack/hot/only-dev-server',
-      path.join(root, 'static', 'less', 'editor.less'),
+      path.join(root, 'static', 'scss', 'editor.scss'),
       path.join(root, 'static', 'js', 'editor/index.js')
     ]
   },
@@ -46,8 +46,8 @@ module.exports = {
         loader: 'babel-loader'
       },
       {
-        test: /\.less$/,
-        loader: 'style-loader!css-loader!less-loader'
+        test: /\.scss$/,
+        loader: 'style-loader!css-loader!sass-loader'
       },
       {test: /\.woff2?(\?v=.*)?$/, loader: "url?limit=10000&mimetype=application/font-woff" },
       {test: /\.ttf(\?v=.*)?$/, loader: "url?limit=10000&mimetype=application/octet-stream" },
