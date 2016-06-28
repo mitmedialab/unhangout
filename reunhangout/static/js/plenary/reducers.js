@@ -31,3 +31,10 @@ export const chat_messages = (state=null, action) => {
 export const auth = (state=null, action) => {
   return state;
 };
+
+export const present = (state=null, action) => {
+  if (action.type === A.SET_PRESENT) {
+    return action.payload;
+  }
+  return state || {'path': null, 'members': []}
+};

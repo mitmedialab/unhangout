@@ -44,3 +44,11 @@ export const chatMessageReceive = (payload) => {
     dispatch({type: CHAT_MESSAGE_RECEIVE, payload});
   }
 };
+
+// Presence
+export const SET_PRESENT = 'SET_PRESENT';
+export const setPresent = (payload) => {
+  return (dispatch) => {
+    dispatch({type: SET_PRESENT, payload});
+  }
+};

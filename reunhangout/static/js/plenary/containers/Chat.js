@@ -64,7 +64,7 @@ class ChatMessage extends React.Component {
     let linked = linkify(message);
     let atnamed = linked.map((part, i) => {
       if (_.isString(part)) {
-        return atnamify(part, this.props.plenary.connected_users);
+        return atnamify(part, this.props.present);
       }
       return part;
     });
@@ -86,7 +86,7 @@ class Chat extends React.Component {
   render() {
     return <div>
       {this.props.chat_messages.map((msg, i) => {
-        return <ChatMessage msg={msg} plenary={this.props.plenary} key={`${i}`} />
+        return <ChatMessage msg={msg} plenary={this.props.plenary} present={this.props.present} key={`${i}`} />
       })}
       <form className={
               `chat-input${this.props.plenary.chat.state === "error" ? " has-error" : ""}`
@@ -107,6 +107,7 @@ export default connect(
   // map state to props
   (state) => ({
     chat_messages: state.chat_messages,
+    present: state.present,
     plenary: state.plenary,
     auth: state.auth,
   }),

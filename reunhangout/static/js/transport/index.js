@@ -42,7 +42,13 @@ export class SocketClient {
     }
     switch (data.type) {
       case "chat": 
-        this.store.dispatch(PLENARY_ACTIONS.chatMessageReceive(data.payload))
+        this.store.dispatch(PLENARY_ACTIONS.chatMessageReceive(data.payload));
+        break;
+      case "present":
+        this.store.dispatch(PLENARY_ACTIONS.setPresent(data.payload));
+        break;
+      default:
+        console.log("Unhandled message:", data);
         break;
     }
   }

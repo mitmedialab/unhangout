@@ -3,7 +3,7 @@ import {connect} from "react-redux";
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
 
-class ContactInfo extends React.Component {
+class BreakoutList extends React.Component {
   render() {
     return <div>{this.props.breakouts}</div>
   }
@@ -19,4 +19,4 @@ export default connect(
   }),
   (dispatch, ownProps) => ({
   })
-)(ContactInfo);
+)(BreakoutList);

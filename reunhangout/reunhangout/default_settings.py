@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'breakouts',
     'frontend',
     'plenaries',
+    'rooms',
 
     'django_gravatar',
     'registration',

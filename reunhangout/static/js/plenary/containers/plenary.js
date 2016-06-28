@@ -4,8 +4,7 @@ import * as BS from "react-bootstrap";
 import Embed from './Embed';
 import BreakoutList from './BreakoutList';
 import Whiteboard from './Whiteboard';
-import ContactInfo from './ContactInfo';
-import ConnectedUsers from './ConnectedUsers';
+import Presence from './Presence';
 import Chat from './Chat';
 import {ConnectionStatus} from '../../transport';
 import * as A from '../actions';
@@ -35,8 +34,7 @@ class Plenary extends React.Component {
             <Chat />
           </BS.Col>
           <BS.Col xs={4}>
-            <ContactInfo />
-            <ConnectedUsers />
+            <Presence />
           </BS.Col>
         </BS.Row>
       </BS.Grid>
