@@ -1,5 +1,6 @@
 import React from "react";
 import {connect} from "react-redux";
+import * as style from "../../../scss/pages/plenary/_plenarystyle.scss"
 import * as BS from "react-bootstrap";
 import Embed from './Embed';
 import BreakoutList from './BreakoutList';
@@ -7,6 +8,8 @@ import Whiteboard from './Whiteboard';
 import ContactInfo from './ContactInfo';
 import ConnectedUsers from './ConnectedUsers';
 import Chat from './Chat';
+import VideoContainer from './VideoContainer';
+import EventInfo from './EventInfo'
 import {ConnectionStatus} from '../../transport';
 import * as A from '../actions';
 
@@ -14,29 +17,22 @@ class Plenary extends React.Component {
   render() {
     return <div className='plenary'>
       <ConnectionStatus />
-      <BS.Navbar>
-        <BS.Navbar.Header>
-          <BS.Navbar.Brand>
-            <a href=''>{this.props.plenary.name}</a>
-          </BS.Navbar.Brand>
-        </BS.Navbar.Header>
-        <BS.Nav>
-          <BS.NavItem eventKey={1} href='#'>About</BS.NavItem>
-        </BS.Nav>
-      </BS.Navbar>
-      <BS.Grid>
+      <BS.Grid fluid>
         <BS.Row>
-          <BS.Col xs={4}>
-            <Embed />
-            <BreakoutList />
+          <BS.Col xs={3} className="column users-col">
+          <EventInfo />
+            <ContactInfo />
+            <ConnectedUsers />
+            <img src="../../../../media/assets/unhangout-logo-blue-full.png" className="logo"/>
           </BS.Col>
-          <BS.Col xs={4}>
+          <BS.Col xs={5} className="column chat-col">
             <Whiteboard />
             <Chat />
           </BS.Col>
-          <BS.Col xs={4}>
-            <ContactInfo />
-            <ConnectedUsers />
+          <BS.Col xs={4} className="column breakout-col">
+          <VideoContainer />
+          <Embed />
+            <BreakoutList />
           </BS.Col>
         </BS.Row>
       </BS.Grid>

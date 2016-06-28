@@ -1,0 +1,9 @@
+@import "../../abstracts/mixins";
+
+.event-info-container {
+	background-color: #2e7daa;
+	padding: 10px;
+  	margin: 5px;
+  	color: #fff;
+  	@include border-radius(5px);
+}

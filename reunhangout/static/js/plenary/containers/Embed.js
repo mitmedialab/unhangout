@@ -1,5 +1,6 @@
 import React from "react";
 import {connect} from "react-redux";
+import * as style from "../../../scss/pages/plenary/_embedstyle.scss"
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
 
@@ -13,19 +14,22 @@ class Embed extends React.Component {
   renderAdminControls() {
     return <div className='embed-admin-controls'>
       <form>
-        <BS.Button bsStyle='success'>Play for all</BS.Button>
-        <BS.Button bsStyle='danger'>Remove Embed</BS.Button>
+      <div className="button-flex-container">
+        <BS.Button bsStyle='success' className="play-button">Play for all</BS.Button>
+        <BS.Button bsStyle='danger' className="remove-button">Remove Embed</BS.Button>
+      </div>
         <BS.FormGroup>
           <BS.InputGroup>
             <BS.DropdownButton
               componentClass={BS.InputGroup.Button}
-              id="embed-list"
+              id="embed-list input"
               title="Previous embeds"
             >
               <BS.MenuItem key="1">OK</BS.MenuItem>
               <BS.MenuItem key="2">Yar</BS.MenuItem>
             </BS.DropdownButton>
-            <BS.FormControl type="text" />
+            <BS.FormControl type="text" 
+            placeholder="YouTube URL"/>
             <BS.DropdownButton
               componentClass={BS.InputGroup.Button}
               id="input-dropdown-addon"
@@ -35,7 +39,10 @@ class Embed extends React.Component {
               <BS.MenuItem key="2">Enqueue</BS.MenuItem>
             </BS.DropdownButton>
           </BS.InputGroup>
-        </BS.FormGroup>
+          </BS.FormGroup>
+        <div className="button-flex-container">
+        <BS.Button className="hangout-on-air-button">Create Hangout-on-Air</BS.Button>
+        </div>
       </form>
     </div>
   }
