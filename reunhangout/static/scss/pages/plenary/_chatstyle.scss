@@ -1,0 +1,35 @@
+@import "../../abstracts/mixins";
+
+.chat-box {
+  height: 100vh;
+  background-color: #eee;
+  margin: 5px 0px 5px 0px;
+  @include border-radius(5px);
+   }
+
+.chat-log {
+  height: 93%;
+  overflow: auto; 
+  }
+
+.chat-composer {
+  height: 7%;
+  }
+
+.chat-message {
+  background-color: #F2F2F2;
+  box-shadow: 0 0 6px #B2B2B2;
+  padding: 10px 18px;
+  position: relative;
+  vertical-align: top;
+  float: right;
+  margin: 5px 45px 5px 20px;
+  clear: both;
+  max-width: 70%;
+  word-wrap: break-word; 
+  @include border-radius(5px);
+  }
+.form-group {
+  margin: 5px;
+}
+

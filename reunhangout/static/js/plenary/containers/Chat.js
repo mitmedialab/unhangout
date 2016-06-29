@@ -4,6 +4,7 @@ import {connect} from "react-redux";
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
 import {urlRegex} from "../../utils";
+import * as style from "../../../scss/pages/plenary/_chatstyle.scss"
 
 /**
  * Split 'text' into an array of react components or strings that represent the
@@ -54,8 +55,9 @@ class ChatMessage extends React.Component {
   render() {
     let msg = this.props.msg;
     let markedUp = this.markup(msg.message);
-    return <div>
+    return <div className="chat-message">
       <span className='userName'>{msg.user.username}</span>
+      <br></br>
       <span className='message'>{markedUp}</span>
     </div>
   }
@@ -84,20 +86,29 @@ class Chat extends React.Component {
   }
 
   render() {
-    return <div>
+    return <div className="chat-box">
+      <div className="chat-log">
       {this.props.chat_messages.map((msg, i) => {
         return <ChatMessage msg={msg} plenary={this.props.plenary} present={this.props.present} key={`${i}`} />
       })}
+      </div>
       <form className={
               `chat-input${this.props.plenary.chat.state === "error" ? " has-error" : ""}`
             }
             onSubmit={(e) => this.onSubmit(e)}>
+        <BS.FormGroup>
+          <BS.InputGroup>
         {this.props.plenary.chat.state === "error" ?
           <BS.HelpBlock>{this.props.plenary.chat.error}</BS.HelpBlock> : "" }
-        <BS.FormControl type='text' placeholder='Chat...'
+        <BS.FormControl className="chat-composer" type='text' placeholder='Chat...'
           disabled={this.props.plenary.chat.state === "sending"}
           value={(this.state && this.state.value) || ""}
           onChange={(e) => this.setState({value: e.target.value})} />
+          <BS.InputGroup.Addon>
+          <input type="checkbox" aria-label="..." /> Highlight
+          </BS.InputGroup.Addon>
+        </BS.InputGroup>
+        </BS.FormGroup>
       </form>
     </div>
   }

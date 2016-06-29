@@ -1,0 +1,23 @@
+.plenary {
+	overflow: hidden;
+}
+.column {
+  padding-left: 0px;
+  padding-right: 0px; 
+  &.users-col {
+  	overflow: auto;
+  	height: 100vh;
+  	position: relative;
+  	}
+  &.breakout-col {
+  	overflow: auto;
+  	}
+  .logo {
+  	width:90%;
+  	position: absolute;
+  	bottom: 0;
+  	left: 0;
+  	right: 0;
+  	margin: 10px;
+  	}
+  }
