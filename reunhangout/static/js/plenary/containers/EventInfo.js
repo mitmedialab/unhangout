@@ -7,8 +7,8 @@ import * as A from "../actions";
 class EventInfo extends React.Component {
   render() {
     return <div className="event-info-container">
-    	<h2>{this.props.plenary.title}</h2>
-    	<h4>{this.props.plenary.organizer}</h4>
+      <h2>{this.props.plenary.name}</h2>
+      <h4>{this.props.plenary.organizer}</h4>
     </div>
   }
 }

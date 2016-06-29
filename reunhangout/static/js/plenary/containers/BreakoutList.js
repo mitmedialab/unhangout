@@ -40,8 +40,7 @@ export default connect(
   // map state to props
   (state) => ({
     breakouts: state.breakouts,
-    breakouts_open: state.breakouts_open,
-    breakout_mode: state.breakout_mode,
+    plenary: state.plenary,
     auth: state.auth
   }),
   (dispatch, ownProps) => ({

@@ -52,7 +52,7 @@ export default connect(
   // map state to props
   (state) => ({
     embeds: state.plenary.embeds || [],
-    auth: state.auth || {admin: true},
+    auth: state.auth,
   }),
   // map dispatch to props
   (dispatch, ownProps) => ({
