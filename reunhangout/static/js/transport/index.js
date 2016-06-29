@@ -47,8 +47,11 @@ export class SocketClient {
       case "present":
         this.store.dispatch(PLENARY_ACTIONS.setPresent(data.payload));
         break;
+      case "embeds":
+        this.store.dispatch(PLENARY_ACTIONS.setEmbeds(data.payload));
+        break;
       default:
-        console.log("Unhandled message:", data);
+        console.log("transport.js: Unhandled message:", data);
         break;
     }
   }

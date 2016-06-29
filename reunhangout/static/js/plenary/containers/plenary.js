@@ -7,7 +7,6 @@ import BreakoutList from './BreakoutList';
 import Whiteboard from './Whiteboard';
 import Presence from './Presence';
 import Chat from './Chat';
-import VideoContainer from './VideoContainer';
 import EventInfo from './EventInfo'
 import {ConnectionStatus} from '../../transport';
 import * as A from '../actions';
@@ -28,7 +27,6 @@ class Plenary extends React.Component {
             <Chat />
           </BS.Col>
           <BS.Col xs={4} className="column breakout-col">
-          <VideoContainer />
           <Embed />
             <BreakoutList />
           </BS.Col>

@@ -47,8 +47,26 @@ export const chatMessageReceive = (payload) => {
 
 // Presence
 export const SET_PRESENT = 'SET_PRESENT';
-export const setPresent = (payload) => {
+export const setPresent = (payload) => ({type: SET_PRESENT, payload});
+
+// Embeds
+export const SET_EMBEDS = 'SET_EMBEDS';
+export const setEmbeds = (payload) => ({type: SET_EMBEDS, payload});
+export const ADMIN_EMBEDS_SENDING = 'ADMIN_EMBEDS_SENDING';
+export const ADMIN_EMBEDS_SENT = 'ADMIN_EMBEDS_SENT';
+export const ADMIN_EMBEDS_ERROR = 'ADMIN_EMBEDS_ERROR';
+export const adminEmbedsError = (payload) => ({type: ADMIN_EMBEDS_ERROR, payload});
+export const adminSendEmbeds = (payload) => {
   return (dispatch) => {
-    dispatch({type: SET_PRESENT, payload});
-  }
+    dispatch({type: ADMIN_EMBEDS_SENDING, payload});
+    sendSocketMessage({type: "embeds", payload})
+      .then(() => {
+        dispatch({type: ADMIN_EMBEDS_SENT, payload});
+      })
+      .catch((err) => {
+        dispatch({type: ADMIN_EMBEDS_ERROR, payload});
+      });
+  };
 };
+
+

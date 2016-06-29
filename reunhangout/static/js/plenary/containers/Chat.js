@@ -144,6 +144,6 @@ export default connect(
     auth: state.auth,
   }),
   (dispatch, ownProps) => ({
-    onSendMessage: (details) => dispatch(A.sendChatMessage(details))
+    onSendMessage: (payload) => dispatch(A.sendChatMessage(payload))
   })
 )(Chat);

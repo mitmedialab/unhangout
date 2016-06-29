@@ -1,5 +1,10 @@
 @import "../../abstracts/mixins";
 
+.plenary-embed {
+  width: 100%;
+  height: 320px;
+}
+
 .embed-admin-controls {
   background-color: #f3bd71;
   padding: 10px;

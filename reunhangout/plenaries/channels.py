@@ -1,4 +1,5 @@
 import json
+from urllib.parse import urlparse
 
 from channels import Group
 from channels.sessions import enforce_ordering
@@ -54,19 +55,22 @@ def ws_receive(message):
 def route_message(message, data):
     if data['type'] == "chat":
         handle_chat(message, data)
+    elif data['type'] == "embeds":
+        handle_embeds(message, data)
     else:
         message.reply_channel.send(json.dumps({
             "error": "Type not understood"
         }))
+
+def handle_error(message, error):
+    message.reply_channel.send({'text': json.dumps({"error": error})})
 
 def handle_chat(message, data):
     path = message.channel_session['path']
     plenary = Plenary.objects.get_from_path(path)
     if plenary:
         if 'payload' not in data or 'message' not in data['payload']:
-            return message.reply_channel.send(json.dumps({
-                'error': "Requires payload with 'payload' key and 'message' subkey"
-            }))
+            return handle_error(message, "Requires payload with 'payload' key and 'message' subkey")
         highlight = (
             data['payload'].get('highlight') and \
             (message.user.is_superuser or plenary.has_admin(message.user))
@@ -83,6 +87,49 @@ def handle_chat(message, data):
             })
         })
     else:
-        message.reply_channel.send(json.dumps({
-            "error": "Plenary not found"
-        }))
+        return handle_error(message, "Plenary not found")
+
+def handle_embeds(message, data):
+    path = message.channel_session['path']
+    plenary = Plenary.objects.get_from_path(path)
+    if not plenary:
+        return handle_error(message, "Plenary not found")
+    if not plenary.has_admin(message.user):
+        return handle_error(message, "Must be an admin to set embeds")
+
+    error = None
+    clean = []
+    for embed in data.get('payload', {}).get('embeds', []):
+        if not isinstance(embed, dict) or not isinstance(embed.get('props'), dict):
+            error = "Malformed embed"
+        elif embed.get('type') not in ("youtube", "url"):
+            error = "Invalid type: {}".format(embed['type'])
+        else:
+            parsed = urlparse(embed['props']['src'])
+            if parsed.scheme != "https":
+                error = "Only https URLs allowed"
+        if error:
+            return handle_error(message, error)
+        clean.append({
+            'props': {'src': embed['props']['src']},
+            'type': embed['type']
+        })
+    current = data['payload'].get('current', None)
+    if current is not None and not isinstance(current, int):
+        return handle_error(message, "Invalid 'current' type")
+    if isinstance(current, int) and (current < 0  or current > len(clean)):
+        return handle_error(message, "Invalid 'current' value")
+
+    plenary.embeds = {
+        'embeds': clean,
+        'current': current
+    }
+    plenary.save()
+    Group(path).send({
+        'text': json.dumps({
+            'type': 'embeds', 'payload': plenary.embeds
+        })
+    })
+
+
+

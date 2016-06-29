@@ -8,11 +8,20 @@ export const plenary = (state=null, action) => {
   }
   switch (action.type) {
     case A.CHAT_MESSAGE_SENDING:
-      return {chat: {state: "sending", message: action.payload.message}, ...state}
+      return {...state, chat: {state: "sending", message: action.payload.message}}
     case A.CHAT_MESSAGE_SENT:
-      return {chat: {}, ...state}
+      return {...state, chat: {}}
     case A.CHAT_MESSAGE_ERROR:
-      return {chat: {state: "error", error: action.payload.error}, ...state}
+      return {...state, chat: {state: "error", error: action.payload.error}}
+    case A.ADMIN_EMBEDS_SENDING:
+      return {...state, embedsSending: {state: "sending", payload: action.payload}}
+    case A.ADMIN_EMBEDS_SENT:
+      return {...state, embedsSending: null}
+    case A.ADMIN_EMBEDS_ERROR:
+      return {...state, embedsSending: {state: "error", error: action.payload.error}}
+    case A.SET_EMBEDS:
+      let state = {...state, embedsSending: null, embeds: action.payload};
+      return state;
   }
   return state;
 };
