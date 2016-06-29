@@ -107,6 +107,9 @@ class Plenary(models.Model):
             'chat_messages': [msg.serialize() for msg in self.chatmessage_set.all()],
         }
 
+    def has_admin(self, user):
+        return self.admins.filter(pk=user.pk).exists()
+
     def __str__(self):
         return self.name
 
@@ -119,6 +122,7 @@ class ChatMessage(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
     created = models.DateTimeField(auto_now_add=True)
     message = models.TextField(default="", blank=True)
+    highlight = models.BooleanField(default=False)
 
     def safe_message(self):
         return self.message
@@ -130,7 +134,8 @@ class ChatMessage(models.Model):
         return {
             'user': self.user.serialize_public(),
             'created': self.created.isoformat(),
-            'message': self.safe_message()
+            'message': self.safe_message(),
+            'highlight': self.highlight,
         }
 
     class Meta:

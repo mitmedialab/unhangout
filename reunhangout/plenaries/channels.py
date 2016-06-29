@@ -53,7 +53,7 @@ def ws_receive(message):
 
 def route_message(message, data):
     if data['type'] == "chat":
-        handle_chat(message, data, path)
+        handle_chat(message, data)
     else:
         message.reply_channel.send(json.dumps({
             "error": "Type not understood"
@@ -63,10 +63,19 @@ def handle_chat(message, data):
     path = message.channel_session['path']
     plenary = Plenary.objects.get_from_path(path)
     if plenary:
+        if 'payload' not in data or 'message' not in data['payload']:
+            return message.reply_channel.send(json.dumps({
+                'error': "Requires payload with 'payload' key and 'message' subkey"
+            }))
+        highlight = (
+            data['payload'].get('highlight') and \
+            (message.user.is_superuser or plenary.has_admin(message.user))
+        )
         chat_message = ChatMessage.objects.create(
             plenary=plenary,
             user=message.user,
-            message=data['message'],
+            message=data['payload']['message'],
+            highlight=highlight
         )
         Group(path).send({
             'text': json.dumps({

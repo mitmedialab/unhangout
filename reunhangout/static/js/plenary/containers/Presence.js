@@ -12,7 +12,6 @@ class ContactInfo extends React.Component {
 
 class Presence extends React.Component {
   render() {
-    console.log("Presence.props", this.props);
     return (
       <div className='present'>
         {

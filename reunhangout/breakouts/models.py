@@ -59,7 +59,7 @@ class Breakout(models.Model):
             'is_proposal': self.is_proposal,
             'google_hangout': self.google_hangout.url if self.google_hangout else None,
             'google_hoa': self.google_hoa,
-            'proposed_by': self.proposed_by.serialize_public(),
+            'proposed_by': self.proposed_by.serialize_public() if self.proposed_by else None,
             'votes': [v.serialize_public() for v in self.votes.all()]
         }
 

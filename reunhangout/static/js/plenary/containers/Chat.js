@@ -28,16 +28,19 @@ const linkify = (text) => {
  * Split 'text' into an array of react components or strings, where at-names
  * are highlighted.
  */
-const atnamify = (text, users) => {
-  let parts = text.split(/((?:\b|^)@[a-z0-9]+)/gim);
+const atnamify = (text, users, msgId) => {
+  let parts = text.split(/(?:\b|^|\s)@([a-z0-9]+)/gim);
   return parts.map(function(part, i) {
     if (i % 2 === 1) {
       var normalized = part.replace(/\s/g, "").toLowerCase();
-      var mentioned = _.findWhere(users, (user) => {
-        return user.username.indexOf(normalized) === 0;
+      var mentioned = _.find(users, (user) => {
+        return user.username.toLowerCase().indexOf(normalized) === 0;
       });
       if (mentioned) {
-        return <AtName text={part} mentioned={mentioned} />
+        return <span>
+          {' '}
+          <AtName text={`@${part}`} mentioned={mentioned} id={`atname-${msgId}-${i}`}/>
+        </span>
       }
     }
     return part;
@@ -46,8 +49,15 @@ const atnamify = (text, users) => {
 
 class AtName extends React.Component {
   render() {
-    // TODO: Render popover using this.props.mentioned
-    return <span className='atname'>{this.props.text}</span>
+    return <span className='atname'>
+      <BS.OverlayTrigger trigger={['hover', 'focus']} placement='right' overlay={
+        <BS.Popover id={this.props.id}>
+          {this.props.mentioned.username}
+        </BS.Popover>
+      }>
+        <span>{this.props.text}</span>
+      </BS.OverlayTrigger>
+    </span>
   }
 }
 
@@ -55,7 +65,7 @@ class ChatMessage extends React.Component {
   render() {
     let msg = this.props.msg;
     let markedUp = this.markup(msg.message);
-    return <div className="chat-message">
+    return <div className={`chat-message${msg.highlight ? " highlight" : ""}`}>
       <span className='userName'>{msg.user.username}</span>
       <br></br>
       <span className='message'>{markedUp}</span>
@@ -66,7 +76,7 @@ class ChatMessage extends React.Component {
     let linked = linkify(message);
     let atnamed = linked.map((part, i) => {
       if (_.isString(part)) {
-        return atnamify(part, this.props.present);
+        return atnamify(part, this.props.present.members, this.props.msg.id);
       }
       return part;
     });
@@ -80,8 +90,10 @@ class ChatMessage extends React.Component {
 class Chat extends React.Component {
   onSubmit(event) {
     event.preventDefault();
-    console.log(this.props);
-    this.props.onSendMessage({message: this.state.value});
+    this.props.onSendMessage({
+      message: this.state.value,
+      highlight: this.state.highlight
+    });
     this.setState({value: ""});
   }
 
@@ -89,7 +101,7 @@ class Chat extends React.Component {
     return <div className="chat-box">
       <div className="chat-log">
       {this.props.chat_messages.map((msg, i) => {
-        return <ChatMessage msg={msg} plenary={this.props.plenary} present={this.props.present} key={`${i}`} />
+        return <ChatMessage msg={msg} plenary={this.props.plenary} present={this.props.present} key={`${i}`} auth={this.props.auth} />
       })}
       </div>
       <form className={
@@ -100,13 +112,22 @@ class Chat extends React.Component {
           <BS.InputGroup>
         {this.props.plenary.chat.state === "error" ?
           <BS.HelpBlock>{this.props.plenary.chat.error}</BS.HelpBlock> : "" }
-        <BS.FormControl className="chat-composer" type='text' placeholder='Chat...'
+        <BS.FormControl
+          className="chat-composer"
+          type='text'
+          placeholder='Chat...'
           disabled={this.props.plenary.chat.state === "sending"}
           value={(this.state && this.state.value) || ""}
           onChange={(e) => this.setState({value: e.target.value})} />
-          <BS.InputGroup.Addon>
-          <input type="checkbox" aria-label="..." /> Highlight
-          </BS.InputGroup.Addon>
+          {this.props.auth.is_admin ?
+            <BS.InputGroup.Addon>
+              <input type="checkbox"
+                aria-label="Highlight"
+                checked={this.state && this.state.highlight}
+                onChange={(e) => this.setState({highlight: e.target.checked})}
+              /> Highlight
+            </BS.InputGroup.Addon>
+            : "" }
         </BS.InputGroup>
         </BS.FormGroup>
       </form>

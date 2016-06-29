@@ -20,8 +20,7 @@ class Plenary extends React.Component {
         <BS.Row>
           <BS.Col xs={3} className="column users-col">
           <EventInfo />
-            <ContactInfo />
-            <ConnectedUsers />
+            <Presence />
             <img src="../../../../media/assets/unhangout-logo-blue-full.png" className="logo"/>
           </BS.Col>
           <BS.Col xs={5} className="column chat-col">

@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
-from django.contrib.auth.models import PermissionsMixin
+from django.contrib.auth.models import PermissionsMixin, AnonymousUser
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 
@@ -17,6 +17,20 @@ class UserManager(BaseUserManager):
         user.is_superuser = True
         user.save()
         return user
+
+def serialize_public(user):
+    if isinstance(user, AnonymousUser):
+        # TODO: uniqify this somehow
+        return {
+            'username': 'Anonymous',
+            'image': None,
+        }
+    else:
+        return {
+            'username': user.username,
+            'image': None, #TODO
+        }
+
 
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=30, unique=True)
@@ -43,10 +57,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = []
 
     def serialize_public(self):
-        return {
-            'username': self.username,
-            'image': None, #TODO
-        }
+        return serialize_public(self)
 
     def get_short_name(self):
         return self.username

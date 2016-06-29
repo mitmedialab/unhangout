@@ -54,7 +54,6 @@ export class SocketClient {
   }
 
   onOpen(event) {
-    console.log("OPENED!");
     this.store.dispatch(A.open({url: this.url}));
     if (this._connectedInterval) {
       clearTimeout(this._connectedInterval);
@@ -62,7 +61,6 @@ export class SocketClient {
   }
 
   onClose(event) {
-    console.log("CLOSED!");
     this.store.dispatch(A.closed({url: this.url}));
     this._connectInterval = setInterval(() => {
       if (this.store.getState().socket.state === WebSocket.CLOSED) {

@@ -4,11 +4,11 @@ import * as style from "../../../scss/pages/plenary/_eventinfostyle.scss"
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
 
-class ContactInfo extends React.Component {
+class EventInfo extends React.Component {
   render() {
     return <div className="event-info-container">
-    	<h2>Title</h2>
-    	<h4>hosted by Event Organizer</h4>
+    	<h2>{this.props.plenary.title}</h2>
+    	<h4>{this.props.plenary.organizer}</h4>
     </div>
   }
 }
@@ -16,8 +16,8 @@ class ContactInfo extends React.Component {
 export default connect(
   // map state to props
   (state) => ({
-    connected_users: state.connected_users
+    plenary: state.plenary
   }),
   (dispatch, ownProps) => ({
   })
-)(ContactInfo);
+)(EventInfo);

@@ -29,12 +29,12 @@ export const CHAT_MESSAGE_ERROR = 'CHAT_MESSAGE_ERROR';
 export const sendChatMessage = (payload) => {
   return (dispatch) => {
     dispatch({type: CHAT_MESSAGE_SENDING, payload});
-    sendSocketMessage({type: "chat", message: payload.message})
+    sendSocketMessage({type: "chat", payload})
       .then(() => {
-        dispatch({type: CHAT_MESSAGE_SENT, message: payload.message})
+        dispatch({type: CHAT_MESSAGE_SENT, payload})
       })
       .catch((err) => {
-        dispatch({type: CHAT_MESSAGE_ERROR, message: payload.message})
+        dispatch({type: CHAT_MESSAGE_ERROR, payload})
       });
   }
 };
