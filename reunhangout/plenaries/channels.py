@@ -7,6 +7,9 @@ from channels.auth import channel_session_user, channel_session_user_from_http
 
 from plenaries.models import Plenary, ChatMessage
 from rooms.models import Room
+from breakouts.models import Breakout
+
+import pdb
 
 @enforce_ordering(slight=True)
 @channel_session_user_from_http
@@ -49,14 +52,16 @@ def ws_receive(message):
             "error": "Message body must be json."
         }))
         return
-
     route_message(message, data)
 
 def route_message(message, data):
     if data['type'] == "chat":
         handle_chat(message, data)
     elif data['type'] == "embeds":
+        pdb.set_trace()
         handle_embeds(message, data)
+    elif data['type'] == "breakout_create":
+        handle_breakout_create(message, data)
     else:
         message.reply_channel.send(json.dumps({
             "error": "Type not understood"
@@ -130,6 +135,25 @@ def handle_embeds(message, data):
             'type': 'embeds', 'payload': plenary.embeds
         })
     })
+def handle_breakout_create(message, data):
+    path = message.channel_session['path']
+    plenary = Plenary.objects.get_from_path(path)
+    if plenary:
+        if 'payload' not in data or 'title' not in data['payload']:
+            return handle_error(message, "Requires payload with 'payload' key and 'message' subkey")
+        breakout = Breakout.objects.create(
+            plenary=plenary,
+            title=data['payload']['title'],
+            slug='/',
+            max_attendees=data['payload']['max_attendees']
+        )
+        Group(path).send({
+            'text': json.dumps({
+                'type': 'breakout_receive', 'payload': breakout.serialize()
+            })
+        })
+    else:
+        return handle_error(message, "Plenary not found")
 
 
 

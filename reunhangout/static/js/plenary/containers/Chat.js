@@ -101,7 +101,8 @@ class Chat extends React.Component {
     return <div className="chat-box">
       <div className="chat-log">
       {this.props.chat_messages.map((msg, i) => {
-        return <ChatMessage msg={msg} plenary={this.props.plenary} present={this.props.present} key={`${i}`} auth={this.props.auth} />
+        return <ChatMessage msg={msg} plenary={this.props.plenary} 
+        present={this.props.present} key={`${i}`} auth={this.props.auth} />
       })}
       </div>
       <form className={
@@ -124,8 +125,7 @@ class Chat extends React.Component {
               <input type="checkbox"
                 aria-label="Highlight"
                 checked={this.state && this.state.highlight}
-                onChange={(e) => this.setState({highlight: e.target.checked})}
-              /> Highlight
+                onChange={(e) => this.setState({highlight: e.target.checked})}/> Highlight
             </BS.InputGroup.Addon>
             : "" }
         </BS.InputGroup>

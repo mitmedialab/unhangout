@@ -68,5 +68,26 @@ export const adminSendEmbeds = (payload) => {
       });
   };
 };
+//Breakouts
+export const BREAKOUT_CREATING = 'BREAKOUT_CREATING';
+export const BREAKOUT_CREATED = 'BREAKOUT_CREATED';
+export const createBreakout = (payload) => {
+    return (dispatch) => {
+    dispatch({type: BREAKOUT_CREATING, payload});
+    sendSocketMessage({type: "breakout_create", payload})
+      .then(() => {
+        dispatch({type: BREAKOUT_CREATED, payload})
+      })
+      .catch((err) => {
+        dispatch({type: BREAKOUT_ERROR, payload})
+      });
+  }
+};
+export const BREAKOUT_RECEIVE = 'BREAKOUT_RECEIVE';
+export const breakoutReceive = (payload) => {
+  return (dispatch) => {
+    dispatch({type: BREAKOUT_RECEIVE, payload});
+  }
+};
 
 

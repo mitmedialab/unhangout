@@ -43,7 +43,9 @@
     "webpack-dev-server": "^1.14.1",
     "sass-loader": "~3.2.1",
     "node-sass": "~3.8.0",
-    "bootstrap-sass": "~3.3.6"
+    "bootstrap-sass": "~3.3.6",
+    "postcss-loader": "~0.9.1",
+    "autoprefixer": "~6.3.6"
   },
   "devDependencies": {
     "redux-logger": "^2.6.1"

@@ -181,8 +181,7 @@ class Embed extends React.Component {
               type="text"
               placeholder="YouTube URL or embed code"
               value={this.state.embedValue}
-              onChange={(e) => this.setState({embedValue: e.target.value})}
-              />
+              onChange={(e) => this.setState({embedValue: e.target.value})}/>
             <BS.DropdownButton
               componentClass={BS.InputGroup.Button}
               id="input-dropdown-addon"

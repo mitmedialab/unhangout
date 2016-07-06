@@ -4,6 +4,7 @@ var path = require("path")
 var webpack = require("webpack")
 var BundleTracker = require("webpack-bundle-tracker")
 var ExtractTextPlugin = require("extract-text-webpack-plugin")
+var autoprefixer = require('autoprefixer')
 
 var root = path.join(__dirname, '..', '..')
 
@@ -42,12 +43,19 @@ module.exports = {
         test: /\.scss$/,
         loader: ExtractTextPlugin.extract('style-loader', 'css-loader!sass-loader')
       },
+      {
+        test: /\.css$/,
+        loader: 'style-loader!css-loader!postcss-loader'
+      },
       {test: /\.woff2?(\?v=.*)?$/, loader: "url?limit=10000&mimetype=application/font-woff" },
       {test: /\.ttf(\?v=.*)?$/, loader: "url?limit=10000&mimetype=application/octet-stream" },
       {test: /\.eot(\?v=.*)?$/, loader: "file" },
       {test: /\.svg(\?v=.*)?$/, loader: "url?limit=10000&mimetype=image/svg+xml" },
       {test: /\.otf(\?v=.*)?$/, loader: "url?limit=10000&mimetype=application/font-sfnt" },
     ]
+  },
+  postcss: function() {
+    return [autoprefixer];
   },
   resolve: {
     // The path wherein we expect modules directories (e.g. node_modules) to reside.

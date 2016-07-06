@@ -1,19 +1,17 @@
-@import "../../abstracts/mixins";
-
 .breakout-header {
   background-color: #2e7daa;
   padding: 15px;
   margin: 5px;
-  @include border-radius(5px);
-  @include flexbox;
-  @include flex-flow(row wrap);
-  @include flex-just(space-around);
+  border-radius: 5px;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-around;
   .btn-default {
-  	@include flex-grow(1);
+  	flex-grow: 1;
     color: #2e7daa;
   	}
   h4 {
-  	@include flex-grow(1);
+  	flex-grow: 1;
   	color: #fff;
   	}
   }
@@ -21,15 +19,15 @@
   background-color: #eee;
   padding: 20px;
   margin: 5px;
-  @include border-radius(5px);
-  @include flexbox;
-  @include flex-flow(row wrap);
-  @include flex-just(space-around);
+  border-radius: 5px;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-around;
   h5 {
-    @include flex-grow(1);
+    flex-grow: 1;
   }
   .btn-default {
-    @include flex-grow(1);
+    flex-grow: 1;
     background-color: #2e7daa;
     color: #fff;
   }

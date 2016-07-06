@@ -26,6 +26,11 @@ export const plenary = (state=null, action) => {
   return state;
 };
 export const breakouts = (state=null, action) => {
+  state = state || []
+  switch (action.type) {
+    case A.BREAKOUT_RECEIVE:
+      return [...state, action.payload]
+  }
   return state;
 };
 export const chat_messages = (state=null, action) => {

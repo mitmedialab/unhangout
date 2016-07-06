@@ -48,8 +48,8 @@ class Breakout(models.Model):
 
     def serialize(self):
         return {
-            'title': title,
-            'slug': slug,
+            'title': self.title,
+            'slug': self.slug,
             'description': self.safe_description(),
             'max_attendees': self.max_attendees,
             'activities': self.activities,

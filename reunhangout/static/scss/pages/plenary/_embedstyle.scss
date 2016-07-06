@@ -1,5 +1,3 @@
-@import "../../abstracts/mixins";
-
 .plenary-embed {
   width: 100%;
   height: 320px;
@@ -9,23 +7,23 @@
   background-color: #f3bd71;
   padding: 10px;
   margin: 5px;
-  @include border-radius(5px);
+  border-radius: 5px;
   }
 .button-flex-container {
-  @include flexbox;
-  @include flex-flow(row wrap);
-  @include flex-just(space-around);
+  display: flex;
+  flex-flow: row wrap;
+  flex-just: space-around;
 }
 .play-button {
-  @include flex-grow(1);
+  flex-grow: 1;
   margin: 0px 5px 5px 5px;
   }
 .remove-button {
-  @include flex-grow(1); 
+  flex-grow: 1; 
   margin: 0px 5px 5px 5px;
   }
 .hangout-on-air-button {
-  @include flex-grow(1);
+  flex-grow: 1;
   margin-top: 0;
    }
 .form-group {

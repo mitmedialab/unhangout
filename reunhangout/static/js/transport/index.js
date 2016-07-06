@@ -50,6 +50,9 @@ export class SocketClient {
       case "embeds":
         this.store.dispatch(PLENARY_ACTIONS.setEmbeds(data.payload));
         break;
+      case "breakout_receive":
+        this.store.dispatch(PLENARY_ACTIONS.breakoutReceive(data.payload));
+        break;
       default:
         console.log("transport.js: Unhandled message:", data);
         break;
