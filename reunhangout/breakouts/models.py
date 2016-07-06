@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.translation import ugettext_lazy as _
+from django.template.defaultfilters import slugify
 from jsonfield import JSONField
 from richtext.utils import sanitize
 
@@ -65,7 +66,7 @@ class Breakout(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = self.pk
+            self.slug = '{}-{}'.format(slugify(self.title), self.pk)
         super(Breakout, self).save(*args, **kwargs)
 
     def __str__(self):

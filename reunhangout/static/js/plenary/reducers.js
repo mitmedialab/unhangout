@@ -29,10 +29,22 @@ export const breakouts = (state=null, action) => {
   state = state || []
   switch (action.type) {
     case A.BREAKOUT_RECEIVE:
-      return [...state, action.payload]
+      return action.payload;
+    // handle error, and maybe also sending start?
   }
   return state;
 };
+export const breakoutCrud = (state={}, action) => {
+  switch (action.type) {
+    case A.BREAKOUT_ERROR:
+      return {error: action.payload}
+    case A.BREAKOUT_RECEIVE:
+    case A.BREAKOUT_CREATED:
+    case A.BREAKOUT_CREATING:
+      return {}
+  return state;
+}
+
 export const chat_messages = (state=null, action) => {
   state = state || []
   switch (action.type) {

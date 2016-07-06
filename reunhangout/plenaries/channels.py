@@ -135,21 +135,27 @@ def handle_embeds(message, data):
             'type': 'embeds', 'payload': plenary.embeds
         })
     })
+
 def handle_breakout_create(message, data):
     path = message.channel_session['path']
     plenary = Plenary.objects.get_from_path(path)
     if plenary:
         if 'payload' not in data or 'title' not in data['payload']:
-            return handle_error(message, "Requires payload with 'payload' key and 'message' subkey")
+            return handle_error(message,
+                    "Requires payload with 'payload' key and 'title' subkey")
+        # Ensure data['plenary'] is a dict
         breakout = Breakout.objects.create(
             plenary=plenary,
             title=data['payload']['title'],
             slug='/',
-            max_attendees=data['payload']['max_attendees']
+            # Either verify 'max_attendees' is there, or use ".get('max_attendees', 0)"
+            max_attendees=data['payload'].get('max_attendees', 10)
         )
         Group(path).send({
             'text': json.dumps({
-                'type': 'breakout_receive', 'payload': breakout.serialize()
+                # Just send all breakout rooms, rather than introducing a new one.
+                'type': 'breakout_receive',
+                'payload': [b.serialize() for b in plenary.breakout_set.all()]
             })
         })
     else:

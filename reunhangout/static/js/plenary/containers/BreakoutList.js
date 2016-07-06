@@ -38,6 +38,10 @@ class BreakoutList extends React.Component {
         { this.props.auth.is_admin ? <BS.Button onClick={() => 
           this.setState({showModal: !this.state.showModal})}>
         CREATE A SESSION</BS.Button> : "" }
+        { this.props.breakoutCrud.error ?
+            <div className='alert alert-danger'>
+              {this.props.breakoutCrud.error.message}
+            </div> : "" }
       </div>
       <div className="create-session-dialog">
         <BS.Modal show={this.state.showModal} 
@@ -91,6 +95,7 @@ export default connect(
   // map state to props
   (state) => ({
     breakouts: state.breakouts,
+    breakoutCrud: state.breakoutCrud,
     plenary: state.plenary,
     auth: state.auth
   }),

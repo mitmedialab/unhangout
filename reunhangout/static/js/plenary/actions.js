@@ -71,6 +71,7 @@ export const adminSendEmbeds = (payload) => {
 //Breakouts
 export const BREAKOUT_CREATING = 'BREAKOUT_CREATING';
 export const BREAKOUT_CREATED = 'BREAKOUT_CREATED';
+export const BREAKOUT_ERROR = 'BREAKOUT_ERROR';
 export const createBreakout = (payload) => {
     return (dispatch) => {
     dispatch({type: BREAKOUT_CREATING, payload});
@@ -83,6 +84,7 @@ export const createBreakout = (payload) => {
       });
   }
 };
+// Replace with action to receive all breakouts
 export const BREAKOUT_RECEIVE = 'BREAKOUT_RECEIVE';
 export const breakoutReceive = (payload) => {
   return (dispatch) => {
