@@ -69,22 +69,21 @@ export const adminSendEmbeds = (payload) => {
   };
 };
 //Breakouts
-export const BREAKOUT_CREATING = 'BREAKOUT_CREATING';
-export const BREAKOUT_CREATED = 'BREAKOUT_CREATED';
+export const BREAKOUT_CHANGING = 'BREAKOUT_CHANGING';
+export const BREAKOUT_CREATED = 'BREAKOUT_CHANGED';
 export const BREAKOUT_ERROR = 'BREAKOUT_ERROR';
-export const createBreakout = (payload) => {
+export const changeBreakouts = (payload) => {
     return (dispatch) => {
-    dispatch({type: BREAKOUT_CREATING, payload});
-    sendSocketMessage({type: "breakout_create", payload})
-      .then(() => {
-        dispatch({type: BREAKOUT_CREATED, payload})
+    dispatch({type: BREAKOUT_CHANGING, payload});
+    sendSocketMessage({type: "breakout", payload})
+    .then(() => {
+        dispatch({type: BREAKOUT_CHANGED, payload})
       })
-      .catch((err) => {
+    .catch((err) => {
         dispatch({type: BREAKOUT_ERROR, payload})
       });
   }
 };
-// Replace with action to receive all breakouts
 export const BREAKOUT_RECEIVE = 'BREAKOUT_RECEIVE';
 export const breakoutReceive = (payload) => {
   return (dispatch) => {

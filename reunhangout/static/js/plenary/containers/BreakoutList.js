@@ -1,15 +1,76 @@
 import React from "react";
+import ReactDOM from "react-dom"
 import {connect} from "react-redux";
-import * as style from "../../../scss/pages/plenary/_breakoutliststyle.scss"
+import * as style from "../../../scss/pages/plenary/_breakoutliststyle.scss";
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
 
 class Breakout extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {title: this.props.title};
+    this.active = false;
+  }
+  //Add an event listener that will dispatch the updated title
+  componentDidMount() {
+    window.addEventListener('click', 
+      () => this.handleModify(this.props.onChangeBreakouts, this.state.title), 
+      false);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('click', 
+      () => this.handleModify(this.props.onChangeBreakouts, this.state.title), 
+      false);
+  }
+  //dispatch updated title upon click outside or submit
+  handleModify(onChangeBreakouts, updatedTitle) {
+    if (this.active) {  
+      onChangeBreakouts({
+        type: "modify",
+        index: this.props.index,
+        title: updatedTitle
+      });
+    }
+    this.active = false
+  }
+  handleSubmit(event, onChangeBreakouts, updatedTitle) {
+    event.preventDefault();
+    if (this.active) {  
+      onChangeBreakouts({
+        type: "modify",
+        index: this.props.index,
+        title: updatedTitle
+      });
+    }
+    this.active = false
+  }
+  //prevent dispatch for clicks on input bar
+  handleClick(event) {
+    event.stopPropagation();
+    this.active = true;
+  }
+  //dispatch delete breakout
+  handleDelete(event) {
+    event.preventDefault();
+    this.props.onChangeBreakouts({
+      type: "delete",
+      index: this.props.index
+    });
+  }
   render() {
-    return <div className="breakout"> 
-          <h5>{this.props.title}</h5>
+    return <div className="breakout">  
+          { this.props.auth.is_admin ? <form 
+            onSubmit={(e) => this.handleSubmit(e, this.props.onChangeBreakouts, 
+              this.state.title)}>
+            <BS.FormControl type="text" value={this.state.title}
+            onChange={(e) => this.setState({title: e.target.value})} 
+            onClick={(e) => this.handleClick(e)}/>
+          </form> : <h5>{this.props.title}</h5> }
           <BS.Button>Join</BS.Button>
-          { this.props.auth.is_admin ? <BS.Button bsStyle="danger">Delete</BS.Button> : "" }
+          { this.props.auth.is_admin ? <BS.Button bsStyle="danger"
+          onClick= {(e) => 
+            this.handleDelete(e, this.props.index)}><i className='fa fa-trash' />
+           </BS.Button> : "" }
         </div>
   }
 }
@@ -19,9 +80,11 @@ class BreakoutList extends React.Component {
     super();
     this.state= {showModal: false};
   }
+  //dispatch breakout creation and close modal
   handleSubmit(event) {
     event.preventDefault();
-    this.props.onCreateBreakout({
+    this.props.onChangeBreakouts({
+      type: "create",
       title: this.state.title,
       max_attendees: this.state.max_attendees
     });
@@ -39,7 +102,7 @@ class BreakoutList extends React.Component {
           this.setState({showModal: !this.state.showModal})}>
         CREATE A SESSION</BS.Button> : "" }
         { this.props.breakoutCrud.error ?
-            <div className='alert alert-danger'>
+            <div className="breakout-error">
               {this.props.breakoutCrud.error.message}
             </div> : "" }
       </div>
@@ -82,7 +145,8 @@ class BreakoutList extends React.Component {
       <div className="breakouts-container"> 
       {this.props.breakouts.map((breakout, i) => {
         return <Breakout title={breakout.title} maxAttendees={breakout.max} 
-        key={`${i}`} auth={this.props.auth} />
+        key={`${i}`} auth={this.props.auth} index={i} 
+        onChangeBreakouts={this.props.onChangeBreakouts} />
       })}
       </div>
     </div>
@@ -100,6 +164,6 @@ export default connect(
     auth: state.auth
   }),
   (dispatch, ownProps) => ({
-    onCreateBreakout: (payload) => dispatch(A.createBreakout(payload))
+    onChangeBreakouts: (payload) => dispatch(A.changeBreakouts(payload))
   })
 )(BreakoutList);

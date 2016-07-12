@@ -88,15 +88,19 @@ class ChatMessage extends React.Component {
 };
 
 class Chat extends React.Component {
+  constructor() {
+    super();
+    this.state = {highlight: false}
+  }
   onSubmit(event) {
-    event.preventDefault();
+    event.preventDefault();    
+    console.log("not empty")
     this.props.onSendMessage({
-      message: this.state.value,
-      highlight: this.state.highlight
+    message: this.state.value,
+    highlight: this.state.highlight
     });
     this.setState({value: ""});
   }
-
   render() {
     return <div className="chat-box">
       <div className="chat-log">

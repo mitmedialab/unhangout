@@ -58,10 +58,9 @@ def route_message(message, data):
     if data['type'] == "chat":
         handle_chat(message, data)
     elif data['type'] == "embeds":
-        pdb.set_trace()
         handle_embeds(message, data)
-    elif data['type'] == "breakout_create":
-        handle_breakout_create(message, data)
+    elif data['type'] == "breakout":
+        handle_breakout(message, data)
     else:
         message.reply_channel.send(json.dumps({
             "error": "Type not understood"
@@ -91,6 +90,7 @@ def handle_chat(message, data):
                 'type': 'chat', 'payload': chat_message.serialize()
             })
         })
+        pdb.set_trace()
     else:
         return handle_error(message, "Plenary not found")
 
@@ -136,28 +136,66 @@ def handle_embeds(message, data):
         })
     })
 
-def handle_breakout_create(message, data):
+def handle_breakout(message, data):
     path = message.channel_session['path']
     plenary = Plenary.objects.get_from_path(path)
     if plenary:
-        if 'payload' not in data or 'title' not in data['payload']:
+        if 'payload' not in data or 'type' not in data['payload']:
             return handle_error(message,
-                    "Requires payload with 'payload' key and 'title' subkey")
-        # Ensure data['plenary'] is a dict
-        breakout = Breakout.objects.create(
-            plenary=plenary,
-            title=data['payload']['title'],
-            slug='/',
-            # Either verify 'max_attendees' is there, or use ".get('max_attendees', 0)"
-            max_attendees=data['payload'].get('max_attendees', 10)
-        )
-        Group(path).send({
-            'text': json.dumps({
-                # Just send all breakout rooms, rather than introducing a new one.
-                'type': 'breakout_receive',
-                'payload': [b.serialize() for b in plenary.breakout_set.all()]
+                    "Requires payload with 'payload' key and 'type' subkey")
+        elif not type(data['payload']) == dict:
+            return handle_error(message, "Requires payload of dict type")
+        elif data['payload']['type'] == 'create':
+            breakout = Breakout.objects.create(
+                plenary=plenary,
+                title=data['payload']['title'],
+                slug='/',
+                max_attendees=data['payload'].get('max_attendees', 10)
+            )
+            Group(path).send({
+                'text': json.dumps({
+                    # Just send all breakout rooms, rather than introducing a new one.
+                    'type': 'breakout_receive',
+                    'payload': [b.serialize() for b in plenary.breakout_set.all()]
+                })
             })
-        })
+        elif data['payload']['type'] == 'delete':
+            breakouts = plenary.breakout_set.all()
+            updated = []
+            for b in range(0, len(breakouts)):
+                if b == data['payload']['index']:
+                    breakouts[b].delete()
+                else:
+                    updated.append(breakouts[b].serialize())
+            Group(path).send({
+                'text': json.dumps({
+                    'type': 'breakout_receive',
+                    'payload': updated
+                    })
+                })
+        elif data['payload']['type'] == 'modify':
+            breakouts = plenary.breakout_set.all()
+            updated = []
+            for b in range(0, len(breakouts)):
+                if b == data['payload']['index']:
+                    #delete breakout then create one w updated title
+                    saved_max_attendees = breakouts[b].max_attendees
+                    breakouts[b].delete()
+                    newbreakout = Breakout.objects.create(
+                        plenary=plenary,
+                        title=data['payload']['title'],
+                        slug='/',
+                        max_attendees=saved_max_attendees
+                    )
+                    updated.append(newbreakout.serialize())
+                else:
+                    updated.append(breakouts[b].serialize())
+            Group(path).send({
+                'text': json.dumps({
+                    'type': 'breakout_receive',
+                    'payload': updated
+                    })
+                })   
     else:
         return handle_error(message, "Plenary not found")
 
