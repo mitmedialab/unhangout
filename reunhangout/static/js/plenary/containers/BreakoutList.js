@@ -1,5 +1,4 @@
 import React from "react";
-import ReactDOM from "react-dom"
 import {connect} from "react-redux";
 import * as style from "../../../scss/pages/plenary/_breakoutliststyle.scss";
 import * as BS from "react-bootstrap";
