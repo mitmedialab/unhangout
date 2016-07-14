@@ -53,6 +53,9 @@ export class SocketClient {
       case "breakout_receive":
         this.store.dispatch(PLENARY_ACTIONS.breakoutReceive(data.payload));
         break;
+      case "breakout_mode":
+        this.store.dispatch(PLENARY_ACTIONS.breakoutMode(data.payload));
+        break;
       default:
         console.log("transport.js: Unhandled message:", data);
         break;

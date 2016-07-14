@@ -13,7 +13,6 @@ class BreakoutList extends React.Component {
   //dispatch breakout creation and close modal
   handleSubmit(event, isProposal) {
     event.preventDefault();
-    console.log('onsubmit fireds')
     this.props.onChangeBreakouts({
       type: "create",
       title: this.state.title,
@@ -113,10 +112,9 @@ class BreakoutList extends React.Component {
         return <Breakout title={breakout.title} maxAttendees={breakout.max_attendees} 
         key={`${i}`} auth={this.props.auth} index={i} 
         onChangeBreakouts={this.props.onChangeBreakouts} 
-        is_proposal={breakout.is_proposal} breakoutMode={this.props.breakoutMode["mode"]} />
+        is_proposal={breakout.is_proposal} breakoutMode={this.props.breakoutMode["mode"]} votes={breakout.votes}/>
       }) : ""}
       </div> 
-      {console.log(this.props.breakouts)}
     </div>
 
   }

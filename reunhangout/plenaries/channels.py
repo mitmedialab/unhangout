@@ -214,6 +214,21 @@ def handle_breakout(message, data):
                     'payload': updated
                     })
                 }) 
+        elif data['payload']['type'] == 'vote':
+            updated = []
+            for b in range(0, len(breakouts)):
+                if b == data['payload']['index']:
+                    newbreakout = breakouts[b]
+                    newbreakout.votes.add(message.user)
+                    updated.append(newbreakout.serialize())
+                else:
+                    updated.append(breakouts[b].serialize())
+            Group(path).send({
+                'text': json.dumps({
+                    'type': 'breakout_receive',
+                    'payload': updated
+                    })
+                }) 
     else:
         return handle_error(message, "Plenary not found")
 

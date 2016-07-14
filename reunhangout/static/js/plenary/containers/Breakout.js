@@ -63,10 +63,19 @@ export default class Breakout extends React.Component {
       index: this.props.index
     });
   }
+  handleVote(event) {
+    event.preventDefault();
+    this.props.onChangeBreakouts({
+      type: "vote",
+      index: this.props.index
+    });
+  }
   render() {
     let is_proposal = this.props.is_proposal || false
     let breakoutMode = this.props.breakoutMode || "admin"
+    let votes = this.props.votes || 0
     return <div className="breakout">
+    {console.log('votes', votes)}
           { this.props.auth.is_admin ? <form 
             onSubmit={(e) => this.handleSubmit(e, this.props.onChangeBreakouts, 
               this.state.title)}>
@@ -74,7 +83,8 @@ export default class Breakout extends React.Component {
             onChange={(e) => this.setState({title: e.target.value})} 
             onClick={(e) => this.handleClick(e)}/>
           </form> : <h5>{this.props.title}</h5> }
-          { is_proposal ? <BS.Button>Vote</BS.Button> : <BS.Button>Join</BS.Button> }
+          { is_proposal ? <BS.Button onClick={(e) => this.handleVote(e)}>Vote | {votes.length}</BS.Button> 
+          : <BS.Button>Join</BS.Button> }
           { this.props.auth.is_admin ? <BS.Button bsStyle="danger"
           onClick= {(e) => 
             this.handleDelete(e, this.props.index)}><i className='fa fa-trash' />
