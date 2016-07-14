@@ -6,6 +6,7 @@
   display: flex;
   flex-flow: row wrap;
   justify-content: space-around;
+  overflow: visible;
   .btn-default {
   	flex-grow: 1;
     color: #2e7daa;

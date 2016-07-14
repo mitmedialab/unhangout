@@ -7,7 +7,7 @@ import BreakoutList from './BreakoutList';
 import Whiteboard from './Whiteboard';
 import Presence from './Presence';
 import Chat from './Chat';
-import EventInfo from './EventInfo'
+import EventInfo from './EventInfo';
 import {ConnectionStatus} from '../../transport';
 import * as A from '../actions';
 

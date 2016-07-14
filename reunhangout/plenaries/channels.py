@@ -90,7 +90,6 @@ def handle_chat(message, data):
                 'type': 'chat', 'payload': chat_message.serialize()
             })
         })
-        pdb.set_trace()
     else:
         return handle_error(message, "Plenary not found")
 
@@ -139,6 +138,7 @@ def handle_embeds(message, data):
 def handle_breakout(message, data):
     path = message.channel_session['path']
     plenary = Plenary.objects.get_from_path(path)
+    breakouts = plenary.breakout_set.all()
     if plenary:
         if 'payload' not in data or 'type' not in data['payload']:
             return handle_error(message,
@@ -150,17 +150,17 @@ def handle_breakout(message, data):
                 plenary=plenary,
                 title=data['payload']['title'],
                 slug='/',
-                max_attendees=data['payload'].get('max_attendees', 10)
+                max_attendees=data['payload'].get('max_attendees', 10),
+                is_proposal=data['payload'].get('is_proposal', False)
             )
             Group(path).send({
                 'text': json.dumps({
                     # Just send all breakout rooms, rather than introducing a new one.
                     'type': 'breakout_receive',
-                    'payload': [b.serialize() for b in plenary.breakout_set.all()]
+                    'payload': [b.serialize() for b in breakouts]
                 })
             })
         elif data['payload']['type'] == 'delete':
-            breakouts = plenary.breakout_set.all()
             updated = []
             for b in range(0, len(breakouts)):
                 if b == data['payload']['index']:
@@ -174,19 +174,12 @@ def handle_breakout(message, data):
                     })
                 })
         elif data['payload']['type'] == 'modify':
-            breakouts = plenary.breakout_set.all()
             updated = []
             for b in range(0, len(breakouts)):
                 if b == data['payload']['index']:
-                    #delete breakout then create one w updated title
-                    saved_max_attendees = breakouts[b].max_attendees
-                    breakouts[b].delete()
-                    newbreakout = Breakout.objects.create(
-                        plenary=plenary,
-                        title=data['payload']['title'],
-                        slug='/',
-                        max_attendees=saved_max_attendees
-                    )
+                    newbreakout = breakouts[b]
+                    newbreakout.title = data['payload']['title']
+                    newbreakout.save()
                     updated.append(newbreakout.serialize())
                 else:
                     updated.append(breakouts[b].serialize())
@@ -195,7 +188,32 @@ def handle_breakout(message, data):
                     'type': 'breakout_receive',
                     'payload': updated
                     })
-                })   
+                }) 
+        elif data['payload']['type'] == 'mode':
+            plenary.breakout_mode = data['payload']['mode'] 
+            plenary.save()
+            Group(path).send({
+                'text': json.dumps({
+                    'type': 'breakout_mode',
+                    'payload': {'mode': data['payload']['mode']}
+                    })
+                }) 
+        elif data['payload']['type'] == 'approve':
+            updated = []
+            for b in range(0, len(breakouts)):
+                if b == data['payload']['index']:
+                    newbreakout = breakouts[b]
+                    newbreakout.is_proposal = not newbreakout.is_proposal
+                    newbreakout.save()
+                    updated.append(newbreakout.serialize())
+                else:
+                    updated.append(breakouts[b].serialize())
+            Group(path).send({
+                'text': json.dumps({
+                    'type': 'breakout_receive',
+                    'payload': updated
+                    })
+                }) 
     else:
         return handle_error(message, "Plenary not found")
 

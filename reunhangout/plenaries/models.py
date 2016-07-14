@@ -58,8 +58,8 @@ class Plenary(models.Model):
     breakout_mode = models.CharField(max_length=20, choices=(
         ("admin", _("Admin controlled")),
         ("user", _("Participant proposed")),
-        ("randomized", _("Randomized breakouts")),
-    ))
+        ("randomized", _("Randomized breakouts"))
+    ), default="admin")
 
     embeds = JSONField(blank=True, null=True)
     history = JSONField(blank=True, null=True)

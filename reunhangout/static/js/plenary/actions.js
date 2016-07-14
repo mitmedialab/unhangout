@@ -74,6 +74,7 @@ export const BREAKOUT_CREATED = 'BREAKOUT_CHANGED';
 export const BREAKOUT_ERROR = 'BREAKOUT_ERROR';
 export const changeBreakouts = (payload) => {
     return (dispatch) => {
+      console.log('sending action fired')
     dispatch({type: BREAKOUT_CHANGING, payload});
     sendSocketMessage({type: "breakout", payload})
     .then(() => {
@@ -86,9 +87,16 @@ export const changeBreakouts = (payload) => {
 };
 export const BREAKOUT_RECEIVE = 'BREAKOUT_RECEIVE';
 export const breakoutReceive = (payload) => {
+  console.log("receiving action fired")
   return (dispatch) => {
     dispatch({type: BREAKOUT_RECEIVE, payload});
   }
 };
+export const BREAKOUT_MODE = 'BREAKOUT_MODE';
+export const breakoutMode = (payload) => {
+  return (dispatch) => {
+    dispatch({type: BREAKOUT_MODE, payload})
+  }
+}
 
 

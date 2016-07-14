@@ -29,9 +29,19 @@ export const breakouts = (state=null, action) => {
   state = state || []
   switch (action.type) {
     case A.BREAKOUT_RECEIVE:
+      console.log('reducer fired');
+      console.log('reducers', action.payload)
       return action.payload;
   }
   return state;
+};
+export const breakoutMode = (state=null, action) => {
+  state = state || {}
+  switch(action.type) {
+    case A.BREAKOUT_MODE:
+      return action.payload;
+  }
+  return state
 };
 export const breakoutCrud = (state={}, action) => {
   switch (action.type) {
