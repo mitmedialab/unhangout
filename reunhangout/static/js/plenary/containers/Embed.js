@@ -12,6 +12,36 @@ class Embed extends React.Component {
     super();
     this.state = {embedValue: ''};
   }
+  getVideoTitle(videoID) {
+    gapi.load('client', () => {
+      gapi.client.setApiKey('AIzaSyD824yd_UAc6mI7eWrgM2e3R2urTi5_NPY');
+      gapi.client.load('youtube', 'v3').then(() => {
+        gapi.client.youtube.videos.list({
+          part: 'snippet',
+          id: videoID,
+          fields: 'items/snippet/title'
+        }).execute((JSONresp, rawresp) => {this.setState({videoTitle: JSONresp.items[0].snippet.title})});
+        });
+    })
+  return this.state.videoTitle
+  }
+  getVideoThumbnail(videoID) {
+    gapi.load('client', () => {
+      gapi.client.setApiKey('AIzaSyD824yd_UAc6mI7eWrgM2e3R2urTi5_NPY');
+      gapi.client.load('youtube', 'v3').then(() => {
+        gapi.client.youtube.videos.list({
+          part: 'snippet',
+          id: videoID,
+          fields: 'items/snippet/thumbnails/default/url'
+        }).execute((JSONresp, rawresp) => {this.setState({videoThumbnail: JSONresp.items[0].snippet.thumbnails.default.url})});
+        });
+    })
+  }
+
+  getIDFromURL(videoURL) {
+    let videoID = videoURL.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/i)[1];
+    return videoID
+  }
 
   /**
    * Parse the user-input URL or iframe embed code to extract the appropriate
@@ -120,6 +150,7 @@ class Embed extends React.Component {
         current: this.props.embeds.current
       });
       this.setState({embedValue: ''});
+
     }
   }
   setCurrent(event, index) {
@@ -168,7 +199,9 @@ class Embed extends React.Component {
                     return <BS.MenuItem key={i}
                       onClick={(event) => this.setCurrent(event, i)}
                     >
-                      {embed.props.src}
+                      {this.getVideoThumbnail(this.getIDFromURL(embed.props.src))}
+                      <img src={this.state.videoThumbnail} />
+                      {this.getVideoTitle(this.getIDFromURL(embed.props.src))}
                       <i className='fa fa-trash'
                          onClick={(e) => this.removeEmbed(e, i)} />
                     </BS.MenuItem>;
