@@ -1,4 +1,5 @@
 import {sendSocketMessage} from '../transport';
+import * as youtube from './youtube';
 
 // Video playback
 export const ADMIN_PLAY_FOR_ALL = 'ADMIN_PLAY_FOR_ALL';
@@ -68,30 +69,33 @@ export const adminSendEmbeds = (payload) => {
       });
   };
 };
-export const REQUEST_VIDEO_DETAILS = 'REQUEST_VIDEO_DETAILS'
-function requestVideoDetails(videoID) {
+export const REQUEST_EMBED_DETAILS = 'REQUEST_EMBED_DETAILS'
+function requestEmbedDetails(embed) {
   return {
-    type: REQUEST_VIDEO_DETAILS,
-    videoID
+    type: REQUEST_EMBED_DETAILS,
+    payload: {embed}
   }
 }
-export const RECEIVE_VIDEO_DETAILS = 'RECEIVE_VIDEO_DETAILS'
-function receiveVideoDetails(videoID, json) {
+export const RECEIVE_EMBED_DETAILS = 'RECEIVE_EMBED_DETAILS'
+function receiveEmbedDetails(embed, details) {
   return {
-    type: RECEIVE_VIDEO_DETAILS,
-    videoID,
-    details: json
+    type: RECEIVE_EMBED_DETAILS,
+    payload: {
+      embed: embed,
+      details: details
+    }
   }
 }
-export function fetchVideoDetails(videoID) {
+export function fetchEmbedDetails(embed) {
   return dispatch => {
-    dispatch(requestVideoDetails(videoID))
-    let API_KEY = 'AIzaSyD824yd_UAc6mI7eWrgM2e3R2urTi5_NPY'
-    return fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoID}&fields=items(snippet(thumbnails/default/url,title))&key=${API_KEY}`)
-      .then(response => response.json())
-      .then(json => dispatch(receiveVideoDetails(videoID, json)))
+    dispatch(requestEmbedDetails(embed));
+    if (embed.type === "youtube") {
+      youtube.fetchVideoDetails(embed.props.src)
+        .then(details => dispatch(receiveEmbedDetails(embed, details)));
+    }
   }
 }
+
 //Breakouts
 export const BREAKOUT_CHANGING = 'BREAKOUT_CHANGING';
 export const BREAKOUT_CREATED = 'BREAKOUT_CHANGED';
@@ -103,12 +107,12 @@ export const changeBreakouts = (payload) => {
     sendSocketMessage({type: "breakout", payload})
     .then(() => {
       console.log('deleted action.js sending')
-        dispatch({type: BREAKOUT_CHANGED, payload})
-      })
+      dispatch({type: BREAKOUT_CHANGED, payload})
+    })
     .catch((err) => {
       console.log("catch")
-        dispatch({type: BREAKOUT_ERROR, payload})
-      });
+      dispatch({type: BREAKOUT_ERROR, payload})
+    });
   }
 };
 export const BREAKOUT_RECEIVE = 'BREAKOUT_RECEIVE';

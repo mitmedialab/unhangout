@@ -6,9 +6,10 @@ export const plenary = (state=null, action) => {
   if (!state.chat) {
     state = {chat: {}, ...state}
   }
-  if (!state.videoDetails) {
-    state = {videoDetails: {}, ...state}
+  if (!state.embedDetails) {
+    state = {embedDetails: {}, ...state}
   }
+  let newstate;
   switch (action.type) {
     case A.CHAT_MESSAGE_SENDING:
       return {...state, chat: {state: "sending", message: action.payload.message}}
@@ -25,10 +26,13 @@ export const plenary = (state=null, action) => {
     case A.SET_EMBEDS:
       let state = {...state, embedsSending: null, embeds: action.payload};
       return state;
-    case A.RECEIVE_VIDEO_DETAILS:
-      console.log('receive video details reducer fired')
-      let newstate = {...state}
-      newstate.videoDetails[action.videoID] = action.details.items[0].snippet
+    case A.REQUEST_EMBED_DETAILS:
+      newstate = {...state}
+      newstate.embedDetails[action.payload.embed.props.src] = {loading: true};
+      return newstate
+    case A.RECEIVE_EMBED_DETAILS:
+      newstate = {...state}
+      newstate.embedDetails[action.payload.embed.props.src] = action.payload.details
       return newstate
     }
   return state;

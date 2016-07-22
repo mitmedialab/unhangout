@@ -4,6 +4,7 @@ import {connect} from "react-redux";
 import * as style from "../../../scss/pages/plenary/_embedstyle.scss"
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
+import * as youtube from "../youtube";
 
 const uniqueEmbeds = (embeds) => _.uniqBy(embeds, (e) => e.props.src);
 
@@ -11,18 +12,22 @@ class Embed extends React.Component {
   constructor(props) {
     super(props);
     this.state = {embedValue: ''};
-    this.props.embeds.embeds.map((embed, i) => {
-      this.props.fetchVideoDetails(this.getIDFromURL(embed.props.src))
-    })
+    this.updateEmbedDetails();
   }
   componentWillReceiveProps() {
-    this.props.embeds.embeds.map((embed, i) => {
-          this.props.fetchVideoDetails(this.getIDFromURL(embed.props.src))
-      })
+    this.updateEmbedDetails();
   }
-  getIDFromURL(videoURL) {
-    let videoID = videoURL.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/i)[1];
-    return videoID
+
+  /**
+   * Trigger a state update for the video embed details (title, thumbnail) for
+   * any new embeds.
+   */
+  updateEmbedDetails() {
+    this.props.embeds.embeds.map((embed, i) => {
+      if (!this.props.embedDetails[embed.props.src]) {
+        this.props.fetchEmbedDetails(embed);
+      }
+    });
   }
 
   /**
@@ -39,16 +44,11 @@ class Embed extends React.Component {
 
     // Youtube embeds and URLs
     if (/youtube\.com|youtu\.be/.test(v)) {
-      // From http://stackoverflow.com/a/6904504 , covering any of the 15 or so
-      // different variations on youtube URLs.  Also works permissively on full
-      // iframe/object embed codes.
-      const re = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/i;
-      let match = re.exec(v);
-      if (match) {
-        let ytid = match[1];
+      let canonicalUrl = youtube.getCanonicalUrl(v);
+      if (canonicalUrl) {
         return {
           type: 'youtube',
-          props: {src: `https://www.youtube.com/embed/${ytid}`}
+          props: {src: canonicalUrl}
         }
       } else {
         throw new Error("Unrecognized youtube URL.");
@@ -181,9 +181,22 @@ class Embed extends React.Component {
                     return <BS.MenuItem key={i}
                       onClick={(event) => this.setCurrent(event, i)}
                     >
-                    {/*console.log('video details state', this.props.videoDetails[this.getIDFromURL(embed.props.src)])*/}
-                     {/*<img src={this.state[this.getIDFromURL(embed.props.src)]}}
-                                                               {this.state[this.getIDFromURL(embed.props.src)]}*/}
+                      {
+                        /* No embed details? Show URL. */
+                        !this.props.embedDetails[embed.props.src] ?
+                          embed.props.src
+                        /* Currently loading the details.. */
+                        : this.props.embedDetails[embed.props.src].loading ?
+                          embed.props.src
+                        /* Have embed details */
+                        : <span>
+                            <img src={this.props.embedDetails[embed.props.src].thumbnails.default.url}
+                                width={64}
+                                height={48}
+                                alt="" />
+                            {this.props.embedDetails[embed.props.src].title}
+                          </span>
+                      }
                       <i className='fa fa-trash'
                          onClick={(e) => this.removeEmbed(e, i)} />
                     </BS.MenuItem>;
@@ -221,7 +234,7 @@ export default connect(
     embeds: state.plenary.embeds || {embeds: [], current: null},
     embedsSending: state.plenary.embedsSending || {},
     auth: state.auth,
-    videoDetails: state.plenary.videoDetails || {}
+    embedDetails: state.plenary.embedDetails || {}
   }),
   // map dispatch to props
   (dispatch, ownProps) => ({
@@ -234,7 +247,7 @@ export default connect(
     // user
     onSyncPlayback: () => dispatch(A.syncPlayback()),
     onBreakSyncPlayback: () => dispatch(A.breakSyncPlayback()),
-    fetchVideoDetails: (videoID) => dispatch(A.fetchVideoDetails(videoID))
+    fetchEmbedDetails: (embed) => dispatch(A.fetchEmbedDetails(embed))
   })
 )(Embed);
 
