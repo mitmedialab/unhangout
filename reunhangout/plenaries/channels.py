@@ -229,6 +229,38 @@ def handle_breakout(message, data):
                     'payload': updated
                     })
                 }) 
+        # elif data['payload']['type'] == 'random':
+        #     breakouts_required = data['payload']['total_members']//data['payload']['max_attendees'] + 1
+        #     random_breakouts = []
+        #     for b in breakouts:
+        #         if b.random == True:
+        #             random_breakouts.append(b.serialize())
+        #     if random_breakouts < breakout_required:
+        #         for i in range(breakouts_required - random_breakouts):
+        #             breakout = Breakout.objects.create(
+        #         plenary=plenary,
+        #         title=data['payload']['title'],
+        #         slug='/',
+        #         max_attendees=data['payload'].get('max_attendees', 10),
+        #         is_proposal=data['payload'].get('is_proposal', False),
+        #         is_random = True
+        #     )
+
+
+        #     for b in range(0, len(breakouts)):
+        #         if b == data['payload']['index']:
+        #             newbreakout = breakouts[b]
+        #             newbreakout.votes.add(message.user)
+        #             updated.append(newbreakout.serialize())
+        #         else:
+        #             updated.append(breakouts[b].serialize())
+            
+        #     Group(path).send({
+        #         'text': json.dumps({
+        #             'type': 'breakout_receive',
+        #             'payload': updated
+        #             })
+        #         }) 
     else:
         return handle_error(message, "Plenary not found")
 

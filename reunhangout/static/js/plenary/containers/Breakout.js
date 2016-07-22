@@ -40,6 +40,7 @@ export default class Breakout extends React.Component {
         index: this.props.index,
         title: updatedTitle
       });
+      this.refs.titleInput.blur()
     }
     this.active = false
   }
@@ -50,6 +51,7 @@ export default class Breakout extends React.Component {
   }
   //dispatch delete breakout
   handleDelete(event) {
+    console.log('delete dispatched')
     event.preventDefault();
     this.props.onChangeBreakouts({
       type: "delete",
@@ -75,13 +77,12 @@ export default class Breakout extends React.Component {
     let breakoutMode = this.props.breakoutMode || "admin"
     let votes = this.props.votes || 0
     return <div className="breakout">
-    {console.log('votes', votes)}
           { this.props.auth.is_admin ? <form 
             onSubmit={(e) => this.handleSubmit(e, this.props.onChangeBreakouts, 
               this.state.title)}>
-            <BS.FormControl type="text" value={this.state.title}
+            <input type="text" value={this.state.title}
             onChange={(e) => this.setState({title: e.target.value})} 
-            onClick={(e) => this.handleClick(e)}/>
+            onClick={(e) => this.handleClick(e)} ref="titleInput"/>
           </form> : <h5>{this.props.title}</h5> }
           { is_proposal ? <BS.Button onClick={(e) => this.handleVote(e)}>Vote | {votes.length}</BS.Button> 
           : <BS.Button>Join</BS.Button> }

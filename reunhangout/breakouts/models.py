@@ -43,6 +43,8 @@ class Breakout(models.Model):
             settings.AUTH_USER_MODEL,
             related_name='voted_on_breakouts',
             blank=True)
+    #is_random = models.BooleanField(default=False)
+
 
     def safe_description(self):
         return sanitize(self.description)

@@ -68,26 +68,51 @@ export const adminSendEmbeds = (payload) => {
       });
   };
 };
+export const REQUEST_VIDEO_DETAILS = 'REQUEST_VIDEO_DETAILS'
+function requestVideoDetails(videoID) {
+  return {
+    type: REQUEST_VIDEO_DETAILS,
+    videoID
+  }
+}
+export const RECEIVE_VIDEO_DETAILS = 'RECEIVE_VIDEO_DETAILS'
+function receiveVideoDetails(videoID, json) {
+  return {
+    type: RECEIVE_VIDEO_DETAILS,
+    videoID,
+    details: json
+  }
+}
+export function fetchVideoDetails(videoID) {
+  return dispatch => {
+    dispatch(requestVideoDetails(videoID))
+    let API_KEY = 'AIzaSyD824yd_UAc6mI7eWrgM2e3R2urTi5_NPY'
+    return fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoID}&fields=items(snippet(thumbnails/default/url,title))&key=${API_KEY}`)
+      .then(response => response.json())
+      .then(json => dispatch(receiveVideoDetails(videoID, json)))
+  }
+}
 //Breakouts
 export const BREAKOUT_CHANGING = 'BREAKOUT_CHANGING';
 export const BREAKOUT_CREATED = 'BREAKOUT_CHANGED';
 export const BREAKOUT_ERROR = 'BREAKOUT_ERROR';
 export const changeBreakouts = (payload) => {
     return (dispatch) => {
-      console.log('sending action fired')
+      console.log('delete action.js sending')
     dispatch({type: BREAKOUT_CHANGING, payload});
     sendSocketMessage({type: "breakout", payload})
     .then(() => {
+      console.log('deleted action.js sending')
         dispatch({type: BREAKOUT_CHANGED, payload})
       })
     .catch((err) => {
+      console.log("catch")
         dispatch({type: BREAKOUT_ERROR, payload})
       });
   }
 };
 export const BREAKOUT_RECEIVE = 'BREAKOUT_RECEIVE';
 export const breakoutReceive = (payload) => {
-  console.log("receiving action fired")
   return (dispatch) => {
     dispatch({type: BREAKOUT_RECEIVE, payload});
   }

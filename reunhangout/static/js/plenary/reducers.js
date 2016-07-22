@@ -6,6 +6,9 @@ export const plenary = (state=null, action) => {
   if (!state.chat) {
     state = {chat: {}, ...state}
   }
+  if (!state.videoDetails) {
+    state = {videoDetails: {}, ...state}
+  }
   switch (action.type) {
     case A.CHAT_MESSAGE_SENDING:
       return {...state, chat: {state: "sending", message: action.payload.message}}
@@ -22,15 +25,19 @@ export const plenary = (state=null, action) => {
     case A.SET_EMBEDS:
       let state = {...state, embedsSending: null, embeds: action.payload};
       return state;
-  }
+    case A.RECEIVE_VIDEO_DETAILS:
+      console.log('receive video details reducer fired')
+      let newstate = {...state}
+      newstate.videoDetails[action.videoID] = action.details.items[0].snippet
+      return newstate
+    }
   return state;
 };
 export const breakouts = (state=null, action) => {
   state = state || []
   switch (action.type) {
     case A.BREAKOUT_RECEIVE:
-      console.log('reducer fired');
-      console.log('reducers', action.payload)
+    console.log('reducer received new breakouts', action.payload)
       return action.payload;
   }
   return state;

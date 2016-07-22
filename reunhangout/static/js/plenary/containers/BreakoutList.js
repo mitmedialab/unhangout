@@ -8,7 +8,8 @@ import Breakout from './Breakout';
 class BreakoutList extends React.Component {
   constructor() {
     super();
-    this.state= {showModal: false};
+    this.state= {showSessionModal: false,
+      showRandomizedModal: false};
   }
   //dispatch breakout creation and close modal
   handleSubmit(event, isProposal) {
@@ -23,24 +24,40 @@ class BreakoutList extends React.Component {
       title: "",
       max_attendees: ""
     });
-    this.setState({showModal: !this.state.showModal})
+    this.setState({showSessionModal: !this.state.showSessionModal})
   }
   handleModeChange(event, id) {
     event.preventDefault();
+    if (id === "randomized") { 
+      this.setState({
+        showRandomizedModal: !this.state.showRandomizedModal
+      })} else {
+        this.props.onChangeBreakouts({
+          type: "mode",
+          mode: id
+        })
+      }
+  }
+  handleRandomize(event) {
     this.props.onChangeBreakouts({
       type: "mode",
-      mode: id
+      mode: "randomize"
     })
+    // this.props.onChangeBreakouts({
+    //   type: "random",
+    //   total_members: this.props.present.members,
+    //   max_attendees: this.state.max_attendees
+    // })
   }
   render() {
     return <div>
       <div className="breakout-header">
         <h4>Breakout Rooms</h4>
         { (this.props.auth.is_admin && (this.props.breakoutMode["mode"] === "admin")) ? <BS.Button onClick={() => 
-          this.setState({showModal: !this.state.showModal})}>
+          this.setState({showSessionModal: !this.state.showSessionModal})}>
         CREATE A SESSION</BS.Button> : "" }
         { this.props.breakoutMode["mode"] === "user" ? <BS.Button onClick={() => 
-          this.setState({showModal: !this.state.showModal})}>
+          this.setState({showSessionModal: !this.state.showSessionModal})}>
         PROPOSE A SESSION</BS.Button> : "" }
         { this.props.auth.is_admin ? <BS.DropdownButton title="Breakout Mode" id="breakout-mode">
       <BS.MenuItem onClick={(e) => this.handleModeChange(e, "admin")}>
@@ -57,8 +74,8 @@ class BreakoutList extends React.Component {
             </div> : "" }
       </div>
       <div className="create-session-dialog">
-        <BS.Modal show={this.state.showModal} 
-        onHide={() => this.setState({showModal: !this.state.showModal})}>
+        <BS.Modal show={this.state.showSessionModal} 
+        onHide={() => this.setState({showSessionModal: !this.state.showSessionModal})}>
           <BS.Modal.Header closeButton>
             <BS.Modal.Title>Create Session</BS.Modal.Title>
           </BS.Modal.Header>
@@ -84,21 +101,47 @@ class BreakoutList extends React.Component {
           </BS.Modal.Body>
           <BS.Modal.Footer>
             <BS.Button 
-            onClick={() => this.setState({showModal: !this.state.showModal})}>
+            onClick={() => this.setState({showSessionModal: !this.state.showSessionModal})}>
             Close</BS.Button>
 
             { (() => {if (this.props.breakoutMode['mode']==="user") {
                          return <BS.Button onClick={(e) => this.handleSubmit(e, true)}>Propose Session</BS.Button>
-                       } else if (this.props.breakoutMode['mode']==='admin') {
-                          return <BS.Button onClick={(e) => this.handleSubmit(e, false)}>Create Session</BS.Button>
                        } else {
-                        return <BS.Button>Group Me</BS.Button> }})() }
+                          return <BS.Button onClick={(e) => this.handleSubmit(e, false)}>Create Session</BS.Button>
+                       }})() }
             
           </BS.Modal.Footer>
         </BS.Modal>
       </div>
-      <div className="breakouts-container"> 
 
+      <div className="randomize-dialog">
+        <BS.Modal show={this.state.showRandomizedModal} 
+        onHide={() => this.setState({showRandomizedModal: !this.state.showRandomizedModal})}>
+          <BS.Modal.Header closeButton>
+            <BS.Modal.Title>Randomize Breakouts</BS.Modal.Title>
+          </BS.Modal.Header>
+          <BS.Modal.Body>
+            <BS.Form horizontal>
+            <BS.FormGroup controlId="participant-limit">
+              <BS.Col sm={2}>Participant Limit</BS.Col>
+              <BS.Col sm={10}><BS.FormControl type="text" 
+              placeholder="Max 10, Min 2" 
+              max_attendees={(this.state && this.state.max_attendees) || ""}
+              onChange={(e) => this.setState({max_attendees: e.target.value})}/>
+              </BS.Col>
+            </BS.FormGroup>
+            </BS.Form>
+          </BS.Modal.Body>
+          <BS.Modal.Footer>
+            <BS.Button 
+            onClick={() => this.setState({showRandomizedModal: !this.state.showRandomizedModal})}>
+            Close</BS.Button>
+            <BS.Button onClick={() => this.handleRandomize}>Randomize</BS.Button>        
+          </BS.Modal.Footer>
+        </BS.Modal>
+      </div>
+
+      <div className="breakouts-container"> 
       {(this.props.breakoutMode['mode']==="admin") ?
       this.props.breakouts.map((breakout, i) => {
         if (!breakout.is_proposal) {
@@ -119,8 +162,12 @@ class BreakoutList extends React.Component {
 
   }
 }
-    
 
+const sortPresent = (present, auth) => {
+  // Sort self first, others second.
+  return _.sortBy(present.members, (u) => u.username !== auth.username)
+}
+    
 export default connect(
   // map state to props
   (state) => ({
@@ -128,7 +175,9 @@ export default connect(
     breakoutCrud: state.breakoutCrud,
     plenary: state.plenary,
     auth: state.auth,
-    breakoutMode: state.breakoutMode
+    breakoutMode: state.breakoutMode,
+    // present: {
+    //   members: sortPresent(state.present, state.auth)}
   }),
   (dispatch, ownProps) => ({
     onChangeBreakouts: (payload) => dispatch(A.changeBreakouts(payload))

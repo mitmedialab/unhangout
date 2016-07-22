@@ -8,36 +8,18 @@ import * as A from "../actions";
 const uniqueEmbeds = (embeds) => _.uniqBy(embeds, (e) => e.props.src);
 
 class Embed extends React.Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {embedValue: ''};
-  }
-  getVideoTitle(videoID) {
-    gapi.load('client', () => {
-      gapi.client.setApiKey('AIzaSyD824yd_UAc6mI7eWrgM2e3R2urTi5_NPY');
-      gapi.client.load('youtube', 'v3').then(() => {
-        gapi.client.youtube.videos.list({
-          part: 'snippet',
-          id: videoID,
-          fields: 'items/snippet/title'
-        }).execute((JSONresp, rawresp) => {this.setState({videoTitle: JSONresp.items[0].snippet.title})});
-        });
-    })
-  return this.state.videoTitle
-  }
-  getVideoThumbnail(videoID) {
-    gapi.load('client', () => {
-      gapi.client.setApiKey('AIzaSyD824yd_UAc6mI7eWrgM2e3R2urTi5_NPY');
-      gapi.client.load('youtube', 'v3').then(() => {
-        gapi.client.youtube.videos.list({
-          part: 'snippet',
-          id: videoID,
-          fields: 'items/snippet/thumbnails/default/url'
-        }).execute((JSONresp, rawresp) => {this.setState({videoThumbnail: JSONresp.items[0].snippet.thumbnails.default.url})});
-        });
+    this.props.embeds.embeds.map((embed, i) => {
+      this.props.fetchVideoDetails(this.getIDFromURL(embed.props.src))
     })
   }
-
+  componentWillReceiveProps() {
+    this.props.embeds.embeds.map((embed, i) => {
+          this.props.fetchVideoDetails(this.getIDFromURL(embed.props.src))
+      })
+  }
   getIDFromURL(videoURL) {
     let videoID = videoURL.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/i)[1];
     return videoID
@@ -199,9 +181,9 @@ class Embed extends React.Component {
                     return <BS.MenuItem key={i}
                       onClick={(event) => this.setCurrent(event, i)}
                     >
-                      {this.getVideoThumbnail(this.getIDFromURL(embed.props.src))}
-                      <img src={this.state.videoThumbnail} />
-                      {this.getVideoTitle(this.getIDFromURL(embed.props.src))}
+                    {/*console.log('video details state', this.props.videoDetails[this.getIDFromURL(embed.props.src)])*/}
+                     {/*<img src={this.state[this.getIDFromURL(embed.props.src)]}}
+                                                               {this.state[this.getIDFromURL(embed.props.src)]}*/}
                       <i className='fa fa-trash'
                          onClick={(e) => this.removeEmbed(e, i)} />
                     </BS.MenuItem>;
@@ -239,6 +221,7 @@ export default connect(
     embeds: state.plenary.embeds || {embeds: [], current: null},
     embedsSending: state.plenary.embedsSending || {},
     auth: state.auth,
+    videoDetails: state.plenary.videoDetails || {}
   }),
   // map dispatch to props
   (dispatch, ownProps) => ({
@@ -251,6 +234,7 @@ export default connect(
     // user
     onSyncPlayback: () => dispatch(A.syncPlayback()),
     onBreakSyncPlayback: () => dispatch(A.breakSyncPlayback()),
+    fetchVideoDetails: (videoID) => dispatch(A.fetchVideoDetails(videoID))
   })
 )(Embed);
 
