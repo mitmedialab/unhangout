@@ -24,8 +24,8 @@ export const plenary = (state=null, action) => {
     case A.ADMIN_EMBEDS_ERROR:
       return {...state, embedsSending: {state: "error", error: action.payload.error}}
     case A.SET_EMBEDS:
-      let state = {...state, embedsSending: null, embeds: action.payload};
-      return state;
+      newstate = {...state, embedsSending: null, embeds: action.payload};
+      return newstate;
     case A.REQUEST_EMBED_DETAILS:
       newstate = {...state}
       newstate.embedDetails[action.payload.embed.props.src] = {loading: true};
