@@ -45,6 +45,9 @@ class Breakout(models.Model):
             blank=True)
     #is_random = models.BooleanField(default=False)
 
+    @property
+    def channel_group_name(self):
+        return "breakout-%s" % self.pk
 
     def safe_description(self):
         return sanitize(self.description)

@@ -5,23 +5,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 
 from plenaries.models import Plenary
-
-def serialize_auth_state(request, plenary):
-    if not request.user.is_authenticated():
-        return {'auth': {'is_authenticated': False}}
-
-    user = request.user
-    return {
-        'auth': {
-            'is_authenticated': True,
-            'id': user.id,
-            'username': user.username,
-            'email': user.email,
-            'is_superuser': user.is_superuser,
-            'is_admin': user.is_superuser or plenary.admins.filter(pk=user.pk).exists(),
-        }
-    }
-
+from accounts.utils import serialize_auth_state
 
 @login_required
 def plenary_detail(request, id_or_slug):
@@ -37,7 +21,7 @@ def plenary_detail(request, id_or_slug):
         raise Http404
 
     data = plenary.serialize()
-    data.update(serialize_auth_state(request, plenary))
+    data.update(serialize_auth_state(request.user, plenary))
     
     return render(request, "plenaries/plenary.html", {
         'data': json.dumps(data),

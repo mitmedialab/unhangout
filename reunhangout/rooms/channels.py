@@ -10,6 +10,9 @@ from rooms.models import Room
 @enforce_ordering(slight=True)
 @channel_session_user_from_http
 def ws_connect(message):
+    """
+    Generic room connection that doesn't enforce connection limits, auth, etc.
+    """
     path = message.content['path'].replace('/', '__')
     message.channel_session['path'] = path
     Group(path).add(message.reply_channel)
@@ -18,8 +21,11 @@ def ws_connect(message):
 
 @enforce_ordering(slight=True)
 @channel_session_user
-def ws_disconnect(message):
-    path = message.channel_session['path']
-    Group(path).discard(message.reply_channel)
+def ws_disconnect(message, **kwargs):
+    """
+    Generic room disconnection
+    """
+    Group(message.channel_session['path']).discard(message.reply_channel)
     room = Room.objects.remove(path, message.user, message.reply_channel.name)
-    room.broadcast_presence()
+    if room:
+        room.broadcast_presence()

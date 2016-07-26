@@ -3,10 +3,31 @@ from urllib.parse import urlparse
 
 from channels import Group
 from channels.sessions import enforce_ordering
-from channels.auth import channel_session_user
+from channels.auth import channel_session_user, channel_session_user_from_http
 
 from plenaries.models import Plenary, ChatMessage
 from breakouts.models import Breakout
+from rooms.models import Room
+
+@enforce_ordering(slight=True)
+@channel_session_user_from_http
+def ws_connect(message, slug):
+    if not message.user.is_authenticated():
+        return handle_error(message, "Authentication required")
+    try:
+        plenary = Plenary.objects.get(slug=slug)
+    except Plenary.DoesNotExist:
+        return handle_error(message,  'Plenary not found')
+    
+    message.channel_session['path'] = plenary.channel_group_name
+    group = Group(message.channel_session['path'])
+
+    # Here would be the place for enforcing a connection/user cap or other
+    # auth, if such were needed.
+
+    group.add(message.reply_channel)
+    room = Room.objects.add(group.name, message.user, message.reply_channel.name)
+    room.broadcast_presence()
 
 @enforce_ordering(slight=True)
 @channel_session_user
@@ -47,7 +68,7 @@ def handle_chat(message, data, plenary):
         message=data['payload']['message'],
         highlight=highlight
     )
-    Group(path).send({
+    Group(plenary.channel_group_name).send({
         'text': json.dumps({
             'type': 'chat', 'payload': chat_message.serialize()
         })

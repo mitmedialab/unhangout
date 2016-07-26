@@ -62,6 +62,10 @@ class Plenary(models.Model):
 
     admins = models.ManyToManyField(settings.AUTH_USER_MODEL)
 
+    @property
+    def channel_group_name(self):
+        return "plenary-%s" % self.pk
+
     def safe_description(self):
         return sanitize(self.description) if self.description else ""
 
