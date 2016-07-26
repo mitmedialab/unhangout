@@ -25,7 +25,8 @@ def ws_disconnect(message, **kwargs):
     """
     Generic room disconnection
     """
-    Group(message.channel_session['path']).discard(message.reply_channel)
+    path = message.channel_session['path']
+    Group(path).discard(message.reply_channel)
     room = Room.objects.remove(path, message.user, message.reply_channel.name)
     if room:
         room.broadcast_presence()
