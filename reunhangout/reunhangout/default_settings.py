@@ -37,10 +37,15 @@ INSTALLED_APPS = [
     'plenaries',
     'rooms',
 
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+
     'django_gravatar',
-    'registration',
     'sorl.thumbnail',
     'webpack_loader',
+
+    'channels',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -49,8 +54,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.sites',
     'django.contrib.staticfiles',
-
-    'channels',
 ]
 MIGRATION_MODULES = {
     'thumbnail': 'frontend.sorl_migrations'
@@ -64,6 +67,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'django.contrib.sites.middleware.CurrentSiteMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -116,6 +120,10 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backens.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+)
 
 
 # Internationalization
@@ -147,6 +155,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 CHANNEL_LAYERS = {
     "default": {
+        #"BACKEND": "asgi_redis.RedisChannelLayer",
         "BACKEND": "asgiref.inmemory.ChannelLayer",
         "ROUTING": "reunhangout.routing.channel_routing",
     }

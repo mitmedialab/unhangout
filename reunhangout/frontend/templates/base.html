@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=EDGE">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel='icon' href='{% static "img/favicon.png" %}'>
-  <title>{% block title %}{% endblock %}{% block site_title %} - reunhangout{% endblock %}</title>
+  <title>{% block head_title %}{% endblock %}{% block title %}{% endblock %}{% block site_title %} - {{request.site.name}}{% endblock %}</title>
   {% block styles %}
     {% render_bundle 'main' 'css' %}
   {% endblock %}
@@ -16,7 +16,9 @@
 <div id='wrapper'>
   <div id='body'>
     {% block navbar %}{% include "_navbar.html" %}{% endblock %}
-    {% block content %}{% endblock %}
+    {% block main %}
+      {% block content %}{% endblock %}
+    {% endblock %}
   </div>
   <footer>{% block footer %}{% include "_footer.html" %}{% endblock %}</footer>
 </div>

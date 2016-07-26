@@ -6,6 +6,7 @@ jsonfield
 django-timezone-field
 bleach
 bleach-whitelist
+django-allauth
 django-debug-toolbar
 django-gravatar2
 django-webpack-loader

@@ -2,6 +2,7 @@ import json
 
 from django.http import Http404
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 
 from plenaries.models import Plenary
 
@@ -21,6 +22,8 @@ def serialize_auth_state(request, plenary):
         }
     }
 
+
+@login_required
 def plenary_detail(request, id_or_slug):
     try:
         return redirect(Plenary.objects.get(pk=id_or_slug).get_absolute_url())

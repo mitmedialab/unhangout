@@ -52,10 +52,10 @@
           </li>
         {% else %}
           <li>
-            <a href='{% url "registration_register" %}' class='js-register-modal'>Sign up</a>
+            <a href='{% url "account_signup" %}' class='js-register-modal'>Sign up</a>
           </li>
           <li>
-            <a href='{% url "auth_login" %}' class='js-login-modal'>Login</a>
+            <a href='{% url "account_login" %}' class='js-login-modal'>Login</a>
           </li>
         {% endif %}
       </ul>
