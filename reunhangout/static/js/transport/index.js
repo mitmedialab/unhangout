@@ -44,17 +44,17 @@ export class SocketClient {
       case "chat": 
         this.store.dispatch(PLENARY_ACTIONS.chatMessageReceive(data.payload));
         break;
-      case "present":
-        this.store.dispatch(PLENARY_ACTIONS.setPresent(data.payload));
-        break;
       case "embeds":
         this.store.dispatch(PLENARY_ACTIONS.setEmbeds(data.payload));
         break;
       case "breakout_receive":
         this.store.dispatch(PLENARY_ACTIONS.breakoutReceive(data.payload));
         break;
-      case "breakout_mode":
-        this.store.dispatch(PLENARY_ACTIONS.breakoutMode(data.payload));
+      case "plenary":
+        this.store.dispatch(PLENARY_ACTIONS.setPlenary(data.payload));
+        break;
+      case "present":
+        this.store.dispatch(A.setPresent(data.payload));
         break;
       default:
         console.log("transport.js: Unhandled message:", data);

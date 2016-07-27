@@ -15,7 +15,7 @@ class BreakoutList extends React.Component {
   handleSubmit(event, isProposal) {
     event.preventDefault();
     this.props.onChangeBreakouts({
-      type: "create",
+      action: "create",
       title: this.state.title,
       max_attendees: this.state.max_attendees,
       is_proposal: isProposal
@@ -32,41 +32,40 @@ class BreakoutList extends React.Component {
       this.setState({
         showRandomizedModal: !this.state.showRandomizedModal
       })} else {
-        this.props.onChangeBreakouts({
-          type: "mode",
-          mode: id
-        })
+        this.props.onChangeBreakoutMode(id)
       }
   }
   handleRandomize(event) {
-    this.props.onChangeBreakouts({
-      type: "mode",
-      mode: "randomize"
-    })
-    // this.props.onChangeBreakouts({
-    //   type: "random",
-    //   total_members: this.props.present.members,
-    //   max_attendees: this.state.max_attendees
-    // })
+    // FIXME: Include the value of this.state.max_attendees
+    this.props.onChangeBreakoutMode("randomize");
   }
+
   render() {
     return <div>
       <div className="breakout-header">
         <h4>Breakout Rooms</h4>
-        { (this.props.auth.is_admin && (this.props.breakoutMode["mode"] === "admin")) ? <BS.Button onClick={() => 
+        { (this.props.auth.is_admin && (this.props.plenary.breakout_mode === "admin")) ? <BS.Button onClick={() => 
           this.setState({showSessionModal: !this.state.showSessionModal})}>
         CREATE A SESSION</BS.Button> : "" }
-        { this.props.breakoutMode["mode"] === "user" ? <BS.Button onClick={() => 
+        { this.props.plenary.breakout_mode === "user" ? <BS.Button onClick={() => 
           this.setState({showSessionModal: !this.state.showSessionModal})}>
         PROPOSE A SESSION</BS.Button> : "" }
-        { this.props.auth.is_admin ? <BS.DropdownButton title="Breakout Mode" id="breakout-mode">
-      <BS.MenuItem onClick={(e) => this.handleModeChange(e, "admin")}>
-      Admin Proposed Sessions</BS.MenuItem>
-      <BS.MenuItem onClick={(e) => this.handleModeChange(e, "user")}>
-      Participant Proposed Sessions</BS.MenuItem>
-      <BS.MenuItem onClick={(e) => this.handleModeChange(e, "randomized")}>
-      Randomized Sessions</BS.MenuItem>
-    </BS.DropdownButton> : "" }
+        { this.props.auth.is_admin ?
+          <BS.DropdownButton title="Breakout Mode" id="breakout-mode">
+            <BS.MenuItem onClick={(e) => this.handleModeChange(e, "admin")}>
+              {this.props.plenary.breakout_mode === "admin" ? '✓' : ""}
+              Admin Proposed Sessions
+            </BS.MenuItem>
+            <BS.MenuItem onClick={(e) => this.handleModeChange(e, "user")}>
+              {this.props.plenary.breakout_mode === "user" ? '✓' : ""}
+              Participant Proposed Sessions
+            </BS.MenuItem>
+            <BS.MenuItem onClick={(e) => this.handleModeChange(e, "randomized")}>
+              {this.props.plenary.breakout_mode === "randomized" ? '✓' : ""}
+              Randomized Sessions
+            </BS.MenuItem>
+          </BS.DropdownButton>
+          : "" }
 
         { this.props.breakoutCrud.error ?
             <div className="breakout-error">
@@ -104,7 +103,7 @@ class BreakoutList extends React.Component {
             onClick={() => this.setState({showSessionModal: !this.state.showSessionModal})}>
             Close</BS.Button>
 
-            { (() => {if (this.props.breakoutMode['mode']==="user") {
+            { (() => {if (this.props.plenary.breakout_mode === "user") {
                          return <BS.Button onClick={(e) => this.handleSubmit(e, true)}>Propose Session</BS.Button>
                        } else {
                           return <BS.Button onClick={(e) => this.handleSubmit(e, false)}>Create Session</BS.Button>
@@ -142,21 +141,24 @@ class BreakoutList extends React.Component {
       </div>
 
       <div className="breakouts-container"> 
-      {(this.props.breakoutMode['mode']==="admin") ?
-      this.props.breakouts.map((breakout, i) => {
-        if (!breakout.is_proposal) {
-          return <Breakout title={breakout.title} maxAttendees={breakout.max_attendees} 
-        key={`${i}`} auth={this.props.auth} index={i} onChangeBreakouts={this.props.onChangeBreakouts} /> } else {
-          return "";
-        }
-      }) : ""}
-      {(this.props.breakoutMode['mode']==="user") ?
-      this.props.breakouts.map((breakout, i) => {
-        return <Breakout title={breakout.title} maxAttendees={breakout.max_attendees} 
-        key={`${i}`} auth={this.props.auth} index={i} 
-        onChangeBreakouts={this.props.onChangeBreakouts} 
-        is_proposal={breakout.is_proposal} breakoutMode={this.props.breakoutMode["mode"]} votes={breakout.votes}/>
-      }) : ""}
+      { (this.props.plenary.breakout_mode === "admin") ?
+           this.props.breakouts.filter((b) => !b.is_proposal).map((breakout, i) => {
+             return <Breakout
+               breakout={breakout}
+               auth={this.props.auth}
+               key={`${i}`}
+               onChangeBreakouts={this.props.onChangeBreakouts} />
+           })
+        : ""}
+      { (this.props.plenary.breakout_mode === "user") ?
+           this.props.breakouts.map((breakout, i) => {
+             return <Breakout
+               breakout={breakout}
+               auth={this.props.auth} index={i} 
+               key={`${i}`}
+               onChangeBreakouts={this.props.onChangeBreakouts}  />
+           })
+        : ""}
       </div> 
     </div>
 
@@ -175,11 +177,11 @@ export default connect(
     breakoutCrud: state.breakoutCrud,
     plenary: state.plenary,
     auth: state.auth,
-    breakoutMode: state.breakoutMode,
     // present: {
     //   members: sortPresent(state.present, state.auth)}
   }),
   (dispatch, ownProps) => ({
-    onChangeBreakouts: (payload) => dispatch(A.changeBreakouts(payload))
+    onChangeBreakouts: (payload) => dispatch(A.changeBreakouts(payload)),
+    onChangeBreakoutMode: (payload) => dispatch(A.changeBreakoutMode(payload))
   })
 )(BreakoutList);

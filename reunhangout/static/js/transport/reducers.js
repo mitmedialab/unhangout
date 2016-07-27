@@ -23,3 +23,11 @@ export const socket = (state=null, action) => {
   }
   return state;
 }
+
+export const present = (state=null, action) => {
+  switch (action.type) {
+    case A.SET_PRESENT:
+      return action.payload;
+  }
+  return state || {'path': null, 'members': []};
+}

@@ -52,6 +52,8 @@ def route_message(message, data, plenary):
         handle_embeds(message, data, plenary)
     elif data['type'] == "breakout":
         handle_breakout(message, data, plenary)
+    elif data['type'] == "plenary":
+        handle_plenary(message, data, plenary)
     else:
         handle_error(message, "Type not understood")
 
@@ -106,127 +108,96 @@ def handle_embeds(message, data, plenary):
         'current': current
     }
     plenary.save()
-    Group(path).send({
+    Group(plenary.channel_group_name).send({
         'text': json.dumps({
             'type': 'embeds', 'payload': plenary.embeds
         })
     })
 
 def handle_breakout(message, data, plenary):
-    breakouts = plenary.breakout_set.all()
-
     is_admin = plenary.has_admin(message.user)
-    admin_required = lambda: handle_error(message, "Must be an admin to do that.")
+    admin_required_error = lambda: handle_error(message, "Must be an admin to do that.")
+    print(data, is_admin)
 
     if plenary.breakout_mode != "user" and not is_admin:
-        return admin_required()
+        return admin_required_error()
 
     # Validate payload type
-    if 'payload' not in data or 'type' not in data['payload']:
+    if 'payload' not in data or 'action' not in data['payload']:
         return handle_error(message,
                 "Requires payload with 'payload' key and 'type' subkey")
     elif not type(data['payload']) == dict:
         return handle_error(message, "Requires payload of dict type")
 
+    payload = data['payload']
+    action = payload['action']
+
+    def respond_with_breakouts():
+        # Not-too-efficient strategy: always respond with the full list of
+        # breakouts from a new database query.  We can optimize this later if
+        # needed.
+        Group(plenary.channel_group_name).send({
+            'text': json.dumps({
+                'type': 'breakout_receive',
+                'payload': [b.serialize() for b in plenary.breakout_set.all()]
+            })
+        })
+
     # Handle actions
-    if data['payload']['type'] == 'create':
+
+    if action == 'create':
         if not is_admin and plenary.breakout_mode != "user":
-            return admin_required()
+            return admin_required_error()
 
         breakout = Breakout.objects.create(
             plenary=plenary,
-            title=data['payload']['title'],
-            slug='/',
-            max_attendees=data['payload'].get('max_attendees', 10),
-            is_proposal=data['payload'].get('is_proposal', False)
+            title=payload['title'],
+            max_attendees=payload.get('max_attendees') or 10,
+            is_proposal=(not is_admin or data['payload'].get('is_proposal', False))
         )
-        Group(path).send({
-            'text': json.dumps({
-                # Just send all breakout rooms, rather than introducing a new one.
-                'type': 'breakout_receive',
-                'payload': [b.serialize() for b in breakouts]
-            })
-        })
-    elif data['payload']['type'] == 'delete':
+        return respond_with_breakouts()
+
+    # For all actions other than create, we expect payload['id'] to contain the
+    # id of the breakout to operate on.
+
+    try:
+        breakout = plenary.breakout_set.get(id=payload['id'])
+    except (Breakout.DoesNotExist, KeyError):
+        return handle_error("Breakout not found.")
+
+    if action == 'delete':
         if not is_admin:
-            return admin_required()
-        updated = []
-        for b in range(0, len(breakouts)):
-            if b == data['payload']['index']:
-                breakouts[b].delete()
-            else:
-                updated.append(breakouts[b].serialize())
-        Group(path).send({
-            'text': json.dumps({
-                'type': 'breakout_receive',
-                'payload': updated
-                })
-            })
-    elif data['payload']['type'] == 'modify':
+            return admin_required_error()
+        breakout.delete()
+        return respond_with_breakouts()
+
+    elif action == 'modify':
         if not is_admin:
-            return admin_required()
-        updated = []
-        for b in range(0, len(breakouts)):
-            if b == data['payload']['index']:
-                newbreakout = breakouts[b]
-                newbreakout.title = data['payload']['title']
-                newbreakout.save()
-                updated.append(newbreakout.serialize())
-            else:
-                updated.append(breakouts[b].serialize())
-        Group(path).send({
-            'text': json.dumps({
-                'type': 'breakout_receive',
-                'payload': updated
-                })
-            }) 
-    elif data['payload']['type'] == 'mode':
+            return admin_required_error()
+        if 'title' in payload:
+            breakout.title = payload['title']
+        breakout.save()
+        return respond_with_breakouts()
+
+    elif action == 'approve':
         if not is_admin:
-            return admin_required()
-        plenary.breakout_mode = data['payload']['mode'] 
-        plenary.save()
-        Group(path).send({
-            'text': json.dumps({
-                'type': 'breakout_mode',
-                'payload': {'mode': data['payload']['mode']}
-                })
-            }) 
-    elif data['payload']['type'] == 'approve':
-        if not is_admin:
-            return admin_required()
-        updated = []
-        for b in range(0, len(breakouts)):
-            if b == data['payload']['index']:
-                newbreakout = breakouts[b]
-                newbreakout.is_proposal = not newbreakout.is_proposal
-                newbreakout.save()
-                updated.append(newbreakout.serialize())
-            else:
-                updated.append(breakouts[b].serialize())
-        Group(path).send({
-            'text': json.dumps({
-                'type': 'breakout_receive',
-                'payload': updated
-                })
-            }) 
-    elif data['payload']['type'] == 'vote':
+            return admin_required_error()
+
+        breakout.is_proposal = not breakout.is_proposal
+        breakout.save()
+        return respond_with_breakouts()
+
+    elif action == 'vote':
         if plenary.breakout_mode != "user":
             return handle_error(message, "Can only vote on user-proposed breakouts")
-        updated = []
-        for b in range(0, len(breakouts)):
-            if b == data['payload']['index']:
-                newbreakout = breakouts[b]
-                newbreakout.votes.add(message.user)
-                updated.append(newbreakout.serialize())
-            else:
-                updated.append(breakouts[b].serialize())
-        Group(path).send({
-            'text': json.dumps({
-                'type': 'breakout_receive',
-                'payload': updated
-                })
-            }) 
-    # elif data['payload']['type'] == 'random':
+        # Toggle vote
+        if breakout.votes.filter(pk=message.user.pk).exists():
+            breakout.votes.remove(message.user)
+        else:
+            breakout.votes.add(message.user)
+        return respond_with_breakouts()
+
+    # elif action == 'random':
     #     if plenary.breakout_mode != 'random':
     #         return handle_error(message, "Can only do that with random-mode plenaries")
     #     breakouts_required = data['payload']['total_members']//data['payload']['max_attendees'] + 1
@@ -254,10 +225,26 @@ def handle_breakout(message, data, plenary):
     #         else:
     #             updated.append(breakouts[b].serialize())
         
-    #     Group(path).send({
+    #     Group(plenary.channel_group_name).send({
     #         'text': json.dumps({
     #             'type': 'breakout_receive',
     #             'payload': updated
     #             })
     #         }) 
 
+def handle_plenary(message, data, plenary):
+    if not plenary.has_admin(message.user):
+        return handle_error(message, "Must be an admin")
+
+    payload = data['payload']
+    if 'breakout_mode' in payload:
+        plenary.breakout_mode = payload['breakout_mode']
+
+    plenary.save()
+
+    Group(plenary.channel_group_name).send({
+        'text': json.dumps({
+            'type': 'plenary',
+            'payload': {'plenary': {'breakout_mode': plenary.breakout_mode}}
+        })
+    })

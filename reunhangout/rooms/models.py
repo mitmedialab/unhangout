@@ -73,7 +73,7 @@ class Room(models.Model):
         return {
             'path': self.path,
             'members': [m.serialize_public() for m in members],
-            'anonymous': self.connection_set.filter(user=None).count(),
+            'lurkers': self.connection_set.filter(user=None).count(),
         }
 
     def broadcast_presence(self):
@@ -83,4 +83,27 @@ class Room(models.Model):
                 'payload': self.serialize()
             })
         })
+
+    @classmethod
+    def over_capacity_error(cls, message, path):
+        return cls._join_error(message, path, "over-capacity", "Over capacity")
+
+    @classmethod
+    def already_connected_error(cls, message, path):
+        return cls._join_error(message, path, "already-connected", "Already connected")
+
+    @classmethod
+    def _join_error(cls, message, path, error_code, error_msg):
+        message.reply_channel.send({
+            'text': json.dumps({
+                'type': 'present',
+                'payload': {
+                    "path": path,
+                    "members": [],
+                    "error": error_msg,
+                    "error_code": error_code,
+                }
+            })
+        })
+
 

@@ -46,10 +46,6 @@ export const chatMessageReceive = (payload) => {
   }
 };
 
-// Presence
-export const SET_PRESENT = 'SET_PRESENT';
-export const setPresent = (payload) => ({type: SET_PRESENT, payload});
-
 // Embeds
 export const SET_EMBEDS = 'SET_EMBEDS';
 export const setEmbeds = (payload) => ({type: SET_EMBEDS, payload});
@@ -101,16 +97,13 @@ export const BREAKOUT_CHANGING = 'BREAKOUT_CHANGING';
 export const BREAKOUT_CREATED = 'BREAKOUT_CHANGED';
 export const BREAKOUT_ERROR = 'BREAKOUT_ERROR';
 export const changeBreakouts = (payload) => {
-    return (dispatch) => {
-      console.log('delete action.js sending')
+  return (dispatch) => {
     dispatch({type: BREAKOUT_CHANGING, payload});
     sendSocketMessage({type: "breakout", payload})
     .then(() => {
-      console.log('deleted action.js sending')
       dispatch({type: BREAKOUT_CHANGED, payload})
     })
     .catch((err) => {
-      console.log("catch")
       dispatch({type: BREAKOUT_ERROR, payload})
     });
   }
@@ -122,10 +115,18 @@ export const breakoutReceive = (payload) => {
   }
 };
 export const BREAKOUT_MODE = 'BREAKOUT_MODE';
-export const breakoutMode = (payload) => {
+export const BREAKOUT_MODE_CHANGING = 'BREAKOUT_MODE_CHANGING';
+export const changeBreakoutMode = (payload) => {
   return (dispatch) => {
-    dispatch({type: BREAKOUT_MODE, payload})
+    dispatch({type: BREAKOUT_MODE_CHANGING, payload});
+
+    sendSocketMessage({
+      type: "plenary",
+      payload: {breakout_mode: payload}
+    });
   }
 }
 
-
+// Plenary details
+export const SET_PLENARY = 'SET_PLENARY';
+export const setPlenary = (payload) => ({type: SET_PLENARY, payload});

@@ -1,5 +1,9 @@
+import re
+
 from django.db import models
 from django.conf import settings
+from django.contrib.sites.models import Site
+from django.core.urlresolvers import reverse
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import slugify
@@ -49,14 +53,24 @@ class Breakout(models.Model):
     def channel_group_name(self):
         return "breakout-%s" % self.pk
 
+    @property
+    def webrtc_id(self):
+        src = '{}-{}'.format(Site.objects.get_current(), self.channel_group_name)
+        return re.sub('[^a-zA-Z0-9]', '', src)
+
     def safe_description(self):
         return sanitize(self.description)
+
+    def get_absolute_url(self):
+        return reverse("breakout_detail", args=[self.pk])
 
     def serialize(self):
         return {
             'id': self.id,
             'title': self.title,
             'slug': self.slug,
+            'webrtc_id': self.webrtc_id,
+            'url': self.get_absolute_url(),
             'description': self.safe_description(),
             'max_attendees': self.max_attendees,
             'activities': self.activities,
@@ -67,6 +81,8 @@ class Breakout(models.Model):
             'google_hangout': self.google_hangout.url if self.google_hangout else None,
             'google_hoa': self.google_hoa,
             'proposed_by': self.proposed_by.serialize_public() if self.proposed_by else None,
+            'mode': self.plenary.breakout_mode if self.plenary else "permalink",
+            'open': self.plenary.breakouts_open if self.plenary else True,
             'votes': [v.serialize_public() for v in self.votes.all()]
         }
 

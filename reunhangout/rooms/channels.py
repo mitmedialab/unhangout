@@ -13,6 +13,7 @@ def ws_connect(message):
     """
     Generic room connection that doesn't enforce connection limits, auth, etc.
     """
+    print('############################')
     path = message.content['path'].replace('/', '__')
     message.channel_session['path'] = path
     Group(path).add(message.reply_channel)
@@ -25,8 +26,9 @@ def ws_disconnect(message, **kwargs):
     """
     Generic room disconnection
     """
-    path = message.channel_session['path']
-    Group(path).discard(message.reply_channel)
-    room = Room.objects.remove(path, message.user, message.reply_channel.name)
-    if room:
-        room.broadcast_presence()
+    path = message.channel_session.get('path', None)
+    if path:
+        Group(path).discard(message.reply_channel)
+        room = Room.objects.remove(path, message.user, message.reply_channel.name)
+        if room:
+            room.broadcast_presence()

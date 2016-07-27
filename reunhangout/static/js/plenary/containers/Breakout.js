@@ -7,7 +7,7 @@ import * as A from "../actions";
 export default class Breakout extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {title: this.props.title};
+    this.state = {title: this.props.breakout.title};
     this.active = false;
   }
   //Add an event listener that will dispatch the updated title
@@ -25,7 +25,7 @@ export default class Breakout extends React.Component {
   handleModify(onChangeBreakouts, updatedTitle) {
     if (this.active) {  
       onChangeBreakouts({
-        type: "modify",
+        action: "modify",
         index: this.props.index,
         title: updatedTitle
       });
@@ -36,7 +36,7 @@ export default class Breakout extends React.Component {
     event.preventDefault();
     if (this.active) {  
       onChangeBreakouts({
-        type: "modify",
+        action: "modify",
         index: this.props.index,
         title: updatedTitle
       });
@@ -51,48 +51,96 @@ export default class Breakout extends React.Component {
   }
   //dispatch delete breakout
   handleDelete(event) {
-    console.log('delete dispatched')
     event.preventDefault();
     this.props.onChangeBreakouts({
-      type: "delete",
-      index: this.props.index
+      action: "delete",
+      id: this.props.breakout.id,
     });
   }
   handleApprove(event) {
     event.preventDefault();
     this.props.onChangeBreakouts({
-      type: "approve",
-      index: this.props.index
+      action: "approve",
+      id: this.props.breakout.id,
     });
   }
   handleVote(event) {
     event.preventDefault();
     this.props.onChangeBreakouts({
-      type: "vote",
-      index: this.props.index
+      action: "vote",
+      id: this.props.breakout.id,
     });
   }
   render() {
-    let is_proposal = this.props.is_proposal || false
-    let breakoutMode = this.props.breakoutMode || "admin"
-    let votes = this.props.votes || 0
+    let showApprove = (
+      this.props.auth.is_admin &&
+      this.props.breakout.is_proposal &&
+      this.props.breakout.mode == "user"
+    );
+    let showUnapprove = (
+      this.props.auth.is_admin &&
+      !this.props.breakout.is_proposal &&
+      this.props.breakout.mode == "user"
+    );
+    let showDelete = this.props.auth.is_admin;
+    let showEditTitle = this.props.auth.is_admin;
+    let showVote = this.props.breakout.is_proposal;
+    let showJoin = this.props.breakout.open && (
+      this.props.breakout.mode !== "user" ||
+      !this.props.breakout.is_proposal
+    );
+    let votedForThis = !!_.find(this.props.breakout.votes, (vote) => {
+      return vote.username === this.props.auth.username
+    });
     return <div className="breakout">
-          { this.props.auth.is_admin ? <form 
-            onSubmit={(e) => this.handleSubmit(e, this.props.onChangeBreakouts, 
-              this.state.title)}>
-            <input type="text" value={this.state.title}
-            onChange={(e) => this.setState({title: e.target.value})} 
-            onClick={(e) => this.handleClick(e)} ref="titleInput"/>
-          </form> : <h5>{this.props.title}</h5> }
-          { is_proposal ? <BS.Button onClick={(e) => this.handleVote(e)}>Vote | {votes.length}</BS.Button> 
-          : <BS.Button>Join</BS.Button> }
-          { this.props.auth.is_admin ? <BS.Button bsStyle="danger"
-          onClick= {(e) => 
-            this.handleDelete(e, this.props.index)}><i className='fa fa-trash' />
-           </BS.Button> : "" }
-           { is_proposal && this.props.auth.is_admin ? <BS.Button onClick={(e) => this.handleApprove(e)}>Approve</BS.Button> : "" }
-           { !is_proposal && (breakoutMode === "user" && this.props.auth.is_admin)? <BS.Button onClick={(e) => this.handleApprove(e)}>Unapprove</BS.Button> : ""}
+          { showEditTitle ?
+              <form 
+                onSubmit={(e) => {
+                  this.handleSubmit(e, this.props.onChangeBreakouts, this.state.title)
+                }}>
+                <input type="text" value={this.state.title}
+                  onChange={(e) => this.setState({title: e.target.value})} 
+                  onClick={(e) => this.handleClick(e)} ref="titleInput"/>
+              </form>
+            :
+              <h5>{this.props.breakout.title}</h5>
+          }
+          { showVote ?
+              <BS.Button onClick={(e) => this.handleVote(e)}>
+                {votedForThis ? '✓' : ''}
+                Vote | {this.props.breakout.votes.length}
+              </BS.Button> 
+            : showJoin ?
+              <BS.Button href={this.props.breakout.url} target='_blank'>
+                Join
+              </BS.Button>
+            :
+              <BS.Button disabled>Locked</BS.Button>
+          }
+          { showDelete ?
+              <BS.Button bsStyle="danger" onClick= {(e) => this.handleDelete(e)}>
+                <i className='fa fa-trash' />
+              </BS.Button>
+            : ""
+          }
+          { showApprove ?
+              <BS.Button onClick={(e) => this.handleApprove(e)}>
+                Approve
+              </BS.Button>
+            : ""
+          }
+          { showUnapprove ?
+              <BS.Button onClick={(e) => this.handleApprove(e)}>
+                Unapprove
+              </BS.Button>
+            : ""
+          }
         </div>
   }
 }
 
+Breakout.propTypes = {
+  'breakout': React.PropTypes.object.isRequired,
+  'auth': React.PropTypes.object.isRequired,
+  'onChangeBreakouts': React.PropTypes.func.isRequired
+}

@@ -1,5 +1,4 @@
 import * as A from './actions';
-import deepFreeze from 'deep-freeze';
 
 export const plenary = (state=null, action) => {
   state = state || {};
@@ -34,26 +33,21 @@ export const plenary = (state=null, action) => {
       newstate = {...state}
       newstate.embedDetails[action.payload.embed.props.src] = action.payload.details
       return newstate
-    }
+    case A.SET_PLENARY:
+      newstate = {...state, ...action.payload.plenary};
+      return newstate
+  }
   return state;
 };
 export const breakouts = (state=null, action) => {
   state = state || []
   switch (action.type) {
     case A.BREAKOUT_RECEIVE:
-    console.log('reducer received new breakouts', action.payload)
       return action.payload;
   }
   return state;
 };
-export const breakoutMode = (state=null, action) => {
-  state = state || {}
-  switch(action.type) {
-    case A.BREAKOUT_MODE:
-      return action.payload;
-  }
-  return state
-};
+
 export const breakoutCrud = (state={}, action) => {
   switch (action.type) {
     case A.BREAKOUT_ERROR:
@@ -77,11 +71,4 @@ export const chat_messages = (state=null, action) => {
 
 export const auth = (state=null, action) => {
   return state;
-};
-
-export const present = (state=null, action) => {
-  if (action.type === A.SET_PRESENT) {
-    return action.payload;
-  }
-  return state || {'path': null, 'members': []}
 };
