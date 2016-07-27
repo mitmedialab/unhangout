@@ -94,7 +94,6 @@ class Chat extends React.Component {
   }
   onSubmit(event) {
     event.preventDefault();    
-    console.log("not empty")
     this.props.onSendMessage({
     message: this.state.value,
     highlight: this.state.highlight

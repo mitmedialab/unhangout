@@ -13,7 +13,6 @@ def ws_connect(message):
     """
     Generic room connection that doesn't enforce connection limits, auth, etc.
     """
-    print('############################')
     path = message.content['path'].replace('/', '__')
     message.channel_session['path'] = path
     Group(path).add(message.reply_channel)

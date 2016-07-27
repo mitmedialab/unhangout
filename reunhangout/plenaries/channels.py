@@ -128,7 +128,6 @@ def handle_breakout(message, data, plenary):
 
     payload = data['payload']
     action = payload['action']
-    print(plenary.breakout_mode)
 
     if not is_admin and not (
             plenary.breakout_mode == "user" or

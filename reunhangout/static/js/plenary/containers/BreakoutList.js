@@ -55,7 +55,6 @@ class BreakoutList extends React.Component {
   render() {
 
     let breakoutFilter;
-    console.log(this.props);
     switch (this.props.plenary.breakout_mode) {
       case "admin":
         breakoutFilter = (b) => !b.is_proposal && !b.is_random;

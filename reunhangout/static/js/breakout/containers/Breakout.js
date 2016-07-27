@@ -7,7 +7,6 @@ import * as style from "../../../scss/pages/breakout/_breakoutstyle.scss"
 
 class Breakout extends React.Component {
   render() {
-    console.log(this.props);
     if (!this.props.present || !this.props.present.path) {
       return this.renderStatusMessage("Loading...");
     }
