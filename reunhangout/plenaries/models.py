@@ -3,6 +3,7 @@ import re
 from django.db import models
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.translation import ugettext_lazy as _
 from richtext.utils import sanitize
 
@@ -52,6 +53,10 @@ class Plenary(models.Model):
         ("user", _("Participant proposed")),
         ("randomized", _("Randomized breakouts"))
     ), default="admin")
+    randomized_max_attendees = models.IntegerField(default=10, validators=[
+        MinValueValidator(2),
+        MaxValueValidator(10),
+    ])
 
     embeds = JSONField(blank=True, null=True)
     history = JSONField(blank=True, null=True)

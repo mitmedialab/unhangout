@@ -1,5 +1,6 @@
 import json
 from urllib.parse import urlparse
+from django.db.models import F, Count
 
 from channels import Group
 from channels.sessions import enforce_ordering
@@ -117,10 +118,6 @@ def handle_embeds(message, data, plenary):
 def handle_breakout(message, data, plenary):
     is_admin = plenary.has_admin(message.user)
     admin_required_error = lambda: handle_error(message, "Must be an admin to do that.")
-    print(data, is_admin)
-
-    if plenary.breakout_mode != "user" and not is_admin:
-        return admin_required_error()
 
     # Validate payload type
     if 'payload' not in data or 'action' not in data['payload']:
@@ -131,6 +128,12 @@ def handle_breakout(message, data, plenary):
 
     payload = data['payload']
     action = payload['action']
+    print(plenary.breakout_mode)
+
+    if not is_admin and not (
+            plenary.breakout_mode == "user" or
+            (plenary.breakout_mode == "randomize" and action == "group_me")):
+        return admin_required_error()
 
     def respond_with_breakouts():
         # Not-too-efficient strategy: always respond with the full list of
@@ -157,13 +160,43 @@ def handle_breakout(message, data, plenary):
         )
         return respond_with_breakouts()
 
+    elif action == 'group_me':
+        if plenary.breakout_mode != "randomize":
+            return handle_error(message, "Must be in randomize mode to do that.")
+        blacklist = set()
+        # Remove membership, if any, from current breakouts
+        for breakout in plenary.breakout_set.filter(members=message.user):
+            breakout.members.remove(message.user)
+            # Add to blacklist so we don't just rejoin this group.
+            blacklist.add(breakout.id)
+
+        # Place in an existing breakout, if available
+        available_random_breakouts = plenary.breakout_set.exclude(
+            id__in=blacklist
+        ).annotate(
+            member_count=Count('members')
+        ).filter(
+            is_random=True,
+            member_count__lt=F('max_attendees')
+        )
+        try:
+            breakout = available_random_breakouts[0]
+        except IndexError:
+            breakout = Breakout.objects.create(
+                    plenary=plenary,
+                    title='Breakout',
+                    max_attendees=plenary.randomized_max_attendees,
+                    is_random=True)
+        breakout.members.add(message.user)
+        return respond_with_breakouts()
+
     # For all actions other than create, we expect payload['id'] to contain the
     # id of the breakout to operate on.
 
     try:
         breakout = plenary.breakout_set.get(id=payload['id'])
     except (Breakout.DoesNotExist, KeyError):
-        return handle_error("Breakout not found.")
+        return handle_error(message, "Breakout not found.")
 
     if action == 'delete':
         if not is_admin:
@@ -197,41 +230,6 @@ def handle_breakout(message, data, plenary):
             breakout.votes.add(message.user)
         return respond_with_breakouts()
 
-    # elif action == 'random':
-    #     if plenary.breakout_mode != 'random':
-    #         return handle_error(message, "Can only do that with random-mode plenaries")
-    #     breakouts_required = data['payload']['total_members']//data['payload']['max_attendees'] + 1
-    #     random_breakouts = []
-    #     for b in breakouts:
-    #         if b.random == True:
-    #             random_breakouts.append(b.serialize())
-    #     if random_breakouts < breakout_required:
-    #         for i in range(breakouts_required - random_breakouts):
-    #             breakout = Breakout.objects.create(
-    #         plenary=plenary,
-    #         title=data['payload']['title'],
-    #         slug='/',
-    #         max_attendees=data['payload'].get('max_attendees', 10),
-    #         is_proposal=data['payload'].get('is_proposal', False),
-    #         is_random = True
-    #     )
-
-
-    #     for b in range(0, len(breakouts)):
-    #         if b == data['payload']['index']:
-    #             newbreakout = breakouts[b]
-    #             newbreakout.votes.add(message.user)
-    #             updated.append(newbreakout.serialize())
-    #         else:
-    #             updated.append(breakouts[b].serialize())
-        
-    #     Group(plenary.channel_group_name).send({
-    #         'text': json.dumps({
-    #             'type': 'breakout_receive',
-    #             'payload': updated
-    #             })
-    #         }) 
-
 def handle_plenary(message, data, plenary):
     if not plenary.has_admin(message.user):
         return handle_error(message, "Must be an admin")
@@ -239,6 +237,8 @@ def handle_plenary(message, data, plenary):
     payload = data['payload']
     if 'breakout_mode' in payload:
         plenary.breakout_mode = payload['breakout_mode']
+    if 'randomized_max_attendees' in payload:
+        plenary.randomized_max_attendees = payload['randomized_max_attendees']
 
     plenary.save()
 

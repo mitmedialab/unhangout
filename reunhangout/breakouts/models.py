@@ -32,6 +32,7 @@ class Breakout(models.Model):
             blank=True, null=True)
     is_hoa = models.BooleanField(default=False)
     is_proposal = models.BooleanField(default=False)
+    is_random = models.BooleanField(default=False)
 
     google_hangout = models.OneToOneField(GoogleHangout,
             on_delete=models.SET_NULL,
@@ -43,11 +44,16 @@ class Breakout(models.Model):
             on_delete=models.SET_NULL,
             related_name='proposed_breakouts',
             blank=True, null=True)
+
     votes = models.ManyToManyField(
             settings.AUTH_USER_MODEL,
             related_name='voted_on_breakouts',
             blank=True)
-    #is_random = models.BooleanField(default=False)
+
+    members = models.ManyToManyField(
+            settings.AUTH_USER_MODEL,
+            related_name='member_of_breakouts',
+            blank=True)
 
     @property
     def channel_group_name(self):
@@ -65,6 +71,14 @@ class Breakout(models.Model):
         return reverse("breakout_detail", args=[self.pk])
 
     def serialize(self):
+        if self.is_proposal:
+            votes = [v.serialize_public() for v in self.votes.all()]
+        else:
+            votes = []
+        if self.is_random:
+            members = [m.serialize_public() for m in self.members.all()]
+        else:
+            members = []
         return {
             'id': self.id,
             'title': self.title,
@@ -78,12 +92,14 @@ class Breakout(models.Model):
             'plenary': self.plenary.id if self.plenary else None,
             'is_hoa': self.is_hoa,
             'is_proposal': self.is_proposal,
+            'is_random': self.is_random,
             'google_hangout': self.google_hangout.url if self.google_hangout else None,
             'google_hoa': self.google_hoa,
             'proposed_by': self.proposed_by.serialize_public() if self.proposed_by else None,
             'mode': self.plenary.breakout_mode if self.plenary else "permalink",
             'open': self.plenary.breakouts_open if self.plenary else True,
-            'votes': [v.serialize_public() for v in self.votes.all()]
+            'votes': votes,
+            'members': members,
         }
 
     def save(self, *args, **kwargs):

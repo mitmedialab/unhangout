@@ -122,7 +122,7 @@ export const changeBreakoutMode = (payload) => {
 
     sendSocketMessage({
       type: "plenary",
-      payload: {breakout_mode: payload}
+      payload: payload
     });
   }
 }

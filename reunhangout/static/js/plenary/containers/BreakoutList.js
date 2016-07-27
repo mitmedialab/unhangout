@@ -22,9 +22,9 @@ class BreakoutList extends React.Component {
     });
     this.setState({
       title: "",
-      max_attendees: ""
+      max_attendees: "",
+      showSessionModal: false
     });
-    this.setState({showSessionModal: !this.state.showSessionModal})
   }
   handleModeChange(event, id) {
     event.preventDefault();
@@ -32,15 +32,46 @@ class BreakoutList extends React.Component {
       this.setState({
         showRandomizedModal: !this.state.showRandomizedModal
       })} else {
-        this.props.onChangeBreakoutMode(id)
+        this.props.onChangeBreakoutMode({breakout_mode: id})
       }
   }
   handleRandomize(event) {
-    // FIXME: Include the value of this.state.max_attendees
-    this.props.onChangeBreakoutMode("randomize");
+    event.preventDefault();
+    this.props.onChangeBreakoutMode({
+      breakout_mode: "randomize", 
+      randomized_max_attendees: this.state.max_attendees
+    });
+    this.setState({
+      max_attendees: "",
+      showSessionModal: false
+    });
+  }
+
+  handleGroupMe(event) {
+    event.preventDefault();
+    this.props.onChangeBreakouts({action: 'group_me'});
   }
 
   render() {
+
+    let breakoutFilter;
+    console.log(this.props);
+    switch (this.props.plenary.breakout_mode) {
+      case "admin":
+        breakoutFilter = (b) => !b.is_proposal && !b.is_random;
+        break;
+      case "user":
+        breakoutFilter = (b) => !b.is_random;
+        break;
+      case "randomize":
+        breakoutFilter = (b) => b.is_random && (
+          this.props.auth.is_superuser ||
+          !!_.find(b.members, (m) => m.username === this.props.auth.username)
+        );
+        break;
+    }
+    let breakouts = this.props.breakouts.filter(breakoutFilter);
+
     return <div>
       <div className="breakout-header">
         <h4>Breakout Rooms</h4>
@@ -135,30 +166,24 @@ class BreakoutList extends React.Component {
             <BS.Button 
             onClick={() => this.setState({showRandomizedModal: !this.state.showRandomizedModal})}>
             Close</BS.Button>
-            <BS.Button onClick={() => this.handleRandomize}>Randomize</BS.Button>        
+            <BS.Button onClick={(e) => this.handleRandomize(e)}>Randomize</BS.Button>        
           </BS.Modal.Footer>
         </BS.Modal>
       </div>
 
       <div className="breakouts-container"> 
-      { (this.props.plenary.breakout_mode === "admin") ?
-           this.props.breakouts.filter((b) => !b.is_proposal).map((breakout, i) => {
-             return <Breakout
-               breakout={breakout}
-               auth={this.props.auth}
-               key={`${i}`}
-               onChangeBreakouts={this.props.onChangeBreakouts} />
-           })
-        : ""}
-      { (this.props.plenary.breakout_mode === "user") ?
-           this.props.breakouts.map((breakout, i) => {
-             return <Breakout
-               breakout={breakout}
-               auth={this.props.auth} index={i} 
-               key={`${i}`}
-               onChangeBreakouts={this.props.onChangeBreakouts}  />
-           })
-        : ""}
+        { breakouts.map((breakout, i) => {
+            return <Breakout breakout={breakout}
+              auth={this.props.auth}
+              key={`${i}`}
+              onChangeBreakouts={this.props.onChangeBreakouts} />
+          })
+        }
+        { this.props.plenary.breakout_mode === "randomize" ?
+            <BS.Button onClick={(e) => this.handleGroupMe(e)}>
+              { breakouts.length === 0 ? "Group me" : "Regroup me" }
+            </BS.Button>
+          : "" }
       </div> 
     </div>
 

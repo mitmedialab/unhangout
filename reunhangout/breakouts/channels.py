@@ -47,7 +47,7 @@ def ws_receive(message, breakout_id):
     try:
         breakout = Breakout.objects.get(id=breakout_id)
     except Breakout.DoesNotExist:
-        return handle_error("Breakout not found")
+        return handle_error(message, "Breakout not found")
 
     route_message(message, data, breakout)
 
