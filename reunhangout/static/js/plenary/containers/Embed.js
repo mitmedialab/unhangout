@@ -171,39 +171,42 @@ class Embed extends React.Component {
         <BS.FormGroup>
           <BS.InputGroup>
             { hasPrevEmbeds ?
-              <BS.DropdownButton
-                componentClass={BS.InputGroup.Button}
-                id="embed-list input"
-                title="Previous embeds"
-              >
-                {this.props.embeds.embeds.map((embed, i) => {
-                  if (i !== this.props.embeds.current) {
-                    return <BS.MenuItem key={i}
-                      onClick={(event) => this.setCurrent(event, i)}
-                    >
-                      {
-                        /* No embed details? Show URL. */
-                        !this.props.embedDetails[embed.props.src] ?
-                          embed.props.src
-                        /* Currently loading the details.. */
-                        : this.props.embedDetails[embed.props.src].loading ?
-                          embed.props.src
-                        /* Have embed details */
-                        : <span>
-                            <img src={this.props.embedDetails[embed.props.src].thumbnails.default.url}
-                                width={64}
-                                height={48}
-                                alt="" />
-                            {this.props.embedDetails[embed.props.src].title}
-                          </span>
+              <BS.InputGroup.Button>
+                <BS.Dropdown id="embed-list input">
+                  <BS.Dropdown.Toggle>
+                      <BS.Glyphicon glyph="menu-hamburger" />
+                  </BS.Dropdown.Toggle>
+                  <BS.Dropdown.Menu>
+                    {this.props.embeds.embeds.map((embed, i) => {
+                      if (i !== this.props.embeds.current) {
+                        return <BS.MenuItem key={i}
+                          onClick={(event) => this.setCurrent(event, i)}
+                        >
+                          {
+                            /* No embed details? Show URL. */
+                            !this.props.embedDetails[embed.props.src] ?
+                              embed.props.src
+                            /* Currently loading the details.. */
+                            : this.props.embedDetails[embed.props.src].loading ?
+                              embed.props.src
+                            /* Have embed details */
+                            : <span>
+                                <img src={this.props.embedDetails[embed.props.src].thumbnails.default.url}
+                                    width={64}
+                                    height={48}
+                                    alt="" />
+                                {this.props.embedDetails[embed.props.src].title}
+                              </span>
+                          }
+                          <i className='fa fa-trash'
+                             onClick={(e) => this.removeEmbed(e, i)} />
+                        </BS.MenuItem>;
                       }
-                      <i className='fa fa-trash'
-                         onClick={(e) => this.removeEmbed(e, i)} />
-                    </BS.MenuItem>;
-                  }
-                  return "";
-                })}
-              </BS.DropdownButton>
+                      return "";
+                    })}
+                  </BS.Dropdown.Menu>
+                </BS.Dropdown>
+              </BS.InputGroup.Button>
               : "" }
             <BS.FormControl
               type="text"
@@ -214,6 +217,7 @@ class Embed extends React.Component {
               componentClass={BS.InputGroup.Button}
               id="input-dropdown-addon"
               title="Action"
+              pullRight
             >
               <BS.MenuItem key="1" onClick={(e) => this.setEmbed(e)}>Set</BS.MenuItem>
               <BS.MenuItem key="2" onClick={(e) => this.enqueueEmbed(e)}>Enqueue</BS.MenuItem>

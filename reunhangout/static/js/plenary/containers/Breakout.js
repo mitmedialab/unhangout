@@ -10,6 +10,9 @@ export default class Breakout extends React.Component {
     this.state = {title: this.props.breakout.title};
     this.active = false;
   }
+  componentWillReceiveProps(newProps) {
+    this.setState({title: newProps.breakout.title})
+  }
   //Add an event listener that will dispatch the updated title
   componentDidMount() {
     window.addEventListener('click', 
