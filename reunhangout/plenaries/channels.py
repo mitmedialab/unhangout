@@ -238,12 +238,21 @@ def handle_plenary(message, data, plenary):
         plenary.breakout_mode = payload['breakout_mode']
     if 'randomized_max_attendees' in payload:
         plenary.randomized_max_attendees = payload['randomized_max_attendees']
+        # Not using queryset.update here, because we want to be able to rely on
+        # signals for eventual use of django-channels data binding:
+        # http://channels.readthedocs.io/en/latest/binding.html
+        for breakout in plenary.breakout_set.filter(is_random=True):
+            breakout.max_attendees = plenary.randomized_max_attendees
+            breakout.save()
 
     plenary.save()
 
     Group(plenary.channel_group_name).send({
         'text': json.dumps({
             'type': 'plenary',
-            'payload': {'plenary': {'breakout_mode': plenary.breakout_mode}}
+            'payload': {'plenary': {
+                'breakout_mode': plenary.breakout_mode,
+                'randomized_max_attendees': plenary.randomized_max_attendees
+            }}
         })
     })
