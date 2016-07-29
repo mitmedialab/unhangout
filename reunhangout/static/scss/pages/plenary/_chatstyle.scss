@@ -1,31 +1,33 @@
 .chat-box {
-  height: 100vh;
+  height: calc(100vh - 10px);
   background-color: #eee;
   margin: 5px 0px 5px 0px;
   border-radius: 5px;
+  display: flex;
+  flex-direction: column;
    }
 
 .chat-log {
-  height: 93%;
   overflow: auto; 
   }
 
 .chat-composer {
-  height: 7%;
+  align-self: flex-end;
   }
 
 .chat-message {
-  background-color: #F2F2F2;
-  box-shadow: 0 0 6px #B2B2B2;
-  padding: 10px 18px;
+  padding: 5px 18px;
   position: relative;
   vertical-align: top;
-  float: right;
-  margin: 5px 45px 5px 20px;
+  float: left;
+  margin: 5px 0px;
   clear: both;
-  max-width: 70%;
+  max-width: 90%;
   word-wrap: break-word; 
-  border-radius: 5px;
+  .userName {
+    font-weight: 900;
+    color: #2c2d30
+  }
   }
 .form-group {
   margin: 5px;

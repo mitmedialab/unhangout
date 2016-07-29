@@ -7,14 +7,19 @@
   flex-flow: row wrap;
   justify-content: space-around;
   overflow: visible;
+  flex-wrap: wrap;
   .btn-default {
-  	flex-grow: 1;
+    flex-grow: 1;
     color: #2e7daa;
-  	}
+    margin: 5px;
+    }
   h4 {
-  	flex-grow: 1;
-  	color: #fff;
-  	}
+    flex-grow: 1;
+    color: #fff;
+    }
+  #breakout-mode {
+    margin: 5px;
+    } 
   }
 .breakout {
   background-color: #eee;
@@ -32,4 +37,31 @@
     background-color: #2e7daa;
     color: #fff;
   }
+  .title-input {
+    background-color: #eee;
+    border: none;
+    box-shadow: none;
+    &:hover {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    &:focus {
+      background-color: #fff;
+      border: 1px solid;
+      border-radius: 4px;
+      border-color: #66afe9;
+      box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6); 
+    }
+  }
+  &.proposal {
+    border: 2px dashed #2e7daa;
+    background-color: #fff;
+    .title-input {
+    background-color: #fff;
+    }
+  }
+}
+.breakouts-container {
+  display: flex;
+  flex-direction: column;
 }

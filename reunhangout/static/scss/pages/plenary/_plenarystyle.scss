@@ -6,11 +6,12 @@
   padding-right: 0px; 
   &.users-col {
   	overflow: auto;
-  	height: 100vh;
+  	height: calc(100vh - 10px);
   	position: relative;
   	}
   &.breakout-col {
   	overflow: auto;
+    height: calc(100vh - 10px);
   	}
   .logo {
   	width:90%;

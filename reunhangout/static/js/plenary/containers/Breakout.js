@@ -92,7 +92,8 @@ export default class Breakout extends React.Component {
     let votedForThis = !!_.find(this.props.breakout.votes, (vote) => {
       return vote.username === this.props.auth.username
     });
-    return <div className="breakout">
+    if (this.props.breakout.is_proposal) {
+      return <div className="breakout proposal">
           { showEditTitle ?
               <form 
                 onSubmit={(e) => {
@@ -100,7 +101,8 @@ export default class Breakout extends React.Component {
                 }}>
                 <input type="text" value={this.state.title}
                   onChange={(e) => this.setState({title: e.target.value})} 
-                  onClick={(e) => this.handleClick(e)} ref="titleInput"/>
+                  onClick={(e) => this.handleClick(e)} ref="titleInput"
+                  className="title-input form-control"/>
               </form>
             :
               <h5>{this.props.breakout.title}</h5>
@@ -136,6 +138,54 @@ export default class Breakout extends React.Component {
             : ""
           }
         </div>
+    } else {
+      return <div className="breakout">
+          { showEditTitle ?
+              <form 
+                onSubmit={(e) => {
+                  this.handleSubmit(e, this.props.onChangeBreakouts, this.state.title)
+                }}>
+                <input type="text" value={this.state.title}
+                  onChange={(e) => this.setState({title: e.target.value})} 
+                  onClick={(e) => this.handleClick(e)} ref="titleInput"
+                  className="title-input form-control"/>
+              </form>
+            :
+              <h5>{this.props.breakout.title}</h5>
+          }
+          { showVote ?
+              <BS.Button onClick={(e) => this.handleVote(e)}>
+                {votedForThis ? '✓' : ''}
+                Vote | {this.props.breakout.votes.length}
+              </BS.Button> 
+            : showJoin ?
+              <BS.Button href={this.props.breakout.url} target='_blank'>
+                Join
+              </BS.Button>
+            :
+              <BS.Button disabled>Locked</BS.Button>
+          }
+          { showDelete ?
+              <BS.Button bsStyle="danger" onClick= {(e) => this.handleDelete(e)}>
+                <i className='fa fa-trash' />
+              </BS.Button>
+            : ""
+          }
+          { showApprove ?
+              <BS.Button onClick={(e) => this.handleApprove(e)}>
+                Approve
+              </BS.Button>
+            : ""
+          }
+          { showUnapprove ?
+              <BS.Button onClick={(e) => this.handleApprove(e)}>
+                Unapprove
+              </BS.Button>
+            : ""
+          }
+        </div>
+    }
+    
   }
 }
 
