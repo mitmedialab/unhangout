@@ -10,6 +10,8 @@ from plenaries.models import Plenary, ChatMessage
 from breakouts.models import Breakout
 from rooms.models import Room
 
+import pdb
+
 @enforce_ordering(slight=True)
 @channel_session_user_from_http
 def ws_connect(message, slug):
@@ -122,7 +124,7 @@ def handle_breakout(message, data, plenary):
     # Validate payload type
     if 'payload' not in data or 'action' not in data['payload']:
         return handle_error(message,
-                "Requires payload with 'payload' key and 'type' subkey")
+                "Requires payload with 'payload' key and 'action' subkey")
     elif not type(data['payload']) == dict:
         return handle_error(message, "Requires payload of dict type")
 
@@ -230,20 +232,44 @@ def handle_breakout(message, data, plenary):
         return respond_with_breakouts()
 
 def handle_plenary(message, data, plenary):
-    if not plenary.has_admin(message.user):
-        return handle_error(message, "Must be an admin")
+    is_admin = plenary.has_admin(message.user)
+    admin_required_error = lambda: handle_error(message, "Must be an admin to do that.")
+    if not is_admin:
+        return admin_required_error()
+    # Validate payload type
+    if 'payload' not in data:
+        return handle_error(message,
+                "Requires payload with 'payload' key")
+    elif not type(data['payload']) == dict:
+        return handle_error(message, "Requires payload of dict type")
 
     payload = data['payload']
+
+    new_payload = {}
+
     if 'breakout_mode' in payload:
         plenary.breakout_mode = payload['breakout_mode']
+        new_payload['breakout_mode'] = payload['breakout_mode']
     if 'randomized_max_attendees' in payload:
         plenary.randomized_max_attendees = payload['randomized_max_attendees']
+    if 'name' in payload:
+        plenary.name = payload['name']
+        new_payload['name'] = payload['name']
+    if 'organizer' in payload:
+        plenary.organizer = payload['organizer']
+        new_payload['organizer'] = payload['organizer']
+    if 'start_date' in payload:
+        plenary.start_date = payload['start_date']
+        new_payload['start_date'] = payload['start_date']
+    if 'description' in payload:
+        plenary.description = payload['description']
+        new_payload['description'] = payload['description']
 
     plenary.save()
-
+    
     Group(plenary.channel_group_name).send({
         'text': json.dumps({
             'type': 'plenary',
-            'payload': {'plenary': {'breakout_mode': plenary.breakout_mode}}
+            'payload': {'plenary': new_payload}
         })
     })

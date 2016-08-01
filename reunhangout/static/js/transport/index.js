@@ -51,6 +51,7 @@ export class SocketClient {
         this.store.dispatch(PLENARY_ACTIONS.breakoutReceive(data.payload));
         break;
       case "plenary":
+        console.log('plenary switch statement hit index.js')
         this.store.dispatch(PLENARY_ACTIONS.setPlenary(data.payload));
         break;
       case "present":
@@ -106,5 +107,6 @@ export const sendSocketMessage = function (message) {
   if (!(_socketClient && _socketClient.socket.readyState === WebSocket.OPEN)) {
     return Promise.reject(new Error("WebSocket not connected; can't send message."));
   }
+  console.log('sendSocketMessage hit')
   return _socketClient.sendMessage(message);
 }

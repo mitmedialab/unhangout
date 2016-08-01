@@ -35,6 +35,7 @@ export const plenary = (state=null, action) => {
       return newstate
     case A.SET_PLENARY:
       newstate = {...state, ...action.payload.plenary};
+      console.log('SET_PLENARY reducer hit', newstate)
       return newstate
   }
   return state;

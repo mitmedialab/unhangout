@@ -29,7 +29,7 @@ export default class Breakout extends React.Component {
     if (this.active) {  
       onChangeBreakouts({
         action: "modify",
-        index: this.props.index,
+        id: this.props.breakout.id,
         title: updatedTitle
       });
     }
@@ -37,10 +37,11 @@ export default class Breakout extends React.Component {
   }
   handleSubmit(event, onChangeBreakouts, updatedTitle) {
     event.preventDefault();
+    console.log('handleSubmit hit')
     if (this.active) {  
       onChangeBreakouts({
         action: "modify",
-        index: this.props.index,
+        id: this.props.breakout.id,
         title: updatedTitle
       });
       this.refs.titleInput.blur()

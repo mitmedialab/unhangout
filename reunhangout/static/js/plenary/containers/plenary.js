@@ -7,7 +7,7 @@ import BreakoutList from './BreakoutList';
 import Whiteboard from './Whiteboard';
 import Presence from './Presence';
 import Chat from './Chat';
-import EventInfo from './EventInfo';
+import PlenaryInfo from './PlenaryInfo';
 import {ConnectionStatus} from '../../transport';
 import * as A from '../actions';
 
@@ -18,7 +18,7 @@ class Plenary extends React.Component {
       <BS.Grid fluid>
         <BS.Row>
           <BS.Col xs={3} className="column users-col">
-          <EventInfo />
+          <PlenaryInfo />
             <Presence />
             <img src="../../../../media/assets/unhangout-logo-blue-full.png" className="logo"/>
           </BS.Col>

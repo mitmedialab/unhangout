@@ -130,3 +130,20 @@ export const changeBreakoutMode = (payload) => {
 // Plenary details
 export const SET_PLENARY = 'SET_PLENARY';
 export const setPlenary = (payload) => ({type: SET_PLENARY, payload});
+export const ADMIN_PLENARY_DETAILS_SENDING = 'ADMIN_PLENARY_DETAILS_SENDING';
+export const ADMIN_PLENARY_DETAILS_SENT = 'ADMIN_PLENARY_DETAILS_SENT';
+export const ADMIN_PLENARY_DETAILS_ERROR = 'ADMIN_PLENARY_DETAILS_ERROR';
+export const adminSendPlenaryDetails = (payload) => {
+  return (dispatch) => {
+    console.log('adminSendPlenaryDetails hit', payload)
+    dispatch({type: ADMIN_PLENARY_DETAILS_SENDING, payload});
+    sendSocketMessage({type: "plenary", payload})
+      .then(() => {
+        dispatch({type: ADMIN_PLENARY_DETAILS_SENT, payload});
+      })
+      .catch((err) => {
+        dispatch({type: ADMIN_PLENARY_DETAILS_ERROR, payload});
+      });
+  };
+};
+
