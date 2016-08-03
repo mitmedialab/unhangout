@@ -264,6 +264,9 @@ def handle_plenary(message, data, plenary):
     if 'description' in payload:
         plenary.description = payload['description']
         new_payload['description'] = payload['description']
+    if 'whiteboard' in payload:
+        plenary.whiteboard = payload['whiteboard']
+        new_payload['whiteboard'] = payload['whiteboard']
 
     plenary.save()
     

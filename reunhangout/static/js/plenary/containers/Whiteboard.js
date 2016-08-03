@@ -18,12 +18,12 @@ class Whiteboard extends React.Component {
   //Add an event listener that will dispatch the updated content
   componentDidMount() {
     window.addEventListener('click', 
-      () => this.handleModify(this.props.onAdminSendsPlenaryDetails, this.state.editorState), 
+      () => this.handleModify(this.props.onAdminSendPlenaryDetails, this.state.editorState), 
       false);
   }
   componentWillUnmount() {
     window.removeEventListener('click', 
-      () => this.handleModify(this.props.onAdminSendsPlenaryDetails, this.state.editorState), 
+      () => this.handleModify(this.props.onAdminSendPlenaryDetails, this.state.editorState), 
       false);
   }
   componentWillReceiveProps(newProps) {
@@ -37,9 +37,9 @@ class Whiteboard extends React.Component {
     this.active = true;
   }
   //dispatch updated title upon click outside 
-  handleModify(onAdminSendsPlenaryDetails, updated) {
+  handleModify(onAdminSendPlenaryDetails, updated) {
     if (this.active) {  
-      onAdminSendsPlenaryDetails({
+      onAdminSendPlenaryDetails({
         whiteboard: updated.getCurrentContent().getPlainText()
       });
     }
