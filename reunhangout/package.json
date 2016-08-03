@@ -45,7 +45,8 @@
     "node-sass": "~3.8.0",
     "bootstrap-sass": "~3.3.6",
     "postcss-loader": "~0.9.1",
-    "autoprefixer": "~6.3.6"
+    "autoprefixer": "~6.3.6",
+    "draft-js": "~0.7.0"
   },
   "devDependencies": {
     "redux-logger": "^2.6.1"

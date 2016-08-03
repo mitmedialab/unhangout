@@ -135,7 +135,6 @@ export const ADMIN_PLENARY_DETAILS_SENT = 'ADMIN_PLENARY_DETAILS_SENT';
 export const ADMIN_PLENARY_DETAILS_ERROR = 'ADMIN_PLENARY_DETAILS_ERROR';
 export const adminSendPlenaryDetails = (payload) => {
   return (dispatch) => {
-    console.log('adminSendPlenaryDetails hit', payload)
     dispatch({type: ADMIN_PLENARY_DETAILS_SENDING, payload});
     sendSocketMessage({type: "plenary", payload})
       .then(() => {

@@ -3,48 +3,41 @@ import {connect} from "react-redux";
 import * as style from "../../../scss/pages/plenary/_breakoutliststyle.scss";
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
+import {Editor, EditorState, ContentState, SelectionState} from 'draft-js';
 
 export default class Breakout extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {title: this.props.breakout.title};
     this.active = false;
-  }
-  componentWillReceiveProps(newProps) {
-    this.setState({title: newProps.breakout.title})
+    this.state = {
+      editorState: EditorState.createWithContent(ContentState.createFromText(this.props.breakout.title))
+    };
+    this.onChange = (editorState) => this.setState({editorState});
   }
   //Add an event listener that will dispatch the updated title
   componentDidMount() {
     window.addEventListener('click', 
-      () => this.handleModify(this.props.onChangeBreakouts, this.state.title), 
+      () => this.handleModify(this.props.onChangeBreakouts, this.state.editorState), 
       false);
   }
   componentWillUnmount() {
     window.removeEventListener('click', 
-      () => this.handleModify(this.props.onChangeBreakouts, this.state.title), 
+      () => this.handleModify(this.props.onChangeBreakouts, this.state.editorState), 
       false);
   }
-  //dispatch updated title upon click outside or submit
+  componentWillReceiveProps(newProps) {
+    this.setState({
+      editorState: EditorState.createWithContent(ContentState.createFromText(newProps.breakout.title))
+    })
+  }
+  //dispatch updated title upon click outside 
   handleModify(onChangeBreakouts, updatedTitle) {
     if (this.active) {  
       onChangeBreakouts({
         action: "modify",
         id: this.props.breakout.id,
-        title: updatedTitle
+        title: updatedTitle.getCurrentContent().getPlainText()
       });
-    }
-    this.active = false
-  }
-  handleSubmit(event, onChangeBreakouts, updatedTitle) {
-    event.preventDefault();
-    console.log('handleSubmit hit')
-    if (this.active) {  
-      onChangeBreakouts({
-        action: "modify",
-        id: this.props.breakout.id,
-        title: updatedTitle
-      });
-      this.refs.titleInput.blur()
     }
     this.active = false
   }
@@ -96,18 +89,28 @@ export default class Breakout extends React.Component {
     let votedForThis = !!_.find(this.props.breakout.votes, (vote) => {
       return vote.username === this.props.auth.username
     });
+    let titleHasFocus = this.state.editorState.getSelection().getHasFocus();
     if (this.props.breakout.is_proposal) {
       return <div className="breakout proposal">
           { showEditTitle ?
-              <form 
-                onSubmit={(e) => {
-                  this.handleSubmit(e, this.props.onChangeBreakouts, this.state.title)
-                }}>
-                <input type="text" value={this.state.title}
-                  onChange={(e) => this.setState({title: e.target.value})} 
-                  onClick={(e) => this.handleClick(e)} ref="titleInput"
-                  className="title-input form-control"/>
-              </form>
+            titleHasFocus ?
+              <div 
+              tabIndex="0"
+              className="title-input title-focus"
+              onClick={(e) => this.handleClick(e)} >
+                <Editor 
+                editorState={this.state.editorState} 
+                onChange={this.onChange} />
+              </div>
+              :
+              <div 
+              tabIndex="0"
+              className="title-input"
+              onClick={(e) => this.handleClick(e)} >
+                <Editor 
+                editorState={this.state.editorState} 
+                onChange={this.onChange} />
+              </div>
             :
               <h5>{this.props.breakout.title}</h5>
           }
@@ -145,15 +148,24 @@ export default class Breakout extends React.Component {
     } else {
       return <div className="breakout">
           { showEditTitle ?
-              <form 
-                onSubmit={(e) => {
-                  this.handleSubmit(e, this.props.onChangeBreakouts, this.state.title)
-                }}>
-                <input type="text" value={this.state.title}
-                  onChange={(e) => this.setState({title: e.target.value})} 
-                  onClick={(e) => this.handleClick(e)} ref="titleInput"
-                  className="title-input form-control"/>
-              </form>
+            titleHasFocus ?
+              <div 
+              tabIndex="0"
+              className="title-input title-focus"
+              onClick={(e) => this.handleClick(e)} >
+                <Editor 
+                editorState={this.state.editorState} 
+                onChange={this.onChange} />
+              </div>
+              :
+              <div 
+              tabIndex="0"
+              className="title-input"
+              onClick={(e) => this.handleClick(e)} >
+                <Editor 
+                editorState={this.state.editorState} 
+                onChange={this.onChange} />
+              </div>
             :
               <h5>{this.props.breakout.title}</h5>
           }

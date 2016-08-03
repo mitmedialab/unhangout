@@ -41,11 +41,14 @@
     background-color: #eee;
     border: none;
     box-shadow: none;
+    min-width: 30%;
+    padding: 10px;
     &:hover {
+      background-color: #fff;
       border: 1px solid #ccc;
       border-radius: 4px;
     }
-    &:focus {
+    &.title-focus {
       background-color: #fff;
       border: 1px solid;
       border-radius: 4px;
