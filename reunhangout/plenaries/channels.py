@@ -258,9 +258,10 @@ def handle_plenary(message, data, plenary):
 
     payload = data['payload']
     simple_update_keys = ('randomized_max_attendees', 'breakout_mode', 'name',
-            'organizer', 'start_date', 'description', 'whiteboard')
+            'organizer', 'start_date')
+    sanitized_keys = ('whiteboard', 'description')
 
-    for key in simple_update_keys:
+    for key in simple_update_keys + sanitized_keys:
         if key in payload:
             setattr(plenary, key, payload[key])
 
@@ -281,6 +282,7 @@ def handle_plenary(message, data, plenary):
         return handle_error(message, json_dumps(e.message_dict))
 
     update = {key: getattr(plenary, key) for key in simple_update_keys}
+    update.update({key: getattr(plenary, "safe_" + key)() for key in sanitized_keys})
     Group(plenary.channel_group_name).send({
         'text': json_dumps({
             'type': 'plenary',
