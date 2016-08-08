@@ -3,7 +3,7 @@ import {connect} from "react-redux";
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
 import {Editor, EditorState, ContentState, SelectionState} from 'draft-js';
-
+import * as style from "../../../scss/pages/plenary/_whiteboardstyle.scss"
 
 class Whiteboard extends React.Component {
   constructor(props) {
@@ -50,8 +50,10 @@ class Whiteboard extends React.Component {
     let whiteboardHasFocus = this.state.editorState.getSelection().getHasFocus();
 
     if (isAdmin) {
-      return <div>
-        <BS.Button onClick={ ()=> this.setState({ panelOpen: !this.state.panelOpen })}>
+      return <div className="whiteboard">
+        <BS.Button 
+        onClick={() => this.setState({ panelOpen: !this.state.panelOpen })}
+        className="whiteboard-button">
           <BS.Glyphicon glyph="chevron-down" />
         </BS.Button>
         <BS.Panel collapsible expanded={this.state.panelOpen}>
@@ -76,7 +78,7 @@ class Whiteboard extends React.Component {
         </BS.Panel>
       </div>
     } else {
-      return <div>
+      return <div className="whiteboard-button">
         <BS.Button onClick={ ()=> this.setState({ open: !this.state.panelOpen })}>
           click
         </BS.Button>

@@ -145,4 +145,20 @@ export const adminSendPlenaryDetails = (payload) => {
       });
   };
 };
+// Auth details
+export const AUTH_DETAILS_SENDING = 'AUTH_DETAILS_SENDING';
+export const AUTH_DETAILS_SENT = 'AUTH_DETAILS_SENT';
+export const AUTH_DETAILS_ERROR = 'AUTH_DETAILS_ERROR';
+export const sendAuthDetails = (payload) => {
+  return (dispatch) => {
+    dispatch({type: AUTH_DETAILS_SENDING, payload});
+    sendSocketMessage({type: "auth", payload})
+      .then(() => {
+        dispatch({type: AUTH_DETAILS_SENT, payload});
+      })
+      .catch((err) => {
+        dispatch({type: AUTH_DETAILS_ERROR, payload});
+      });
+  };
+};
 

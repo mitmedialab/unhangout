@@ -35,6 +35,9 @@ def serialize_public(user):
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=30, unique=True)
     email = models.EmailField("Email address", blank=True, unique=True)
+    twitter_handle = models.CharField(max_length=100, blank=True, unique=True)
+    linkedin_profile = models.CharField(max_length=100, blank=True, unique=True)
+    share_info = models.BooleanField(default=True)
 
     is_staff = models.BooleanField(
         _('staff status'),

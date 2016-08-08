@@ -4,7 +4,6 @@ import * as style from "../../../scss/pages/plenary/_plenarystyle.scss"
 import * as BS from "react-bootstrap";
 import Embed from './Embed';
 import BreakoutList from './BreakoutList';
-import Whiteboard from './Whiteboard';
 import Presence from './Presence';
 import Chat from './Chat';
 import PlenaryInfo from './PlenaryInfo';
@@ -28,10 +27,11 @@ class Plenary extends React.Component {
             <BS.Col xs={3} className="column users-col">
             <PlenaryInfo />
               <Presence />
-              <img src="../../../../media/assets/unhangout-logo-blue-full.png" className="logo"/>
+              <div className="logo-container">
+                <img src="../../../../media/assets/unhangout-logo-blue-full.png" className="logo"/>
+              </div>
             </BS.Col>
             <BS.Col xs={5} className="column chat-col">
-              <Whiteboard />
               <Chat />
             </BS.Col>
             <BS.Col xs={4} className="column breakout-col">

@@ -21,7 +21,7 @@ def ws_connect(message, slug):
         plenary = Plenary.objects.get(slug=slug)
     except Plenary.DoesNotExist:
         return handle_error(message,  'Plenary not found')
-    
+        
     message.channel_session['path'] = plenary.channel_group_name
     group = Group(message.channel_session['path'])
 
@@ -57,6 +57,8 @@ def route_message(message, data, plenary):
         handle_breakout(message, data, plenary)
     elif data['type'] == "plenary":
         handle_plenary(message, data, plenary)
+    elif data['type'] == "auth":
+        handle_auth(message, data, plenary)
     else:
         handle_error(message, "Type not understood")
 
@@ -276,3 +278,22 @@ def handle_plenary(message, data, plenary):
             'payload': {'plenary': new_payload}
         })
     })
+def handle_auth(message, data, plenary):
+    # Validate payload type
+    if 'payload' not in data:
+        return handle_error(message,
+                "Requires payload with 'payload' key")
+    elif not type(data['payload']) == dict:
+        return handle_error(message, "Requires payload of dict type")
+
+    payload = data['payload']
+
+    auth = message.user
+
+    auth.email = payload['email']
+    auth.twitter_handle = payload['twitter_handle']
+    auth.linkedin_profile = payload['linkedin_profile']
+    auth.share_info = payload['share_info']
+
+    message.user.save()
+    

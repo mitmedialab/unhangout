@@ -1,18 +1,21 @@
-.chat-box {
+.chat-container {
   height: calc(100vh - 10px);
   background-color: #eee;
   margin: 5px 0px 5px 0px;
   border-radius: 5px;
   display: flex;
   flex-direction: column;
-   }
+  .chat-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    flex-grow: 1;
+    overflow: auto; ;
+  }
+}
 
 .chat-log {
   overflow: auto; 
-  }
-
-.chat-composer {
-  align-self: flex-end;
   }
 
 .chat-message {
