@@ -1,12 +1,17 @@
 import React from "react";
 import _ from "lodash";
 import {connect} from "react-redux";
+import * as style from "../../../scss/pages/plenary/_presencestyle.scss"
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
 
+
 class ContactInfo extends React.Component {
   render() {
-    return <div>{this.props.user.username}</div>
+    let avatar = this.props.user.image || "../../../../media/assets/default_avatar.jpg"
+    return (
+      <img src={avatar} className="user-avatar" />
+    )
   }
 }
 

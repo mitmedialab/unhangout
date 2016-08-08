@@ -1,6 +1,8 @@
 import json
 from urllib.parse import urlparse
+from django.core.exceptions import ValidationError
 from django.db.models import F, Count
+from django.db import transaction
 
 from channels import Group
 from channels.sessions import enforce_ordering
@@ -9,6 +11,27 @@ from channels.auth import channel_session_user, channel_session_user_from_http
 from plenaries.models import Plenary, ChatMessage
 from breakouts.models import Breakout
 from rooms.models import Room
+from reunhangout.utils import json_dumps
+
+import pdb
+
+def require_payload_keys(keylist):
+    """
+    Decorator to enforce that a message contains a 'payload' key with the given
+    keylist as subkeys.
+    """
+    def wrapper(fn):
+        def handler(message, data, *args, **kwargs):
+            if 'payload' not in data:
+                return handle_error(message, "Requires 'payload' key")
+            if not isinstance(data['payload'], dict):
+                return handle_error(message, "'payload' must be a dict")
+            for key in keylist:
+                if key not in data['payload']:
+                    return handle_error(message, "Missing '%s' payload key." % key)
+            return fn(message, data, *args, **kwargs)
+        return handler
+    return wrapper
 
 @enforce_ordering(slight=True)
 @channel_session_user_from_http
@@ -19,7 +42,7 @@ def ws_connect(message, slug):
         plenary = Plenary.objects.get(slug=slug)
     except Plenary.DoesNotExist:
         return handle_error(message,  'Plenary not found')
-    
+        
     message.channel_session['path'] = plenary.channel_group_name
     group = Group(message.channel_session['path'])
 
@@ -44,10 +67,12 @@ def ws_receive(message, slug):
     route_message(message, data, plenary)
 
 def handle_error(message, error):
-    message.reply_channel.send({'text': json.dumps({"error": error})})
+    message.reply_channel.send({'text': json_dumps({"error": error})})
 
 def route_message(message, data, plenary):
-    if data['type'] == "chat":
+    if 'type' not in data:
+        handle_error(message, "Missing type")
+    elif data['type'] == "chat":
         handle_chat(message, data, plenary)
     elif data['type'] == "embeds":
         handle_embeds(message, data, plenary)
@@ -55,12 +80,13 @@ def route_message(message, data, plenary):
         handle_breakout(message, data, plenary)
     elif data['type'] == "plenary":
         handle_plenary(message, data, plenary)
+    elif data['type'] == "auth":
+        handle_auth(message, data, plenary)
     else:
         handle_error(message, "Type not understood")
 
+@require_payload_keys(['message'])
 def handle_chat(message, data, plenary):
-    if 'payload' not in data or 'message' not in data['payload']:
-        return handle_error(message, "Requires payload with 'payload' key and 'message' subkey")
     highlight = (
         data['payload'].get('highlight') and \
         (message.user.is_superuser or plenary.has_admin(message.user))
@@ -72,11 +98,12 @@ def handle_chat(message, data, plenary):
         highlight=highlight
     )
     Group(plenary.channel_group_name).send({
-        'text': json.dumps({
+        'text': json_dumps({
             'type': 'chat', 'payload': chat_message.serialize()
         })
     })
 
+@require_payload_keys('embeds')
 def handle_embeds(message, data, plenary):
     if not plenary.has_admin(message.user):
         return handle_error(message, "Must be an admin to set embeds")
@@ -110,21 +137,15 @@ def handle_embeds(message, data, plenary):
     }
     plenary.save()
     Group(plenary.channel_group_name).send({
-        'text': json.dumps({
+        'text': json_dumps({
             'type': 'embeds', 'payload': plenary.embeds
         })
     })
 
+@require_payload_keys(['action'])
 def handle_breakout(message, data, plenary):
     is_admin = plenary.has_admin(message.user)
     admin_required_error = lambda: handle_error(message, "Must be an admin to do that.")
-
-    # Validate payload type
-    if 'payload' not in data or 'action' not in data['payload']:
-        return handle_error(message,
-                "Requires payload with 'payload' key and 'type' subkey")
-    elif not type(data['payload']) == dict:
-        return handle_error(message, "Requires payload of dict type")
 
     payload = data['payload']
     action = payload['action']
@@ -139,7 +160,7 @@ def handle_breakout(message, data, plenary):
         # breakouts from a new database query.  We can optimize this later if
         # needed.
         Group(plenary.channel_group_name).send({
-            'text': json.dumps({
+            'text': json_dumps({
                 'type': 'breakout_receive',
                 'payload': [b.serialize() for b in plenary.breakout_set.all()]
             })
@@ -150,12 +171,13 @@ def handle_breakout(message, data, plenary):
     if action == 'create':
         if not is_admin and plenary.breakout_mode != "user":
             return admin_required_error()
-
+        if 'title' not in payload:
+            return handle_error(message, "Missing 'title'")
         breakout = Breakout.objects.create(
             plenary=plenary,
             title=payload['title'],
             max_attendees=payload.get('max_attendees') or 10,
-            is_proposal=(not is_admin or data['payload'].get('is_proposal', False))
+            is_proposal=(not is_admin or payload.get('is_proposal', False))
         )
         return respond_with_breakouts()
 
@@ -229,30 +251,55 @@ def handle_breakout(message, data, plenary):
             breakout.votes.add(message.user)
         return respond_with_breakouts()
 
+@require_payload_keys([])
 def handle_plenary(message, data, plenary):
     if not plenary.has_admin(message.user):
-        return handle_error(message, "Must be an admin")
+        return handle_error(message, "Must be an admin to do that.")
 
     payload = data['payload']
-    if 'breakout_mode' in payload:
-        plenary.breakout_mode = payload['breakout_mode']
-    if 'randomized_max_attendees' in payload:
-        plenary.randomized_max_attendees = payload['randomized_max_attendees']
-        # Not using queryset.update here, because we want to be able to rely on
-        # signals for eventual use of django-channels data binding:
-        # http://channels.readthedocs.io/en/latest/binding.html
-        for breakout in plenary.breakout_set.filter(is_random=True):
-            breakout.max_attendees = plenary.randomized_max_attendees
-            breakout.save()
+    simple_update_keys = ('randomized_max_attendees', 'breakout_mode', 'name',
+            'organizer', 'start_date', 'description', 'whiteboard')
 
-    plenary.save()
+    for key in simple_update_keys:
+        if key in payload:
+            setattr(plenary, key, payload[key])
 
+    try:
+        with transaction.atomic():
+            plenary.full_clean()
+            plenary.save()
+            if 'randomized_max_attendees' in payload:
+                # Not using queryset.update here, because we want to be able to rely on
+                # signals for eventual use of django-channels data binding:
+                # http://channels.readthedocs.io/en/latest/binding.html
+                for breakout in plenary.breakout_set.filter(is_random=True):
+                    breakout.max_attendees = plenary.randomized_max_attendees
+                    breakout.full_clean()
+                    breakout.save()
+    except ValidationError as e:
+        print(e)
+        return handle_error(message, json_dumps(e.message_dict))
+
+    update = {key: getattr(plenary, key) for key in simple_update_keys}
     Group(plenary.channel_group_name).send({
-        'text': json.dumps({
+        'text': json_dumps({
             'type': 'plenary',
-            'payload': {'plenary': {
-                'breakout_mode': plenary.breakout_mode,
-                'randomized_max_attendees': plenary.randomized_max_attendees
-            }}
+            'payload': {'plenary': update}
         })
     })
+
+@require_payload_keys([])
+def handle_auth(message, data, plenary):
+    payload = data['payload']
+
+    user = message.user
+    for key in ['email', 'twitter_handle', 'linkedin_profile', 'share_info']:
+        if key in payload:
+            setattr(user, key, payload[key])
+
+    try:
+        user.full_clean()
+    except ValidationError as e:
+        return handle_error(message, json_dumps(e.message_dict))
+
+    user.save()

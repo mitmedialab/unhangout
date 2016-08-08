@@ -5,6 +5,8 @@ import * as BS from "react-bootstrap";
 import * as A from "../actions";
 import {urlRegex} from "../../utils";
 import * as style from "../../../scss/pages/plenary/_chatstyle.scss"
+import Whiteboard from './Whiteboard';
+
 
 /**
  * Split 'text' into an array of react components or strings that represent the
@@ -101,39 +103,42 @@ class Chat extends React.Component {
     this.setState({value: ""});
   }
   render() {
-    return <div className="chat-box">
-      <div className="chat-log">
-      {this.props.chat_messages.map((msg, i) => {
-        return <ChatMessage msg={msg} plenary={this.props.plenary} 
-        present={this.props.present} key={`${i}`} auth={this.props.auth} />
-      })}
+    return <div className="chat-container">
+      <Whiteboard />
+        <div className="chat-box">
+        <div className="chat-log">
+        {this.props.chat_messages.map((msg, i) => {
+          return <ChatMessage msg={msg} plenary={this.props.plenary} 
+          present={this.props.present} key={`${i}`} auth={this.props.auth} />
+        })}
+        </div>
+        <form className={
+                `chat-input${this.props.plenary.chat.state === "error" ? " has-error" : ""}`
+              }
+              onSubmit={(e) => this.onSubmit(e)}>
+          <BS.FormGroup>
+            <BS.InputGroup>
+          {this.props.plenary.chat.state === "error" ?
+            <BS.HelpBlock>{this.props.plenary.chat.error}</BS.HelpBlock> : "" }
+          <BS.FormControl
+            className="chat-composer"
+            type='text'
+            placeholder='Chat...'
+            disabled={this.props.plenary.chat.state === "sending"}
+            value={(this.state && this.state.value) || ""}
+            onChange={(e) => this.setState({value: e.target.value})} />
+            {this.props.auth.is_admin ?
+              <BS.InputGroup.Addon>
+                <input type="checkbox"
+                  aria-label="Highlight"
+                  checked={this.state && this.state.highlight}
+                  onChange={(e) => this.setState({highlight: e.target.checked})}/> Highlight
+              </BS.InputGroup.Addon>
+              : "" }
+          </BS.InputGroup>
+          </BS.FormGroup>
+        </form>
       </div>
-      <form className={
-              `chat-input${this.props.plenary.chat.state === "error" ? " has-error" : ""}`
-            }
-            onSubmit={(e) => this.onSubmit(e)}>
-        <BS.FormGroup>
-          <BS.InputGroup>
-        {this.props.plenary.chat.state === "error" ?
-          <BS.HelpBlock>{this.props.plenary.chat.error}</BS.HelpBlock> : "" }
-        <BS.FormControl
-          className="chat-composer"
-          type='text'
-          placeholder='Chat...'
-          disabled={this.props.plenary.chat.state === "sending"}
-          value={(this.state && this.state.value) || ""}
-          onChange={(e) => this.setState({value: e.target.value})} />
-          {this.props.auth.is_admin ?
-            <BS.InputGroup.Addon>
-              <input type="checkbox"
-                aria-label="Highlight"
-                checked={this.state && this.state.highlight}
-                onChange={(e) => this.setState({highlight: e.target.checked})}/> Highlight
-            </BS.InputGroup.Addon>
-            : "" }
-        </BS.InputGroup>
-        </BS.FormGroup>
-      </form>
     </div>
   }
 };

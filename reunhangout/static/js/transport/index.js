@@ -56,6 +56,9 @@ export class SocketClient {
       case "present":
         this.store.dispatch(A.setPresent(data.payload));
         break;
+      case "error":
+        alert(`Server error: ${data.payload.error}`);
+        console.error(data.payload.error);
       default:
         console.log("transport.js: Unhandled message:", data);
         break;

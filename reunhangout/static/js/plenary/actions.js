@@ -130,3 +130,35 @@ export const changeBreakoutMode = (payload) => {
 // Plenary details
 export const SET_PLENARY = 'SET_PLENARY';
 export const setPlenary = (payload) => ({type: SET_PLENARY, payload});
+export const ADMIN_PLENARY_DETAILS_SENDING = 'ADMIN_PLENARY_DETAILS_SENDING';
+export const ADMIN_PLENARY_DETAILS_SENT = 'ADMIN_PLENARY_DETAILS_SENT';
+export const ADMIN_PLENARY_DETAILS_ERROR = 'ADMIN_PLENARY_DETAILS_ERROR';
+export const adminSendPlenaryDetails = (payload) => {
+  return (dispatch) => {
+    dispatch({type: ADMIN_PLENARY_DETAILS_SENDING, payload});
+    sendSocketMessage({type: "plenary", payload})
+      .then(() => {
+        dispatch({type: ADMIN_PLENARY_DETAILS_SENT, payload});
+      })
+      .catch((err) => {
+        dispatch({type: ADMIN_PLENARY_DETAILS_ERROR, payload});
+      });
+  };
+};
+// Auth details
+export const AUTH_DETAILS_SENDING = 'AUTH_DETAILS_SENDING';
+export const AUTH_DETAILS_SENT = 'AUTH_DETAILS_SENT';
+export const AUTH_DETAILS_ERROR = 'AUTH_DETAILS_ERROR';
+export const sendAuthDetails = (payload) => {
+  return (dispatch) => {
+    dispatch({type: AUTH_DETAILS_SENDING, payload});
+    sendSocketMessage({type: "auth", payload})
+      .then(() => {
+        dispatch({type: AUTH_DETAILS_SENT, payload});
+      })
+      .catch((err) => {
+        dispatch({type: AUTH_DETAILS_ERROR, payload});
+      });
+  };
+};
+

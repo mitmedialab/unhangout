@@ -3,44 +3,41 @@ import {connect} from "react-redux";
 import * as style from "../../../scss/pages/plenary/_breakoutliststyle.scss";
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
+import {Editor, EditorState, ContentState, SelectionState} from 'draft-js';
 
 export default class Breakout extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {title: this.props.breakout.title};
     this.active = false;
+    this.state = {
+      editorState: EditorState.createWithContent(ContentState.createFromText(this.props.breakout.title))
+    };
+    this.onChange = (editorState) => this.setState({editorState});
   }
   //Add an event listener that will dispatch the updated title
   componentDidMount() {
     window.addEventListener('click', 
-      () => this.handleModify(this.props.onChangeBreakouts, this.state.title), 
+      () => this.handleModify(this.props.onChangeBreakouts, this.state.editorState), 
       false);
   }
   componentWillUnmount() {
     window.removeEventListener('click', 
-      () => this.handleModify(this.props.onChangeBreakouts, this.state.title), 
+      () => this.handleModify(this.props.onChangeBreakouts, this.state.editorState), 
       false);
   }
-  //dispatch updated title upon click outside or submit
+  componentWillReceiveProps(newProps) {
+    this.setState({
+      editorState: EditorState.createWithContent(ContentState.createFromText(newProps.breakout.title))
+    })
+  }
+  //dispatch updated title upon click outside 
   handleModify(onChangeBreakouts, updatedTitle) {
     if (this.active) {  
       onChangeBreakouts({
         action: "modify",
-        index: this.props.index,
-        title: updatedTitle
+        id: this.props.breakout.id,
+        title: updatedTitle.getCurrentContent().getPlainText()
       });
-    }
-    this.active = false
-  }
-  handleSubmit(event, onChangeBreakouts, updatedTitle) {
-    event.preventDefault();
-    if (this.active) {  
-      onChangeBreakouts({
-        action: "modify",
-        index: this.props.index,
-        title: updatedTitle
-      });
-      this.refs.titleInput.blur()
     }
     this.active = false
   }
@@ -92,16 +89,28 @@ export default class Breakout extends React.Component {
     let votedForThis = !!_.find(this.props.breakout.votes, (vote) => {
       return vote.username === this.props.auth.username
     });
-    return <div className="breakout">
+    let titleHasFocus = this.state.editorState.getSelection().getHasFocus();
+    if (this.props.breakout.is_proposal) {
+      return <div className="breakout proposal">
           { showEditTitle ?
-              <form 
-                onSubmit={(e) => {
-                  this.handleSubmit(e, this.props.onChangeBreakouts, this.state.title)
-                }}>
-                <input type="text" value={this.state.title}
-                  onChange={(e) => this.setState({title: e.target.value})} 
-                  onClick={(e) => this.handleClick(e)} ref="titleInput"/>
-              </form>
+            titleHasFocus ?
+              <div 
+              tabIndex="0"
+              className="title-input title-focus"
+              onClick={(e) => this.handleClick(e)} >
+                <Editor 
+                editorState={this.state.editorState} 
+                onChange={this.onChange} />
+              </div>
+              :
+              <div 
+              tabIndex="0"
+              className="title-input"
+              onClick={(e) => this.handleClick(e)} >
+                <Editor 
+                editorState={this.state.editorState} 
+                onChange={this.onChange} />
+              </div>
             :
               <h5>{this.props.breakout.title}</h5>
           }
@@ -136,6 +145,63 @@ export default class Breakout extends React.Component {
             : ""
           }
         </div>
+    } else {
+      return <div className="breakout">
+          { showEditTitle ?
+            titleHasFocus ?
+              <div 
+              tabIndex="0"
+              className="title-input title-focus"
+              onClick={(e) => this.handleClick(e)} >
+                <Editor 
+                editorState={this.state.editorState} 
+                onChange={this.onChange} />
+              </div>
+              :
+              <div 
+              tabIndex="0"
+              className="title-input"
+              onClick={(e) => this.handleClick(e)} >
+                <Editor 
+                editorState={this.state.editorState} 
+                onChange={this.onChange} />
+              </div>
+            :
+              <h5>{this.props.breakout.title}</h5>
+          }
+          { showVote ?
+              <BS.Button onClick={(e) => this.handleVote(e)}>
+                {votedForThis ? '✓' : ''}
+                Vote | {this.props.breakout.votes.length}
+              </BS.Button> 
+            : showJoin ?
+              <BS.Button href={this.props.breakout.url} target='_blank'>
+                Join
+              </BS.Button>
+            :
+              <BS.Button disabled>Locked</BS.Button>
+          }
+          { showDelete ?
+              <BS.Button bsStyle="danger" onClick= {(e) => this.handleDelete(e)}>
+                <i className='fa fa-trash' />
+              </BS.Button>
+            : ""
+          }
+          { showApprove ?
+              <BS.Button onClick={(e) => this.handleApprove(e)}>
+                Approve
+              </BS.Button>
+            : ""
+          }
+          { showUnapprove ?
+              <BS.Button onClick={(e) => this.handleApprove(e)}>
+                Unapprove
+              </BS.Button>
+            : ""
+          }
+        </div>
+    }
+    
   }
 }
 

@@ -34,7 +34,13 @@ def serialize_public(user):
 
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=30, unique=True)
-    email = models.EmailField("Email address", blank=True, unique=True)
+    email = models.EmailField("Email address", blank=True, null=True,
+            unique=True, default=None)
+    twitter_handle = models.CharField(max_length=100, blank=True, null=True,
+            unique=True, default=None)
+    linkedin_profile = models.CharField(max_length=100, blank=True, null=True,
+            unique=True, default=None)
+    share_info = models.BooleanField(default=True)
 
     is_staff = models.BooleanField(
         _('staff status'),
@@ -55,6 +61,12 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
+
+    def clean(self):
+        if self.email:
+            self.email = UserManager.normalize_email(self.email)
+        if self.twitter_handle:
+            self.twitter_handle = self.twitter_handle.lower()
 
     def serialize_public(self):
         return serialize_public(self)

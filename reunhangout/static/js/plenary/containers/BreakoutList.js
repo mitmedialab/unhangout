@@ -43,19 +43,26 @@ class BreakoutList extends React.Component {
     });
     this.setState({
       max_attendees: "",
-      showSessionModal: false
+      showRandomizedModal: false
     });
   }
-
   handleGroupMe(event) {
     event.preventDefault();
     this.props.onChangeBreakouts({action: 'group_me'});
   }
-
+  sortBreakouts(breakouts) {
+    let approved = breakouts.filter((b) => {
+      return !b.is_proposal
+    })
+    let unapproved = breakouts.filter((b) => {
+      return b.is_proposal
+    })
+    return [...approved, ...unapproved]
+  }
   render() {
-
+    let breakout_mode = this.props.plenary.breakout_mode
     let breakoutFilter;
-    switch (this.props.plenary.breakout_mode) {
+    switch (breakout_mode) {
       case "admin":
         breakoutFilter = (b) => !b.is_proposal && !b.is_random;
         break;
@@ -70,28 +77,31 @@ class BreakoutList extends React.Component {
         break;
     }
     let breakouts = this.props.breakouts.filter(breakoutFilter);
+    if (breakout_mode === "user") {
+      breakouts = this.sortBreakouts(breakouts)
+    }
 
     return <div>
       <div className="breakout-header">
         <h4>Breakout Rooms</h4>
-        { (this.props.auth.is_admin && (this.props.plenary.breakout_mode === "admin")) ? <BS.Button onClick={() => 
+        { (this.props.auth.is_admin && (breakout_mode === "admin")) ? <BS.Button onClick={() => 
           this.setState({showSessionModal: !this.state.showSessionModal})}>
         CREATE A SESSION</BS.Button> : "" }
-        { this.props.plenary.breakout_mode === "user" ? <BS.Button onClick={() => 
+        { breakout_mode === "user" ? <BS.Button onClick={() => 
           this.setState({showSessionModal: !this.state.showSessionModal})}>
         PROPOSE A SESSION</BS.Button> : "" }
         { this.props.auth.is_admin ?
-          <BS.DropdownButton title="Breakout Mode" id="breakout-mode">
+          <BS.DropdownButton title="Breakout Mode" id="breakout-mode" pullRight>
             <BS.MenuItem onClick={(e) => this.handleModeChange(e, "admin")}>
-              {this.props.plenary.breakout_mode === "admin" ? '✓' : ""}
+              {breakout_mode === "admin" ? '✓' : ""}
               Admin Proposed Sessions
             </BS.MenuItem>
             <BS.MenuItem onClick={(e) => this.handleModeChange(e, "user")}>
-              {this.props.plenary.breakout_mode === "user" ? '✓' : ""}
+              {breakout_mode === "user" ? '✓' : ""}
               Participant Proposed Sessions
             </BS.MenuItem>
             <BS.MenuItem onClick={(e) => this.handleModeChange(e, "randomized")}>
-              {this.props.plenary.breakout_mode === "randomized" ? '✓' : ""}
+              {breakout_mode === "randomized" ? '✓' : ""}
               Randomized Sessions
             </BS.MenuItem>
           </BS.DropdownButton>
@@ -133,7 +143,7 @@ class BreakoutList extends React.Component {
             onClick={() => this.setState({showSessionModal: !this.state.showSessionModal})}>
             Close</BS.Button>
 
-            { (() => {if (this.props.plenary.breakout_mode === "user") {
+            { (() => {if (breakout_mode === "user") {
                          return <BS.Button onClick={(e) => this.handleSubmit(e, true)}>Propose Session</BS.Button>
                        } else {
                           return <BS.Button onClick={(e) => this.handleSubmit(e, false)}>Create Session</BS.Button>
@@ -150,13 +160,14 @@ class BreakoutList extends React.Component {
             <BS.Modal.Title>Randomize Breakouts</BS.Modal.Title>
           </BS.Modal.Header>
           <BS.Modal.Body>
-            <BS.Form horizontal>
+            <BS.Form horizontal
+            onSubmit={(e) => {e.preventDefault()}}>
             <BS.FormGroup controlId="participant-limit">
               <BS.Col sm={2}>Participant Limit</BS.Col>
               <BS.Col sm={10}><BS.FormControl type="text" 
               placeholder="Max 10, Min 2" 
               max_attendees={(this.state && this.state.max_attendees) || ""}
-              onChange={(e) => this.setState({max_attendees: e.target.value})}/>
+              onChange={(e) => this.setState({max_attendees: e.target.value})} />
               </BS.Col>
             </BS.FormGroup>
             </BS.Form>
@@ -178,7 +189,7 @@ class BreakoutList extends React.Component {
               onChangeBreakouts={this.props.onChangeBreakouts} />
           })
         }
-        { this.props.plenary.breakout_mode === "randomize" ?
+        { breakout_mode === "randomize" ?
             <BS.Button onClick={(e) => this.handleGroupMe(e)}>
               { breakouts.length === 0 ? "Group me" : "Regroup me" }
             </BS.Button>
