@@ -11,6 +11,7 @@ from channels.auth import channel_session_user, channel_session_user_from_http
 from plenaries.models import Plenary, ChatMessage
 from breakouts.models import Breakout
 from rooms.models import Room
+from videosync.models import VideoSync
 from reunhangout.utils import json_dumps
 
 import pdb
@@ -82,6 +83,8 @@ def route_message(message, data, plenary):
         handle_plenary(message, data, plenary)
     elif data['type'] == "auth":
         handle_auth(message, data, plenary)
+    elif data['type'] == 'videosync':
+        handle_video_sync(message, data, plenary)
     else:
         handle_error(message, "Type not understood")
 
@@ -130,6 +133,10 @@ def handle_embeds(message, data, plenary):
         return handle_error(message, "Invalid 'current' type")
     if isinstance(current, int) and (current < 0  or current > len(clean)):
         return handle_error(message, "Invalid 'current' value")
+
+    # Stop any current video sync if we're changing the current embed.
+    if plenary.embeds and plenary.embeds.current != current:
+        VideoSync.objects.stop(self.channel_group_name)
 
     plenary.embeds = {
         'embeds': clean,
@@ -305,3 +312,27 @@ def handle_auth(message, data, plenary):
         return handle_error(message, json_dumps(e.message_dict))
 
     user.save()
+
+@require_payload_keys(['action'])
+def handle_video_sync(message, data, plenary):
+    if not plenary.has_admin(message.user):
+        return handle_error(message, "Must be an admin to control video sync")
+
+    payload = data['payload']
+    # Here, we're ignoring the payload['sync_id'] value and instead just
+    # reusing plenary.channel_group_name as the sync_id. This is a convenient
+    # way to ensure that the sync_id is the correct one for the plenary, and
+    # prevents admins from abusing other rooms.  But we'll need to change this
+    # if we ever want more than one video container with sync on a plenary at
+    # once.
+    if payload['action'] == "play":
+        start_index = payload.get('start_index', 0)
+        VideoSync.objects.start(
+            sync_id=plenary.channel_group_name,
+            channel_group_name=plenary.channel_group_name,
+            time_index=start_index
+        )
+    elif payload['action'] == "pause":
+        VideoSync.objects.stop(
+            sync_id=plenary.channel_group_name
+        )

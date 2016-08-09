@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
+from datetime import timedelta
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -36,16 +37,16 @@ INSTALLED_APPS = [
     'frontend',
     'plenaries',
     'rooms',
+    'videosync',
 
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-
+    'channels',
     'django_gravatar',
+    'djcelery',
     'sorl.thumbnail',
     'webpack_loader',
-
-    'channels',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -56,7 +57,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 MIGRATION_MODULES = {
-    'thumbnail': 'frontend.sorl_migrations'
+    'thumbnail': 'frontend.sorl_migrations',
+    'djcelery': 'frontend.djcelery_migrations'
 }
 
 MIDDLEWARE_CLASSES = [
@@ -161,3 +163,12 @@ CHANNEL_LAYERS = {
     }
 }
 
+# Celery
+CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
+CELERYBEAT_SCHEDULE = {
+    'video-sync': {
+        'task': 'videosync.tasks.tick',
+        'schedule': timedelta(seconds=15),
+    }
+}
+CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'

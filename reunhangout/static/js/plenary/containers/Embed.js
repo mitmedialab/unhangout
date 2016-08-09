@@ -4,6 +4,7 @@ import {connect} from "react-redux";
 import * as style from "../../../scss/pages/plenary/_embedstyle.scss"
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
+import * as VIDEOSYNC_ACTIONS from "../../videosync/actions";
 import * as youtube from "../youtube";
 
 const uniqueEmbeds = (embeds) => _.uniqBy(embeds, (e) => e.props.src);
@@ -141,6 +142,18 @@ class Embed extends React.Component {
       current: index
     });
   }
+  isPlayingForAll() {
+    let curSync = this.props.videosync[this.props.plenary.video_sync_id];
+    console.log(curSync);
+    return curSync && curSync.state === "playing";
+  }
+  togglePlayForAll(event) {
+    if (this.isPlayingForAll()) {
+      this.props.onAdminPauseForAll(this.props.plenary.video_sync_id);
+    } else {
+      this.props.onAdminPlayForAll(this.props.plenary.video_sync_id);
+    }
+  }
   render() {
     let chosen;
     if (_.isNumber(this.props.embeds.current)) {
@@ -154,11 +167,15 @@ class Embed extends React.Component {
   renderAdminControls(chosen) {
     let hasPrevEmbeds = (!chosen && this.props.embeds.embeds.length > 0) ||
                         (chosen && this.props.embeds.embeds.length > 1);
+
     return <div className='embed-admin-controls'>
       <form>
         { chosen && chosen.type === "youtube" ?
           <div className="button-flex-container">
-            <BS.Button bsStyle='success' className="play-button">Play for all</BS.Button>
+            <BS.Button bsStyle='success' className="play-button"
+                onClick={(e) => this.togglePlayForAll(e)}>
+              { this.isPlayingForAll() ? "Pause for all" : "Play for all" }
+            </BS.Button>
             <BS.Button bsStyle='danger' className="remove-button"
                 onClick={(e) => this.removeEmbed(e, null)}>
               Remove Embed
@@ -235,23 +252,26 @@ class Embed extends React.Component {
 export default connect(
   // map state to props
   (state) => ({
+    plenary: state.plenary,
     embeds: state.plenary.embeds || {embeds: [], current: null},
+    embedDetails: state.plenary.embedDetails || {},
     embedsSending: state.plenary.embedsSending || {},
     auth: state.auth,
-    embedDetails: state.plenary.embedDetails || {}
+    videosync: state.videosync,
   }),
   // map dispatch to props
   (dispatch, ownProps) => ({
     // admin -- youtube only
-    onAdminPlayForAll: () => dispatch(A.adminPlayForAll()),
-    onAdminPauseForAll: () => dispatch(A.adminPauseForAll()),
     onAdminCreateHoA: () => dispatch(A.adminCreateHoA()),
     onAdminSendEmbeds: (payload) => dispatch(A.adminSendEmbeds(payload)),
     onAdminEmbedsError: (payload) => dispatch(A.adminEmbedsError(payload)),
+
+    onAdminPlayForAll: (sync_id) => dispatch(VIDEOSYNC_ACTIONS.playForAll({sync_id})),
+    onAdminPauseForAll: (sync_id) => dispatch(VIDEOSYNC_ACTIONS.pauseForAll({sync_id})),
     // user
-    onSyncPlayback: () => dispatch(A.syncPlayback()),
-    onBreakSyncPlayback: () => dispatch(A.breakSyncPlayback()),
-    fetchEmbedDetails: (embed) => dispatch(A.fetchEmbedDetails(embed))
+    fetchEmbedDetails: (embed) => dispatch(A.fetchEmbedDetails(embed)),
+    onSyncPlayback: (sync_id) => dispatch(VIDEOSYNC_ACTIONS.syncPlayback({sync_id})),
+    onBreakSyncPlayback: (sync_id) => dispatch(VIDEOSYNC_ACTIONS.breakSyncPlayback({sync_id})),
   })
 )(Embed);
 

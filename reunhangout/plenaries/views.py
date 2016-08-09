@@ -5,7 +5,9 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 
 from plenaries.models import Plenary
+from videosync.models import VideoSync
 from accounts.utils import serialize_auth_state
+from reunhangout.utils import json_dumps
 
 @login_required
 def plenary_detail(request, id_or_slug):
@@ -22,9 +24,19 @@ def plenary_detail(request, id_or_slug):
 
     data = plenary.serialize()
     data.update(serialize_auth_state(request.user, plenary))
+
+    try:
+        videosync = VideoSync.objects.get(sync_id=data['plenary']['video_sync_id'])
+    except VideoSync.DoesNotExist:
+        videosync = None
+        data.update({'videosync': {}})
+    else:
+        videosync_data = videosync.serialize()
+        videosync_data['synced'] = True
+        data.update({'videosync': {videosync.sync_id: videosync_data}})
     
     return render(request, "plenaries/plenary.html", {
-        'data': json.dumps(data),
+        'data': json_dumps(data),
         'plenary': plenary,
     })
 

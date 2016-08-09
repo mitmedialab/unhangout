@@ -1,7 +1,9 @@
 django<1.10
 channels
-pytz
 asgi_redis
+celery
+django-celery
+pytz
 jsonfield
 django-timezone-field
 bleach
@@ -10,6 +12,5 @@ django-allauth
 django-debug-toolbar
 django-gravatar2
 django-webpack-loader
-django-registration>=2.0.4
 pillow
 sorl-thumbnail

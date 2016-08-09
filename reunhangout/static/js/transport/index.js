@@ -1,6 +1,7 @@
 export {default as ConnectionStatus} from './containers/ConnectionStatus';
 import * as A from './actions';
 import * as PLENARY_ACTIONS from '../plenary/actions';
+import * as VIDEOSYNC_ACTIONS from '../videosync/actions';
 
 let _socketClient = null;
 
@@ -55,6 +56,9 @@ export class SocketClient {
         break;
       case "present":
         this.store.dispatch(A.setPresent(data.payload));
+        break;
+      case "videosync":
+        this.store.dispatch(VIDEOSYNC_ACTIONS.tick(data.payload));
         break;
       case "error":
         alert(`Server error: ${data.payload.error}`);

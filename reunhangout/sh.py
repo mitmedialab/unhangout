@@ -15,3 +15,4 @@ from accounts.models import *
 from breakouts.models import *
 from frontend.models import *
 from plenaries.models import *
+from videosync.models import *

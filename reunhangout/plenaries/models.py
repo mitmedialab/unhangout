@@ -101,6 +101,7 @@ class Plenary(models.Model):
                 'open': self.open,
                 'breakouts_open': self.breakouts_open,
                 'admins': [admin.username for admin in self.admins.all()],
+                'video_sync_id': self.channel_group_name,
             },
             'breakouts': [breakout.serialize() for breakout in self.breakout_set.all()],
             'chat_messages': [msg.serialize() for msg in self.chatmessage_set.all()],
