@@ -59,7 +59,8 @@ module.exports = {
   },
   resolve: {
     // The path wherein we expect modules directories (e.g. node_modules) to reside.
-    root: root
+    root: root,
+    alias: {Bluebird: "Promise"}
   }
 };
 

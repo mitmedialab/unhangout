@@ -157,8 +157,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 CHANNEL_LAYERS = {
     "default": {
-        #"BACKEND": "asgi_redis.RedisChannelLayer",
-        "BACKEND": "asgiref.inmemory.ChannelLayer",
+        "BACKEND": "asgi_redis.RedisChannelLayer",
         "ROUTING": "reunhangout.routing.channel_routing",
     }
 }

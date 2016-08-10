@@ -38,7 +38,7 @@ export class SocketClient {
     try {
       data = JSON.parse(event.data);
     } catch (e) {
-      console.error(e);
+      console.error("Transport.onMessage: invalid JSON", e);
       return;
     }
     switch (data.type) {

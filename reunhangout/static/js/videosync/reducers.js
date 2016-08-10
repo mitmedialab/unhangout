@@ -1,7 +1,6 @@
 import * as A from './actions';
 
 export const videosync = (state={}, action) => {
-  console.log(action);
   state = {...state};
   switch (action.type) {
     case A.TICK:

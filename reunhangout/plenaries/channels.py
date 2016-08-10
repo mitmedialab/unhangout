@@ -326,11 +326,11 @@ def handle_video_sync(message, data, plenary):
     # if we ever want more than one video container with sync on a plenary at
     # once.
     if payload['action'] == "play":
-        start_index = payload.get('start_index', 0)
+        time_index = payload.get('time_index', 0)
         VideoSync.objects.start(
             sync_id=plenary.channel_group_name,
             channel_group_name=plenary.channel_group_name,
-            time_index=start_index
+            time_index=time_index
         )
     elif payload['action'] == "pause":
         VideoSync.objects.stop(

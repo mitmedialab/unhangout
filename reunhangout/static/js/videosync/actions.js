@@ -15,7 +15,11 @@ export const playForAll = (payload) => {
   return (dispatch) => {
     sendSocketMessage({
       type: "videosync",
-      payload: {action: "play", sync_id: payload.sync_id}
+      payload: {
+        action: "play",
+        sync_id: payload.sync_id,
+        time_index: payload.time_index || 0
+      }
     })
   }
 }

@@ -4,8 +4,9 @@ import {connect} from "react-redux";
 import * as style from "../../../scss/pages/plenary/_embedstyle.scss"
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
-import * as VIDEOSYNC_ACTIONS from "../../videosync/actions";
 import * as youtube from "../youtube";
+import {SyncableVideo, isEmbedSyncable} from "../../videosync";
+import * as VIDEOSYNC_ACTIONS from "../../videosync/actions";
 
 const uniqueEmbeds = (embeds) => _.uniqBy(embeds, (e) => e.props.src);
 
@@ -142,25 +143,24 @@ class Embed extends React.Component {
       current: index
     });
   }
-  isPlayingForAll() {
-    let curSync = this.props.videosync[this.props.plenary.video_sync_id];
-    console.log(curSync);
-    return curSync && curSync.state === "playing";
-  }
-  togglePlayForAll(event) {
-    if (this.isPlayingForAll()) {
-      this.props.onAdminPauseForAll(this.props.plenary.video_sync_id);
-    } else {
-      this.props.onAdminPlayForAll(this.props.plenary.video_sync_id);
-    }
-  }
   render() {
     let chosen;
     if (_.isNumber(this.props.embeds.current)) {
       chosen = this.props.embeds.embeds[this.props.embeds.current];
     }
     return <div>
-      { chosen ?  <iframe className='plenary-embed' {...chosen.props} /> : "" }
+      { chosen ?
+        (
+          isEmbedSyncable(chosen) ? 
+            <SyncableVideo embed={chosen}
+              sync_id={this.props.plenary.video_sync_id}
+              showSyncControls={this.props.auth.is_admin}
+              className='plenary-embed' />
+          :
+            <iframe className='plenary-embed' {...chosen.props} />
+        )
+        : ""
+      }
       { this.props.auth.is_admin ? this.renderAdminControls(chosen) : "" }
     </div>;
   }
@@ -172,10 +172,6 @@ class Embed extends React.Component {
       <form>
         { chosen && chosen.type === "youtube" ?
           <div className="button-flex-container">
-            <BS.Button bsStyle='success' className="play-button"
-                onClick={(e) => this.togglePlayForAll(e)}>
-              { this.isPlayingForAll() ? "Pause for all" : "Play for all" }
-            </BS.Button>
             <BS.Button bsStyle='danger' className="remove-button"
                 onClick={(e) => this.removeEmbed(e, null)}>
               Remove Embed
@@ -266,12 +262,8 @@ export default connect(
     onAdminSendEmbeds: (payload) => dispatch(A.adminSendEmbeds(payload)),
     onAdminEmbedsError: (payload) => dispatch(A.adminEmbedsError(payload)),
 
-    onAdminPlayForAll: (sync_id) => dispatch(VIDEOSYNC_ACTIONS.playForAll({sync_id})),
-    onAdminPauseForAll: (sync_id) => dispatch(VIDEOSYNC_ACTIONS.pauseForAll({sync_id})),
     // user
     fetchEmbedDetails: (embed) => dispatch(A.fetchEmbedDetails(embed)),
-    onSyncPlayback: (sync_id) => dispatch(VIDEOSYNC_ACTIONS.syncPlayback({sync_id})),
-    onBreakSyncPlayback: (sync_id) => dispatch(VIDEOSYNC_ACTIONS.breakSyncPlayback({sync_id})),
   })
 )(Embed);
 

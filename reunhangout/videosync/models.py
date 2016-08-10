@@ -14,6 +14,7 @@ class VideoSyncManager(models.Manager):
         vs.channel_group_name = channel_group_name
         vs.start_time_clock = now()
         vs.start_time_index = time_index
+        vs.current_time_index = time_index
         vs.save()
 
     def stop(self, sync_id):
