@@ -16,7 +16,7 @@ export function loadPlenary(store) {
     }
   }
   module.hot && module.hot.accept("./containers/plenary.js", () => {
-    if (_store) {
+    if (store) {
       Plenary = require("./containers/plenary.js")['default'];
       _loadPlenary(store);
     }
