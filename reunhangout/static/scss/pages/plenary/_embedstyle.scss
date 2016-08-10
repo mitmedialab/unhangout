@@ -31,3 +31,21 @@
   margin-bottom: 10px;
 }
 
+.sync-indicator {
+  display: inline-block;
+  vertical-align: middle;
+  margin-top: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 6px;
+  background-color: #aaa;
+  box-shadow: 0px 0px 5px rgba(200, 200, 200, 1);
+  &.synced {
+    background-color: #0f0;
+    box-shadow: 0px 0px 5px rgba(0, 200, 0, 1);
+  }
+  &.unsynced {
+    background-color: #f00;
+    box-shadow: 0px 0px 5px rgba(200, 0, 0, 1);
+  }
+}
