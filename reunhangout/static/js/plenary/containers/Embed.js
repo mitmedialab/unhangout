@@ -148,7 +148,7 @@ class Embed extends React.Component {
     if (_.isNumber(this.props.embeds.current)) {
       chosen = this.props.embeds.embeds[this.props.embeds.current];
     }
-    return <div>
+    return <div className='plenary-embed'>
       { chosen ?
         (
           isEmbedSyncable(chosen) ? 
@@ -157,7 +157,7 @@ class Embed extends React.Component {
               showSyncControls={this.props.auth.is_admin}
               className='plenary-embed' />
           :
-            <iframe className='plenary-embed' {...chosen.props} />
+            <iframe {...chosen.props} />
         )
         : ""
       }

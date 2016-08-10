@@ -168,6 +168,10 @@ CELERYBEAT_SCHEDULE = {
     'video-sync': {
         'task': 'videosync.tasks.tick',
         'schedule': timedelta(seconds=15),
-    }
+    },
+    'prune-rooms': {
+        'task': 'rooms.tasks.prune',
+        'schedule': timedelta(seconds=30),
+    },
 }
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'

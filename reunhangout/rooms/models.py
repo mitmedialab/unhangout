@@ -62,6 +62,7 @@ class Room(models.Model):
         )[0])
 
     def prune_connections(self, keep_channels):
+        print(self.path, keep_channels)
         Connection.objects.filter(room=self).exclude(
             channel_name__in=keep_channels
         ).delete()
