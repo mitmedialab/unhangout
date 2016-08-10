@@ -1,16 +1,6 @@
 import {sendSocketMessage} from '../transport';
 import * as youtube from './youtube';
 
-// Video playback
-export const ADMIN_REMOVE_EMBED = 'ADMIN_REMOVE_EMBED';
-export const adminRemoveEmbed = (payload) => ({type: ADMIN_REMOVE_EMBED, payload});
-
-export const ADMIN_ADD_EMBED = 'ADMIN_ADD_EMBED';
-export const adminAddEmbed = (payload) => ({type: ADMIN_ADD_EMBED, payload});
-
-export const ADMIN_CREATE_HOA = 'ADMIN_CREATE_HOA';
-export const adminCreateHoA = (payload) => ({type: ADMIN_CREATE_HOA, payload});
-
 // Chat
 export const CHAT_MESSAGE_SENDING = 'CHAT_MESSAGE_SENDING';
 export const CHAT_MESSAGE_SENT = 'CHAT_MESSAGE_SENT';
@@ -115,6 +105,12 @@ export const changeBreakoutMode = (payload) => {
   }
 }
 
+export const messageBreakouts = (payload) => {
+  return (dispatch) => {
+    sendSocketMessage({type: "message_breakouts", payload});
+  }
+}
+
 // Plenary details
 export const SET_PLENARY = 'SET_PLENARY';
 export const setPlenary = (payload) => ({type: SET_PLENARY, payload});
@@ -133,6 +129,7 @@ export const adminSendPlenaryDetails = (payload) => {
       });
   };
 };
+
 // Auth details
 export const AUTH_DETAILS_SENDING = 'AUTH_DETAILS_SENDING';
 export const AUTH_DETAILS_SENT = 'AUTH_DETAILS_SENT';

@@ -2,6 +2,7 @@ export {default as ConnectionStatus} from './containers/ConnectionStatus';
 import * as A from './actions';
 import * as PLENARY_ACTIONS from '../plenary/actions';
 import * as VIDEOSYNC_ACTIONS from '../videosync/actions';
+import * as BREAKOUT_ACTIONS from '../breakout/actions';
 
 let _socketClient = null;
 
@@ -60,9 +61,13 @@ export class SocketClient {
       case "videosync":
         this.store.dispatch(VIDEOSYNC_ACTIONS.tick(data.payload));
         break;
+      case "message_breakouts":
+        this.store.dispatch(BREAKOUT_ACTIONS.message(data.payload));
+        break;
       case "error":
         alert(`Server error: ${data.payload.error}`);
         console.error(data.payload.error);
+        break;
       default:
         console.log("transport.js: Unhandled message:", data);
         break;

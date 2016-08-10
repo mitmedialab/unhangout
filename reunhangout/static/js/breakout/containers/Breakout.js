@@ -27,6 +27,15 @@ class Breakout extends React.Component {
                 return <li key={`${i}`}>{m.username}</li>
               })}
             </ul>
+            { this.props.breakoutMessages.length > 0 ?
+                <ul className='breakout-messages'>
+                  {
+                    this.props.breakoutMessages.map((message, i) => {
+                      return <li key={`message-${i}`}>{message}</li>
+                    })
+                  }
+                </ul>
+              : "" }
           </BS.Col>
           <BS.Col xs={10}>
             <iframe src={`https://meet.jit.si/${this.props.breakout.webrtc_id}`}
@@ -56,6 +65,7 @@ export default connect(
     present: state.present,
     plenary: state.plenary,
     breakout: state.breakout,
+    breakoutMessages: state.breakoutMessages,
     auth: state.auth
   }),
   // map dispatch to props

@@ -14,8 +14,6 @@ from rooms.models import Room
 from videosync.models import VideoSync
 from reunhangout.utils import json_dumps
 
-import pdb
-
 def require_payload_keys(keylist):
     """
     Decorator to enforce that a message contains a 'payload' key with the given
@@ -85,6 +83,8 @@ def route_message(message, data, plenary):
         handle_auth(message, data, plenary)
     elif data['type'] == 'videosync':
         handle_video_sync(message, data, plenary)
+    elif data['type'] == "message_breakouts":
+        handle_message_breakouts(message, data, plenary)
     else:
         handle_error(message, "Type not understood")
 
@@ -106,7 +106,7 @@ def handle_chat(message, data, plenary):
         })
     })
 
-@require_payload_keys('embeds')
+@require_payload_keys(['embeds'])
 def handle_embeds(message, data, plenary):
     if not plenary.has_admin(message.user):
         return handle_error(message, "Must be an admin to set embeds")
@@ -135,8 +135,8 @@ def handle_embeds(message, data, plenary):
         return handle_error(message, "Invalid 'current' value")
 
     # Stop any current video sync if we're changing the current embed.
-    if plenary.embeds and plenary.embeds.current != current:
-        VideoSync.objects.stop(self.channel_group_name)
+    if plenary.embeds and plenary.embeds['current'] != current:
+        VideoSync.objects.stop(plenary.channel_group_name)
 
     plenary.embeds = {
         'embeds': clean,
@@ -336,3 +336,17 @@ def handle_video_sync(message, data, plenary):
         VideoSync.objects.stop(
             sync_id=plenary.channel_group_name
         )
+
+@require_payload_keys(['message'])
+def handle_message_breakouts(message, data, plenary):
+    if not plenary.has_admin(message.user):
+        return handle_error(message, "Must be an admin to message breakouts")
+
+    message = data['payload']['message']
+    for breakout in plenary.breakout_set.all():
+        Group(breakout.channel_group_name).send({
+            'text': json_dumps({
+                'type': 'message_breakouts',
+                'payload': {'message': message}
+            })
+        })
