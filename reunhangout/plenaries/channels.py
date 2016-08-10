@@ -159,7 +159,7 @@ def handle_breakout(message, data, plenary):
 
     if not is_admin and not (
             plenary.breakout_mode == "user" or
-            (plenary.breakout_mode == "randomize" and action == "group_me")):
+            (plenary.breakout_mode == "random" and action == "group_me")):
         return admin_required_error()
 
     def respond_with_breakouts():
@@ -189,8 +189,8 @@ def handle_breakout(message, data, plenary):
         return respond_with_breakouts()
 
     elif action == 'group_me':
-        if plenary.breakout_mode != "randomize":
-            return handle_error(message, "Must be in randomize mode to do that.")
+        if plenary.breakout_mode != "random":
+            return handle_error(message, "Must be in random mode to do that.")
         blacklist = set()
         # Remove membership, if any, from current breakouts
         for breakout in plenary.breakout_set.filter(members=message.user):
@@ -213,7 +213,7 @@ def handle_breakout(message, data, plenary):
             breakout = Breakout.objects.create(
                     plenary=plenary,
                     title='Breakout',
-                    max_attendees=plenary.randomized_max_attendees,
+                    max_attendees=plenary.random_max_attendees,
                     is_random=True)
         breakout.members.add(message.user)
         return respond_with_breakouts()
@@ -264,7 +264,7 @@ def handle_plenary(message, data, plenary):
         return handle_error(message, "Must be an admin to do that.")
 
     payload = data['payload']
-    simple_update_keys = ('randomized_max_attendees', 'breakout_mode', 'name',
+    simple_update_keys = ('random_max_attendees', 'breakout_mode', 'name',
             'organizer', 'start_date')
     sanitized_keys = ('whiteboard', 'description')
 
@@ -276,12 +276,12 @@ def handle_plenary(message, data, plenary):
         with transaction.atomic():
             plenary.full_clean()
             plenary.save()
-            if 'randomized_max_attendees' in payload:
+            if 'random_max_attendees' in payload:
                 # Not using queryset.update here, because we want to be able to rely on
                 # signals for eventual use of django-channels data binding:
                 # http://channels.readthedocs.io/en/latest/binding.html
                 for breakout in plenary.breakout_set.filter(is_random=True):
-                    breakout.max_attendees = plenary.randomized_max_attendees
+                    breakout.max_attendees = plenary.random_max_attendees
                     breakout.full_clean()
                     breakout.save()
     except ValidationError as e:

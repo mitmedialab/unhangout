@@ -9,7 +9,7 @@ class BreakoutList extends React.Component {
   constructor() {
     super();
     this.state= {showSessionModal: false,
-      showRandomizedModal: false};
+      showRandomBreakoutdModal: false};
   }
   //dispatch breakout creation and close modal
   handleSubmit(event, isProposal) {
@@ -28,22 +28,22 @@ class BreakoutList extends React.Component {
   }
   handleModeChange(event, id) {
     event.preventDefault();
-    if (id === "randomized") { 
+    if (id === "random") { 
       this.setState({
-        showRandomizedModal: !this.state.showRandomizedModal
+        showRandomBreakoutModal: !this.state.showRandomBreakoutModal
       })} else {
         this.props.onChangeBreakoutMode({breakout_mode: id})
       }
   }
-  handleRandomize(event) {
+  handleRandomMode(event) {
     event.preventDefault();
     this.props.onChangeBreakoutMode({
-      breakout_mode: "randomize", 
-      randomized_max_attendees: this.state.max_attendees
+      breakout_mode: "random",
+      random_max_attendees: this.state.max_attendees
     });
     this.setState({
       max_attendees: "",
-      showRandomizedModal: false
+      showRandomBreakoutModal: false
     });
   }
   handleGroupMe(event) {
@@ -69,7 +69,7 @@ class BreakoutList extends React.Component {
       case "user":
         breakoutFilter = (b) => !b.is_random;
         break;
-      case "randomize":
+      case "random":
         breakoutFilter = (b) => b.is_random && (
           this.props.auth.is_superuser ||
           !!_.find(b.members, (m) => m.username === this.props.auth.username)
@@ -100,9 +100,9 @@ class BreakoutList extends React.Component {
               {breakout_mode === "user" ? '✓' : ""}
               Participant Proposed Sessions
             </BS.MenuItem>
-            <BS.MenuItem onClick={(e) => this.handleModeChange(e, "randomized")}>
-              {breakout_mode === "randomized" ? '✓' : ""}
-              Randomized Sessions
+            <BS.MenuItem onClick={(e) => this.handleModeChange(e, "random")}>
+              {breakout_mode === "random" ? '✓' : ""}
+              Randomly Assigned Sessions
             </BS.MenuItem>
           </BS.DropdownButton>
           : "" }
@@ -153,11 +153,11 @@ class BreakoutList extends React.Component {
         </BS.Modal>
       </div>
 
-      <div className="randomize-dialog">
-        <BS.Modal show={this.state.showRandomizedModal} 
-        onHide={() => this.setState({showRandomizedModal: !this.state.showRandomizedModal})}>
+      <div className="random-dialog">
+        <BS.Modal show={this.state.showRandomBreakoutModal}
+        onHide={() => this.setState({showRandomBreakoutModal: !this.state.showRandomBreakoutModal})}>
           <BS.Modal.Header closeButton>
-            <BS.Modal.Title>Randomize Breakouts</BS.Modal.Title>
+            <BS.Modal.Title>Random Breakout Assignment</BS.Modal.Title>
           </BS.Modal.Header>
           <BS.Modal.Body>
             <BS.Form horizontal
@@ -174,9 +174,9 @@ class BreakoutList extends React.Component {
           </BS.Modal.Body>
           <BS.Modal.Footer>
             <BS.Button 
-            onClick={() => this.setState({showRandomizedModal: !this.state.showRandomizedModal})}>
+            onClick={() => this.setState({showRandomBreakoutModal: !this.state.showRandomBreakoutModal})}>
             Close</BS.Button>
-            <BS.Button onClick={(e) => this.handleRandomize(e)}>Randomize</BS.Button>        
+            <BS.Button onClick={(e) => this.handleRandomMode(e)}>Set Random Mode</BS.Button>
           </BS.Modal.Footer>
         </BS.Modal>
       </div>
@@ -189,7 +189,7 @@ class BreakoutList extends React.Component {
               onChangeBreakouts={this.props.onChangeBreakouts} />
           })
         }
-        { breakout_mode === "randomize" ?
+        { breakout_mode === "random" ?
             <BS.Button onClick={(e) => this.handleGroupMe(e)}>
               { breakouts.length === 0 ? "Group me" : "Regroup me" }
             </BS.Button>

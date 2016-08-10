@@ -51,9 +51,9 @@ class Plenary(models.Model):
     breakout_mode = models.CharField(max_length=20, choices=(
         ("admin", _("Admin controlled")),
         ("user", _("Participant proposed")),
-        ("randomized", _("Randomized breakouts"))
+        ("random", _("Random breakouts"))
     ), default="admin")
-    randomized_max_attendees = models.IntegerField(default=10, validators=[
+    random_max_attendees = models.IntegerField(default=10, validators=[
         MinValueValidator(2),
         MaxValueValidator(10),
     ])
