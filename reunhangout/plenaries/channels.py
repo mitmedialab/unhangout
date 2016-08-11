@@ -1,4 +1,6 @@
 import json
+import functools
+
 from urllib.parse import urlparse
 from django.core.exceptions import ValidationError
 from django.db.models import F, Count
@@ -11,6 +13,7 @@ from channels.auth import channel_session_user, channel_session_user_from_http
 from plenaries.models import Plenary, ChatMessage
 from breakouts.models import Breakout
 from rooms.models import Room
+from rooms.utils import touch_connection
 from videosync.models import VideoSync
 from reunhangout.utils import json_dumps
 
@@ -19,8 +22,9 @@ def require_payload_keys(keylist):
     Decorator to enforce that a message contains a 'payload' key with the given
     keylist as subkeys.
     """
-    def wrapper(fn):
-        def handler(message, data, *args, **kwargs):
+    def decorator(fn):
+        @functools.wraps(fn)
+        def inner(message, data, *args, **kwargs):
             if 'payload' not in data:
                 return handle_error(message, "Requires 'payload' key")
             if not isinstance(data['payload'], dict):
@@ -29,8 +33,8 @@ def require_payload_keys(keylist):
                 if key not in data['payload']:
                     return handle_error(message, "Missing '%s' payload key." % key)
             return fn(message, data, *args, **kwargs)
-        return handler
-    return wrapper
+        return inner
+    return decorator
 
 @enforce_ordering(slight=True)
 @channel_session_user_from_http
@@ -49,9 +53,10 @@ def ws_connect(message, slug):
     # auth, if such were needed.
 
     group.add(message.reply_channel)
-    room = Room.objects.add(group.name, message.user, message.reply_channel.name)
+    room = Room.objects.add(group.name, message.reply_channel.name, message.user)
     room.broadcast_presence()
 
+@touch_connection
 @enforce_ordering(slight=True)
 @channel_session_user
 def ws_receive(message, slug):

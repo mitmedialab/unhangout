@@ -6,6 +6,7 @@ from channels.auth import channel_session_user, channel_session_user_from_http
 
 from breakouts.models import Breakout
 from rooms.models import Room, Connection
+from rooms.utils import touch_connection
 
 @enforce_ordering(slight=True)
 @channel_session_user_from_http
@@ -20,20 +21,24 @@ def ws_connect(message, breakout_id):
 
     group = Group(breakout.channel_group_name)
 
-    num_connections = len(group.channel_layer.group_channels(group.name))
+    num_connections = Connection.objects.filter(
+            room__channel_name=breakout.channel_group_name).count()
+
     # Enforce max attendees.
     if num_connections >= breakout.max_attendees:
         return Room.over_capacity_error(message, group.name)
+
     elif message.user.is_authenticated() and Connection.objects.filter(
-            room__path=group.name, user=message.user).exists():
+            room__channel_name=group.name, user=message.user).exists():
         # Only one connection per user.
         return Room.already_connected_error(message, group.name)
 
-    message.channel_session['path'] = breakout.channel_group_name
+    message.channel_session['channel_group_name'] = breakout.channel_group_name
     group.add(message.reply_channel)
-    room = Room.objects.add(group.name, message.user, message.reply_channel.name)
+    room = Room.objects.add(group.name, message.reply_channel.name, message.user)
     room.broadcast_presence()
 
+@touch_connection
 @enforce_ordering(slight=True)
 @channel_session_user
 def ws_receive(message, breakout_id):

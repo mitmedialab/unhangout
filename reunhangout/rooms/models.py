@@ -1,84 +1,87 @@
 import json
+from datetime import timedelta
 
 from django.db import models
 from django.conf import settings
-from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth import get_user_model
+from django.utils.timezone import now
 
-from channels import channel_layers, Group
+from channels import Group
+
+class ConnectionManager(models.Manager):
+    def touch(self, channel_name):
+        self.filter(channel_name=channel_name).update(last_seen=now())
+
+    def leave_all(self, channel_name):
+        for conn in self.select_related('room').filter(
+                channel_name=channel_name):
+            room = conn.room
+            conn.delete()
+            room.broadcast_presence()
 
 class Connection(models.Model):
-    room = models.ForeignKey('Room')
-    channel_name = models.CharField(max_length=255, unique=True)
+    room = models.ForeignKey('Room', on_delete=models.CASCADE)
+    channel_name = models.CharField(max_length=255)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True)
+    last_seen = models.DateTimeField(default=now)
+
+    objects = ConnectionManager()
+
+    def __str__(self):
+        return self.channel_name
+
+    class Meta:
+        unique_together = [('room', 'channel_name')]
 
 class RoomManager(models.Manager):
-    def add(self, path, user, channel_name):
-        room, created = Room.objects.get_or_create(path=path)
-        room.add_connection(user, channel_name)
+    def add(self, room_channel_name, user_channel_name, user=None):
+        room, created = Room.objects.get_or_create(channel_name=room_channel_name)
+        room.add_connection(user_channel_name, user)
         return room
 
-    def remove(self, path, user, channel_name):
-        try:
-            room = Room.objects.get(path=path)
-        except Room.DoesNotExist:
-            return None
-        room.remove_connection(channel_name)
-        return room
-
-    def prune(self, path, channel_names):
-        try:
-            room = Room.objects.get(path=path)
-        except Room.DoesNotExist:
-            return None
-        room.prune_connections(keep_channels=channel_names)
-        return room
-
-    def prune_all(self, channel_layer=None):
-        channel_layer = channel_layer or channel_layers['default']
+    def prune_connections(self, channel_layer=None, age=60):
         for room in Room.objects.all():
-            channel_names = channel_layers['default'].group_channels(room.path)
-            if len(channel_names) == 0:
-                room.delete()
-            else:
-                room.prune_connections(channel_names)
+            room.prune_connections(age)
+
+    def prune_rooms(self):
+        Room.objects.filter(connection__isnull=True).delete()
 
 class Room(models.Model):
-    path = models.CharField(max_length=255, unique=True)
+    channel_name = models.CharField(max_length=255, unique=True)
 
     objects = RoomManager()
 
     def __str__(self):
-        return self.path
+        return self.channel_name
 
-    def remove_connection(self, channel_name):
-        self.connection_set.filter(channel_name=channel_name).delete()
-
-    def add_connection(self, user, channel_name):
-        self.connection_set.add(Connection.objects.get_or_create(
+    def add_connection(self, channel_name, user=None):
+        conn, created = Connection.objects.get_or_create(
             room=self,
             channel_name=channel_name,
-            user=None if isinstance(user, AnonymousUser) else user
-        )[0])
+            user=user if (user and user.is_authenticated()) else None
+        )
+        if created:
+            self.broadcast_presence()
 
-    def prune_connections(self, keep_channels):
-        print(self.path, keep_channels)
-        Connection.objects.filter(room=self).exclude(
-            channel_name__in=keep_channels
+    def prune_connections(self, age_in_seconds):
+        num_deleted, num_per_type = Connection.objects.filter(
+            room=self,
+            last_seen__lt=now() - timedelta(seconds=age_in_seconds)
         ).delete()
-        self.broadcast_presence()
+        if num_deleted > 0:
+            self.broadcast_presence()
 
     def serialize(self):
         User = get_user_model()
         members = User.objects.filter(connection__room=self).distinct()
         return {
-            'path': self.path,
+            'channel_name': self.channel_name,
             'members': [m.serialize_public() for m in members],
             'lurkers': self.connection_set.filter(user=None).count(),
         }
 
     def broadcast_presence(self):
-        Group(self.path).send({
+        Group(self.channel_name).send({
             'text': json.dumps({
                 'type': 'present',
                 'payload': self.serialize()
@@ -94,12 +97,12 @@ class Room(models.Model):
         return cls._join_error(message, path, "already-connected", "Already connected")
 
     @classmethod
-    def _join_error(cls, message, path, error_code, error_msg):
+    def _join_error(cls, message, channel_name, error_code, error_msg):
         message.reply_channel.send({
             'text': json.dumps({
                 'type': 'present',
                 'payload': {
-                    "path": path,
+                    "channel_name": channel_name,
                     "members": [],
                     "error": error_msg,
                     "error_code": error_code,

@@ -6,28 +6,15 @@ from channels.sessions import enforce_ordering
 from channels.auth import channel_session_user, channel_session_user_from_http
 
 from rooms.models import Room
+from rooms.utils import remove_connection
 
-@enforce_ordering(slight=True)
-@channel_session_user_from_http
-def ws_connect(message):
-    """
-    Generic room connection that doesn't enforce connection limits, auth, etc.
-    """
-    path = message.content['path'].replace('/', '__')
-    message.channel_session['path'] = path
-    Group(path).add(message.reply_channel)
-    room = Room.objects.add(path, message.user, message.reply_channel.name)
-    room.broadcast_presence()
-
+@remove_connection
 @enforce_ordering(slight=True)
 @channel_session_user
 def ws_disconnect(message, **kwargs):
     """
     Generic room disconnection
     """
-    path = message.channel_session.get('path', None)
-    if path:
-        Group(path).discard(message.reply_channel)
-        room = Room.objects.remove(path, message.user, message.reply_channel.name)
-        if room:
-            room.broadcast_presence()
+    channel_group_name = message.channel_session.get('channel_group_name', None)
+    if channel_group_name:
+        Group(channel_group_name).discard(message.reply_channel)
