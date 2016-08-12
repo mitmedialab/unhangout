@@ -6,35 +6,15 @@ from django.core.exceptions import ValidationError
 from django.db.models import F, Count
 from django.db import transaction
 
-from channels import Group
 from channels.sessions import enforce_ordering
 from channels.auth import channel_session_user, channel_session_user_from_http
+from channels_presence.models import Room
+from channels_presence.decorators import touch_presence
 
 from plenaries.models import Plenary, ChatMessage
 from breakouts.models import Breakout
-from rooms.models import Room
-from rooms.utils import touch_connection
 from videosync.models import VideoSync
-from reunhangout.utils import json_dumps
-
-def require_payload_keys(keylist):
-    """
-    Decorator to enforce that a message contains a 'payload' key with the given
-    keylist as subkeys.
-    """
-    def decorator(fn):
-        @functools.wraps(fn)
-        def inner(message, data, *args, **kwargs):
-            if 'payload' not in data:
-                return handle_error(message, "Requires 'payload' key")
-            if not isinstance(data['payload'], dict):
-                return handle_error(message, "'payload' must be a dict")
-            for key in keylist:
-                if key not in data['payload']:
-                    return handle_error(message, "Missing '%s' payload key." % key)
-            return fn(message, data, *args, **kwargs)
-        return inner
-    return decorator
+from reunhangout.channels_utils import broadcast, handle_error, require_payload_keys
 
 @enforce_ordering(slight=True)
 @channel_session_user_from_http
@@ -46,17 +26,12 @@ def ws_connect(message, slug):
     except Plenary.DoesNotExist:
         return handle_error(message,  'Plenary not found')
         
-    message.channel_session['path'] = plenary.channel_group_name
-    group = Group(message.channel_session['path'])
-
     # Here would be the place for enforcing a connection/user cap or other
     # auth, if such were needed.
 
-    group.add(message.reply_channel)
-    room = Room.objects.add(group.name, message.reply_channel.name, message.user)
-    room.broadcast_presence()
+    Room.objects.add(plenary.channel_group_name, message.reply_channel.name, message.user)
 
-@touch_connection
+@touch_presence
 @enforce_ordering(slight=True)
 @channel_session_user
 def ws_receive(message, slug):
@@ -69,9 +44,6 @@ def ws_receive(message, slug):
     except Plenary.DoesNotExist:
         return handle_error(message, "Plenary not found")
     route_message(message, data, plenary)
-
-def handle_error(message, error):
-    message.reply_channel.send({'text': json_dumps({"error": error})})
 
 def route_message(message, data, plenary):
     if 'type' not in data:
@@ -105,11 +77,8 @@ def handle_chat(message, data, plenary):
         message=data['payload']['message'],
         highlight=highlight
     )
-    Group(plenary.channel_group_name).send({
-        'text': json_dumps({
-            'type': 'chat', 'payload': chat_message.serialize()
-        })
-    })
+    broadcast(plenary.channel_group_name, type='chat',
+        payload=chat_message.serialize())
 
 @require_payload_keys(['embeds'])
 def handle_embeds(message, data, plenary):
@@ -148,11 +117,8 @@ def handle_embeds(message, data, plenary):
         'current': current
     }
     plenary.save()
-    Group(plenary.channel_group_name).send({
-        'text': json_dumps({
-            'type': 'embeds', 'payload': plenary.embeds
-        })
-    })
+    broadcast(plenary.channel_group_name, type='embeds',
+        payload=plenary.embeds)
 
 @require_payload_keys(['action'])
 def handle_breakout(message, data, plenary):
@@ -171,12 +137,8 @@ def handle_breakout(message, data, plenary):
         # Not-too-efficient strategy: always respond with the full list of
         # breakouts from a new database query.  We can optimize this later if
         # needed.
-        Group(plenary.channel_group_name).send({
-            'text': json_dumps({
-                'type': 'breakout_receive',
-                'payload': [b.serialize() for b in plenary.breakout_set.all()]
-            })
-        })
+        broadcast(plenary.channel_group_name, type='breakout_receive',
+            payload=[b.serialize() for b in plenary.breakout_set.all()])
 
     # Handle actions
 
@@ -295,12 +257,8 @@ def handle_plenary(message, data, plenary):
 
     update = {key: getattr(plenary, key) for key in simple_update_keys}
     update.update({key: getattr(plenary, "safe_" + key)() for key in sanitized_keys})
-    Group(plenary.channel_group_name).send({
-        'text': json_dumps({
-            'type': 'plenary',
-            'payload': {'plenary': update}
-        })
-    })
+    broadcast(plenary.channel_group_name, type='plenary',
+            payload={'plenary': update})
 
 @require_payload_keys([])
 def handle_auth(message, data, plenary):
@@ -349,9 +307,5 @@ def handle_message_breakouts(message, data, plenary):
 
     message = data['payload']['message']
     for breakout in plenary.breakout_set.all():
-        Group(breakout.channel_group_name).send({
-            'text': json_dumps({
-                'type': 'message_breakouts',
-                'payload': {'message': message}
-            })
-        })
+        broadcast(breakout.channel_group_name, type='message_breakouts',
+                payload={'message': message})

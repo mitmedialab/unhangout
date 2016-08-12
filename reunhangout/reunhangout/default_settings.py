@@ -36,13 +36,13 @@ INSTALLED_APPS = [
     'breakouts',
     'frontend',
     'plenaries',
-    'rooms',
     'videosync',
 
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'channels',
+    'channels_presence',
     'django_gravatar',
     'djcelery',
     'sorl.thumbnail',
@@ -169,12 +169,12 @@ CELERYBEAT_SCHEDULE = {
         'task': 'videosync.tasks.tick',
         'schedule': timedelta(seconds=15),
     },
-    'prune-connections': {
-        'task': 'rooms.tasks.prune_connections',
+    'prune-presence': {
+        'task': 'channels_presence.tasks.prune_presence',
         'schedule': timedelta(seconds=60),
     },
     'prune-rooms': {
-        'task': 'rooms.tasks.prune_rooms',
+        'task': 'channels_presence.tasks.prune_rooms',
         'schedule': timedelta(seconds=600),
     },
 }

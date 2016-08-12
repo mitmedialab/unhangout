@@ -75,9 +75,11 @@ export class SocketClient {
   }
 
   onOpen(event) {
-    this.heartbeat = setInterval(() => {
-      this.sendMessage("heartbeat");
-    }, 30000);
+    setTimeout(() => {
+      this.heartbeat = setInterval(() => {
+        this.sendMessage("heartbeat");
+      }, 30000);
+    }, Math.random() * 30000);
     this.store.dispatch(A.open({url: this.url}));
     if (this._connectedInterval) {
       clearTimeout(this._connectedInterval);

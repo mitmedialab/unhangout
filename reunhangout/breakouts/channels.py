@@ -1,12 +1,14 @@
 import json
 
-from channels import Group
 from channels.sessions import enforce_ordering
 from channels.auth import channel_session_user, channel_session_user_from_http
 
 from breakouts.models import Breakout
-from rooms.models import Room, Connection
-from rooms.utils import touch_connection
+from channels_presence.models import Room, Presence
+from channels_presence.decorators import touch_presence
+from reunhangout.channels_utils import (
+    send_over_capacity_error, send_already_connected_error
+)
 
 @enforce_ordering(slight=True)
 @channel_session_user_from_http
@@ -19,26 +21,23 @@ def ws_connect(message, breakout_id):
     except Breakout.DoesNotExist:
         return handle_error(message,  'Breakout not found')
 
-    group = Group(breakout.channel_group_name)
-
-    num_connections = Connection.objects.filter(
+    num_connections = Presence.objects.filter(
             room__channel_name=breakout.channel_group_name).count()
 
     # Enforce max attendees.
     if num_connections >= breakout.max_attendees:
-        return Room.over_capacity_error(message, group.name)
+        return send_over_capacity_error(message, breakout.channel_group_name)
 
-    elif message.user.is_authenticated() and Connection.objects.filter(
-            room__channel_name=group.name, user=message.user).exists():
+    elif message.user.is_authenticated() and Presence.objects.filter(
+                room__channel_name=breakout.channel_group_name,
+                user=message.user
+            ).exists():
         # Only one connection per user.
-        return Room.already_connected_error(message, group.name)
+        return send_already_connected_error(message, breakout.channel_group_name)
 
-    message.channel_session['channel_group_name'] = breakout.channel_group_name
-    group.add(message.reply_channel)
     room = Room.objects.add(group.name, message.reply_channel.name, message.user)
-    room.broadcast_presence()
 
-@touch_connection
+@touch_presence
 @enforce_ordering(slight=True)
 @channel_session_user
 def ws_receive(message, breakout_id):

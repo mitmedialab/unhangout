@@ -1,8 +1,7 @@
 from django.db import models
 from django.utils.timezone import now
 
-from channels import Group
-from reunhangout.utils import json_dumps
+from reunhangout.channels_utils import broadcast
 
 class VideoSyncManager(models.Manager):
     def start(self, sync_id, channel_group_name, time_index=0):
@@ -53,22 +52,12 @@ class VideoSync(models.Model):
         }
 
     def broadcast(self):
-        Group(self.channel_group_name).send({
-            'text': json_dumps({
-                'type': 'videosync',
-                'payload': self.serialize()
-            })
-        })
+        broadcast(self.channel_group_name, type='videosync', payload=self.serialize())
 
     def broadcast_pause(self):
-        Group(self.channel_group_name).send({
-            'text': json_dumps({
-                'type': 'videosync',
-                'payload': {
-                    'sync_id': self.sync_id,
-                    'state': 'paused'
-                }
-            })
+        broadcast(self.channel_group_name, type='videosync', payload={
+            'sync_id': self.sync_id,
+            'state': paused
         })
 
     def tick(self):
