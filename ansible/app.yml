@@ -1,0 +1,46 @@
+---
+- hosts: reunhangout
+  become: yes
+  become_user: root
+  gather_facts: true
+  vars_files:
+    - vars/secrets.yml
+  roles:
+    - common
+    - swap
+    - nginx
+    - letsencrypt-nginx
+    - letsencrypt
+    - postgresql
+    - nodesource.node
+    - monitored
+    #- tarsnap
+    - reunhangout
+    - django
+  vars:
+    domain: dev.unhangout.io
+    letsencrypt_domains:
+      - dev.unhangout.io 
+    uh_repo_dir: "/var/local/reunhangout/"
+    django_domain: "{{domain}}"
+    django_project_name: "reunhangout"
+    django_repo_url: "https://gitlab.com/cdetar/reunhangout.git"
+    django_repo_dir: "{{uh_repo_dir}}"
+    django_requirements_file: "{{uh_repo_dir}}shrinkwrap.txt"
+    django_project_dir: "{{uh_repo_dir}}reunhangout/"
+    django_venv_dir: "{{uh_repo_dir}}venv/"
+    django_static_dir: "{{django_project_dir}}public/"
+    django_media_dir: "{{django_project_dir}}media/"
+    django_id_rsa: no
+    django_wsgi_port: 3040
+    django_postgres_db: "{{uh_postgres_db}}"
+    django_postgres_user: "{{uh_postgres_user}}"
+    django_postgres_password: "{{uh_postgres_password}}"
+    django_settings_template: "roles/reunhangout/templates/reunhangout_settings.py"
+    django_nginx_template: "roles/reunhangout/templates/reunhangout_nginx.conf"
+    tarsnap_dirs:
+      - "{{django_media_dir}}"
+    tarsnap_postgres_databases:
+      - "{{uh_postgres_db}}"
+    nodejs_version: "4"
+

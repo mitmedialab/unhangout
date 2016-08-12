@@ -1,0 +1,27 @@
+---
+- hosts: all
+  vars_files:
+   - vars/secrets.yml
+  tasks:
+    - name: check if reboot is needed
+      stat: path="/var/run/reboot-required"
+      register: reboot_required
+
+    - name: reboot
+      become: yes
+      become_user: root
+      command: shutdown -r now
+      async: 0
+      poll: 0
+      ignore_errors: true
+      when: reboot_required.stat.exists
+
+    - name: Wait for reboot
+      wait_for: >
+        host="{{ansible_ssh_host | default(inventory_hostname)}}"
+        port="{{ansible_ssh_port | default(22)}}"
+        search_regex=OpenSSH
+        delay=5
+        timeout=120
+      connection: local
+      when: reboot_required.stat.exists

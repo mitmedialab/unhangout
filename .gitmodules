@@ -1,0 +1,6 @@
+[submodule "ansible/vendor/cfd-common-roles"]
+	path = ansible/vendor/cfd-common-roles
+	url = https://gitlab.com/cdetar/cfd-common-roles.git
+[submodule "ansible/vendor/nodesource.node"]
+	path = ansible/vendor/nodesource.node
+	url = https://github.com/nodesource/ansible-nodejs-role.git

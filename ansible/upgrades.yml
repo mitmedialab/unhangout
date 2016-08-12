@@ -1,0 +1,12 @@
+---
+- hosts: all
+  vars_files:
+   - vars/secrets.yml
+  become: yes
+  become_user: root
+  tasks:
+    - name: Update apt cache
+      apt: update_cache=yes
+    
+    - name: Upgrade all safe packages
+      apt: upgrade=safe
