@@ -1,0 +1,5 @@
+---
+ - name: Install redis
+   apt: state=installed pkg={{item}}
+   with_items:
+    - "redis-server"

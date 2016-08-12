@@ -1,0 +1,20 @@
+---
+ - name: Django systemd
+   template: src=reunhangout_systemd.service dest=/usr/lib/systemd/system/reunhangout.service
+   notify: restart {{django_init_name}}
+
+ - name: Channels worker systemd
+   template: src=reunhangout-channels-worker_systemd.service dest=/usr/lib/systemd/system/reunhangout-channels-worker.service
+
+ - name: Celery systemd
+   template: src=reunhangout-celery-beat_systemd.service dest=/usr/lib/systemd/system/reunhangout-celery-beat.service
+   tags:
+    - reunhangout
+
+# Could add a "when" here which checks on any changes to the init script or
+# the django codebase... simpler just to restart always.
+ - name: Restart celery and channels worker
+   service: name={{name}} state=restarted
+   with_items:
+    - "reunhangout-celery-beat"
+    - "reunhangout-channels-worker"
