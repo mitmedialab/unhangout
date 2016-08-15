@@ -60,7 +60,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['email'] # Used only by createsuperuser management command
 
     def clean(self):
         if self.email:
