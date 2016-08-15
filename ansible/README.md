@@ -19,7 +19,6 @@ can act as a starting point for broader use.
    as plain text; but if you don't use ansible-vault, be careful not to commit
    the file to source control, as it contains keys to the kingdom.  The file
    should define the following variables:
-
     * `reunhangout_domain`: The domain name as found in `hosts.cfg`.
     * `main_user_name`: The username to use for deployment
     * `main_user_salt`: A 16-character-ish alphanumerical string for salting
@@ -39,7 +38,6 @@ can act as a starting point for broader use.
       auth.
     * `letsencrypt_account_key`: An RSA private key to use as an account key
       for letsencrypt. Can be generated with `openssl genrsa 4096`.
-
 5. Run the first deployment:
   ```
   make firstrun
@@ -59,7 +57,6 @@ can act as a starting point for broader use.
     make all
     ```
   Other useful make targets:
-
     * `make app`: Only run the tasks pertaining to the reunhangout application
       (skipping the OS/user setup, firewall, webserver, letsencrypt, etc).
       Faster for rebuilding after code changes.
