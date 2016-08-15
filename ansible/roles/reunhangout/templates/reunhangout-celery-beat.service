@@ -1,4 +1,3 @@
-# FIX IT: https://github.com/celery/celery/issues/2131
 [Unit]
 Description=Reunhangout celery daemon 
 
@@ -6,8 +5,19 @@ Description=Reunhangout celery daemon
 Type=simple
 User=www-data
 Group=www-data
-ExecStart={{django_venv_dir}}bin/celery -A {{django_project_name}} beat -l info
 WorkingDirectory={{django_project_dir}}
+# Despite running as 'simple' type, celery beat seems to want to write a PID
+# file. Set up a /run/ directory target owned by www-data to store this.
+# run ExecStartPre as privileged user to set up /run
+PermissionsStartOnly=true
+ExecStartPre=/bin/mkdir -p /run/{{django_project_name}}
+ExecStartPre=/bin/chown -R www-data:www-data /run/{{django_project_name}}
+ExecStart={{django_venv_dir}}bin/celery -A {{django_project_name}} beat \
+    --workdir={{django_project_dir}} \
+    --pidfile=/run/{{django_project_name}}/celery-beat.pid \
+    --logfile={{django_logs_dir}}/celery-beat.log \
+    --loglevel=info
+ExecStop=/bin/systemctl kill {{django_project_name}}-celery-beat.service
 
 [Install]
 WantedBy=multi-user.target
