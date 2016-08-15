@@ -1,0 +1,13 @@
+# FIX IT: https://github.com/celery/celery/issues/2131
+[Unit]
+Description=Reunhangout celery daemon 
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+ExecStart={{django_venv_dir}}bin/celery -A {{django_project_name}} beat -l info
+WorkingDirectory={{django_project_dir}}
+
+[Install]
+WantedBy=multi-user.target

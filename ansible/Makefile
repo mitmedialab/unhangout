@@ -12,12 +12,15 @@ endif
 all:
 	ansible-playbook -i hosts.cfg app.yml $(VAULT) $(TAGS)
 
+firstrun:
+	ansible-playbook -i hosts.cfg firstrun.yml --user root
+	ansible-playbook -i hosts.cfg app.yml $(VAULT) --user root
+
 upgrades:
 	ansible-playbook -i hosts.cfg upgrades.yml $(VAULT)
 
 reboot:
 	ansible-playbook -i hosts.cfg reboot.yml $(VAULT)
 
-firstrun:
-	ansible-playbook -i hosts.cfg firstrun.yml --user root
-	ansible-playbook -i hosts.cfg app.yml $(VAULT) --user root
+createsuperuser:
+	ansible-playbook -i hosts.cfg createsuperuser.yml $(VAULT)

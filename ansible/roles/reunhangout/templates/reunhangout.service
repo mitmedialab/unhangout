@@ -1,0 +1,12 @@
+[Unit]
+Description=Reunhangout asgi interface server
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+ExecStart={{django_venv_dir}}bin/daphne {{django_project_name}}.asgi:channel_layer -p {{django_wsgi_port}} --access-log={{django_logs_dir}}access.log
+WorkingDirectory={{django_project_dir}}
+
+[Install]
+WantedBy=multi-user.target

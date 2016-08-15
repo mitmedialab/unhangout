@@ -1,0 +1,7 @@
+---
+- hosts: all
+  vars_files:
+   - vars/secrets.yml
+  tasks:
+    - name: Create superuser
+      shell: "/var/local/reunhangout/venv/bin/python /var/local/reunhangout/reunhangout/manage.py createsuperuser --username admin --email {{admin_email}}"

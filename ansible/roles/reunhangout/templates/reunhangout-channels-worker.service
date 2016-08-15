@@ -5,7 +5,7 @@ Description=Reunhangout channels worker server
 Type=simple
 User=www-data
 Group=www-data
-ExecStart {{django_venv_dir}}bin/python {{django_project_dir}}{{django_project_name}}/manage.py runworker
+ExecStart={{django_venv_dir}}bin/python {{django_project_dir}}/manage.py runworker
 
 [Install]
 WantedBy=multi-user.target

@@ -1,52 +1,34 @@
 ---
- - file: path=/usr/lib/systemd/system state=directory
-   tags:
-    - reunhangout
-    - reunhangout-post
+ - name: Systemd parent dir
+   file: path=/usr/lib/systemd/system state=directory
+   tags: ['reunhangout', 'reunhangout-post']
 
- - name: Django systemd
-   template: src=reunhangout_systemd.service dest=/usr/lib/systemd/system/{{django_init_name}}.service
-   tags:
-    - reunhangout
-    - reunhangout-post
+ - name: Systemd scripts
+   template: src={{item}} dest=/usr/lib/systemd/system/{{item}}
+   with_items:
+    - "{{django_init_name}}.service"
+    - reunhangout-channels-worker.service
+    - reunhangout-celery-beat.service
+   register: django_systemd
+   tags: ['reunhangout', 'reunhangout-post']
    # NOTE: Expecting a step below to restart this service if anything in the
    # codebase has changed, and thus not require an explicit restart here.
 
- - name: Channels worker systemd
-   template: src=reunhangout-channels-worker_systemd.service dest=/usr/lib/systemd/system/reunhangout-channels-worker.service
-   tags:
-    - reunhangout
-    - reunhangout-post
-   # NOTE: Expecting a step below to restart this service if anything in the
-   # codebase has changed, and thus not require an explicit restart here.
-
- - name: Celery systemd
-   template: src=reunhangout-celery-beat_systemd.service dest=/usr/lib/systemd/system/reunhangout-celery-beat.service
-   tags:
-    - reunhangout
-    - reunhangout-post
-   # NOTE: Expecting a step below to restart this service if anything in the
-   # codebase has changed, and thus not require an explicit restart here.
 
 # Manual restart of all services with daemon_reload if anything in the
 # codebase changed. Without this, we'd need to set up handlers/notify for all
 # things. Should be easier in ansible v2.2:
 # https://docs.ansible.com/ansible/systemd_module.html
- - block:
-   - name: Reload systemd files
-     command: systemctl daemon-reload
-     tags:
-      - reunhangout
-      - reunhangout-post
-  
-   - name: Restart all workers
-     service: name={{item}} state=restarted
-     with_items:
-      - "{{django_init_name}}"
-      - "reunhangout-celery-beat"
-      - "reunhangout-channels-worker"
-     register: reunhangout_restart_workers
-     tags:
-      - reunhangout
-      - reunhangout-post
-   when: django_scripts_result is not defined or django_scripts_result.changed
+ - name: Reload systemd files
+   command: systemctl daemon-reload
+   when: django_systemd.changed
+   tags: ['reunhangout', 'reunhangout-post']
+
+ - name: Restart all workers
+   service: name={{item}} state=restarted
+   with_items:
+    - "{{django_init_name}}"
+    - "reunhangout-celery-beat"
+    - "reunhangout-channels-worker"
+   when: django_scripts_result is not defined or django_scripts_result.changed or django_systemd.changed
+   tags: ['reunhangout', 'reunhangout-post']
