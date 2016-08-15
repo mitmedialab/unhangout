@@ -16,6 +16,9 @@ firstrun:
 	ansible-playbook -i hosts.cfg firstrun.yml --user root
 	ansible-playbook -i hosts.cfg app.yml $(VAULT) --user root
 
+app:
+	ansible-playbook -i hosts.cfg app.yml $(VAULT) --tags reunhangout
+
 upgrades:
 	ansible-playbook -i hosts.cfg upgrades.yml $(VAULT)
 
