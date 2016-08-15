@@ -1,23 +1,48 @@
 ---
- - name: Systemd
-   file: state=directory path=/usr/lib/systemd/reunhangout/
-
- - name: Django systemd
-   template: src=reunhangout_systemd.service dest=/usr/lib/systemd/reunhangout/reunhangout.service
-   notify: restart {{django_init_name}}
-
- - name: Channels worker systemd
-   template: src=reunhangout-channels-worker_systemd.service dest=/usr/lib/systemd/reunhangout/reunhangout-channels-worker.service
-
- - name: Celery systemd
-   template: src=reunhangout-celery-beat_systemd.service dest=/usr/lib/systemd/reunhangout/reunhangout-celery-beat.service
+ - file: path=/usr/lib/systemd/system state=directory
    tags:
     - reunhangout
+    - reunhangout-post
 
-# Could add a "when" here which checks on any changes to the init script or
-# the django codebase... simpler just to restart always.
- - name: Restart celery and channels worker
-   service: name={{name}} state=restarted
-   with_items:
-    - "reunhangout-celery-beat"
-    - "reunhangout-channels-worker"
+ - name: Django systemd
+   template: src=reunhangout_systemd.service dest=/usr/lib/systemd/system/{{django_init_name}}.service
+   # NOTE: Expecting a step below to restart this service if anything in the
+   # codebase has changed, and thus not require an explicit restart here.
+
+ - name: Channels worker systemd
+   template: src=reunhangout-channels-worker_systemd.service dest=/usr/lib/systemd/system/reunhangout-channels-worker.service
+   tags:
+    - reunhangout
+    - reunhangout-post
+   # NOTE: Expecting a step below to restart this service if anything in the
+   # codebase has changed, and thus not require an explicit restart here.
+
+ - name: Celery systemd
+   template: src=reunhangout-celery-beat_systemd.service dest=/usr/lib/systemd/system/reunhangout-celery-beat.service
+   tags:
+    - reunhangout
+    - reunhangout-post
+   # NOTE: Expecting a step below to restart this service if anything in the
+   # codebase has changed, and thus not require an explicit restart here.
+
+# Manual restart of all services with daemon_reload if anything in the
+# codebase changed. Without this, we'd need to set up handlers/notify for all
+# things. Should be easier in ansible v2.2:
+# https://docs.ansible.com/ansible/systemd_module.html
+ - block:
+   - name: Reload systemd files
+     command: systemctl daemon-reload
+     tags:
+      - reunhangout
+      - reunhangout-post
+  
+   - name: Restart all workers
+     service: name={{item}} state=restarted
+     with_items:
+      - "{{django_init_name}}"
+      - "reunhangout-celery-beat"
+      - "reunhangout-channels-worker"
+     tags:
+      - reunhangout
+      - reunhangout-post
+   when: django_scripts_result.changed
