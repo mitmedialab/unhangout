@@ -19,4 +19,5 @@ reboot:
 	ansible-playbook -i hosts.cfg reboot.yml $(VAULT)
 
 firstrun:
+	ansible-playbook -i hosts.cfg firstrun.yml --user root
 	ansible-playbook -i hosts.cfg app.yml $(VAULT) --user root

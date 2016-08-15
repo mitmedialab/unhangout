@@ -1,13 +1,16 @@
 ---
+ - name: Systemd
+   file: state=directory path=/usr/lib/systemd/reunhangout/
+
  - name: Django systemd
-   template: src=reunhangout_systemd.service dest=/usr/lib/systemd/system/reunhangout.service
+   template: src=reunhangout_systemd.service dest=/usr/lib/systemd/reunhangout/reunhangout.service
    notify: restart {{django_init_name}}
 
  - name: Channels worker systemd
-   template: src=reunhangout-channels-worker_systemd.service dest=/usr/lib/systemd/system/reunhangout-channels-worker.service
+   template: src=reunhangout-channels-worker_systemd.service dest=/usr/lib/systemd/reunhangout/reunhangout-channels-worker.service
 
  - name: Celery systemd
-   template: src=reunhangout-celery-beat_systemd.service dest=/usr/lib/systemd/system/reunhangout-celery-beat.service
+   template: src=reunhangout-celery-beat_systemd.service dest=/usr/lib/systemd/reunhangout/reunhangout-celery-beat.service
    tags:
     - reunhangout
 
