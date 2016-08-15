@@ -7,9 +7,7 @@ settings.py
 db.sqlite3
 reunhangout/public
 webpack-stats.json
-webpack-stats-prod.json
 reunhangout/static/bundles/*
-reunhangout/static/dist/*
 reunhangout/media/*
 !reunhangout/media/assets
 logs/*
