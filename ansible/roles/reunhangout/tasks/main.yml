@@ -6,6 +6,9 @@
 
  - name: Django systemd
    template: src=reunhangout_systemd.service dest=/usr/lib/systemd/system/{{django_init_name}}.service
+   tags:
+    - reunhangout
+    - reunhangout-post
    # NOTE: Expecting a step below to restart this service if anything in the
    # codebase has changed, and thus not require an explicit restart here.
 
@@ -42,7 +45,8 @@
       - "{{django_init_name}}"
       - "reunhangout-celery-beat"
       - "reunhangout-channels-worker"
+     register: reunhangout_restart_workers
      tags:
       - reunhangout
       - reunhangout-post
-   when: django_scripts_result.changed
+   when: django_scripts_result is not defined or django_scripts_result.changed
