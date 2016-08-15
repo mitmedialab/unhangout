@@ -7,6 +7,10 @@ like a cheap Digital Ocean, Linode or AWS server.
 As of now, this is a somewhat opinionated and un-flexible configuration; but it
 can act as a starting point for broader use.
 
+NOTE: This configuration uses submodules, so be sure to run
+`git submodule init` followed by `git submodule update` within this repository
+before use.
+
 ## Installation
 
 1. Register a domain name or establish a subdomain and point it to the server you'd like to use.
