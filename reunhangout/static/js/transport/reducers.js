@@ -24,9 +24,9 @@ export const socket = (state=null, action) => {
   return state;
 }
 
-export const present = (state=null, action) => {
+export const presence = (state=null, action) => {
   switch (action.type) {
-    case A.SET_PRESENT:
+    case A.SET_PRESENCE:
       return action.payload;
   }
   return state || {'path': null, 'members': []};

@@ -55,14 +55,17 @@ export class SocketClient {
       case "plenary":
         this.store.dispatch(PLENARY_ACTIONS.setPlenary(data.payload));
         break;
-      case "present":
-        this.store.dispatch(A.setPresent(data.payload));
+      case "presence":
+        this.store.dispatch(A.setPresence(data.payload));
         break;
       case "videosync":
         this.store.dispatch(VIDEOSYNC_ACTIONS.tick(data.payload));
         break;
       case "message_breakouts":
         this.store.dispatch(BREAKOUT_ACTIONS.message(data.payload));
+        break;
+      case "breakout_presence":
+        this.store.dispatch(PLENARY_ACTIONS.setBreakoutPresence(data.payload));
         break;
       case "error":
         let error = data.error ? data.error : data;

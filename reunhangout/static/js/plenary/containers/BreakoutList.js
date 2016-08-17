@@ -163,7 +163,9 @@ class BreakoutList extends React.Component {
 
       <div className="breakouts-container"> 
         { breakouts.map((breakout, i) => {
-            return <Breakout breakout={breakout}
+            return <Breakout
+              breakout={breakout}
+              presence={this.props.breakout_presence[breakout.id] || {}}
               auth={this.props.auth}
               key={`${i}`}
               onChangeBreakouts={this.props.onChangeBreakouts} />
@@ -248,11 +250,6 @@ class BreakoutList extends React.Component {
   }
 }
 
-const sortPresent = (present, auth) => {
-  // Sort self first, others second.
-  return _.sortBy(present.members, (u) => u.username !== auth.username)
-}
-    
 export default connect(
   // map state to props
   (state) => ({
@@ -260,8 +257,7 @@ export default connect(
     breakoutCrud: state.breakoutCrud,
     plenary: state.plenary,
     auth: state.auth,
-    // present: {
-    //   members: sortPresent(state.present, state.auth)}
+    breakout_presence: state.breakout_presence,
   }),
   (dispatch, ownProps) => ({
     onChangeBreakouts: (payload) => dispatch(A.changeBreakouts(payload)),

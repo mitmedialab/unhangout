@@ -56,7 +56,14 @@ def _join_error(message, channel_name, error_code, error_msg):
         "error_code": error_code,
     }
     message.reply_channel.send(prepare_message(
-        type='present',
+        type='presence',
         payload=data
     ))
     track("error", message.user, data)
+
+def serialize_room(room):
+    return {
+        'channel_name': room.channel_name,
+        'members': [m.serialize_public() for m in room.get_users()],
+        'lurkers': room.get_anonymous_count(),
+    }

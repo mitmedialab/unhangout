@@ -4,7 +4,7 @@ import * as style from "../../../scss/pages/plenary/_plenarystyle.scss"
 import * as BS from "react-bootstrap";
 import Embed from './Embed';
 import BreakoutList from './BreakoutList';
-import Presence from './Presence';
+import {Presence} from './Presence';
 import Chat from './Chat';
 import PlenaryInfo from './PlenaryInfo';
 import {ConnectionStatus} from '../../transport';
@@ -41,12 +41,12 @@ class Plenary extends React.Component {
             <BS.Col xs={3} className="column users-col">
             <PlenaryInfo />
               <img src="../../../../media/assets/unhangout-logo-blue-full.png" className="logo"/>
-              <Presence />
+              <Presence presence={this.props.presence} auth={this.props.auth} />
               <div className="user-menu-flex-container">
                 <div className="user-menu-container">
                   <img src={userAvatar} />
                   <h4>{this.props.auth.username}</h4>
-                    <BS.Dropdown 
+                    <BS.Dropdown
                       id="user-menu-button"
                       dropup
                       pullRight>
@@ -55,7 +55,7 @@ class Plenary extends React.Component {
                         <BS.Glyphicon glyph="chevron-up" />
                       </BS.Dropdown.Toggle>
                       <BS.Dropdown.Menu>
-                        <BS.MenuItem 
+                        <BS.MenuItem
                           onClick={(e) => this.setState({contactInfoModalOpen: true})}>
                           My Contact Info
                         </BS.MenuItem>
@@ -70,19 +70,19 @@ class Plenary extends React.Component {
                     <BS.Modal.Title>My contact information</BS.Modal.Title>
                   </BS.Modal.Header>
                   <BS.Modal.Body>
-                    <p>What is this for? After the event, we will send you an email with 
-                    the names and contact information of the people you interacted with 
-                    (we will send a similar email to each participants). That way you can 
+                    <p>What is this for? After the event, we will send you an email with
+                    the names and contact information of the people you interacted with
+                    (we will send a similar email to each participants). That way you can
                     follow up and continue the conversations you started today.</p>
-                    <p>We care about privacy and will never share your contact information 
+                    <p>We care about privacy and will never share your contact information
                     with people outside of the event.</p>
                     <p>What is the best way for other Unhangout participants to reach you?</p>
                     <BS.Form horizontal>
                       <BS.FormGroup controlId="email">
                         <BS.Col sm={2}>Email</BS.Col>
                         <BS.Col sm={10}>
-                          <BS.FormControl 
-                            type="text" 
+                          <BS.FormControl
+                            type="text"
                             placeholder="Email Address"
                             value={(this.state && this.state.email) || ""}
                             onChange={(e) => this.setState({email: e.target.value})} />
@@ -91,9 +91,9 @@ class Plenary extends React.Component {
                       <BS.FormGroup controlId="twitter-handle">
                         <BS.Col sm={2}>Twitter Handle</BS.Col>
                         <BS.Col sm={10}>
-                          <BS.FormControl 
-                            type="text" 
-                            placeholder="@TwitterHandle" 
+                          <BS.FormControl
+                            type="text"
+                            placeholder="@TwitterHandle"
                             value={(this.state && this.state.twitter_handle) || ""}
                             onChange={(e) => this.setState({twitter_handle: e.target.value})}/>
                         </BS.Col>
@@ -101,9 +101,9 @@ class Plenary extends React.Component {
                        <BS.FormGroup controlId="linkedin-profile">
                         <BS.Col sm={2}>LinkedIn Profile</BS.Col>
                         <BS.Col sm={10}>
-                          <BS.FormControl 
-                            type="text" 
-                            placeholder="LinkedIn Profile URL" 
+                          <BS.FormControl
+                            type="text"
+                            placeholder="LinkedIn Profile URL"
                             value={(this.state && this.state.linkedin_profile) || ""}
                             onChange={(e) => this.setState({linkedin_profile: e.target.value})}/>
                         </BS.Col>
@@ -121,7 +121,7 @@ class Plenary extends React.Component {
                     </BS.Form>
                   </BS.Modal.Body>
                   <BS.Modal.Footer>
-                    <BS.Button 
+                    <BS.Button
                     onClick={(e) => this.handleSubmitContact(e)}>
                     Submit</BS.Button>
                   </BS.Modal.Footer>
@@ -177,22 +177,22 @@ class Plenary extends React.Component {
             <div>
               {this.state.alertVisible ?
                 this.props.auth.is_authenticated ?
-                <BS.Alert 
-                  bsStyle="success"  
+                <BS.Alert
+                  bsStyle="success"
                   onDismiss={() => {
                     this.handleAlertDismiss()}
                   }>
                   <h4>Thanks for logging in. Come back at the posted start time to participate!</h4>
                 </BS.Alert>
                 :
-                <BS.Alert 
-                  bsStyle="warning" 
+                <BS.Alert
+                  bsStyle="warning"
                   onDismiss={() => {
                     this.handleAlertDismiss()}
                   }>
                   <h4>Please log-in above, and you will be automatically connected when the event starts.</h4>
                 </BS.Alert>
-    
+
               : ""}
             </div>
             </BS.Col>
@@ -207,7 +207,8 @@ export default connect(
   // map state to props
   (state) => ({
     plenary: state.plenary,
-    auth: state.auth
+    auth: state.auth,
+    presence: state.presence
   }),
   // map dispatch to props
   (dispatch, ownProps) => ({

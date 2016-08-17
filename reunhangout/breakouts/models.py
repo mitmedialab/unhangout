@@ -59,6 +59,11 @@ class Breakout(models.Model):
     def channel_group_name(self):
         return "breakout-%s" % self.pk
 
+    @classmethod
+    def id_from_channel_group_name(cls, channel_group_name):
+        if channel_group_name.startswith("breakout-"):
+            return channel_group_name[len("breakout-"):]
+
     @property
     def webrtc_id(self):
         src = '{}-{}'.format(Site.objects.get_current(), self.channel_group_name)

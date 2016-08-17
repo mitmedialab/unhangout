@@ -4,6 +4,7 @@ import * as style from "../../../scss/pages/plenary/_breakoutliststyle.scss";
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
 import {Editor, EditorState, ContentState, SelectionState} from 'draft-js';
+import {Avatar, sortPresence} from './Presence';
 
 export default class Breakout extends React.Component {
   constructor(props) {
@@ -90,123 +91,91 @@ export default class Breakout extends React.Component {
       return vote.username === this.props.auth.username
     });
     let titleHasFocus = this.state.editorState.getSelection().getHasFocus();
+    let showPresence = this.props.breakout.open && !this.props.breakout.is_proposal;
+    let classes = ['breakout'];
     if (this.props.breakout.is_proposal) {
-      return <div className="breakout proposal">
-          { showEditTitle ?
-            titleHasFocus ?
-              <div 
-              tabIndex="0"
-              className="title-input title-focus"
-              onClick={(e) => this.handleClick(e)} >
-                <Editor 
-                editorState={this.state.editorState} 
-                onChange={this.onChange} />
-              </div>
-              :
-              <div 
-              tabIndex="0"
-              className="title-input"
-              onClick={(e) => this.handleClick(e)} >
-                <Editor 
-                editorState={this.state.editorState} 
-                onChange={this.onChange} />
-              </div>
-            :
-              <h5>{this.props.breakout.title}</h5>
-          }
-          { showVote ?
-              <BS.Button onClick={(e) => this.handleVote(e)}>
-                {votedForThis ? '✓' : ''}
-                Vote | {this.props.breakout.votes.length}
-              </BS.Button> 
-            : showJoin ?
-              <BS.Button href={this.props.breakout.url} target='_blank'>
-                Join
-              </BS.Button>
-            :
-              <BS.Button disabled>Locked</BS.Button>
-          }
-          { showDelete ?
-              <BS.Button bsStyle="danger" onClick= {(e) => this.handleDelete(e)}>
-                <i className='fa fa-trash' />
-              </BS.Button>
-            : ""
-          }
-          { showApprove ?
-              <BS.Button onClick={(e) => this.handleApprove(e)}>
-                Approve
-              </BS.Button>
-            : ""
-          }
-          { showUnapprove ?
-              <BS.Button onClick={(e) => this.handleApprove(e)}>
-                Unapprove
-              </BS.Button>
-            : ""
-          }
-        </div>
-    } else {
-      return <div className="breakout">
-          { showEditTitle ?
-            titleHasFocus ?
-              <div 
-              tabIndex="0"
-              className="title-input title-focus"
-              onClick={(e) => this.handleClick(e)} >
-                <Editor 
-                editorState={this.state.editorState} 
-                onChange={this.onChange} />
-              </div>
-              :
-              <div 
-              tabIndex="0"
-              className="title-input"
-              onClick={(e) => this.handleClick(e)} >
-                <Editor 
-                editorState={this.state.editorState} 
-                onChange={this.onChange} />
-              </div>
-            :
-              <h5>{this.props.breakout.title}</h5>
-          }
-          { showVote ?
-              <BS.Button onClick={(e) => this.handleVote(e)}>
-                {votedForThis ? '✓' : ''}
-                Vote | {this.props.breakout.votes.length}
-              </BS.Button> 
-            : showJoin ?
-              <BS.Button href={this.props.breakout.url} target='_blank'>
-                Join
-              </BS.Button>
-            :
-              <BS.Button disabled>Locked</BS.Button>
-          }
-          { showDelete ?
-              <BS.Button bsStyle="danger" onClick= {(e) => this.handleDelete(e)}>
-                <i className='fa fa-trash' />
-              </BS.Button>
-            : ""
-          }
-          { showApprove ?
-              <BS.Button onClick={(e) => this.handleApprove(e)}>
-                Approve
-              </BS.Button>
-            : ""
-          }
-          { showUnapprove ?
-              <BS.Button onClick={(e) => this.handleApprove(e)}>
-                Unapprove
-              </BS.Button>
-            : ""
-          }
-        </div>
+      classes.push('proposal');
     }
-    
+    return <div className={classes.join(" ")}>
+      { showPresence ?  <BreakoutPresence {...this.props} /> : "" }
+      { showEditTitle ?
+        titleHasFocus ?
+          <div tabIndex="0"
+               className="title-input title-focus"
+               onClick={(e) => this.handleClick(e)}>
+            <Editor editorState={this.state.editorState} 
+                    onChange={this.onChange} />
+          </div>
+          :
+          <div tabIndex="0"
+               className="title-input"
+               onClick={(e) => this.handleClick(e)}>
+            <Editor editorState={this.state.editorState} 
+                    onChange={this.onChange} />
+          </div>
+        :
+          <h5>{this.props.breakout.title}</h5>
+      }
+      { showVote ?
+          <BS.Button onClick={(e) => this.handleVote(e)}>
+            {votedForThis ? '✓' : ''}
+            Vote | {this.props.breakout.votes.length}
+          </BS.Button> 
+        : showJoin ?
+          <BS.Button href={this.props.breakout.url} target='_blank'>
+            Join
+          </BS.Button>
+        :
+          <BS.Button disabled>Locked</BS.Button>
+      }
+      { showDelete ?
+          <BS.Button bsStyle="danger" onClick= {(e) => this.handleDelete(e)}>
+            <i className='fa fa-trash' />
+          </BS.Button>
+        : ""
+      }
+      { showApprove ?
+          <BS.Button onClick={(e) => this.handleApprove(e)}>
+            Approve
+          </BS.Button>
+        : ""
+      }
+      { showUnapprove ?
+          <BS.Button onClick={(e) => this.handleApprove(e)}>
+            Unapprove
+          </BS.Button>
+        : ""
+      }
+    </div>
   }
 }
-
 Breakout.propTypes = {
   'breakout': React.PropTypes.object.isRequired,
+  'presence': React.PropTypes.object.isRequired,
   'auth': React.PropTypes.object.isRequired,
   'onChangeBreakouts': React.PropTypes.func.isRequired
+}
+
+class BreakoutPresence extends React.Component {
+  render() {
+    let members = sortPresence(this.props.presence, this.props.auth);
+    let numSlots = this.props.breakout.max_attendees;
+    let empties = numSlots - members.length;
+    for (let i = 0; i < empties; i++) {
+      members.push(null);
+    }
+    return <div className='breakout-presence'>
+      { members.map((user, i) => (
+          <span className={`slot${user === null ? " empty" : ""}`} key={`user-${i}`}>
+            { user === null ? "" : <Avatar user={user} /> }
+          </span>
+        ))
+      }
+    </div>
+  }
+}
+BreakoutPresence.propTypes = {
+  'breakout': React.PropTypes.object.isRequired,
+  'presence': React.PropTypes.object.isRequired,
+  'auth': React.PropTypes.object.isRequired,
 }
