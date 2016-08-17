@@ -9,12 +9,13 @@ from django.db import transaction
 from channels.sessions import enforce_ordering
 from channels.auth import channel_session_user, channel_session_user_from_http
 from channels_presence.models import Room
-from channels_presence.decorators import touch_presence
+from channels_presence.decorators import touch_presence, remove_presence
 
 from plenaries.models import Plenary, ChatMessage
 from breakouts.models import Breakout
 from videosync.models import VideoSync
 from reunhangout.channels_utils import broadcast, handle_error, require_payload_keys
+from analytics.models import track
 
 @enforce_ordering(slight=True)
 @channel_session_user_from_http
@@ -30,6 +31,18 @@ def ws_connect(message, slug):
     # auth, if such were needed.
 
     Room.objects.add(plenary.channel_group_name, message.reply_channel.name, message.user)
+    message.channel_session['plenary_id'] = plenary.id
+    track("join_plenary", message.user, plenary=plenary)
+
+@remove_presence
+@channel_session_user
+def ws_disconnect(message):
+    if message.channel_session.get('plenary_id'):
+        try:
+            plenary = Plenary.objects.get(pk=message.channel_session['plenary_id'])
+        except Plenary.DoesNotExist:
+            plenary = None
+        track("leave_plenary", message.user, plenary=plenary)
 
 @touch_presence
 @enforce_ordering(slight=True)
@@ -77,8 +90,9 @@ def handle_chat(message, data, plenary):
         message=data['payload']['message'],
         highlight=highlight
     )
-    broadcast(plenary.channel_group_name, type='chat',
-        payload=chat_message.serialize())
+    data = chat_message.serialize()
+    broadcast(plenary.channel_group_name, type='chat', payload=data)
+    track("plenary_chat", message.user, data, plenary=plenary)
 
 @require_payload_keys(['embeds'])
 def handle_embeds(message, data, plenary):
@@ -117,8 +131,8 @@ def handle_embeds(message, data, plenary):
         'current': current
     }
     plenary.save()
-    broadcast(plenary.channel_group_name, type='embeds',
-        payload=plenary.embeds)
+    broadcast(plenary.channel_group_name, type='embeds', payload=plenary.embeds)
+    track("change_embeds", message.user, plenary.embeds, plenary=plenary)
 
 @require_payload_keys(['action'])
 def handle_breakout(message, data, plenary):
@@ -153,6 +167,8 @@ def handle_breakout(message, data, plenary):
             max_attendees=payload.get('max_attendees') or 10,
             is_proposal=(not is_admin or payload.get('is_proposal', False))
         )
+        if breakout.is_proposal:
+            track("propose_breakout", message.user, breakout=breakout)
         return respond_with_breakouts()
 
     elif action == 'group_me':
@@ -223,6 +239,7 @@ def handle_breakout(message, data, plenary):
             breakout.votes.remove(message.user)
         else:
             breakout.votes.add(message.user)
+        track("change_breakout_vote", message.user, breakout=breakout)
         return respond_with_breakouts()
 
 @require_payload_keys([])
@@ -252,7 +269,6 @@ def handle_plenary(message, data, plenary):
                     breakout.full_clean()
                     breakout.save()
     except ValidationError as e:
-        print(e)
         return handle_error(message, json_dumps(e.message_dict))
 
     update = {key: getattr(plenary, key) for key in simple_update_keys}
@@ -275,6 +291,7 @@ def handle_auth(message, data, plenary):
         return handle_error(message, json_dumps(e.message_dict))
 
     user.save()
+    track("change_auth", message.user, plenary=plenary)
 
 @require_payload_keys(['action'])
 def handle_video_sync(message, data, plenary):
@@ -295,10 +312,12 @@ def handle_video_sync(message, data, plenary):
             channel_group_name=plenary.channel_group_name,
             time_index=time_index
         )
+        track("start_play_for_all", message.user, plenary=plenary)
     elif payload['action'] == "pause":
         VideoSync.objects.stop(
             sync_id=plenary.channel_group_name
         )
+        track("stop_play_for_all", message.user, plenary=plenary)
 
 @require_payload_keys(['message'])
 def handle_message_breakouts(message, data, plenary):
@@ -309,3 +328,4 @@ def handle_message_breakouts(message, data, plenary):
     for breakout in plenary.breakout_set.all():
         broadcast(breakout.channel_group_name, type='message_breakouts',
                 payload={'message': message})
+    track("message_breakouts", message.user, {'message': message}, plenary=plenary)

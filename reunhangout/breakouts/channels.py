@@ -5,9 +5,9 @@ from channels.auth import channel_session_user, channel_session_user_from_http
 
 from breakouts.models import Breakout
 from channels_presence.models import Room, Presence
-from channels_presence.decorators import touch_presence
+from channels_presence.decorators import touch_presence, remove_presence
 from reunhangout.channels_utils import (
-    send_over_capacity_error, send_already_connected_error
+    send_over_capacity_error, send_already_connected_error, handle_error
 )
 
 @enforce_ordering(slight=True)
@@ -36,6 +36,18 @@ def ws_connect(message, breakout_id):
         return send_already_connected_error(message, breakout.channel_group_name)
 
     room = Room.objects.add(group.name, message.reply_channel.name, message.user)
+    message.channel_session['breakout_id'] = breakout.id
+    track("join_breakout", message.user, breakout=breakout)
+
+@remove_presence
+@channel_session_user
+def ws_disconnect(message):
+    if message.channel_session.get('breakout_id'):
+        try:
+            breakout = Breakout.objects.get(pk=message.channel_session['breakout_id'])
+        except Breakout.DoesNotExist:
+            breakout = None
+        track("leave_breakout", message.user, breakout=breakout)
 
 @touch_presence
 @enforce_ordering(slight=True)
@@ -54,9 +66,6 @@ def ws_receive(message, breakout_id):
         return handle_error(message, "Breakout not found")
 
     route_message(message, data, breakout)
-
-def handle_error(message, error):
-    message.reply_channel.send({'text': json.dumps({"error": error})})
 
 def route_message(message, data, breakout):
     pass

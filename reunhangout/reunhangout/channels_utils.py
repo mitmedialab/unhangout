@@ -3,6 +3,7 @@ import json
 
 from channels import Group
 from django.core.serializers.json import DjangoJSONEncoder
+from analytics.models import track
 
 def prepare_message(payload=None, error=None, type=None):
     obj = {}
@@ -18,7 +19,9 @@ def broadcast(group_name, **kwargs):
     Group(group_name).send(prepare_message(**kwargs))
 
 def handle_error(message, error):
-    message.reply_channel.send(prepare_message(type='error', error=error))
+    data = prepare_message(type='error', error=error)
+    message.reply_channel.send(data)
+    track("error", message.user, data)
 
 def require_payload_keys(keylist):
     """
@@ -46,12 +49,14 @@ def send_already_connected_error(message, channel_name):
     return _join_error(message, channel_name, "already-connected", "Already connected")
 
 def _join_error(message, channel_name, error_code, error_msg):
+    data = {
+        'channel_name': channel_name,
+        'members': [],
+        'error': error_msg,
+        "error_code": error_code,
+    }
     message.reply_channel.send(prepare_message(
         type='present',
-        payload={
-            'channel_name': channel_name,
-            'members': [],
-            'error': error_msg,
-            "error_code": error_code,
-        }
+        payload=data
     ))
+    track("error", message.user, data)
