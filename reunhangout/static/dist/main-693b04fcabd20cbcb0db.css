@@ -8147,6 +8147,23 @@ footer {
     .breakout.proposal .title-input {
       background-color: #fff; }
 
+.breakout-presence {
+  position: relative;
+  padding-bottom: 0.2em;
+  width: 100%; }
+  .breakout-presence .slot {
+    width: 32px;
+    height: 32px;
+    margin-right: 2px;
+    position: relative;
+    display: inline-block;
+    vertical-align: middle; }
+    .breakout-presence .slot.empty {
+      border: 1px solid #ccc; }
+  .breakout-presence img {
+    width: 100%;
+    height: 100%; }
+
 .breakouts-container {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -8155,7 +8172,7 @@ footer {
   -webkit-box-direction: normal;
       -ms-flex-direction: column;
           flex-direction: column; }
-.present {
+.presence {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -8166,7 +8183,7 @@ footer {
           flex-grow: 1;
   margin: 5px;
   margin-top: 0px; }
-  .present .user-avatar {
+  .presence .user-avatar {
     width: 48px;
     height: 48px;
     border-radius: 5px;
