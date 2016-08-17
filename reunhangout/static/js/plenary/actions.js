@@ -111,6 +111,9 @@ export const messageBreakouts = (payload) => {
   }
 }
 
+export const SET_BREAKOUT_PRESENCE = 'SET_BREAKOUT_PRESENCE';
+export const setBreakoutPresence = (payload) => ({type: SET_BREAKOUT_PRESENCE, payload});
+
 // Plenary details
 export const SET_PLENARY = 'SET_PLENARY';
 export const setPlenary = (payload) => ({type: SET_PLENARY, payload});

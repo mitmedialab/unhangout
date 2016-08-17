@@ -10,5 +10,5 @@ export const ERROR = 'ERROR';
 export const error = (payload) => ({type: ERROR, payload});
 
 // Presence
-export const SET_PRESENT = 'SET_PRESENT';
-export const setPresent = (payload) => ({type: SET_PRESENT, payload});
+export const SET_PRESENCE = 'SET_PRESENCE';
+export const setPresence = (payload) => ({type: SET_PRESENCE, payload});

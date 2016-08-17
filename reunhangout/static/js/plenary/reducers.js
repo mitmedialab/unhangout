@@ -36,6 +36,7 @@ export const plenary = (state=null, action) => {
     case A.SET_PLENARY:
       newstate = {...state, ...action.payload.plenary};
       return newstate
+
   }
   return state;
 };
@@ -45,6 +46,16 @@ export const breakouts = (state=null, action) => {
     case A.BREAKOUT_RECEIVE:
       return action.payload;
   }
+  return state;
+};
+
+export const breakout_presence = (state=null, action) => {
+  state = state || {};
+  switch (action.type) {
+    case A.SET_BREAKOUT_PRESENCE:
+      state = {...state, [action.payload.breakout_id]: action.payload};
+      return state;
+   }
   return state;
 };
 

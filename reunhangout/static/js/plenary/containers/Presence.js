@@ -5,23 +5,36 @@ import * as style from "../../../scss/pages/plenary/_presencestyle.scss"
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
 
+const DEFAULT_AVATAR = "../../../../media/assets/default_avatar.jpg";
 
-class ContactInfo extends React.Component {
+export class Avatar extends React.Component {
   render() {
-    let avatar = this.props.user.image || "../../../../media/assets/default_avatar.jpg"
+    let avatar = this.props.user.image || DEFAULT_AVATAR;
     return (
-      <img src={avatar} className="user-avatar" />
+      <img src={avatar} className="user-avatar" title={this.props.user.username} />
     )
   }
 }
 
-class Presence extends React.Component {
+export const sortPresence = (presence, auth) => {
+  // Sort self first, others second.
+  let members = _.sortBy(presence.members, (u) => u.username !== auth.username);
+  for (let i = 0; i < presence.lurkers; i++) {
+    members.push({
+      username: `Anonymous ${i+1}`,
+      image: DEFAULT_AVATAR
+    });
+  }
+  return members;
+}
+
+export class Presence extends React.Component {
   render() {
     return (
-      <div className='present'>
+      <div className='presence'>
         {
-          this.props.present.members.map((user) => {
-            return <ContactInfo user={user} key={`user-${user.username}`} />
+          sortPresence(this.props.presence, this.props.auth).map((user) => {
+            return <Avatar user={user} key={`user-${user.username}`} />
           })
         }
       </div>
@@ -29,19 +42,3 @@ class Presence extends React.Component {
   }
 }
 
-const sortPresent = (present, auth) => {
-  // Sort self first, others second.
-  return _.sortBy(present.members, (u) => u.username !== auth.username)
-}
-
-export default connect(
-  // map state to props
-  (state) => ({
-    present: {
-      members: sortPresent(state.present, state.auth),
-    },
-    auth: state.auth
-  }),
-  (dispatch, ownProps) => ({
-  })
-)(Presence);

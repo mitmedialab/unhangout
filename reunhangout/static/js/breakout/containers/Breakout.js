@@ -7,13 +7,13 @@ import * as style from "../../../scss/pages/breakout/_breakoutstyle.scss"
 
 class Breakout extends React.Component {
   render() {
-    if (!this.props.present || !this.props.present.channel_name) {
+    if (!this.props.presence || !this.props.presence.channel_name) {
       return this.renderStatusMessage("Loading...");
     }
-    if (this.props.present.error_code === 'over-capacity') {
+    if (this.props.presence.error_code === 'over-capacity') {
       return this.renderStatusMessage("We're sorry, but this breakout room is over capacity.  Please try another.");
     }
-    if (this.props.present.error_code === 'already-connected') {
+    if (this.props.presence.error_code === 'already-connected') {
       return this.renderStatusMessage("You seem to be connected to this breakout room in another window.");
     }
 
@@ -23,7 +23,7 @@ class Breakout extends React.Component {
         <BS.Row>
           <BS.Col xs={2}>
             <ul>
-              {this.props.present.members.map((m, i) => {
+              {this.props.presence.members.map((m, i) => {
                 return <li key={`${i}`}>{m.username}</li>
               })}
             </ul>
@@ -62,7 +62,7 @@ class Breakout extends React.Component {
 export default connect(
   // map state to props
   (state) => ({
-    present: state.present,
+    presence: state.presence,
     plenary: state.plenary,
     breakout: state.breakout,
     breakoutMessages: state.breakoutMessages,

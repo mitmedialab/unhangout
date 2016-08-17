@@ -4,7 +4,7 @@ import * as style from "../../../scss/pages/plenary/_plenarystyle.scss"
 import * as BS from "react-bootstrap";
 import Embed from './Embed';
 import BreakoutList from './BreakoutList';
-import Presence from './Presence';
+import {Presence} from './Presence';
 import Chat from './Chat';
 import PlenaryInfo from './PlenaryInfo';
 import {ConnectionStatus} from '../../transport';
@@ -26,7 +26,7 @@ class Plenary extends React.Component {
           <BS.Row>
             <BS.Col xs={3} className="column users-col">
             <PlenaryInfo />
-              <Presence />
+              <Presence presence={this.props.presence} auth={this.props.auth} />
               <div className="logo-container">
                 <img src="../../../../media/assets/unhangout-logo-blue-full.png" className="logo"/>
               </div>
@@ -109,7 +109,8 @@ export default connect(
   // map state to props
   (state) => ({
     plenary: state.plenary,
-    auth: state.auth
+    auth: state.auth,
+    presence: state.presence
   }),
   // map dispatch to props
   (dispatch, ownProps) => ({
