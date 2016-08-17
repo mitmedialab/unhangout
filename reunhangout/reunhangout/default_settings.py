@@ -179,3 +179,4 @@ CELERYBEAT_SCHEDULE = {
     },
 }
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+BROKER_URL = "redis://localhost:6379/0"

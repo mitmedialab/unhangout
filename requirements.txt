@@ -1,7 +1,7 @@
 django<1.10
 channels
 asgi_redis
-celery
+celery[redis]
 django-celery
 pytz
 jsonfield
