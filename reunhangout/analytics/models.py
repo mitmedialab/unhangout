@@ -63,9 +63,10 @@ def track(action, user=None, data=None, plenary=None, breakout=None):
         # Mirror breakout onto data to disambiguate in case plenary is deleted.
         data = data or {}
         data['breakout'] = {'id': breakout.id}
-        if plenary is None and breakout.plenary is not None:
+        if plenary is None and breakout.plenary_id is not None:
             data['plenary'] = {'id': plenary.id}
-            kwargs['plenary'] = breakout.plenary
+            del kwargs['plenary']
+            kwargs['plenary_id'] = breakout.plenary_id
 
     kwargs['data'] = data
 
