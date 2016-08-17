@@ -23,6 +23,7 @@ def ws_connect(message, slug):
     if not message.user.is_authenticated():
         return handle_error(message, "Authentication required")
     try:
+        print(slug)
         plenary = Plenary.objects.get(slug=slug)
     except Plenary.DoesNotExist:
         return handle_error(message,  'Plenary not found')

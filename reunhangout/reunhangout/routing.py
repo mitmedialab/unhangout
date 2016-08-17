@@ -1,7 +1,7 @@
 from channels.routing import route
 
-plenary_path = r'/event/(?P<slug>\w+)'
-breakout_path = r'/breakout/(?P<breakout_id>\w+)'
+plenary_path = r'/event/(?P<slug>[\w-]+)'
+breakout_path = r'/breakout/(?P<breakout_id>[\w-]+)'
 
 channel_routing = [
     # Plenaries

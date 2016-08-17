@@ -65,8 +65,9 @@ export class SocketClient {
         this.store.dispatch(BREAKOUT_ACTIONS.message(data.payload));
         break;
       case "error":
-        alert(`Server error: ${data.payload.error}`);
-        console.error(data.payload.error);
+        let error = data.error ? data.error : data;
+        alert(`Server error: ${error}`);
+        console.error(error);
         break;
       default:
         console.log("transport.js: Unhandled message:", data);
