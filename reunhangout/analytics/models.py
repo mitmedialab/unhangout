@@ -64,7 +64,7 @@ def track(action, user=None, data=None, plenary=None, breakout=None):
         data = data or {}
         data['breakout'] = {'id': breakout.id}
         if plenary is None and breakout.plenary_id is not None:
-            data['plenary'] = {'id': plenary.id}
+            data['plenary'] = {'id': breakout.plenary_id}
             del kwargs['plenary']
             kwargs['plenary_id'] = breakout.plenary_id
 

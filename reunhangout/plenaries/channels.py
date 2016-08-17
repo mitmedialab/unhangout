@@ -23,7 +23,6 @@ def ws_connect(message, slug):
     if not message.user.is_authenticated():
         return handle_error(message, "Authentication required")
     try:
-        print(slug)
         plenary = Plenary.objects.get(slug=slug)
     except Plenary.DoesNotExist:
         return handle_error(message,  'Plenary not found')
@@ -32,15 +31,14 @@ def ws_connect(message, slug):
     # auth, if such were needed.
 
     Room.objects.add(plenary.channel_group_name, message.reply_channel.name, message.user)
-    message.channel_session['plenary_id'] = plenary.id
     track("join_plenary", message.user, plenary=plenary)
 
 @remove_presence
 @channel_session_user
-def ws_disconnect(message):
-    if message.channel_session.get('plenary_id'):
+def ws_disconnect(message, slug=None):
+    if slug:
         try:
-            plenary = Plenary.objects.get(pk=message.channel_session['plenary_id'])
+            plenary = Plenary.objects.get(slug=slug)
         except Plenary.DoesNotExist:
             plenary = None
         track("leave_plenary", message.user, plenary=plenary)
