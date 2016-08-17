@@ -9,6 +9,7 @@ from channels_presence.decorators import touch_presence, remove_presence
 from reunhangout.channels_utils import (
     send_over_capacity_error, send_already_connected_error, handle_error
 )
+from analytics.models import track
 
 @enforce_ordering(slight=True)
 @channel_session_user_from_http
@@ -35,16 +36,16 @@ def ws_connect(message, breakout_id):
         # Only one connection per user.
         return send_already_connected_error(message, breakout.channel_group_name)
 
-    room = Room.objects.add(group.name, message.reply_channel.name, message.user)
-    message.channel_session['breakout_id'] = breakout.id
+    room = Room.objects.add(breakout.channel_group_name,
+            message.reply_channel.name, message.user)
     track("join_breakout", message.user, breakout=breakout)
 
 @remove_presence
 @channel_session_user
-def ws_disconnect(message):
-    if message.channel_session.get('breakout_id'):
+def ws_disconnect(message, breakout_id=None):
+    if breakout_id:
         try:
-            breakout = Breakout.objects.get(pk=message.channel_session['breakout_id'])
+            breakout = Breakout.objects.get(pk=breakout_id)
         except Breakout.DoesNotExist:
             breakout = None
         track("leave_breakout", message.user, breakout=breakout)

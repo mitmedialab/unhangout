@@ -7,7 +7,7 @@ import * as style from "../../../scss/pages/breakout/_breakoutstyle.scss"
 
 class Breakout extends React.Component {
   render() {
-    if (!this.props.present || !this.props.present.path) {
+    if (!this.props.present || !this.props.present.channel_name) {
       return this.renderStatusMessage("Loading...");
     }
     if (this.props.present.error_code === 'over-capacity') {
