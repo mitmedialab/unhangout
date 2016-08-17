@@ -9,21 +9,48 @@ import * as A from "../actions";
 class ContactInfo extends React.Component {
   render() {
     let avatar = this.props.user.image || "../../../../media/assets/default_avatar.jpg"
-    return (
-      <img src={avatar} className="user-avatar" />
-    )
+    if (this.props.gridView) {
+      return (
+        <img src={avatar} className="user-avatar" />
+      )
+    } else {
+      return (
+      <div className='user-details'>
+        <img src={avatar} className="user-avatar" />
+        {this.props.user.username}
+      </div>
+      )
+    }
   }
 }
 
 class Presence extends React.Component {
+  constructor() {
+    super();
+    this.state = {gridView: true};
+  }
   render() {
     return (
-      <div className='present'>
-        {
-          this.props.present.members.map((user) => {
-            return <ContactInfo user={user} key={`user-${user.username}`} />
-          })
-        }
+      <div className='presence-container'>
+        <div className='presence-controls'>
+          <BS.Glyphicon glyph='user' />
+          {this.props.present.members.length}
+          <BS.Button 
+            onClick={() => this.setState({gridView: true})}>
+            <BS.Glyphicon glyph='th' />
+          </BS.Button>
+          <BS.Button
+            onClick={() => this.setState({gridView: false})}>
+            <BS.Glyphicon glyph='th-list' />
+          </BS.Button>
+        </div>
+        <div className='present'>
+          {
+            this.props.present.members.map((user) => {
+              return <ContactInfo gridView={this.state.gridView} user={user} key={`user-${user.username}`} />
+            })
+          }
+        </div>
       </div>
     )
   }

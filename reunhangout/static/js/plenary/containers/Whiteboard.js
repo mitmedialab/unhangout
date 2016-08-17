@@ -51,11 +51,6 @@ class Whiteboard extends React.Component {
 
     if (isAdmin) {
       return <div className="whiteboard">
-        <BS.Button 
-        onClick={() => this.setState({ panelOpen: !this.state.panelOpen })}
-        className="whiteboard-button">
-          <BS.Glyphicon glyph="chevron-down" />
-        </BS.Button>
         <BS.Panel collapsible expanded={this.state.panelOpen}>
           { whiteboardHasFocus ?
                 <div 
@@ -76,15 +71,28 @@ class Whiteboard extends React.Component {
                     onChange={this.onChange} />
                 </div>}
         </BS.Panel>
+        <BS.Button 
+        onClick={() => this.setState({ panelOpen: !this.state.panelOpen })}
+        className="whiteboard-button">
+          {this.state.panelOpen ? 
+            <BS.Glyphicon glyph="chevron-up" />
+            :
+            <BS.Glyphicon glyph="chevron-down" /> }
+        </BS.Button>
       </div>
     } else {
-      return <div className="whiteboard-button">
-        <BS.Button onClick={ ()=> this.setState({ open: !this.state.panelOpen })}>
-          click
-        </BS.Button>
+      return <div className="whiteboard">
         <BS.Panel collapsible expanded={this.state.panelOpen}>
           {this.props.plenary.whiteboard}
         </BS.Panel>
+        <BS.Button 
+        onClick={() => this.setState({ panelOpen: !this.state.panelOpen })}
+        className="whiteboard-button">
+          {this.state.panelOpen ? 
+            <BS.Glyphicon glyph="chevron-up" />
+            :
+            <BS.Glyphicon glyph="chevron-down" /> }
+        </BS.Button>
       </div>
     }
   }

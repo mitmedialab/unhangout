@@ -1,8 +1,6 @@
 .chat-container {
   height: calc(100vh - 10px);
   background-color: #eee;
-  margin: 5px 0px 5px 0px;
-  border-radius: 5px;
   display: flex;
   flex-direction: column;
   .chat-box {
@@ -25,13 +23,27 @@
   float: left;
   margin: 5px 0px;
   clear: both;
-  max-width: 90%;
-  word-wrap: break-word; 
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  .chat-message-text{
+    word-wrap: break-word; 
+  }
   .userName {
     font-weight: 900;
     color: #2c2d30
   }
+  &:nth-child(even) {
+    background-color: #eee;
   }
+  &:nth-child(odd) {
+    background-color: #f2f2f2;
+  }
+  img {
+    height: 2em;
+    margin-right: 10px;
+  }
+}
 .form-group {
   margin: 5px;
 }

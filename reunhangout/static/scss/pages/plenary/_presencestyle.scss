@@ -1,13 +1,27 @@
-.present{
-	display: flex;
-	flex-flow: row wrap;
+.presence-container {
 	flex-grow: 1;
-	margin: 5px;
-	margin-top: 0px;
-	.user-avatar{
-		width: 48px;
-		height: 48px;
-		border-radius: 5px;
+	.presence-controls {
+		display:flex;
+		flex-flow: row wrap;
+		justify-content: space-around;
+		.btn {
+			margin-left: auto;
+		}
+	}
+	.present{
+		display: flex;
+		flex-flow: row wrap;
 		margin: 5px;
+		margin-top: 0px;
+		.user-avatar{
+			width: 48px;
+			height: 48px;
+			border-radius: 5px;
+			margin: 5px;
+		}
+		.user-details {
+			width: 100%;
+		}
 	}
 }
+
