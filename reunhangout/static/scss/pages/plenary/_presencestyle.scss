@@ -3,9 +3,16 @@
 	.presence-controls {
 		display:flex;
 		flex-flow: row wrap;
-		justify-content: space-around;
-		.btn {
+		justify-content: flex-start;
+		align-items: center;
+		.presence-counter {
+			margin: 5px;
+		}
+		.grid-button {
 			margin-left: auto;
+		}
+		.btn {
+			margin-right: 5px;
 		}
 	}
 	.presence{

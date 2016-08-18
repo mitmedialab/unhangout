@@ -6,7 +6,7 @@
   padding-right: 0px;
   display: flex;
   flex-direction: column;
-  height: 100vh; 
+  height: 100vh;
   overflow: auto;
   .logo {
       width:90%;
@@ -14,26 +14,27 @@
       margin-right: auto;
       margin-top: 5px;
     }
-  .user-menu-flex-container {
-    flex-grow: 1;
+
+  .user-menu-container {
+		margin-top: auto;
+    background-color: #2e7daa;
+    color: #fff;
     display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    .user-menu-container {
-      background-color: #2e7daa;
-      color: #fff;
-      display: flex;
-      flex-flow: row wrap;
-      justify-content: center;
-      img {
-        height: 2em;
-        width: 2em;
-        border-radius: 5px;
-        margin: 5px;
-      }
-      #user-menu-button {
-        margin: 5px;
-      }
+    flex-flow: row wrap;
+    justify-content: center;
+		align-items: center;
+    img {
+      height: 2em;
+      width: 2em;
+      border-radius: 5px;
+      margin: 5px;
+			margin-right: 10px;
+    }
+    #user-menu-button {
+      margin: 5px;
+			border: none;
+			background-color: #2e7daa;
+			color: #fff;
     }
   }
 }

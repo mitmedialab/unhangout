@@ -1,4 +1,4 @@
-.plenary-info-container {  
+.plenary-info-container {
   	background-color: #2e7daa;
   	padding: 10px;
   	color: #fff;
@@ -6,17 +6,26 @@
   	display: flex;
   	flex-direction: row;
     flex-wrap: wrap;
+    align-items: flex-end;
     h1 {
       flex: 0 1 100%;
     }
-    h3 {
+   .hosted {
       flex: 0 1 100%;
     }
-    h4 {
-      flex: 0 1 50%;
+    .organizer {
+      flex: 0 1 80%;
+      margin-top: 0px;
     }
     .btn {
       flex: 0 1 10%;
       margin-left: auto;
+      max-height: 36px;
+      max-width: 36px;
+      padding-left: 10px;
+      padding-right: 10px;
+      .glyphicon {
+        margin: 0px;
+      }
     }
 }

@@ -40,93 +40,92 @@ class Plenary extends React.Component {
           <BS.Row>
             <BS.Col xs={3} className="column users-col">
             <PlenaryInfo />
-              <img src="../../../../media/assets/unhangout-logo-blue-full.png" className="logo"/>
-              <Presence presence={this.props.presence} auth={this.props.auth} />
-              <div className="user-menu-flex-container">
-                <div className="user-menu-container">
-                  <img src={userAvatar} />
-                  <h4>{this.props.auth.username}</h4>
-                    <BS.Dropdown
-                      id="user-menu-button"
-                      dropup
-                      pullRight>
-                      <BS.Dropdown.Toggle
-                        noCaret>
-                        <BS.Glyphicon glyph="chevron-up" />
-                      </BS.Dropdown.Toggle>
-                      <BS.Dropdown.Menu>
-                        <BS.MenuItem
-                          onClick={(e) => this.setState({contactInfoModalOpen: true})}>
-                          My Contact Info
-                        </BS.MenuItem>
-                      </BS.Dropdown.Menu>
-                    </BS.Dropdown>
-                </div>
+            <img src="../../../../media/assets/unhangout-logo-blue-full.png" className="logo"/>
+            <Presence presence={this.props.presence} auth={this.props.auth} />
+
+              <div className="user-menu-container">
+                <img src={userAvatar} />
+                <h4>{this.props.auth.username}</h4>
+                <BS.Dropdown
+                  id="user-menu-button"
+                  dropup
+                  pullRight>
+                  <BS.Dropdown.Toggle
+                    noCaret>
+                    <BS.Glyphicon glyph="chevron-up" />
+                  </BS.Dropdown.Toggle>
+                  <BS.Dropdown.Menu>
+                    <BS.MenuItem
+                      onClick={(e) => this.setState({contactInfoModalOpen: true})}>
+                      My Contact Info
+                    </BS.MenuItem>
+                  </BS.Dropdown.Menu>
+                </BS.Dropdown>
               </div>
 
-              <div className="contact-info-dialog">
-                <BS.Modal show={this.state.contactInfoModalOpen} >
-                  <BS.Modal.Header>
-                    <BS.Modal.Title>My contact information</BS.Modal.Title>
-                  </BS.Modal.Header>
-                  <BS.Modal.Body>
-                    <p>What is this for? After the event, we will send you an email with
-                    the names and contact information of the people you interacted with
-                    (we will send a similar email to each participants). That way you can
-                    follow up and continue the conversations you started today.</p>
-                    <p>We care about privacy and will never share your contact information
-                    with people outside of the event.</p>
-                    <p>What is the best way for other Unhangout participants to reach you?</p>
-                    <BS.Form horizontal>
-                      <BS.FormGroup controlId="email">
-                        <BS.Col sm={2}>Email</BS.Col>
-                        <BS.Col sm={10}>
-                          <BS.FormControl
-                            type="text"
-                            placeholder="Email Address"
-                            value={(this.state && this.state.email) || ""}
-                            onChange={(e) => this.setState({email: e.target.value})} />
-                        </BS.Col>
-                      </BS.FormGroup>
-                      <BS.FormGroup controlId="twitter-handle">
-                        <BS.Col sm={2}>Twitter Handle</BS.Col>
-                        <BS.Col sm={10}>
-                          <BS.FormControl
-                            type="text"
-                            placeholder="@TwitterHandle"
-                            value={(this.state && this.state.twitter_handle) || ""}
-                            onChange={(e) => this.setState({twitter_handle: e.target.value})}/>
-                        </BS.Col>
-                      </BS.FormGroup>
-                       <BS.FormGroup controlId="linkedin-profile">
-                        <BS.Col sm={2}>LinkedIn Profile</BS.Col>
-                        <BS.Col sm={10}>
-                          <BS.FormControl
-                            type="text"
-                            placeholder="LinkedIn Profile URL"
-                            value={(this.state && this.state.linkedin_profile) || ""}
-                            onChange={(e) => this.setState({linkedin_profile: e.target.value})}/>
-                        </BS.Col>
-                      </BS.FormGroup>
-                      <BS.FormGroup controlId="share-info">
-                        <BS.Col sm={2}>
-                          <BS.Checkbox
-                          checked={this.state.share_info}
-                          onChange={() =>
-                            this.setState({share_info: !this.state.share_info})}>
-                          </BS.Checkbox>
-                        </BS.Col>
-                        <BS.Col sm={10}>I would rather not share my info with other unhangout participants</BS.Col>
-                      </BS.FormGroup>
-                    </BS.Form>
-                  </BS.Modal.Body>
-                  <BS.Modal.Footer>
-                    <BS.Button
-                    onClick={(e) => this.handleSubmitContact(e)}>
-                    Submit</BS.Button>
-                  </BS.Modal.Footer>
-                </BS.Modal>
-              </div>
+            <div className="contact-info-dialog">
+              <BS.Modal show={this.state.contactInfoModalOpen} >
+                <BS.Modal.Header>
+                  <BS.Modal.Title>My contact information</BS.Modal.Title>
+                </BS.Modal.Header>
+                <BS.Modal.Body>
+                  <p>What is this for? After the event, we will send you an email with
+                  the names and contact information of the people you interacted with
+                  (we will send a similar email to each participants). That way you can
+                  follow up and continue the conversations you started today.</p>
+                  <p>We care about privacy and will never share your contact information
+                  with people outside of the event.</p>
+                  <p>What is the best way for other Unhangout participants to reach you?</p>
+                  <BS.Form horizontal>
+                    <BS.FormGroup controlId="email">
+                      <BS.Col sm={2}>Email</BS.Col>
+                      <BS.Col sm={10}>
+                        <BS.FormControl
+                          type="text"
+                          placeholder="Email Address"
+                          value={(this.state && this.state.email) || ""}
+                          onChange={(e) => this.setState({email: e.target.value})} />
+                      </BS.Col>
+                    </BS.FormGroup>
+                    <BS.FormGroup controlId="twitter-handle">
+                      <BS.Col sm={2}>Twitter Handle</BS.Col>
+                      <BS.Col sm={10}>
+                        <BS.FormControl
+                          type="text"
+                          placeholder="@TwitterHandle"
+                          value={(this.state && this.state.twitter_handle) || ""}
+                          onChange={(e) => this.setState({twitter_handle: e.target.value})}/>
+                      </BS.Col>
+                    </BS.FormGroup>
+                     <BS.FormGroup controlId="linkedin-profile">
+                      <BS.Col sm={2}>LinkedIn Profile</BS.Col>
+                      <BS.Col sm={10}>
+                        <BS.FormControl
+                          type="text"
+                          placeholder="LinkedIn Profile URL"
+                          value={(this.state && this.state.linkedin_profile) || ""}
+                          onChange={(e) => this.setState({linkedin_profile: e.target.value})}/>
+                      </BS.Col>
+                    </BS.FormGroup>
+                    <BS.FormGroup controlId="share-info">
+                      <BS.Col sm={2}>
+                        <BS.Checkbox
+                        checked={this.state.share_info}
+                        onChange={() =>
+                          this.setState({share_info: !this.state.share_info})}>
+                        </BS.Checkbox>
+                      </BS.Col>
+                      <BS.Col sm={10}>I would rather not share my info with other unhangout participants</BS.Col>
+                    </BS.FormGroup>
+                  </BS.Form>
+                </BS.Modal.Body>
+                <BS.Modal.Footer>
+                  <BS.Button
+                  onClick={(e) => this.handleSubmitContact(e)}>
+                  Submit</BS.Button>
+                </BS.Modal.Footer>
+              </BS.Modal>
+            </div>
 
             </BS.Col>
             <BS.Col xs={5} className="column chat-col">

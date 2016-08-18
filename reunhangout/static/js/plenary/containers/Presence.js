@@ -35,7 +35,7 @@ export const sortPresence = (presence, auth) => {
   }
   return members;
 }
-class Presence extends React.Component {
+export class Presence extends React.Component {
   constructor() {
     super();
     this.state = {gridView: true};
@@ -44,10 +44,13 @@ class Presence extends React.Component {
     return (
       <div className='presence-container'>
         <div className='presence-controls'>
-          <BS.Glyphicon glyph='user' />
-          {this.props.present.members.length}
+          <div className ='presence-counter'>
+            <BS.Glyphicon glyph='user' />
+            {this.props.presence.members.length}
+          </div>
           <BS.Button
-            onClick={() => this.setState({gridView: true})}>
+            onClick={() => this.setState({gridView: true})}
+            className="grid-button">
             <BS.Glyphicon glyph='th' />
           </BS.Button>
           <BS.Button

@@ -113,7 +113,7 @@ class Chat extends React.Component {
     }
   }
   onSubmit(event) {
-    event.preventDefault();    
+    event.preventDefault();
     this.props.onSendMessage({
     message: this.state.value,
     highlight: this.state.highlight
@@ -125,11 +125,11 @@ class Chat extends React.Component {
     return <div className="chat-container">
       <Whiteboard />
         <div className="chat-box">
-        <div 
+        <div
           className="chat-log"
           ref="chatLog">
         {this.props.chat_messages.map((msg, i) => {
-          return <ChatMessage msg={msg} plenary={this.props.plenary} 
+          return <ChatMessage msg={msg} plenary={this.props.plenary}
           presence={this.props.presence} key={`${i}`} auth={this.props.auth} />
         })}
         </div>
@@ -151,9 +151,11 @@ class Chat extends React.Component {
                   onChange={(e) => this.setState({value: e.target.value})} />
                   <BS.InputGroup.Addon>
                     <input type="checkbox"
-                      aria-label="Highlight"
-                      checked={this.state && this.state.highlight}
-                      onChange={(e) => this.setState({highlight: e.target.checked})}/> Highlight
+                      name="highlight"
+                      id="highlight"/>
+                      <label for="highlight">
+                        <BS.Glyphicon glyph="exclamation-sign" />
+                      </label>
                   </BS.InputGroup.Addon>
               </BS.InputGroup>
             </BS.FormGroup>

@@ -40,10 +40,10 @@ class PlenaryInfo extends React.Component {
     let is_admin = this.props.auth.is_admin
     return  <div className="plenary-info-container">
               <h1>{this.props.plenary.name}</h1>
-              <h3>hosted by</h3>
-              <h4>{this.props.plenary.organizer}</h4>
+              <h4 className='hosted'>hosted by</h4>
+              <h4 className='organizer'>{this.props.plenary.organizer}</h4>
               { is_admin ?
-                <BS.Button 
+                <BS.Button
                   onClick={() =>
                     this.setState({plenaryInfoModalOpen: true})
                   }>
@@ -55,13 +55,13 @@ class PlenaryInfo extends React.Component {
                   <BS.Modal.Title>Event Information</BS.Modal.Title>
                 </BS.Modal.Header>
                 <BS.Modal.Body>
-                  
+
                   <BS.Form horizontal>
                     <BS.FormGroup controlId="event-title">
                       <BS.Col sm={2}>Event Title</BS.Col>
                       <BS.Col sm={10}>
-                        <BS.FormControl 
-                          type="text" 
+                        <BS.FormControl
+                          type="text"
                           placeholder="Give your event a catchy title"
                           value={(this.state && this.state.name) || ""}
                           onChange={(e) => this.setState({name: e.target.value})} />
@@ -70,9 +70,9 @@ class PlenaryInfo extends React.Component {
                     <BS.FormGroup controlId="event-organizer">
                       <BS.Col sm={2}>Event Organizer</BS.Col>
                       <BS.Col sm={10}>
-                        <BS.FormControl 
-                          type="text" 
-                          placeholder="Tell your attendees who's organizing this event" 
+                        <BS.FormControl
+                          type="text"
+                          placeholder="Tell your attendees who's organizing this event"
                           value={(this.state && this.state.organizer) || ""}
                           onChange={(e) => this.setState({organizer: e.target.value})}/>
                       </BS.Col>
@@ -80,9 +80,9 @@ class PlenaryInfo extends React.Component {
                      <BS.FormGroup controlId="eventDate">
                       <BS.Col sm={2}>Event Date/Time</BS.Col>
                       <BS.Col sm={10}>
-                        <BS.FormControl 
-                          type="text" 
-                          placeholder="Event Date and Time" 
+                        <BS.FormControl
+                          type="text"
+                          placeholder="Event Date and Time"
                           value={(this.state && this.state.start_date) || ""}
                           onChange={(e) => this.setState({start_date: e.target.value})}/>
                       </BS.Col>
@@ -90,7 +90,7 @@ class PlenaryInfo extends React.Component {
                     <BS.FormGroup controlId="eventDescription">
                       <BS.Col sm={2}>Event Description</BS.Col>
                       <BS.Col sm={10}>
-                        <BS.FormControl 
+                        <BS.FormControl
                           componentClass="textarea"
                           value={(this.state && this.state.description) || ""}
                           onChange={(e) => this.setState({description: e.target.value})}/>
@@ -99,16 +99,16 @@ class PlenaryInfo extends React.Component {
                   </BS.Form>
                 </BS.Modal.Body>
                 <BS.Modal.Footer>
-                  <BS.Button 
+                  <BS.Button
                   onClick={() => this.setState({plenaryInfoModalOpen: false})}>
                   Close</BS.Button>
-                  <BS.Button 
+                  <BS.Button
                   onClick={(e) => this.handleSubmitPlenaryInfo(e)}>
                   Save</BS.Button>
                 </BS.Modal.Footer>
               </BS.Modal>
             </div>
-          
+
   }
 }
 
