@@ -118,7 +118,10 @@ class Chat extends React.Component {
     message: this.state.value,
     highlight: this.state.highlight
     });
-    this.setState({value: ""});
+    this.setState({
+      value: "",
+      highlight: false
+    });
   }
   render() {
     let is_admin = this.props.auth.is_admin
@@ -152,8 +155,11 @@ class Chat extends React.Component {
                   <BS.InputGroup.Addon>
                     <input type="checkbox"
                       name="highlight"
-                      id="highlight"/>
-                      <label for="highlight">
+                      id="highlight"
+                      checked={this.state && this.state.highlight}
+                      onChange={(e) =>
+                        this.setState({highlight: e.target.checked})} />
+                      <label htmlFor="highlight">
                         <BS.Glyphicon glyph="exclamation-sign" />
                       </label>
                   </BS.InputGroup.Addon>

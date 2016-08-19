@@ -11,14 +11,21 @@
     overflow: auto;
     .form-group {
       margin: 5px;
+      .input-group-addon {
+        padding: 0px;
+      }
+      label {
+        margin-bottom: 0px;
+      }
       input[type="checkbox"] {
         display: none;
-        appearance: none;
       }
       input[type="checkbox"] ~ label span {
         display: inline-block;
-        vertical-align: middle;
         cursor: pointer;
+        font-size: 1.25em;
+        vertical-align: middle;
+        margin: 5px;
       }
       input[type="checkbox"]:checked ~ label span {
         color: #cc0000;
@@ -37,7 +44,7 @@
   position: relative;
   vertical-align: top;
   float: left;
-  margin: 5px 0px;
+  margin: 0px;
   clear: both;
   width: 100%;
   display: flex;
@@ -58,5 +65,8 @@
   img {
     height: 2em;
     margin-right: 10px;
+  }
+  &.highlight {
+    background-color: #e6f7ff;
   }
 }
