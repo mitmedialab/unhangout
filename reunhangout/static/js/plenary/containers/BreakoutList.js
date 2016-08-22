@@ -6,15 +6,19 @@ import * as A from "../actions";
 import Breakout from './Breakout';
 
 class BreakoutList extends React.Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state= {
       "create-session-dialog": false,
       "random-dialog": false,
-      "message-breakouts-dialog": false
+      "message-breakouts-dialog": false,
+      "breakout-mode-dialog": false,
+      "breakout_mode": this.props.plenary.breakout_mode
     }
   }
-
+  componentWillReceiveNewProps(newProps) {
+    this.setState({"breakout_mode": newProps.plenary.breakout_mode})
+  }
   handleCreateBreakout(event, isProposal) {
     event.preventDefault();
     this.props.onChangeBreakouts({
@@ -26,17 +30,18 @@ class BreakoutList extends React.Component {
     this.setState({
       title: "",
       max_attendees: "",
-      showSessionModal: false
+      'create-session-dialog': false,
     });
   }
 
-  handleModeChange(event, id) {
+  handleModeChange(event) {
     event.preventDefault();
-    if (id === "random") { 
+    if (this.state.breakout_mode === "random") {
       this.setState({"random-dialog": true})
     } else {
-      this.props.onChangeBreakoutMode({breakout_mode: id})
+      this.props.onChangeBreakoutMode({breakout_mode: this.state.breakout_mode})
     }
+    this.setState({"breakout-mode-dialog": false})
   }
 
   handleRandomMode(event) {
@@ -126,34 +131,35 @@ class BreakoutList extends React.Component {
       <div className="breakout-header">
         <h4>Breakout Rooms</h4>
         { showCreateSession ?
-            <BS.Button onClick={() => this.setState({"create-session-dialog": true})}>
-              { breakout_mode === "user" ?  "PROPOSE A SESSION" : "CREATE A SESSION" }
+            <BS.Button
+            onClick={() => this.setState({"create-session-dialog": true})}
+            className="create-session-btn">
+              <BS.Glyphicon glyph="plus" />
             </BS.Button>
           : "" }
 
-        { this.props.auth.is_admin ?
-            <BS.Button onClick={() => this.setState({"message-breakouts-dialog": true})}>
-              Message All Breakouts
-            </BS.Button>
-          : "" }
 
-        { this.props.auth.is_admin ?
-            <BS.DropdownButton title="Breakout Mode" id="breakout-mode" pullRight>
-              <BS.MenuItem onClick={(e) => this.handleModeChange(e, "admin")}>
-                {breakout_mode === "admin" ? '✓' : ""}
-                Admin Proposed Sessions
-              </BS.MenuItem>
-              <BS.MenuItem onClick={(e) => this.handleModeChange(e, "user")}>
-                {breakout_mode === "user" ? '✓' : ""}
-                Participant Proposed Sessions
-              </BS.MenuItem>
-              <BS.MenuItem onClick={(e) => this.handleModeChange(e, "random")}>
-                {breakout_mode === "random" ? '✓' : ""}
-                Randomly Assigned Sessions
-              </BS.MenuItem>
-            </BS.DropdownButton>
-          : "" }
-
+          { this.props.auth.is_admin ?
+            <BS.Dropdown
+              id="user-menu-button"
+              pullRight>
+              <BS.Dropdown.Toggle
+                noCaret
+                className="breakout-settings-btn">
+                <img src="../../../../media/assets/control-panel-icon" />
+              </BS.Dropdown.Toggle>
+              <BS.Dropdown.Menu>
+                <BS.MenuItem
+                  onClick={() => this.setState({"message-breakouts-dialog": true})}>
+                  Message All Breakouts
+                </BS.MenuItem>
+                <BS.MenuItem
+                  onClick={() => this.setState({"breakout-mode-dialog": true})}>
+                  Breakout Mode
+                </BS.MenuItem>
+              </BS.Dropdown.Menu>
+            </BS.Dropdown>
+            : "" }
         { this.props.breakoutCrud.error ?
             <div className="breakout-error">
               {this.props.breakoutCrud.error.message}
@@ -161,7 +167,7 @@ class BreakoutList extends React.Component {
           : "" }
       </div>
 
-      <div className="breakouts-container"> 
+      <div className="breakouts-container">
         { breakouts.map((breakout, i) => {
             return <Breakout
               breakout={breakout}
@@ -176,7 +182,7 @@ class BreakoutList extends React.Component {
               { breakouts.length === 0 ? "Group me" : "Regroup me" }
             </BS.Button>
           : "" }
-      </div> 
+      </div>
 
       { this.renderModalForm(
           "create-session-dialog",
@@ -184,7 +190,7 @@ class BreakoutList extends React.Component {
           <div>
             <BS.FormGroup controlId="session-name">
               <BS.Col sm={2}>Session Name</BS.Col>
-              <BS.Col sm={10}><BS.FormControl type="text" 
+              <BS.Col sm={10}><BS.FormControl type="text"
               placeholder="Session Name"
               title={(this.state && this.state.title) || ""}
               onChange={(e) => this.setState({title: e.target.value})} />
@@ -192,8 +198,8 @@ class BreakoutList extends React.Component {
             </BS.FormGroup>
             <BS.FormGroup controlId="participant-limit">
               <BS.Col sm={2}>Participant Limit</BS.Col>
-              <BS.Col sm={10}><BS.FormControl type="text" 
-              placeholder="Max 10, Min 2" 
+              <BS.Col sm={10}><BS.FormControl type="text"
+              placeholder="Max 10, Min 2"
               max_attendees={(this.state && this.state.max_attendees) || ""}
               onChange={(e) => this.setState({max_attendees: e.target.value})}/>
               </BS.Col>
@@ -211,8 +217,8 @@ class BreakoutList extends React.Component {
               <BS.Col sm={2}>Participant Limit</BS.Col>
               <BS.Col sm={10}>
                 <BS.FormControl
-                  type="text" 
-                  placeholder="Max 10, Min 2" 
+                  type="text"
+                  placeholder="Max 10, Min 2"
                   value={(this.state && this.state.max_attendees) || ""}
                   onChange={(e) => this.setState({max_attendees: e.target.value})} />
               </BS.Col>
@@ -246,6 +252,54 @@ class BreakoutList extends React.Component {
           "Send Message",
           (e) => this.handleMessageBreakouts(e)
         ) }
+
+        { this.renderModalForm(
+            "breakout-mode-dialog",
+            "Breakout Mode",
+            <div>
+              <BS.FormGroup controlId="admin-mode">
+                <BS.Col sm={2}>
+                <BS.Radio
+                  checked={this.state.breakout_mode==="admin"}
+                  onChange={() => this.setState({"breakout_mode": "admin"})} />
+                </BS.Col>
+                <BS.Col sm={10}>
+                  Admin Proposed Sessions
+                </BS.Col>
+                <BS.Col sm={10}>
+                  <p>Admins can create breakout sessions</p>
+                </BS.Col>
+
+                <BS.Col sm={2}>
+                  <BS.Radio
+                    checked={this.state.breakout_mode==="user"}
+                    onChange={() => this.setState({"breakout_mode": "user"})} />
+                </BS.Col>
+                <BS.Col sm={10}>
+                  Participant Proposed Sessions
+                </BS.Col>
+                <BS.Col sm={10}>
+                  <p>All users can propose breakout sessions which can be voted on by all users.
+                  Admins can approve these sessions after which users can join the sessions.</p>
+                </BS.Col>
+
+                <BS.Col sm={2}>
+                <BS.Radio
+                  checked={this.state.breakout_mode==="random"}
+                  onChange={() => this.setState({"breakout_mode": "random"})} />
+                </BS.Col>
+                <BS.Col sm={10}>
+                  Randomly Assigned Sessions
+                </BS.Col>
+                <BS.Col sm={10}>
+                  <p>Users are randomly assigned to breakout sessions and will always be in the same breakout session.
+                  Users are given the option of leaving their group and joining a new one with the "Regroup Me" button. </p>
+                </BS.Col>
+              </BS.FormGroup>
+            </div>,
+            "Set",
+            (e) => this.handleModeChange(e)
+          ) }
     </div>
   }
 }

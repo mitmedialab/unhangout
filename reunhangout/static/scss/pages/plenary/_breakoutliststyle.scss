@@ -3,22 +3,28 @@
   padding: 15px;
   display: flex;
   flex-flow: row wrap;
-  justify-content: space-around;
+  justify-content: flex-end;
   overflow: visible;
-  flex-wrap: wrap;
   .btn-default {
     flex-grow: 1;
     color: #2e7daa;
     margin: 5px;
+    &.create-session-btn {
+      max-width: 36px;
+      padding-left:5px;
+      padding-right: 5px;
     }
+  }
   h4 {
     flex-grow: 1;
     color: #fff;
-    }
-  #breakout-mode {
-    margin: 5px;
-    } 
+    margin-right: auto;
   }
+  img {
+    max-width: 24px;
+    max-height: 24px;
+  }
+}
 .breakout {
   background-color: #eee;
   padding: 20px;
@@ -51,7 +57,7 @@
       border: 1px solid;
       border-radius: 4px;
       border-color: #66afe9;
-      box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6); 
+      box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
     }
   }
   &.proposal {
