@@ -29,6 +29,6 @@ ALLAUTH_APPS['google']['client_id'] = '{{ google_client_id }}'
 ALLAUTH_APPS['google']['secret'] = '{{ google_secret }}'
 
 # Add INSTALLED_APPS for any in-use social account providers.
-for name, keys in ALLAUTH_APPS:
+for name, keys in ALLAUTH_APPS.items():
     if keys['client_id']:
         INSTALLED_APPS.append('allauth.socialaccount.providers.%s' % name)

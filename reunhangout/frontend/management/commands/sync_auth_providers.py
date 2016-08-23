@@ -15,6 +15,7 @@ class Command(BaseCommand):
         # that could screw up old user models' relations. Safer to require
         # that to be a manual process.
         changed = False
+        site = Site.objects.get_current()
         for provider, keys in settings.ALLAUTH_APPS.items():
             if not keys['client_id']:
                 continue
@@ -29,6 +30,7 @@ class Command(BaseCommand):
                 SocialApp.objects.create(
                     **dict(list(lookup.items()) + list(keys.items()))
                 )
+                app.sites.add(site)
             else:
                 app_changed = False
                 for key, val in keys.items():
@@ -37,6 +39,9 @@ class Command(BaseCommand):
                         setattr(app, key, val)
                 if app_changed:
                     app.save()
+                if site not in app.sites.all():
+                    changed = True
+                    app.sites.add(site)
         if changed:
             print("changed")
         else:
