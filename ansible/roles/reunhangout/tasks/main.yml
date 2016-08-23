@@ -1,4 +1,8 @@
 ---
+ - name: Sync auth providers
+   command: "{{django_venv_dir}}bin/python {{django_project_dir}}manaage.py sync_auth_providers"
+   tags: ['reunhangout', 'reunhangout-post']
+
  - name: Systemd parent dir
    file: path=/usr/lib/systemd/system state=directory
    tags: ['reunhangout', 'reunhangout-post']

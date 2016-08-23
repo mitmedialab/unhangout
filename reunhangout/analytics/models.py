@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.timezone import now
 from django.conf import settings
+from django.contrib.auth.models import AnonymousUser
 
 from plenaries.models import Plenary
 from breakouts.models import Breakout
@@ -49,7 +50,7 @@ class Action(models.Model):
 def track(action, user=None, data=None, plenary=None, breakout=None):
     kwargs = {
         'action': action,
-        'user': user,
+        'user': None if isinstance(user, AnonymousUser) else user,
         'plenary': plenary,
         'breakout': breakout
     }
