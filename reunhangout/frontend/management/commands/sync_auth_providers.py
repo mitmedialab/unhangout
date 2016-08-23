@@ -14,7 +14,6 @@ class Command(BaseCommand):
         # NOTE: we aren't deleting any stale (removed) SocialApp's here, as
         # that could screw up old user models' relations. Safer to require
         # that to be a manual process.
-        lookup = {'provider': provider, 'name': provider}
         changed = False
         for provider, keys in settings.ALLAUTH_APPS.items():
             if not keys['client_id']:
@@ -22,6 +21,7 @@ class Command(BaseCommand):
             # We could just use `update_or_create` here, but then we
             # wouldn't be able to report changed status correctly. So instead
             # do it the manual way.
+            lookup = {'provider': provider, 'name': provider}
             try:
                 app = SocialApp.objects.get(**lookup)
             except SocialApp.DoesNotExist:
@@ -38,4 +38,6 @@ class Command(BaseCommand):
                 if app_changed:
                     app.save()
         if changed:
-            print("Changed")
+            print("changed")
+        else:
+            print("no change")
