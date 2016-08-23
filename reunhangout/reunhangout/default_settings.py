@@ -87,6 +87,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'frontend.context_processors.public_settings',
             ],
         },
     }
@@ -181,3 +182,8 @@ CELERYBEAT_SCHEDULE = {
 }
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 BROKER_URL = "redis://localhost:6379/0"
+
+# API keys for 3rd party services
+PUBLIC_API_KEYS = {
+    'youtube': '', # Define in settings.py
+}

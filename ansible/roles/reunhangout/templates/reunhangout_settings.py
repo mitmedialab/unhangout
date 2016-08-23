@@ -13,3 +13,5 @@ DATABASES = {
         'PASSWORD': '{{ django_postgres_password }}'
     }
 }
+
+PUBLIC_API_KEYS['youtube'] = '{{ youtube_api_key }}'

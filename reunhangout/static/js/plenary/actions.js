@@ -60,11 +60,11 @@ function receiveEmbedDetails(embed, details) {
     }
   }
 }
-export function fetchEmbedDetails(embed) {
+export function fetchEmbedDetails(embed, settings) {
   return dispatch => {
     dispatch(requestEmbedDetails(embed));
     if (embed.type === "youtube") {
-      youtube.fetchVideoDetails(embed.props.src)
+      youtube.fetchVideoDetails(embed.props.src, settings)
         .then(details => dispatch(receiveEmbedDetails(embed, details)));
     }
   }
