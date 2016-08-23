@@ -25,7 +25,7 @@ class BreakoutList extends React.Component {
       action: "create",
       title: this.state.title,
       max_attendees: this.state.max_attendees,
-      is_proposal: isProposal
+      is_proposal: isProposal,
     });
     this.setState({
       title: "",

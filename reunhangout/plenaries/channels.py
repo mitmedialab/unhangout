@@ -17,6 +17,7 @@ from videosync.models import VideoSync
 from reunhangout.channels_utils import broadcast, handle_error, require_payload_keys
 from analytics.models import track
 
+
 @enforce_ordering(slight=True)
 @channel_session_user_from_http
 def ws_connect(message, slug):
@@ -26,7 +27,7 @@ def ws_connect(message, slug):
         plenary = Plenary.objects.get(slug=slug)
     except Plenary.DoesNotExist:
         return handle_error(message,  'Plenary not found')
-        
+
     # Here would be the place for enforcing a connection/user cap or other
     # auth, if such were needed.
 
@@ -164,7 +165,8 @@ def handle_breakout(message, data, plenary):
             plenary=plenary,
             title=payload['title'],
             max_attendees=payload.get('max_attendees') or 10,
-            is_proposal=(not is_admin or payload.get('is_proposal', False))
+            is_proposal=(not is_admin or payload.get('is_proposal', False)),
+            proposed_by=message.user
         )
         if breakout.is_proposal:
             track("propose_breakout", message.user, breakout=breakout)

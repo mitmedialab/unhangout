@@ -6,6 +6,8 @@ import * as A from "../actions";
 import {Editor, EditorState, ContentState, SelectionState} from 'draft-js';
 import {Avatar, sortPresence} from './Presence';
 
+const DEFAULT_AVATAR = "../../../../media/assets/default_avatar.jpg";
+
 export default class Breakout extends React.Component {
   constructor(props) {
     super(props);
@@ -17,13 +19,13 @@ export default class Breakout extends React.Component {
   }
   //Add an event listener that will dispatch the updated title
   componentDidMount() {
-    window.addEventListener('click', 
-      () => this.handleModify(this.props.onChangeBreakouts, this.state.editorState), 
+    window.addEventListener('click',
+      () => this.handleModify(this.props.onChangeBreakouts, this.state.editorState),
       false);
   }
   componentWillUnmount() {
-    window.removeEventListener('click', 
-      () => this.handleModify(this.props.onChangeBreakouts, this.state.editorState), 
+    window.removeEventListener('click',
+      () => this.handleModify(this.props.onChangeBreakouts, this.state.editorState),
       false);
   }
   componentWillReceiveProps(newProps) {
@@ -31,9 +33,9 @@ export default class Breakout extends React.Component {
       editorState: EditorState.createWithContent(ContentState.createFromText(newProps.breakout.title))
     })
   }
-  //dispatch updated title upon click outside 
+  //dispatch updated title upon click outside
   handleModify(onChangeBreakouts, updatedTitle) {
-    if (this.active) {  
+    if (this.active) {
       onChangeBreakouts({
         action: "modify",
         id: this.props.breakout.id,
@@ -70,6 +72,7 @@ export default class Breakout extends React.Component {
     });
   }
   render() {
+    let showProposer = this.props.breakout.mode == "user" && !this.props.breakout.is_random;
     let showApprove = (
       this.props.auth.is_admin &&
       this.props.breakout.is_proposal &&
@@ -81,7 +84,7 @@ export default class Breakout extends React.Component {
       this.props.breakout.mode == "user"
     );
     let showDelete = this.props.auth.is_admin;
-    let showEditTitle = this.props.auth.is_admin;
+    let showEditTitle = this.props.auth.is_admin && !this.props.breakout.is_random;
     let showVote = this.props.breakout.is_proposal;
     let showJoin = this.props.breakout.open && (
       this.props.breakout.mode !== "user" ||
@@ -93,59 +96,91 @@ export default class Breakout extends React.Component {
     let titleHasFocus = this.state.editorState.getSelection().getHasFocus();
     let showPresence = this.props.breakout.open && !this.props.breakout.is_proposal;
     let classes = ['breakout'];
+    let showMembers = this.props.breakout.is_random;
     if (this.props.breakout.is_proposal) {
       classes.push('proposal');
     }
     return <div className={classes.join(" ")}>
-      { showPresence ?  <BreakoutPresence {...this.props} /> : "" }
-      { showEditTitle ?
-        titleHasFocus ?
-          <div tabIndex="0"
-               className="title-input title-focus"
-               onClick={(e) => this.handleClick(e)}>
-            <Editor editorState={this.state.editorState} 
-                    onChange={this.onChange} />
+      { showMembers ? 
+        <div className="members-container">
+          <span>Assigned Participants:</span>
+          <div className="members-avatars-container">
+            {this.props.breakout.members.map((member) => {
+              let avatar=member.image || DEFAULT_AVATAR;
+              return <img src={avatar} />
+            })}
           </div>
+        </div>
+        : ""}
+      <div className="main-breakout-container">
+        { showDelete ?
+            <BS.Button bsStyle="danger" onClick= {(e) => this.handleDelete(e)} className="delete-btn">
+              <i className='fa fa-trash' />
+            </BS.Button>
+          : ""
+        }
+        { showPresence ?  <BreakoutPresence {...this.props} /> : "" }
+        { showEditTitle ?
+          titleHasFocus ?
+            <div tabIndex="0"
+                 className="title-input title-focus"
+                 onClick={(e) => this.handleClick(e)}>
+              <Editor editorState={this.state.editorState}
+                      onChange={this.onChange} />
+            </div>
+            :
+            <div tabIndex="0"
+                 className="title-input"
+                 onClick={(e) => this.handleClick(e)}>
+              <Editor editorState={this.state.editorState}
+                      onChange={this.onChange} />
+            </div>
           :
-          <div tabIndex="0"
-               className="title-input"
-               onClick={(e) => this.handleClick(e)}>
-            <Editor editorState={this.state.editorState} 
-                    onChange={this.onChange} />
-          </div>
-        :
-          <h5>{this.props.breakout.title}</h5>
-      }
-      { showVote ?
-          <BS.Button onClick={(e) => this.handleVote(e)}>
-            {votedForThis ? '✓' : ''}
-            Vote | {this.props.breakout.votes.length}
-          </BS.Button> 
-        : showJoin ?
-          <BS.Button href={this.props.breakout.url} target='_blank'>
-            Join
-          </BS.Button>
-        :
-          <BS.Button disabled>Locked</BS.Button>
-      }
-      { showDelete ?
-          <BS.Button bsStyle="danger" onClick= {(e) => this.handleDelete(e)}>
-            <i className='fa fa-trash' />
-          </BS.Button>
-        : ""
-      }
-      { showApprove ?
-          <BS.Button onClick={(e) => this.handleApprove(e)}>
-            Approve
-          </BS.Button>
-        : ""
-      }
-      { showUnapprove ?
-          <BS.Button onClick={(e) => this.handleApprove(e)}>
-            Unapprove
-          </BS.Button>
-        : ""
-      }
+            <h5>{this.props.breakout.title}</h5>
+        }
+        { showProposer ? 
+            <div className="proposed-by-container">
+              <div className="proposed-by-label">
+                <span>Proposed</span>
+                <br></br>
+                <span>by:</span>
+              </div>
+              <img src={this.props.breakout.proposed_by.image || DEFAULT_AVATAR} />
+            </div>
+          : "" }
+        { showApprove ?
+            <BS.Button onClick={(e) => this.handleApprove(e)} className="approve-btn">
+              <i className="fa fa-check" aria-hidden="true"></i>
+            </BS.Button>
+          : ""
+        }
+        { showUnapprove ?
+            <BS.Button onClick={(e) => this.handleApprove(e)} className="approve-btn">
+              <i className="fa fa-undo" aria-hidden="true"></i>
+            </BS.Button>
+          : ""
+        }
+        { showVote ?
+          votedForThis ?
+            <BS.Button onClick={(e) => this.handleVote(e)} className="vote-btn voted">
+              <BS.Glyphicon glyph="arrow-up" />
+              <br></br>
+              {this.props.breakout.votes.length}
+            </BS.Button>
+            :
+            <BS.Button onClick={(e) => this.handleVote(e)} className="vote-btn">
+              <BS.Glyphicon glyph="arrow-up" />
+              <br></br>
+              {this.props.breakout.votes.length}
+            </BS.Button>
+          : showJoin ?
+            <BS.Button className="join-btn" href={this.props.breakout.url} target='_blank'>
+              <BS.Glyphicon glyph="log-in" />
+            </BS.Button>
+          :
+            <BS.Button className="join-btn" disabled><BS.Glyphicon glyph="lock" /></BS.Button>
+        }
+      </div>
     </div>
   }
 }
