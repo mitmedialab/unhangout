@@ -1,0 +1,17 @@
+---
+- hosts: all
+  vars_files:
+   - vars/secrets.yml
+  become: yes
+  become_user: root
+  tasks:
+   - name: Reload systemd files
+     command: systemctl daemon-reload
+
+   - name: Restart all workers
+     service: name={{item}} state=restarted
+     with_items:
+      - "reunhangout"
+      - "reunhangout-celery-beat"
+      - "reunhangout-channels-worker"
+      - "nginx"

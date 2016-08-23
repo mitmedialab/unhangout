@@ -27,3 +27,6 @@ reboot:
 
 createsuperuser:
 	ansible-playbook -i hosts.cfg createsuperuser.yml $(VAULT)
+
+restart-workers:
+	ansible-playbook -i hosts.cfg restart-workers.yml $(VAULT)
