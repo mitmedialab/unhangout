@@ -14,8 +14,8 @@
       </button>
       {% if not brandless %}
         <a class='navbar-brand' href='/'>
-          {% thumbnail "assets/nav-bar-logo-full.png" "x34" format="PNG" as logo %}
-            <img src='{{ logo.url }}' alt='Unhangout' />
+          {% thumbnail branding.navbar_logo "x34" format="PNG" as logo %}
+            <img src='{{ logo.url }}' alt='{{ branding.name }}' />
           {% endthumbnail %}
         </a>
       {% endif %}

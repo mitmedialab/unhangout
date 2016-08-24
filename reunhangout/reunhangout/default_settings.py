@@ -215,3 +215,9 @@ ALLAUTH_APPS = {
 PUBLIC_API_KEYS = {
     'youtube': '', # Define in settings.py
 }
+BRANDING = {
+    'logo': 'assets/unhangout-logo-blue-full.png',
+    'navbar_logo': 'assets/nav-bar-logo-full.png',
+    'name': 'Unhangout',
+}
+

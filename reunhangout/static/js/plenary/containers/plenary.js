@@ -9,6 +9,7 @@ import Chat from './Chat';
 import PlenaryInfo from './PlenaryInfo';
 import {ConnectionStatus} from '../../transport';
 import * as A from '../actions';
+import {Avatar} from './Presence';
 
 class Plenary extends React.Component {
   constructor() {
@@ -32,7 +33,6 @@ class Plenary extends React.Component {
     this.setState({contactInfoModalOpen: false})
   }
   render() {
-    let userAvatar = this.props.auth.image || "../../../../media/assets/default_avatar.jpg"
     if (this.props.plenary.open) {
       return <div className='plenary open'>
         <ConnectionStatus />
@@ -40,11 +40,11 @@ class Plenary extends React.Component {
           <BS.Row>
             <BS.Col xs={3} className="column users-col">
             <PlenaryInfo />
-            <img src="../../../../media/assets/unhangout-logo-blue-full.png" className="logo"/>
+            <img src={this.props.settings.LOGO_URL} className="logo"/>
             <Presence presence={this.props.presence} auth={this.props.auth} />
 
             <div className="user-menu-container">
-              <img src={userAvatar} />
+              <Avatar user={this.props.auth} gridView={true} />
               <h4>{this.props.auth.username}</h4>
               <BS.Dropdown
                 id="user-menu-button"
@@ -75,7 +75,7 @@ class Plenary extends React.Component {
                   follow up and continue the conversations you started today.</p>
                   <p>We care about privacy and will never share your contact information
                   with people outside of the event.</p>
-                  <p>What is the best way for other Unhangout participants to reach you?</p>
+                  <p>What is the best way for other participants to reach you?</p>
                   <BS.Form horizontal>
                     <BS.FormGroup controlId="email">
                       <BS.Col sm={2}>Email</BS.Col>
@@ -167,7 +167,7 @@ class Plenary extends React.Component {
                 <ul>
                   <li>You'll need a Google Account (if you don't have one) to login</li>
                   <li>Install the Google Hangout plugin if you don't already have it</li>
-                  <li>Watch this Unhangout video to learn more about the platform</li>
+                  <li>Watch this video to learn more about the platform</li>
                   <li>For tips and tricks, checkout our participant guide'</li>
                 </ul>
               </div>
@@ -207,7 +207,8 @@ export default connect(
   (state) => ({
     plenary: state.plenary,
     auth: state.auth,
-    presence: state.presence
+    presence: state.presence,
+    settings: state.settings,
   }),
   // map dispatch to props
   (dispatch, ownProps) => ({

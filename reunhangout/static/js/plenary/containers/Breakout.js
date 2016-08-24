@@ -163,7 +163,7 @@ export default class Breakout extends React.Component {
         }
         { showVote ?
             <BS.Button onClick={(e) => this.handleVote(e)}
-                className={"vote-btn" + votedForThis ? " voted" : ""}>
+                className={`vote-btn${votedForThis ? " voted" : ""}`}>
               <BS.Glyphicon glyph="arrow-up" />
               <br></br>
               {this.props.breakout.votes.length}
