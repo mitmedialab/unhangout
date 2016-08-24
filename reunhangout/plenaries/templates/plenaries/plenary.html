@@ -1,5 +1,8 @@
 {% extends "base.html" %}
+{% load render_bundle from webpack_loader %}
+
 {% block title %}{{ plenary.name }}{% endblock %}
+{% block styles %}{% render_bundle 'main' 'css' %}{% endblock %}
 
 {# Suppress usual header/footer for plenary #}
 {% block navbar %}{% endblock %}
@@ -11,3 +14,4 @@
   </script>
   <div id='plenary'></div>
 {% endblock %}
+{% block scripts %}{% render_bundle 'main' 'js' %}{% endblock %}

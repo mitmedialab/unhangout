@@ -43,25 +43,25 @@ class Plenary extends React.Component {
             <img src="../../../../media/assets/unhangout-logo-blue-full.png" className="logo"/>
             <Presence presence={this.props.presence} auth={this.props.auth} />
 
-              <div className="user-menu-container">
-                <img src={userAvatar} />
-                <h4>{this.props.auth.username}</h4>
-                <BS.Dropdown
-                  id="user-menu-button"
-                  dropup
-                  pullRight>
-                  <BS.Dropdown.Toggle
-                    noCaret>
-                    <BS.Glyphicon glyph="chevron-up" />
-                  </BS.Dropdown.Toggle>
-                  <BS.Dropdown.Menu>
-                    <BS.MenuItem
-                      onClick={(e) => this.setState({contactInfoModalOpen: true})}>
-                      My Contact Info
-                    </BS.MenuItem>
-                  </BS.Dropdown.Menu>
-                </BS.Dropdown>
-              </div>
+            <div className="user-menu-container">
+              <img src={userAvatar} />
+              <h4>{this.props.auth.username}</h4>
+              <BS.Dropdown
+                id="user-menu-button"
+                dropup
+                pullRight>
+                <BS.Dropdown.Toggle
+                  noCaret>
+                  <BS.Glyphicon glyph="chevron-up" />
+                </BS.Dropdown.Toggle>
+                <BS.Dropdown.Menu>
+                  <BS.MenuItem
+                    onClick={(e) => this.setState({contactInfoModalOpen: true})}>
+                    My Contact Info
+                  </BS.MenuItem>
+                </BS.Dropdown.Menu>
+              </BS.Dropdown>
+            </div>
 
             <div className="contact-info-dialog">
               <BS.Modal show={this.state.contactInfoModalOpen} >

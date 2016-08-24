@@ -6,7 +6,7 @@ import * as A from "../actions";
 import {urlRegex} from "../../utils";
 import * as style from "../../../scss/pages/plenary/_chatstyle.scss"
 import Whiteboard from './Whiteboard';
-
+import {Avatar} from './Presence';
 
 /**
  * Split 'text' into an array of react components or strings that represent the
@@ -67,9 +67,8 @@ class ChatMessage extends React.Component {
   render() {
     let msg = this.props.msg;
     let markedUp = this.markup(msg.message);
-    let avatar = msg.user.image || "../../../../media/assets/default_avatar.jpg";
     return <div className={`chat-message${msg.highlight ? " highlight" : ""}`}>
-      <img src={avatar} className="user-avatar" />
+      <Avatar user={msg.user} gridView={true} />
       <div className="chat-message-text">
         <span className='userName'>{msg.user.username}</span>
         <br></br>
@@ -80,6 +79,7 @@ class ChatMessage extends React.Component {
 
   markup(message) {
     let linked = linkify(message);
+    console.log(this.props.msg);
     let atnamed = linked.map((part, i) => {
       if (_.isString(part)) {
         return atnamify(part, this.props.presence.members, this.props.msg.id);
@@ -133,7 +133,7 @@ class Chat extends React.Component {
           ref="chatLog">
         {this.props.chat_messages.map((msg, i) => {
           return <ChatMessage msg={msg} plenary={this.props.plenary}
-          presence={this.props.presence} key={`${i}`} auth={this.props.auth} />
+            presence={this.props.presence} key={`${i}`} auth={this.props.auth} />
         })}
         </div>
         <form className={

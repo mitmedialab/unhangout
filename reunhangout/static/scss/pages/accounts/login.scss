@@ -1,0 +1,41 @@
+.socialaccount_providers {
+  text-align: center;
+  a.facebook {
+    background-color: #3b5998;
+    color: white;
+    &:hover {
+      background-color: darken(#3b5998, 10%);
+    }
+  }
+  a.google {
+    background-color: #f63d38;
+    color: white;
+    &:hover {
+      background-color: darken(#f63d38, 10%);
+    }
+  }
+  a.twitter {
+    background-color: #4099ff;
+    color: white;
+    &:hover {
+      background-color: darken(#4099ff, 10%);
+    }
+  }
+}
+
+.navbar-nav > li {
+  & > a.btn-login, & > a.btn-signup {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    color: white;
+  }
+  & > a.btn-signup {
+    font-weight: bold;
+    background-color: orange;
+    &:hover {
+      background-color: darken(orange, 5%);
+    }
+  }
+}

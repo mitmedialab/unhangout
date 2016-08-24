@@ -1,0 +1,3 @@
+Templates in here are just for overriding django-allauth's "account" base.  The
+rest of our custom accounts stuff is in the "accounts" directory, in keeping
+with app/template naming conventions.

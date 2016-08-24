@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load account socialaccount %}
+{% load bootstrap %}
+
+{% block head_title %}{% trans "Signup" %}{% endblock %}
+
+{% block content %}
+{% get_providers as socialaccount_providers %}
+
+<div class='container'>
+  <div class='row'>
+    <div class='col-sm-6 col-sm-offset-3'>
+      <h2>{% trans "Sign up" %}</h2>
+
+      {% if socialaccount_providers %}
+        {% include "accounts/_socialaccount-ballot.html" with heading="Sign up with" %}
+      {% endif %}
+
+
+      <form class="form-horizontal" id="signup_form" method="post" action="{% url 'account_signup' %}">
+        {% csrf_token %}
+        {{ form|bootstrap_horizontal }}
+        {% if redirect_field_value %}
+        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+        {% endif %}
+        <button class='btn btn-block btn-primary' type='submit'>Sign Up &raquo;</button>
+        <p></p>
+        <p class='text-center'>{% blocktrans %}Already have an account? Then please <a href="{{ login_url }}">sign in</a>.{% endblocktrans %}</p>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+
+{% endblock %}

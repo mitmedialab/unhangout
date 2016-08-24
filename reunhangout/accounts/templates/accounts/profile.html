@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% load account %}
+{% block title %}{% user_display user %}{% endblock %}
+
+{% block content %}
+  <div class='container'>
+    <h1>{% user_display user %}</h1>
+  </div>
+{% endblock %}

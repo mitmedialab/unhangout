@@ -1,6 +1,7 @@
 {% load static %}
 {% load thumbnail %}
 {% load gravatar %}
+{% load account %}
 
 <div class='navbar navbar-inverse'>
   <div class='container-fluid'>
@@ -34,28 +35,37 @@
                aria-haspopup='true'
                aria-expanded='false'>
               {% gravatar user.email 32 %}
-              <span>{{ user }}</span>
+              <span>{% user_display user %}</span>
             </a>
             <ul class='dropdown-menu'>
               {% if user.is_staff %}
                 <li><a href='{% url "admin:index" %}'>Admin</a></li>
+                <li role='separator' class='divider'></li>
               {% endif %}
-              <li><a href='{% url "accounts_profile" %}'>Profile</a></li>
+              <li>
+                <a href='{% url "accounts_profile" %}'>
+                  <i class='fa fa-user'></i> Profile
+                </a>
+              </li>
               <li>
                 <a href='{% url "accounts_settings" %}'>
                   <i class='fa fa-cog'></i> Settings
                 </a>
               </li>
               <li role='separator' class='divider'></li>
-              <li><a href='{% url "account_logout" %}'>Logout</a></li>
+              <li>
+                <form method='post' action='{% url "account_logout" %}'>{% csrf_token %}
+                  <button type='submit' class='btn btn-link'>Logout</button>
+                </form>
+              </li>
             </ul>
           </li>
         {% else %}
           <li>
-            <a href='{% url "account_signup" %}' class='js-register-modal'>Sign up</a>
+            <a href='{% url "account_login" %}' class='btn btn-login'>Login</a>
           </li>
           <li>
-            <a href='{% url "account_login" %}' class='js-login-modal'>Login</a>
+            <a href='{% url "account_signup" %}' class='btn btn-signup'>Sign up</a>
           </li>
         {% endif %}
       </ul>

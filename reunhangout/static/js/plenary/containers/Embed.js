@@ -27,7 +27,7 @@ class Embed extends React.Component {
   updateEmbedDetails() {
     this.props.embeds.embeds.map((embed, i) => {
       if (!this.props.embedDetails[embed.props.src]) {
-        this.props.fetchEmbedDetails(embed);
+        this.props.fetchEmbedDetails(embed, this.props.settings);
       }
     });
   }
@@ -254,6 +254,7 @@ export default connect(
     embedsSending: state.plenary.embedsSending || {},
     auth: state.auth,
     videosync: state.videosync,
+    settings: state.settings,
   }),
   // map dispatch to props
   (dispatch, ownProps) => ({
@@ -263,7 +264,7 @@ export default connect(
     onAdminEmbedsError: (payload) => dispatch(A.adminEmbedsError(payload)),
 
     // user
-    fetchEmbedDetails: (embed) => dispatch(A.fetchEmbedDetails(embed)),
+    fetchEmbedDetails: (embed, settings) => dispatch(A.fetchEmbedDetails(embed, settings)),
   })
 )(Embed);
 

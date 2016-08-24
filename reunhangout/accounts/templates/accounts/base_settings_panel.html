@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}{{ view.kwargs.name }} Settings{% endblock %}
+
+{% block content %}
+
+<div class='container padded'>
+  <div class='row'>
+    <div class='col-sm-3'>
+      <h3><i class='fa fa-cog'></i> Settings</h3>
+      <ul class='nav nav-pills nav-stacked'>
+        {% for nav in settings_nav %}
+          <li role='presentation' {% if view.kwargs.slug == nav.slug %}class='active'{% endif %}>
+            <a href='{{nav.url}}'>{{nav.name}}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class='col-sm-9'>
+      <h2>{{ view.kwargs.name }}</h2>
+      {% block panel %}{% endblock %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}

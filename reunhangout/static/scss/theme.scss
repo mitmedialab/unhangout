@@ -1,0 +1,33 @@
+// Allow forms with buttons-as-links in dropdown menus to enable POST-ing
+.dropdown-menu > li > form {
+  width: 100%;
+  .btn-link {
+    width: 100%;
+    text-align: left;
+    padding: 3px 20px;
+    color: $dropdown-link-color;
+    background-color: $dropdown-bg;
+    &:hover {
+      color: $dropdown-link-hover-color;
+      background-color: $dropdown-link-hover-bg;
+      text-decoration: none;
+    }
+  }
+}
+
+.hr-break {
+  padding-top: 2em;
+  padding-bottom: 1.5em;
+  & div {
+    width: 100%;
+    text-align: center;
+    border-bottom: 1px solid #000;
+    line-height: 0.1em;
+    margin: 10px 0 20px;
+    & span {
+      font-style: italic;
+      background: #fff;
+      padding: 0 10px;
+    }
+  }
+}

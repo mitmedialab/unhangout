@@ -1,0 +1,49 @@
+{% extends "accounts/base_settings_panel.html" %}
+
+{% load i18n %}
+
+{% block panel %}
+
+{% if form.accounts %}
+  <p>
+    {% blocktrans %}
+    You can sign in to your account using any of the following third party
+    accounts:
+    {% endblocktrans %}
+  </p>
+  {% if form.non_field_errors %}
+    <div id="errorMsg" class='alert alert-danger'>
+      {{ form.non_field_errors }}
+    </div>
+  {% endif %}
+  <ul class='list-group'>
+    {% for base_account in form.accounts %}
+      {% with base_account.get_provider_account as account %}
+        <li class='list-group-item clearfix'>
+          <form method="post" action="">{% csrf_token %}
+            <input type='hidden' name='account' value='{{ base_account.id }}' />
+            <span class='label label-default'>
+              <i class='fa fa-{{base_account.provider}}'></i>
+              {{ account.get_brand.name }}
+            </span>
+            &nbsp;
+            {{ account }}
+            <button type="submit" title='Remove account' class='btn btn-default pull-right'>Remove</button>
+          </form>
+        </li>
+      {% endwith %}
+    {% endfor %}
+  </ul>
+
+{% else %}
+  <p>{% trans 'You currently have no social network accounts connected to this account.' %}</p>
+{% endif %}
+
+<h3>{% trans 'Add an Account' %}</h3>
+
+<ul class="socialaccount_providers list-inline pull-left">
+  {% include "socialaccount/snippets/provider_list.html" with process="connect" %}
+</ul>
+{% include "socialaccount/snippets/login_extra.html" %}
+
+{% endblock %}

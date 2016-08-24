@@ -24,6 +24,7 @@ export class Avatar extends React.Component {
     }
   }
 }
+
 export const sortPresence = (presence, auth) => {
   // Sort self first, others second.
   let members = _.sortBy(presence.members, (u) => u.username !== auth.username);
@@ -35,6 +36,7 @@ export const sortPresence = (presence, auth) => {
   }
   return members;
 }
+
 export class Presence extends React.Component {
   constructor() {
     super();

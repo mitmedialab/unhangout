@@ -128,6 +128,7 @@ class ChatMessage(models.Model):
 
     def serialize(self):
         return {
+            'id': self.id,
             'user': self.user.serialize_public(),
             'created': self.created.isoformat(),
             'message': self.safe_message(),

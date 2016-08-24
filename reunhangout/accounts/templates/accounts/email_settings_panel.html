@@ -1,0 +1,79 @@
+{% extends "accounts/base_settings_panel.html" %}
+
+{% load i18n %}
+{% load bootstrap %}
+
+{% block panel %}
+{% with emails=user.emailaddress_set.all %}
+  {% if emails %}
+    <p>{% trans 'The following e-mail addresses are associated with your account:' %}</p>
+    
+    {% for emailaddress in user.emailaddress_set.all %}
+      <form action="" class="email_list" method="post">{% csrf_token %}
+        <input type='hidden' name='email' value='{{emailaddress.email}}' />
+        {{emailaddress.email}}
+        {% if emailaddress.verified %}
+          <span class="label label-success">{% trans "Verified" %}</span>
+        {% else %}
+          <span class="label label-danger">{% trans "Unverified" %}</span>
+        {% endif %}
+        {% if emailaddress.primary %}
+          <span class="label label-info">{% trans "Primary" %}</span>
+        {% endif %}
+
+        {% if not emailaddress.verified %}
+          <button class="btn btn-default" type="submit" name="action_send">
+            {% trans 'Re-send Verification' %}
+          </button>
+        {% endif %}
+
+        {% if not emailaddress.primary %}
+          <button class='btn btn-default' type='submit' name='action_primary'>
+            {% trans 'Make Primary' %}
+          </button>
+        {% endif %}
+
+        <button class='btn btn-default' type='submit' name='action_remove' title='Remove email'>
+          <i class='fa fa-trash'></i>
+        </button>
+
+      </form>
+    {% endfor %}
+
+  {% else %}
+    <p><strong>
+      {% trans 'Warning:'%}</strong>
+      {% trans "You currently do not have any e-mail address set up. You should really add an e-mail address so you can receive notifications, reset your password, etc." %}
+    </p>
+  {% endif %}
+
+  <h3>{% trans "Add E-mail Address" %}</h3>
+
+  <form class='form-inline' method="post" action="" class="add_email">{% csrf_token %}
+    {{ form|bootstrap_inline }}
+    <div class='form-group'>
+      <button class='btn btn-default' name="action_add" type="submit">{% trans "Add E-mail" %}</button>
+    </div>
+  </form>
+
+{% endwith %}
+
+{% endblock %}
+
+
+{% block scripts %}
+{{ block.super }}
+<script type="text/javascript">
+(function() {
+  var message = "{% trans 'Do you really want to remove the selected e-mail address?' %}";
+  var actions = document.getElementsByName('action_remove');
+  if (actions.length) {
+    actions[0].addEventListener("click", function(e) {
+      if (! confirm(message)) {
+        e.preventDefault();
+      }
+    });
+  }
+})();
+</script>
+{% endblock %}

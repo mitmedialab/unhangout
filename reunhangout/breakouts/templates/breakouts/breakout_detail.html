@@ -1,8 +1,11 @@
 {% extends "base.html" %}
+{% load render_bundle from webpack_loader %}
+
 {% block title %}
   {% if breakout.title %}{{breakout.title}}{% else %}Breakout{% endif %}
   {% if plenary %} - {{ plenary.name }}{% endif %}
 {% endblock %}
+{% block styles %}{% render_bundle 'main' 'css' %}{% endblock %}
 
 {% block navbar %}{% endblock %}
 {% block footer %}{% endblock %}
@@ -12,4 +15,7 @@
     window.__INITIAL_STATE__ = {{ data|safe }};
   </script>
   <div id='breakout'></div>
+{% endblock %}
+{% block scripts %}
+  {% render_bundle 'main' 'js' %}
 {% endblock %}

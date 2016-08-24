@@ -6,8 +6,6 @@ import * as A from "../actions";
 import {Editor, EditorState, ContentState, SelectionState} from 'draft-js';
 import {Avatar, sortPresence} from './Presence';
 
-const DEFAULT_AVATAR = "../../../../media/assets/default_avatar.jpg";
-
 export default class Breakout extends React.Component {
   constructor(props) {
     super(props);
@@ -72,7 +70,8 @@ export default class Breakout extends React.Component {
     });
   }
   render() {
-    let showProposer = this.props.breakout.mode == "user" && !this.props.breakout.is_random;
+    let showProposer = this.props.breakout.mode === "user" && !this.props.breakout.is_random;
+    console.log(this.props.breakout);
     let showApprove = (
       this.props.auth.is_admin &&
       this.props.breakout.is_proposal &&
@@ -95,8 +94,8 @@ export default class Breakout extends React.Component {
     });
     let titleHasFocus = this.state.editorState.getSelection().getHasFocus();
     let showPresence = this.props.breakout.open && !this.props.breakout.is_proposal;
-    let classes = ['breakout'];
     let showMembers = this.props.breakout.is_random;
+    let classes = ['breakout'];
     if (this.props.breakout.is_proposal) {
       classes.push('proposal');
     }
@@ -106,8 +105,7 @@ export default class Breakout extends React.Component {
           <span>Assigned Participants:</span>
           <div className="members-avatars-container">
             {this.props.breakout.members.map((member) => {
-              let avatar=member.image || DEFAULT_AVATAR;
-              return <img src={avatar} />
+              return <Avatar user={member} gridView={true}/>
             })}
           </div>
         </div>
@@ -121,31 +119,31 @@ export default class Breakout extends React.Component {
         }
         { showPresence ?  <BreakoutPresence {...this.props} /> : "" }
         { showEditTitle ?
-          titleHasFocus ?
-            <div tabIndex="0"
-                 className="title-input title-focus"
-                 onClick={(e) => this.handleClick(e)}>
-              <Editor editorState={this.state.editorState}
-                      onChange={this.onChange} />
-            </div>
+            titleHasFocus ?
+              <div tabIndex="0"
+                   className="title-input title-focus"
+                   onClick={(e) => this.handleClick(e)}>
+                <Editor editorState={this.state.editorState}
+                        onChange={this.onChange} />
+              </div>
             :
-            <div tabIndex="0"
-                 className="title-input"
-                 onClick={(e) => this.handleClick(e)}>
-              <Editor editorState={this.state.editorState}
-                      onChange={this.onChange} />
-            </div>
+              <div tabIndex="0"
+                   className="title-input"
+                   onClick={(e) => this.handleClick(e)}>
+                <Editor editorState={this.state.editorState}
+                        onChange={this.onChange} />
+              </div>
           :
             <h5>{this.props.breakout.title}</h5>
         }
-        { showProposer ? 
+        { showProposer && this.props.breakout.proposed_by ? 
             <div className="proposed-by-container">
               <div className="proposed-by-label">
                 <span>Proposed</span>
                 <br></br>
                 <span>by:</span>
               </div>
-              <img src={this.props.breakout.proposed_by.image || DEFAULT_AVATAR} />
+              <Avatar user={this.props.breakout.proposed_by} gridView={true} />
             </div>
           : "" }
         { showApprove ?

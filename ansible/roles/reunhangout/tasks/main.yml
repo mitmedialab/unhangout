@@ -1,4 +1,10 @@
 ---
+ - name: Sync auth providers
+   command: "{{django_venv_dir}}bin/python {{django_project_dir}}manage.py sync_auth_providers"
+   register: sync_auth_providers
+   changed_when: sync_auth_providers.stdout.find("changed") != -1
+   tags: ['reunhangout', 'reunhangout-post']
+
  - name: Systemd parent dir
    file: path=/usr/lib/systemd/system state=directory
    tags: ['reunhangout', 'reunhangout-post']
@@ -30,5 +36,5 @@
     - "{{django_init_name}}"
     - "reunhangout-celery-beat"
     - "reunhangout-channels-worker"
-   when: django_scripts_result is not defined or django_scripts_result.changed or django_systemd.changed
+   when: django_scripts_result is not defined or django_scripts_result.changed or django_systemd.changed or sync_auth_providers.changed
    tags: ['reunhangout', 'reunhangout-post']
