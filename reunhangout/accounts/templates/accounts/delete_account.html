@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load account %}
+
+{% block title %}Delete Account{% endblock %}
+
+{% block content %}
+<div class='container'>
+  <h1>Delete Account</h1>
+  <p>{% user_display user %}, are you sure you want to delete your account?  This can't be undone.</p>
+  <form method='post' action=''>{% csrf_token %}
+    <a class='btn btn-primary' href='{% url "accounts_settings" slug="account" %}'>Cancel</a>
+    <button class='btn btn-danger'>Delete Account Permanently</button>
+  </form>
+</div>
+{% endblock %}
+

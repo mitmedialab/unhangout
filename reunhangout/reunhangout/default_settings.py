@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    'bootstrapform',
     'channels',
     'channels_presence',
     'django_gravatar',

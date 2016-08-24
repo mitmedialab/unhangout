@@ -8,7 +8,7 @@
   <link rel='icon' href='{% static "img/favicon.png" %}'>
   <title>{% block head_title %}{% endblock %}{% block title %}{% endblock %}{% block site_title %} - {{request.site.name}}{% endblock %}</title>
   {% block styles %}
-    {% render_bundle 'main' 'css' %}
+    {% render_bundle 'frontend' 'css' %}
   {% endblock %}
   <script type='text/javascript'>window.__SETTINGS__ = {{public_settings}};</script>
   {% block head %}{% endblock %}
@@ -24,7 +24,7 @@
   <footer>{% block footer %}{% include "_footer.html" %}{% endblock %}</footer>
 </div>
 {% block scripts %}
-  {% render_bundle 'main' 'js' %}
+  {% render_bundle 'frontend' 'js' %}
 {% endblock %}
 </body>
 </html>

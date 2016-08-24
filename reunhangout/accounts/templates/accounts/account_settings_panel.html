@@ -1,0 +1,21 @@
+{% extends "accounts/base_settings_panel.html" %}
+{% load bootstrap %}
+{% block panel %}
+  <form method='post' action=''>{% csrf_token %}
+    {{ form|bootstrap }}
+    <div class='form-group'>
+      <button type='submit' class='btn btn-primary'>Save</button>
+    </div>
+  </form>
+  <p>
+  <h3>Password</h3>
+  {% if user.has_usable_password %}
+    <a class='btn btn-default' href='{% url "account_change_password" %}'>Change Password</a>
+  {% else %}
+    <a class='btn btn-default' href='{% url "account_set_password" %}'>Set Password</a>
+  {% endif %}
+  <div class='pull-right'>
+    <a class='btn btn-default btn-hover-danger' href='{% url "accounts_delete_account" %}'>Delete Account</a>
+  </div>
+
+{% endblock %}
