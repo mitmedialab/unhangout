@@ -70,8 +70,11 @@ export default class Breakout extends React.Component {
     });
   }
   render() {
-    let showProposer = this.props.breakout.mode === "user" && !this.props.breakout.is_random;
-    console.log(this.props.breakout);
+    let showProposer = (
+      this.props.breakout.mode === "user" &&
+      !this.props.breakout.is_random &&
+      !!this.props.breakout.proposed_by
+    );
     let showApprove = (
       this.props.auth.is_admin &&
       this.props.breakout.is_proposal &&
@@ -100,7 +103,7 @@ export default class Breakout extends React.Component {
       classes.push('proposal');
     }
     return <div className={classes.join(" ")}>
-      { showMembers ? 
+      { showMembers ?
         <div className="members-container">
           <span>Assigned Participants:</span>
           <div className="members-avatars-container">
@@ -136,7 +139,7 @@ export default class Breakout extends React.Component {
           :
             <h5>{this.props.breakout.title}</h5>
         }
-        { showProposer && this.props.breakout.proposed_by ? 
+        { showProposer ?
             <div className="proposed-by-container">
               <div className="proposed-by-label">
                 <span>Proposed</span>
@@ -159,14 +162,8 @@ export default class Breakout extends React.Component {
           : ""
         }
         { showVote ?
-          votedForThis ?
-            <BS.Button onClick={(e) => this.handleVote(e)} className="vote-btn voted">
-              <BS.Glyphicon glyph="arrow-up" />
-              <br></br>
-              {this.props.breakout.votes.length}
-            </BS.Button>
-            :
-            <BS.Button onClick={(e) => this.handleVote(e)} className="vote-btn">
+            <BS.Button onClick={(e) => this.handleVote(e)}
+                className={"vote-btn" + votedForThis ? " voted" : ""}>
               <BS.Glyphicon glyph="arrow-up" />
               <br></br>
               {this.props.breakout.votes.length}
