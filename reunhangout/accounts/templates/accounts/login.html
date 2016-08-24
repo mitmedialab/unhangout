@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load account socialaccount %}
+{% load bootstrap %}
+
+{% block head_title %}{% trans "Sign In" %}{% endblock %}
+
+{% block content %}
+
+{% get_providers as socialaccount_providers %}
+
+<div class='container'>
+  <div class='row'>
+    <div class='col-sm-6 col-sm-offset-3'>
+      <div class='auth'>
+        {% if socialaccount_providers %}
+          <h2>{% trans "Sign in" %}</h2>
+
+          <div class="socialaccount_ballot">
+            <div class='hr-break'><div><span>Sign in with</span></div></div>
+
+            <ul class="socialaccount_providers list-inline">
+              {% include "socialaccount/snippets/provider_list.html" with process="login" %}
+            </ul>
+
+            <div class="hr-break"><div><span>{% trans 'or' %}</span></div></div>
+
+          </div>
+          {% include "socialaccount/snippets/login_extra.html" %}
+        {% endif %}
+
+        <form class="form-horizontal" method="POST" action="{% url 'account_login' %}">
+          {% csrf_token %}
+          {{ form|bootstrap_horizontal }}
+          {% if redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+          {% endif %}
+          <div class='form-group'>
+            <button class="btn btn-block btn-primary" type="submit">{% trans "Sign In" %}</button>
+          </div>
+          <div class='form-group'>
+            <a class="btn btn-link" href="{% url 'account_reset_password' %}">
+              {% trans "Forgot Password?" %}
+            </a>
+            <a class='btn btn-link pull-right' href="{{ signup_url }}">
+              {% trans "Register a new account" %}
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
