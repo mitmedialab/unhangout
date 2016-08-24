@@ -15,19 +15,9 @@
     <div class='col-sm-6 col-sm-offset-3'>
       <div class='auth'>
         {% if socialaccount_providers %}
-          <h2>{% trans "Sign in" %}</h2>
 
-          <div class="socialaccount_ballot">
-            <div class='hr-break'><div><span>Sign in with</span></div></div>
-
-            <ul class="socialaccount_providers list-inline">
-              {% include "socialaccount/snippets/provider_list.html" with process="login" %}
-            </ul>
-
-            <div class="hr-break"><div><span>{% trans 'or' %}</span></div></div>
-
-          </div>
-          {% include "socialaccount/snippets/login_extra.html" %}
+          <h2>{% trans "Log in" %}</h2>
+          {% include "accounts/_socialaccount-ballot.html" with heading="Sign in with" %}
         {% endif %}
 
         <form class="form-horizontal" method="POST" action="{% url 'account_login' %}">

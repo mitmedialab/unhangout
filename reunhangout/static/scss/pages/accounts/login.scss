@@ -22,3 +22,20 @@
     }
   }
 }
+
+.navbar-nav > li {
+  & > a.btn-login, & > a.btn-signup {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    color: white;
+  }
+  & > a.btn-signup {
+    font-weight: bold;
+    background-color: orange;
+    &:hover {
+      background-color: darken(orange, 5%);
+    }
+  }
+}

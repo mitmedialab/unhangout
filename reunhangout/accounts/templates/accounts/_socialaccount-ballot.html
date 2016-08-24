@@ -1,0 +1,8 @@
+<div class="socialaccount_ballot">
+  <div class='hr-break'><div><span>{% firstof heading "Sign in with" %}</span></div></div>
+  <ul class="socialaccount_providers list-inline">
+    {% include "socialaccount/snippets/provider_list.html" with process="login" %}
+  </ul>
+  <div class="hr-break"><div><span>or</span></div></div>
+</div>
+{% include "socialaccount/snippets/login_extra.html" %}

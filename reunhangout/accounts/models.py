@@ -33,7 +33,8 @@ def serialize_public(user):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    username = models.CharField(max_length=30, unique=True)
+    username = models.CharField(max_length=30, unique=True,
+            error_messages={'unique': "An account with that username already exists."})
     email = models.EmailField("Email address", blank=True, null=True,
             unique=True, default=None)
     twitter_handle = models.CharField(max_length=100, blank=True, null=True,
