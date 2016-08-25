@@ -1,3 +1,18 @@
+{% load thumbnail %}
 <div class='container section footer'>
-
+  {% thumbnail branding.navbar_logo "x40" format="PNG" as thumb %}
+    <a href='/'><img src='{{ thumb.url }}' alt='{{ branding.name }}' /></a>
+  {% endthumbnail %}
+  <div class='links'>
+    <ul>
+      <li><a href='{% url 'about' %}'>About</a></li>
+      <li><a href='https://github.com/unhangout/unhangout'>Source code on GitHub</a></li>
+      <li><a href='{% url 'plenary_list' %}'>Upcoming events</a></li>
+    </ul>
+    <ul>
+      <li><a href='{% url 'terms' %}'>Trems of Service</a></li>
+      <li><a href='{% url 'privacy' %}'>Privacy Policy</a></li>
+      <li style='list-style-type: none;'>&copy; {% now "Y" %}</li>
+    </ul>
+  </div>
 </div>

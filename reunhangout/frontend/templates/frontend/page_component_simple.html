@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% load page_components %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class='container'>
+  {% page_component key %}
+</div>
+{% endblock %}

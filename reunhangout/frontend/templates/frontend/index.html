@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load thumbnail %}
+{% load page_components %}
 
 {% block title %}{{ branding.name }}{% endblock %}
 
@@ -15,12 +16,7 @@
       {% thumbnail branding.logo "x400" format="PNG" as thumb %}
       <img src='{{thumb.url }}' alt='{{ branding.name }}' class='img-responsive' />
       {% endthumbnail %}
-      <p>
-      {{ branding.name }} is an open source platform for running large-scale,
-      unconferences online. We use Google Hangouts to create as many small
-      breakout sessions as needed, and help users find others with shared
-      interests.
-      </p>
+      {% page_component "front_page_blurb" default="<p>Unhangout is an open source platform for running large-scale, unconferences online. We use Google Hangouts to create as many small breakout sessions as needed, and help users find others with shared interests.</p>" %}
 
     </div>
   </div>
