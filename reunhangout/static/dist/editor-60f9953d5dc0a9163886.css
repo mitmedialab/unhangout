@@ -11,3 +11,9 @@
     padding: 0; }
   .rich-text-editor .ProseMirror-content {
     min-height: 10em; }
+
+.submit-row a.deletelink {
+  height: auto; }
+
+.inline-group .tabular td.original p {
+  height: auto; }
