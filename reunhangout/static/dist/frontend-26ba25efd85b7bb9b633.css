@@ -5796,14 +5796,15 @@ button.close {
       background: #fff;
       padding: 0 10px; }
 
-footer {
+.footer {
+  width: 100%;
   padding: 1em 0em;
   background-color: #2e7daa;
   color: white;
   text-align: center; }
-  footer a, footer a:visited, footer a:hover, footer a:active {
+  .footer a, .footer a:visited, .footer a:hover, .footer a:active {
     color: white; }
-  footer .links ul {
+  .footer .links ul {
     display: inline-block;
     vertical-align: top;
     text-align: left; }
