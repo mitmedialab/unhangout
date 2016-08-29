@@ -57,7 +57,7 @@ class VideoSync(models.Model):
     def broadcast_pause(self):
         broadcast(self.channel_group_name, type='videosync', payload={
             'sync_id': self.sync_id,
-            'state': paused
+            'state': "paused"
         })
 
     def tick(self):

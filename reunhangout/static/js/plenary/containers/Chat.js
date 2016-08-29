@@ -79,7 +79,6 @@ class ChatMessage extends React.Component {
 
   markup(message) {
     let linked = linkify(message);
-    console.log(this.props.msg);
     let atnamed = linked.map((part, i) => {
       if (_.isString(part)) {
         return atnamify(part, this.props.presence.members, this.props.msg.id);

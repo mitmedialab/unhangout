@@ -64,6 +64,10 @@ class SyncableYoutubeVideo extends React.Component {
     }
   }
 
+  videoEnded() {
+    this.props.onPauseForAll({syncId: this.props.sync_id});
+  }
+
   toggleSyncIntent(event) {
     event.preventDefault();
     if (this.getCurSync().synced) {
@@ -84,6 +88,10 @@ class SyncableYoutubeVideo extends React.Component {
     // sync starts.
     if (stateName === "unstarted") {
       this.isUnstarted = true;
+    } else if (stateName === "ended") {
+      if (this.props.showSyncControls && this.isPlayingForAll()) {
+        this.videoEnded();
+      }
     } else if (stateName === "playing" && this.isUnstarted) {
       this.syncVideo();
       delete this.isUnstarted;
@@ -145,9 +153,9 @@ class SyncableYoutubeVideo extends React.Component {
       let stateName = this.STATE_NAMES[state];
       //console.log("syncVideo:", stateName, time, duration, curSync);
       // Stop playback if we've exceeded the duration
-      if (stateName === "ended" || this.syncTime > duration && curSync.state === "playing") {
+      if (stateName === "ended" || (this.syncTime > duration && curSync.state === "playing")) {
         if (this.props.showSyncControls) {
-          this.togglePlayForAll();
+          this.videoEnded();
         }
         return;
       }
