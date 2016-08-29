@@ -2,17 +2,21 @@ import React from "react";
 import {connect} from "react-redux";
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
-import {Editor, EditorState, ContentState, SelectionState} from 'draft-js';
-import * as style from "../../../scss/pages/plenary/_whiteboardstyle.scss"
+import {Editor, EditorState, ContentState, SelectionState, convertFromHTML, convertFromRaw, convertToRaw} from 'draft-js';
+import * as style from "../../../scss/pages/plenary/_whiteboardstyle.scss";
+import Spinner from 'react-spinkit'
 
 class Whiteboard extends React.Component {
   constructor(props) {
     super(props);
-    this.active = false;
+    console.log('constructor', this.props.plenary.whiteboard)
+    let blockArray = convertFromHTML(this.props.plenary.whiteboard)
+    let contentState = ContentState.createFromBlockArray(blockArray)
     this.state = {
       panelOpen: true,
-      editorState: EditorState.createWithContent(ContentState.createFromText(this.props.plenary.whiteboard)),
+      editorState: EditorState.createWithContent(contentState),
     }
+    this.active = false;
     this.onChange = (editorState) => this.setState({editorState});
   }
   //Add an event listener that will dispatch the updated content
@@ -27,9 +31,11 @@ class Whiteboard extends React.Component {
       false);
   }
   componentWillReceiveProps(newProps) {
-    this.setState({
-      editorState: EditorState.createWithContent(ContentState.createFromText(newProps.plenary.whiteboard))
-    })
+    let blockArray = convertFromHTML(newProps.plenary.whiteboard)
+    let contentState = ContentState.createFromBlockArray(blockArray)
+    this.setState = {
+      editorState: EditorState.createWithContent(contentState),
+    }
   }
   //prevent dispatch for clicks on input bar
   handleClick(event) {
@@ -46,9 +52,9 @@ class Whiteboard extends React.Component {
     this.active = false
   }
   render() {
+    console.log(convertToRaw(this.state.editorState.getCurrentContent()))
     let isAdmin = this.props.auth.is_admin;
     let whiteboardHasFocus = this.state.editorState.getSelection().getHasFocus();
-
     if (isAdmin) {
       return <div className="whiteboard">
         <BS.Panel collapsible expanded={this.state.panelOpen}>
@@ -72,9 +78,12 @@ class Whiteboard extends React.Component {
                 </div>}
         </BS.Panel>
         <BS.Button 
-        onClick={() => this.setState({ panelOpen: !this.state.panelOpen })}
-        className="whiteboard-button">
-          {this.state.panelOpen ? 
+          onClick={() => this.setState({ panelOpen: !this.state.panelOpen })}
+          className="whiteboard-button">
+        {this.props.plenary.plenaryDetailsState == "sending" ?
+          <Spinner spinnerName="circle" noFadeIn />
+          : 
+          this.state.panelOpen ? 
             <BS.Glyphicon glyph="chevron-up" />
             :
             <BS.Glyphicon glyph="chevron-down" /> }

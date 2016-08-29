@@ -3,7 +3,7 @@ import {connect} from "react-redux";
 import * as style from "../../../scss/pages/plenary/_breakoutliststyle.scss";
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
-import {Editor, EditorState, ContentState, SelectionState} from 'draft-js';
+import {Editor, EditorState, ContentState, SelectionState, Modifier} from 'draft-js';
 import {Avatar, sortPresence} from './Presence';
 
 export default class Breakout extends React.Component {
@@ -13,7 +13,19 @@ export default class Breakout extends React.Component {
     this.state = {
       editorState: EditorState.createWithContent(ContentState.createFromText(this.props.breakout.title))
     };
-    this.onChange = (editorState) => this.setState({editorState});
+    this.onChange = (editorState) => {
+      let currentPlainText = editorState.getCurrentContent().getPlainText()
+      if (currentPlainText.length <= 80) {
+        // this.setState({
+        //   editorState: EditorState.push(editorState, ContentState.createFromText(currentPlainText), 'backspace-character')
+        // });
+        // console.log(this.state.editorState.getCurrentContent().getPlainText())
+        this.setState({editorState});
+      } 
+      // else {
+      //   this.setState({editorState});
+      // }
+    }
   }
   //Add an event listener that will dispatch the updated title
   componentDidMount() {
@@ -41,6 +53,19 @@ export default class Breakout extends React.Component {
       });
     }
     this.active = false
+  }
+  //dispatch updated title upon return
+  handleReturn(onChangeBreakouts, updatedTitle) {
+    if (this.active) {
+      onChangeBreakouts({
+        action: "modify",
+        id: this.props.breakout.id,
+        title: updatedTitle.getCurrentContent().getPlainText()
+      });
+    }
+    this.active = false
+    this.refs.editor.blur()
+    return 'handled' 
   }
   //prevent dispatch for clicks on input bar
   handleClick(event) {
@@ -120,26 +145,30 @@ export default class Breakout extends React.Component {
             </BS.Button>
           : ""
         }
-        { showPresence ?  <BreakoutPresence {...this.props} /> : "" }
         { showEditTitle ?
-            titleHasFocus ?
-              <div tabIndex="0"
-                   className="title-input title-focus"
-                   onClick={(e) => this.handleClick(e)}>
-                <Editor editorState={this.state.editorState}
-                        onChange={this.onChange} />
-              </div>
+          titleHasFocus ?
+            <div tabIndex="0"
+                 className="title-input title-focus"
+                 onClick={(e) => this.handleClick(e)}>
+              <Editor editorState={this.state.editorState}
+                      onChange={this.onChange} 
+                      handleReturn={() => this.handleReturn(this.props.onChangeBreakouts, this.state.editorState)} 
+                      ref="editor" />
+            </div>
             :
-              <div tabIndex="0"
-                   className="title-input"
-                   onClick={(e) => this.handleClick(e)}>
-                <Editor editorState={this.state.editorState}
-                        onChange={this.onChange} />
-              </div>
+            <div tabIndex="0"
+                 className="title-input"
+                 onClick={(e) => this.handleClick(e)}>
+              <Editor editorState={this.state.editorState}
+                      onChange={this.onChange}
+                      handleReturn={() => this.handleReturn(this.props.onChangeBreakouts, this.state.editorState)} 
+                      ref="editor" />
+            </div>
           :
             <h5>{this.props.breakout.title}</h5>
         }
-        { showProposer ?
+        { showPresence ?  <BreakoutPresence {...this.props} /> : "" }
+        { showProposer ? 
             <div className="proposed-by-container">
               <div className="proposed-by-label">
                 <span>Proposed</span>
@@ -197,7 +226,7 @@ class BreakoutPresence extends React.Component {
     return <div className='breakout-presence'>
       { members.map((user, i) => (
           <span className={`slot${user === null ? " empty" : ""}`} key={`user-${i}`}>
-            { user === null ? "" : <Avatar user={user} /> }
+            { user === null ? "" : <Avatar user={user} gridView={true}/> }
           </span>
         ))
       }

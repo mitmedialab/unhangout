@@ -87,6 +87,9 @@
       top: 0px;
       border-top-left-radius: 0px;
       border-bottom-left-radius: 0px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
     &.delete-btn {
       height: 100%;
@@ -134,7 +137,6 @@
     margin-left: 36px;
     margin-top: 5px;
     &:hover {
-      background-color: #fff;
       border: 1px solid #ccc;
       border-radius: 4px;
     }
@@ -162,8 +164,12 @@
 }
 .breakout-presence {
   position: relative;
+  padding: 5px;
   padding-bottom: 0.2em;
   width: 100%;
+  margin-top: auto;
+  margin-left: 36px;
+  margin-bottom: 5px;
   .slot {
     width: 32px;
     height: 32px;
@@ -173,11 +179,13 @@
     vertical-align: middle;
     &.empty {
       border: 1px solid #ccc;
+      border-radius: 5px;
     }
   }
   img {
     width: 100%;
     height: 100%;
+    border-radius: 5px;
   }
 }
 .breakout-presence {

@@ -33,6 +33,12 @@ export const plenary = (state=null, action) => {
       newstate = {...state}
       newstate.embedDetails[action.payload.embed.props.src] = action.payload.details
       return newstate
+    case A.ADMIN_PLENARY_DETAILS_SENDING:
+      newstate = {...state, plenaryDetailsState: "sending"}
+      return newstate
+    case A.ADMIN_PLENARY_DETAILS_SENT:
+      newstate = {...state, plenaryDetailsState: "sent"}
+      return newstate
     case A.SET_PLENARY:
       newstate = {...state, ...action.payload.plenary};
       return newstate
