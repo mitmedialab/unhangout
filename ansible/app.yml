@@ -25,6 +25,12 @@
       - "{{reunhangout_domain}}"
     uh_repo_dir: "/var/local/reunhangout/"
     postgresql_version: 9.5
+    django_asgi: yes
+    django_systemd: yes
+    django_celery: yes
+    django_celery_beat: yes
+    django_id_rsa: no
+    django_uwsgi: no
     django_python_version: "python3.5"
     django_domain: "{{reunhangout_domain}}"
     django_project_name: "reunhangout"
@@ -35,8 +41,6 @@
     django_venv_dir: "{{uh_repo_dir}}venv/"
     django_static_dir: "{{django_project_dir}}public/"
     django_media_dir: "{{django_project_dir}}media/"
-    django_id_rsa: no
-    django_uwsgi: no
     django_wsgi_port: 3040
     django_postgres_db: "{{uh_postgres_db}}"
     django_postgres_user: "{{uh_postgres_user}}"

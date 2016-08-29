@@ -4,37 +4,3 @@
    register: sync_auth_providers
    changed_when: sync_auth_providers.stdout.find("changed") != -1
    tags: ['reunhangout', 'reunhangout-post']
-
- - name: Systemd parent dir
-   file: path=/usr/lib/systemd/system state=directory
-   tags: ['reunhangout', 'reunhangout-post']
-
- - name: Systemd scripts
-   template: src={{item}} dest=/usr/lib/systemd/system/{{item}}
-   with_items:
-    - "{{django_init_name}}.service"
-    - reunhangout-channels-worker.service
-    - reunhangout-celery-beat.service
-   register: django_systemd
-   tags: ['reunhangout', 'reunhangout-post']
-   # NOTE: Expecting a step below to restart this service if anything in the
-   # codebase has changed, and thus not require an explicit restart here.
-
-
-# Manual restart of all services with daemon_reload if anything in the
-# codebase changed. Without this, we'd need to set up handlers/notify for all
-# things. Should be easier in ansible v2.2:
-# https://docs.ansible.com/ansible/systemd_module.html
- - name: Reload systemd files
-   command: systemctl daemon-reload
-   when: django_systemd.changed
-   tags: ['reunhangout', 'reunhangout-post']
-
- - name: Restart all workers
-   service: name={{item}} state=restarted
-   with_items:
-    - "{{django_init_name}}"
-    - "reunhangout-celery-beat"
-    - "reunhangout-channels-worker"
-   when: django_scripts_result is not defined or django_scripts_result.changed or django_systemd.changed or sync_auth_providers.changed
-   tags: ['reunhangout', 'reunhangout-post']
