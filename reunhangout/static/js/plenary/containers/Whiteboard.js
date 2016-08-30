@@ -30,7 +30,6 @@ class Whiteboard extends React.Component {
       false);
   }
   componentWillReceiveProps(newProps) {
-    console.log(newProps.plenary.whiteboard)
     this.setState ({
       editorState: EditorState.createWithContent(ContentState.createFromText(newProps.plenary.whiteboard)),
     })
@@ -56,7 +55,6 @@ class Whiteboard extends React.Component {
   }
   //dispatch updated title upon click outside 
   handleModify(onAdminSendPlenaryDetails, updated) {
-    console.log(updated.getCurrentContent().getPlainText())
     if (this.active) {  
       onAdminSendPlenaryDetails({
         whiteboard: updated.getCurrentContent().getPlainText()
