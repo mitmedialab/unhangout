@@ -3,10 +3,12 @@ import {connect} from "react-redux";
 import * as BS from "react-bootstrap";
 import {ConnectionStatus} from '../../transport';
 import * as A from '../actions';
+import {Presence} from '../../plenary/containers/Presence.js';
 import * as style from "../../../scss/pages/breakout/_breakoutstyle.scss"
 
 class Breakout extends React.Component {
   render() {
+    console.log(this.props.breakout)
     if (!this.props.presence || !this.props.presence.channel_name) {
       return this.renderStatusMessage("Loading...");
     }
@@ -22,11 +24,10 @@ class Breakout extends React.Component {
       <BS.Grid fluid>
         <BS.Row>
           <BS.Col xs={2}>
-            <ul>
-              {this.props.presence.members.map((m, i) => {
-                return <li key={`${i}`}>{m.username}</li>
-              })}
-            </ul>
+            <div className="breakout-title-container">
+              <span>{this.props.breakout.title}</span>
+            </div>
+            <Presence presence={this.props.presence} auth={this.props.auth} />
             { this.props.breakoutMessages.length > 0 ?
                 <ul className='breakout-messages'>
                   {

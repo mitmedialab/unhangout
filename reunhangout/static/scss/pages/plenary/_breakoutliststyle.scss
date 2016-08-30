@@ -6,14 +6,8 @@
   justify-content: flex-end;
   overflow: visible;
   .btn-default {
-    flex-grow: 1;
     color: #2e7daa;
     margin: 5px;
-    &.create-session-btn {
-      max-width: 36px;
-      padding-left:5px;
-      padding-right: 5px;
-    }
   }
   h4 {
     flex-grow: 1;
@@ -29,7 +23,6 @@
   width: calc(100% - 10px);
   margin: 5px;
   border-radius: 5px;
-  background-color: #eee;
   display: flex;
   flex-flow: column nowrap;
   .main-breakout-container {
@@ -37,6 +30,7 @@
     min-height: 75px;
     position: relative;
     flex-grow: 1;
+    background-color: #eee;
   }
   .members-container {
     display: flex;
@@ -44,8 +38,7 @@
     border: 1px solid #ccc;
     padding: 5px;
     border-radius: 5px;
-    border-bottom-left-radius: 0px;
-    border-bottom-right-radius: 0px;
+    background-color: #eee;
     img {
       width: 18px;
       height: 18px;
@@ -166,7 +159,7 @@
   position: relative;
   padding: 5px;
   padding-bottom: 0.2em;
-  width: 100%;
+  width: 70%;
   margin-top: auto;
   margin-left: 36px;
   margin-bottom: 5px;
@@ -177,28 +170,8 @@
     position: relative;
     display: inline-block;
     vertical-align: middle;
-    &.empty {
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-  }
-  img {
-    width: 100%;
-    height: 100%;
     border-radius: 5px;
-  }
-}
-.breakout-presence {
-  position: relative;
-  padding-bottom: 0.2em;
-  width: 100%;
-  .slot {
-    width: 32px;
-    height: 32px;
-    margin-right: 2px;
-    position: relative;
-    display: inline-block;
-    vertical-align: middle;
+    margin-top: 2px;
     &.empty {
       border: 1px solid #ccc;
     }

@@ -2,7 +2,7 @@ import React from "react";
 import {connect} from "react-redux";
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
-import {Editor, EditorState, ContentState, SelectionState, convertFromHTML, convertFromRaw, convertToRaw} from 'draft-js';
+import {Editor, EditorState, ContentState, SelectionState, convertFromHTML, convertFromRaw, convertToRaw, getDefaultKeyBinding, KeyBindingUtil} from 'draft-js';
 import * as style from "../../../scss/pages/plenary/_whiteboardstyle.scss";
 import Spinner from 'react-spinkit'
 
@@ -37,6 +37,22 @@ class Whiteboard extends React.Component {
       editorState: EditorState.createWithContent(contentState),
     }
   }
+  keyBindingFn(e, contentLength) {
+    console.log('contentLength', contentLength)
+    if (e.keyCode !== 8 && contentLength >= 800) {
+      console.log('not backspace and length greater than 80 chars')
+      return 'my-add';
+    }
+    console.log('default keybinding')
+    return getDefaultKeyBinding(e);
+  }
+  handleKeyCommand (command) {
+    if (command === 'my-add') {
+      console.log('return handled and dont do shit')
+      return 'handled';
+    }
+    console.log('not handled so do default hopefully')
+  }
   //prevent dispatch for clicks on input bar
   handleClick(event) {
     event.stopPropagation();
@@ -65,7 +81,10 @@ class Whiteboard extends React.Component {
                   onClick={(e) => this.handleClick(e)} >
                     <Editor 
                     editorState={this.state.editorState} 
-                    onChange={this.onChange} />
+                    onChange={this.onChange} 
+                    handleKeyCommand={this.handleKeyCommand}
+                      keyBindingFn={(e) => 
+                        this.keyBindingFn(e, this.state.editorState.getCurrentContent().getPlainText().length)} />
                 </div>
                 :
                 <div 
@@ -74,7 +93,10 @@ class Whiteboard extends React.Component {
                   onClick={(e) => this.handleClick(e)} >
                     <Editor 
                     editorState={this.state.editorState} 
-                    onChange={this.onChange} />
+                    onChange={this.onChange} 
+                    handleKeyCommand={this.handleKeyCommand}
+                      keyBindingFn={(e) => 
+                        this.keyBindingFn(e, this.state.editorState.getCurrentContent().getPlainText().length)} />
                 </div>}
         </BS.Panel>
         <BS.Button 

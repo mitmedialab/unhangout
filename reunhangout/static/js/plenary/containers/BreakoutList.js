@@ -137,29 +137,32 @@ class BreakoutList extends React.Component {
               <BS.Glyphicon glyph="plus" />
             </BS.Button>
           : "" }
-
-
-          { this.props.auth.is_admin ?
-            <BS.Dropdown
-              id="user-menu-button"
-              pullRight>
-              <BS.Dropdown.Toggle
-                noCaret
-                className="breakout-settings-btn">
-                <img src="../../../../media/assets/control-panel-icon" />
-              </BS.Dropdown.Toggle>
-              <BS.Dropdown.Menu>
-                <BS.MenuItem
-                  onClick={() => this.setState({"message-breakouts-dialog": true})}>
-                  Message All Breakouts
-                </BS.MenuItem>
-                <BS.MenuItem
-                  onClick={() => this.setState({"breakout-mode-dialog": true})}>
-                  Breakout Mode
-                </BS.MenuItem>
-              </BS.Dropdown.Menu>
-            </BS.Dropdown>
-            : "" }
+        { breakout_mode === "random" ?
+            <BS.Button onClick={(e) => this.handleGroupMe(e)}>
+              { breakouts.length === 0 ? "Group me" : "Regroup me" }
+            </BS.Button>
+          : "" }
+        { this.props.auth.is_admin ?
+          <BS.Dropdown
+            id="user-menu-button"
+            pullRight>
+            <BS.Dropdown.Toggle
+              noCaret
+              className="breakout-settings-btn">
+              <img src="../../../../media/assets/control-panel-icon" />
+            </BS.Dropdown.Toggle>
+            <BS.Dropdown.Menu>
+              <BS.MenuItem
+                onClick={() => this.setState({"message-breakouts-dialog": true})}>
+                Message All Breakouts
+              </BS.MenuItem>
+              <BS.MenuItem
+                onClick={() => this.setState({"breakout-mode-dialog": true})}>
+                Breakout Mode
+              </BS.MenuItem>
+            </BS.Dropdown.Menu>
+          </BS.Dropdown>
+          : "" }
         { this.props.breakoutCrud.error ?
             <div className="breakout-error">
               {this.props.breakoutCrud.error.message}
@@ -177,11 +180,6 @@ class BreakoutList extends React.Component {
               onChangeBreakouts={this.props.onChangeBreakouts} />
           })
         }
-        { breakout_mode === "random" ?
-            <BS.Button onClick={(e) => this.handleGroupMe(e)}>
-              { breakouts.length === 0 ? "Group me" : "Regroup me" }
-            </BS.Button>
-          : "" }
       </div>
 
       { this.renderModalForm(

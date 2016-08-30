@@ -3,7 +3,7 @@ import {connect} from "react-redux";
 import * as style from "../../../scss/pages/plenary/_breakoutliststyle.scss";
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
-import {Editor, EditorState, ContentState, SelectionState, Modifier} from 'draft-js';
+import {Editor, EditorState, ContentState, SelectionState, getDefaultKeyBinding, KeyBindingUtil} from 'draft-js';
 import {Avatar, sortPresence} from './Presence';
 
 export default class Breakout extends React.Component {
@@ -14,17 +14,7 @@ export default class Breakout extends React.Component {
       editorState: EditorState.createWithContent(ContentState.createFromText(this.props.breakout.title))
     };
     this.onChange = (editorState) => {
-      let currentPlainText = editorState.getCurrentContent().getPlainText()
-      if (currentPlainText.length <= 80) {
-        // this.setState({
-        //   editorState: EditorState.push(editorState, ContentState.createFromText(currentPlainText), 'backspace-character')
-        // });
-        // console.log(this.state.editorState.getCurrentContent().getPlainText())
         this.setState({editorState});
-      } 
-      // else {
-      //   this.setState({editorState});
-      // }
     }
   }
   //Add an event listener that will dispatch the updated title
@@ -42,6 +32,22 @@ export default class Breakout extends React.Component {
     this.setState({
       editorState: EditorState.createWithContent(ContentState.createFromText(newProps.breakout.title))
     })
+  }
+  keyBindingFn(e, contentLength) {
+    console.log('contentLength', contentLength)
+    if (e.keyCode !== 8 && contentLength >= 50) {
+      console.log('not backspace and length greater than 80 chars')
+      return 'my-add';
+    }
+    console.log('default keybinding')
+    return getDefaultKeyBinding(e);
+  }
+  handleKeyCommand (command) {
+    if (command === 'my-add') {
+      console.log('return handled and dont do shit')
+      return 'handled';
+    }
+    console.log('not handled so do default hopefully')
   }
   //dispatch updated title upon click outside
   handleModify(onChangeBreakouts, updatedTitle) {
@@ -95,6 +101,7 @@ export default class Breakout extends React.Component {
     });
   }
   render() {
+    console.log('render plaintext', this.state.editorState.getCurrentContent().getPlainText())
     let showProposer = (
       this.props.breakout.mode === "user" &&
       !this.props.breakout.is_random &&
@@ -153,7 +160,10 @@ export default class Breakout extends React.Component {
               <Editor editorState={this.state.editorState}
                       onChange={this.onChange} 
                       handleReturn={() => this.handleReturn(this.props.onChangeBreakouts, this.state.editorState)} 
-                      ref="editor" />
+                      ref="editor"
+                      handleKeyCommand={this.handleKeyCommand}
+                      keyBindingFn={(e) => 
+                        this.keyBindingFn(e, this.state.editorState.getCurrentContent().getPlainText().length)} />
             </div>
             :
             <div tabIndex="0"
@@ -162,7 +172,10 @@ export default class Breakout extends React.Component {
               <Editor editorState={this.state.editorState}
                       onChange={this.onChange}
                       handleReturn={() => this.handleReturn(this.props.onChangeBreakouts, this.state.editorState)} 
-                      ref="editor" />
+                      ref="editor" 
+                      handleKeyCommand={this.handleKeyCommand}
+                      keyBindingFn={(e) => 
+                        this.keyBindingFn(e, this.state.editorState.getCurrentContent().getPlainText().length)} />
             </div>
           :
             <h5>{this.props.breakout.title}</h5>
