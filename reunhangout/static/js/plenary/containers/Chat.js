@@ -124,8 +124,11 @@ class Chat extends React.Component {
   }
   render() {
     let is_admin = this.props.auth.is_admin
+    let showWhiteboard = this.props.plenary.whiteboard.length > 7 ||is_admin;
     return <div className="chat-container">
-      <Whiteboard />
+      { showWhiteboard ? 
+        <Whiteboard />
+        : ""}
         <div className="chat-box">
         <div
           className="chat-log"

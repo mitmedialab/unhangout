@@ -9,7 +9,6 @@ import Spinner from 'react-spinkit'
 class Whiteboard extends React.Component {
   constructor(props) {
     super(props);
-    console.log('constructor', this.props.plenary.whiteboard)
     let blockArray = convertFromHTML(this.props.plenary.whiteboard)
     let contentState = ContentState.createFromBlockArray(blockArray)
     this.state = {
@@ -31,27 +30,24 @@ class Whiteboard extends React.Component {
       false);
   }
   componentWillReceiveProps(newProps) {
-    let blockArray = convertFromHTML(newProps.plenary.whiteboard)
-    let contentState = ContentState.createFromBlockArray(blockArray)
-    this.setState = {
-      editorState: EditorState.createWithContent(contentState),
+    console.log(newProps.plenary.whiteboard)
+    this.setState ({
+      editorState: EditorState.createWithContent(ContentState.createFromText(newProps.plenary.whiteboard)),
+    })
+    if (newProps.plenary.whiteboard !== this.props.plenary.whiteboard) {
+      this.setState({panelOpen: true,})
     }
   }
   keyBindingFn(e, contentLength) {
-    console.log('contentLength', contentLength)
     if (e.keyCode !== 8 && contentLength >= 800) {
-      console.log('not backspace and length greater than 80 chars')
       return 'my-add';
     }
-    console.log('default keybinding')
     return getDefaultKeyBinding(e);
   }
   handleKeyCommand (command) {
     if (command === 'my-add') {
-      console.log('return handled and dont do shit')
       return 'handled';
     }
-    console.log('not handled so do default hopefully')
   }
   //prevent dispatch for clicks on input bar
   handleClick(event) {
@@ -60,6 +56,7 @@ class Whiteboard extends React.Component {
   }
   //dispatch updated title upon click outside 
   handleModify(onAdminSendPlenaryDetails, updated) {
+    console.log(updated.getCurrentContent().getPlainText())
     if (this.active) {  
       onAdminSendPlenaryDetails({
         whiteboard: updated.getCurrentContent().getPlainText()
@@ -68,7 +65,6 @@ class Whiteboard extends React.Component {
     this.active = false
   }
   render() {
-    console.log(convertToRaw(this.state.editorState.getCurrentContent()))
     let isAdmin = this.props.auth.is_admin;
     let whiteboardHasFocus = this.state.editorState.getSelection().getHasFocus();
     if (isAdmin) {

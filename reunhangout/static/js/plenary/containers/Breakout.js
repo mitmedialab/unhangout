@@ -34,20 +34,15 @@ export default class Breakout extends React.Component {
     })
   }
   keyBindingFn(e, contentLength) {
-    console.log('contentLength', contentLength)
     if (e.keyCode !== 8 && contentLength >= 50) {
-      console.log('not backspace and length greater than 80 chars')
       return 'my-add';
     }
-    console.log('default keybinding')
     return getDefaultKeyBinding(e);
   }
   handleKeyCommand (command) {
     if (command === 'my-add') {
-      console.log('return handled and dont do shit')
       return 'handled';
     }
-    console.log('not handled so do default hopefully')
   }
   //dispatch updated title upon click outside
   handleModify(onChangeBreakouts, updatedTitle) {
@@ -101,7 +96,6 @@ export default class Breakout extends React.Component {
     });
   }
   render() {
-    console.log('render plaintext', this.state.editorState.getCurrentContent().getPlainText())
     let showProposer = (
       this.props.breakout.mode === "user" &&
       !this.props.breakout.is_random &&

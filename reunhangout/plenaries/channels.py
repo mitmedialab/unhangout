@@ -17,7 +17,6 @@ from videosync.models import VideoSync
 from reunhangout.channels_utils import broadcast, handle_error, require_payload_keys
 from analytics.models import track
 
-import pdb
 
 @enforce_ordering(slight=True)
 @channel_session_user_from_http
@@ -252,7 +251,7 @@ def handle_plenary(message, data, plenary):
     payload = data['payload']
     simple_update_keys = ('random_max_attendees', 'breakout_mode', 'name',
             'organizer', 'start_date')
-    sanitized_keys = ('description', 'whiteboard')
+    sanitized_keys = ('whiteboard', 'description')
 
     for key in simple_update_keys + sanitized_keys:
         if key in payload:
@@ -274,7 +273,6 @@ def handle_plenary(message, data, plenary):
         return handle_error(message, json_dumps(e.message_dict))
     update = {key: getattr(plenary, key) for key in simple_update_keys}
     update.update({key: getattr(plenary, "safe_" + key)() for key in sanitized_keys})
-    pdb.set_trace()
     broadcast(plenary.channel_group_name, type='plenary',
             payload={'plenary': update})
 
