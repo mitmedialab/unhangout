@@ -2,9 +2,10 @@ import React from "react";
 import {connect} from "react-redux";
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
-import {Editor, EditorState, ContentState, SelectionState, convertFromHTML, convertFromRaw, convertToRaw, getDefaultKeyBinding, KeyBindingUtil} from 'draft-js';
+import {Editor, EditorState, ContentState, SelectionState, convertFromHTML, getDefaultKeyBinding, RichUtils} from 'draft-js';
 import * as style from "../../../scss/pages/plenary/_whiteboardstyle.scss";
-import Spinner from 'react-spinkit'
+import Spinner from 'react-spinkit';
+import {stateToHTML} from 'draft-js-export-html';
 
 class Whiteboard extends React.Component {
   constructor(props) {
@@ -17,6 +18,7 @@ class Whiteboard extends React.Component {
     }
     this.active = false;
     this.onChange = (editorState) => this.setState({editorState});
+    this.handleKeyCommand = this.handleKeyCommand.bind(this);
   }
   //Add an event listener that will dispatch the updated content
   componentDidMount() {
@@ -30,8 +32,10 @@ class Whiteboard extends React.Component {
       false);
   }
   componentWillReceiveProps(newProps) {
+    let blockArray = convertFromHTML(newProps.plenary.whiteboard)
+    let contentState = ContentState.createFromBlockArray(blockArray)
     this.setState ({
-      editorState: EditorState.createWithContent(ContentState.createFromText(newProps.plenary.whiteboard)),
+      editorState: EditorState.createWithContent(contentState),
     })
     if (newProps.plenary.whiteboard !== this.props.plenary.whiteboard) {
       this.setState({panelOpen: true,})
@@ -44,9 +48,14 @@ class Whiteboard extends React.Component {
     return getDefaultKeyBinding(e);
   }
   handleKeyCommand (command) {
+    const newState = RichUtils.handleKeyCommand(this.state.editorState, command)
     if (command === 'my-add') {
       return 'handled';
+    } else if (newState) {
+      this.onChange(newState);
+      return true;
     }
+    return false;
   }
   //prevent dispatch for clicks on input bar
   handleClick(event) {
@@ -57,12 +66,13 @@ class Whiteboard extends React.Component {
   handleModify(onAdminSendPlenaryDetails, updated) {
     if (this.active) {  
       onAdminSendPlenaryDetails({
-        whiteboard: updated.getCurrentContent().getPlainText()
-      });
-    }
+        whiteboard: stateToHTML(updated.getCurrentContent())
+      })
     this.active = false
+    }
   }
   render() {
+    console.log(stateToHTML(this.state.editorState.getCurrentContent()))
     let isAdmin = this.props.auth.is_admin;
     let whiteboardHasFocus = this.state.editorState.getSelection().getHasFocus();
     if (isAdmin) {
