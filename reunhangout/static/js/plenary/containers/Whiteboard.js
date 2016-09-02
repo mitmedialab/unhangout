@@ -72,7 +72,6 @@ class Whiteboard extends React.Component {
     }
   }
   render() {
-    console.log(stateToHTML(this.state.editorState.getCurrentContent()))
     let isAdmin = this.props.auth.is_admin;
     let whiteboardHasFocus = this.state.editorState.getSelection().getHasFocus();
     if (isAdmin) {
