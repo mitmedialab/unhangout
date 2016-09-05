@@ -1,5 +1,3 @@
-import re
-
 from django.db import models
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -9,12 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import slugify
 from jsonfield import JSONField
 from richtext.utils import sanitize
-
-class GoogleHangout(models.Model):
-    url = models.CharField(max_length=255)
-
-    def __str__(self):
-        return self.url
+from reunhangout.utils import random_webrtc_id
 
 class Breakout(models.Model):
     title = models.CharField(max_length=100, default="", blank=True)
@@ -34,11 +27,6 @@ class Breakout(models.Model):
     is_proposal = models.BooleanField(default=False)
     is_random = models.BooleanField(default=False)
 
-    google_hangout = models.OneToOneField(GoogleHangout,
-            on_delete=models.SET_NULL,
-            blank=True, null=True)
-    google_hoa = models.CharField(max_length=255, blank=True)
-
     proposed_by = models.ForeignKey(
             settings.AUTH_USER_MODEL,
             on_delete=models.SET_NULL,
@@ -55,6 +43,9 @@ class Breakout(models.Model):
             related_name='member_of_breakouts',
             blank=True)
 
+    webrtc_id = models.CharField(max_length=100, default=random_webrtc_id,
+            editable=False, unique=True)
+
     @property
     def channel_group_name(self):
         return "breakout-%s" % self.pk
@@ -63,11 +54,6 @@ class Breakout(models.Model):
     def id_from_channel_group_name(cls, channel_group_name):
         if channel_group_name.startswith("breakout-"):
             return channel_group_name[len("breakout-"):]
-
-    @property
-    def webrtc_id(self):
-        src = '{}-{}'.format(Site.objects.get_current(), self.channel_group_name)
-        return re.sub('[^a-zA-Z0-9]', '', src)
 
     def safe_description(self):
         return sanitize(self.description)
@@ -98,8 +84,6 @@ class Breakout(models.Model):
             'is_hoa': self.is_hoa,
             'is_proposal': self.is_proposal,
             'is_random': self.is_random,
-            'google_hangout': self.google_hangout.url if self.google_hangout else None,
-            'google_hoa': self.google_hoa,
             'proposed_by': self.proposed_by.serialize_public() if self.proposed_by else None,
             'mode': self.plenary.breakout_mode if self.plenary else "permalink",
             'open': self.plenary.breakouts_open if self.plenary else True,

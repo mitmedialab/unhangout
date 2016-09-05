@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.translation import ugettext_lazy as _
 from richtext.utils import sanitize
+from reunhangout.utils import random_webrtc_id
 
 from jsonfield import JSONField
 from timezone_field import TimeZoneField
@@ -65,6 +66,9 @@ class Plenary(models.Model):
     breakouts_open = models.BooleanField(default=False,
             help_text=_("Check to allow people to join breakouts associated with this plenary"))
 
+    webrtc_id = models.CharField(max_length=100, default=random_webrtc_id,
+            editable=False, unique=True)
+
     admins = models.ManyToManyField(settings.AUTH_USER_MODEL)
 
     @property
@@ -101,6 +105,7 @@ class Plenary(models.Model):
             'breakouts_open': self.breakouts_open,
             'admins': [admin.username for admin in self.admins.all()],
             'video_sync_id': self.channel_group_name,
+            'webrtc_id': self.webrtc_id,
         }
 
     def has_admin(self, user):
