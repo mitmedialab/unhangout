@@ -1,15 +1,26 @@
-body {
-	.col-xs-2 {
-		padding: 0px;
-	}
-	.col-xs-10 {
-		padding: 0px;
-	}
-	.breakout-title-container {
-		word-wrap: break-word;
-		background-color: #2e7daa;
-		color: #fff;
-		padding: 20px;
-		margin-bottom: 5px;
-	}
+$breakout-left-col-width: 200px;
+.breakout-left-col {
+  width: $breakout-left-col-width;
+  float: left;
+  height: 100vh;
+  overflow: auto;
+}
+.breakout-right-col {
+  width: calc(100% - #{$breakout-left-col-width});
+  height: 100vh;
+  overflow: hidden;
+  float: left;
+  iframe {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border: none;
+  }
+}
+.breakout-title-container {
+  word-wrap: break-word;
+  background-color: #2e7daa;
+  color: #fff;
+  padding: 20px;
+  margin-bottom: 5px;
 }
