@@ -1,1 +1,4 @@
-@import "./prosemirror";
+// Bundle target for prosemirror rich text editor.  Separated from the others
+// because it's massive.
+
+@import "./partials/prosemirror";

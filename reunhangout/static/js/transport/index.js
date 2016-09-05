@@ -8,7 +8,11 @@ let _socketClient = null;
 
 export const connectSocket = (store) => {
   if (_socketClient) {
-    _socketClient.close();
+    try {
+      _socketClient.close();
+    } catch (e) {
+      console.error(e);
+    }
   }
   _socketClient = new SocketClient(store);
 }
@@ -20,6 +24,7 @@ export class SocketClient {
   }
 
   connect() {
+    console.log("SocketClient.connect");
     this.url = window.location.href.replace(/^http/, 'ws');
     this.socket = new WebSocket(this.url);
     this.socket.onmessage = (e) => this.onMessage(e);
@@ -30,7 +35,15 @@ export class SocketClient {
   }
 
   close() {
-    this.socket.close();
+    try {
+      this.socket.close();
+    } catch (e) {
+      console.error(e);
+    }
+    if (this.heartbeat) {
+      clearInterval(this.heartbeat);
+      this.heartbeat = null;
+    }
     this.store.dispatch(A.closing({url: this.url}));
   }
 
@@ -79,27 +92,33 @@ export class SocketClient {
   }
 
   onOpen(event) {
+    console.log("SocketClient.onOpen");
     setTimeout(() => {
       this.heartbeat = setInterval(() => {
         this.sendMessage("heartbeat");
       }, 30000);
     }, Math.random() * 30000);
     this.store.dispatch(A.open({url: this.url}));
-    if (this._connectedInterval) {
-      clearTimeout(this._connectedInterval);
+    if (this._connectInterval) {
+      clearTimeout(this._connectInterval);
+      this._connectInterval = null;
     }
   }
 
   onClose(event) {
+    console.log("SocketClient.onClose");
     this.store.dispatch(A.closed({url: this.url}));
-    this._connectInterval = setInterval(() => {
-      if (this.store.getState().socket.state === WebSocket.CLOSED) {
-        this.connect();
-      }
-    }, 100);
+    if (!this._connectInterval) {
+      this._connectInterval = setInterval(() => {
+        if (this.store.getState().socket.state === WebSocket.CLOSED) {
+          this.connect();
+        }
+      }, 1000);
+    }
   }
 
   onError(event) {
+    console.log("SocketClient.onError");
     this.store.dispatch(A.error({error: "error"}));
   }
 

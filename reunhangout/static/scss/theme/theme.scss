@@ -75,3 +75,20 @@
     display: inline;
   }
 }
+
+.connection {
+  position: absolute;
+  z-index: 1000000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  text-align: center;
+  & > div {
+    display: inline-block;
+    background-color: rgba(255, 226, 0, 0.9);
+    box-shadow: 2px 2px 10px #000;
+    padding: 1em;
+    text-align: center;
+    font-size: 1.5em;
+  }
+}
