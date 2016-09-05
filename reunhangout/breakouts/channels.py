@@ -2,12 +2,14 @@ import json
 
 from channels.sessions import enforce_ordering
 from channels.auth import channel_session_user, channel_session_user_from_http
+from channels import Channel
 
 from breakouts.models import Breakout
 from channels_presence.models import Room, Presence
 from channels_presence.decorators import touch_presence, remove_presence
 from reunhangout.channels_utils import (
-    send_over_capacity_error, send_already_connected_error, handle_error
+    send_over_capacity_error, send_already_connected_error, handle_error,
+    prepare_message
 )
 from analytics.models import track
 
@@ -16,12 +18,14 @@ from analytics.models import track
 def ws_connect(message, breakout_id):
     if not message.user.is_authenticated():
         return handle_error(message, "Authentication required")
-
     try:
         breakout = Breakout.objects.get(pk=breakout_id)
     except Breakout.DoesNotExist:
         return handle_error(message,  'Breakout not found')
 
+    connect_to_breakout(message, breakout)
+
+def connect_to_breakout(message, breakout):
     num_connections = Presence.objects.filter(
             room__channel_name=breakout.channel_group_name).count()
 
@@ -69,4 +73,36 @@ def ws_receive(message, breakout_id):
     route_message(message, data, breakout)
 
 def route_message(message, data, breakout):
-    pass
+    if 'type' not in data:
+        handle_error(message, "Missing type")
+    elif data['type'] == "DISCONNECTING_OTHERS":
+        handle_disconnecting_others(message, data, breakout)
+    else:
+        handle_error(message, "Type not understood")
+
+class MessageProxy(object):
+    def __init__(self, channel_name, user):
+        self.reply_channel = Channel(channel_name)
+        self.user = user
+
+def handle_disconnecting_others(message, data, breakout):
+    try:
+        room = Room.objects.get(channel_name=breakout.channel_group_name)
+    except Room.DoesNotExist:
+        room = None
+    if not message.user.is_authenticated():
+        handle_error(message, "Can't disconnect others when not authenticated")
+        return
+
+    if room:
+        presences = Presence.objects.filter(room=room, user=message.user)
+        for presence in presences:
+            if presence.channel_name != message.reply_channel.name:
+                room.remove_presence(presence=presence)
+                send_already_connected_error(
+                    MessageProxy(presence.channel_name, user=message.user),
+                    breakout.channel_group_name
+                )
+
+    connect_to_breakout(message, breakout)
+

@@ -3,6 +3,11 @@ import * as A from './actions';
 
 export const breakout = (state=null, action) => {
   state = state || {};
+  switch (action.type) {
+    case A.BREAKOUTS_DISCONNECTING_OTHERS:
+      state.disconnectingOthers = true;
+      return state;
+  }
   return state;
 }
 

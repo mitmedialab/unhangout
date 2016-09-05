@@ -20,7 +20,7 @@ def main():
             ),
             # Celery worker with embedded beat
             subprocess.Popen(
-                [venv_bin("celery"), "-A", "reunhangout", "worker", "-B", "-l", "info"],
+                [venv_bin("celery"), "-A", "reunhangout", "worker", "-B", "-l", "warning"],
                 cwd=BASE,
                 env={'PATH': PATH}
             ),
