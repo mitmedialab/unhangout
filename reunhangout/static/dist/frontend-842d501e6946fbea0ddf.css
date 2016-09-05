@@ -5834,6 +5834,21 @@ button.close {
   .edit-region.editable:hover > a.admin-edit-link {
     display: inline; }
 
+.connection {
+  position: absolute;
+  z-index: 1000000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  text-align: center; }
+  .connection > div {
+    display: inline-block;
+    background-color: rgba(255, 226, 0, 0.9);
+    box-shadow: 2px 2px 10px #000;
+    padding: 1em;
+    text-align: center;
+    font-size: 1.5em; }
+
 /*!
  *  Font Awesome 4.6.3 by @davegandy - http://fontawesome.io - @fontawesome
  *  License - http://fontawesome.io/license (Font: SIL OFL 1.1, CSS: MIT License)
@@ -8050,486 +8065,34 @@ html, body {
 
 footer {
   width: 100%; }
-.plenary {
-  overflow: hidden; }
 
-.column {
-  padding-left: 0px;
-  padding-right: 0px;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
-  height: 100vh;
-  overflow: auto; }
-  .column .logo {
-    width: 90%;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 5px; }
-  .column .user-menu-container {
-    margin-top: auto;
-    background-color: #2e7daa;
-    color: #fff;
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -ms-flex-flow: row wrap;
-        flex-flow: row wrap;
-    -webkit-box-pack: center;
-        -ms-flex-pack: center;
-            justify-content: center;
-    -webkit-box-align: center;
-        -ms-flex-align: center;
-            align-items: center; }
-    .column .user-menu-container img {
-      height: 2em;
-      width: 2em;
-      border-radius: 5px;
-      margin: 5px;
-      margin-right: 10px; }
-    .column .user-menu-container #user-menu-button {
-      margin: 5px;
-      border: none;
-      background-color: #2e7daa;
-      color: #fff; }
-.plenary-embed iframe {
-  width: 100%;
-  height: 320px; }
+.socialaccount_providers {
+  text-align: center; }
+  .socialaccount_providers a.facebook {
+    background-color: #3b5998;
+    color: white; }
+    .socialaccount_providers a.facebook:hover {
+      background-color: #2d4373; }
+  .socialaccount_providers a.google {
+    background-color: #f63d38;
+    color: white; }
+    .socialaccount_providers a.google:hover {
+      background-color: #f0110b; }
+  .socialaccount_providers a.twitter {
+    background-color: #4099ff;
+    color: white; }
+    .socialaccount_providers a.twitter:hover {
+      background-color: #0d7eff; }
 
-.embed-admin-controls {
-  background-color: #f3bd71;
-  padding: 10px; }
+.navbar-nav > li > a.btn-login, .navbar-nav > li > a.btn-signup {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  color: white; }
 
-.button-flex-container {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -ms-flex-flow: row wrap;
-      flex-flow: row wrap;
-  flex-just: space-around; }
-
-.play-button {
-  -webkit-box-flex: 1;
-      -ms-flex-positive: 1;
-          flex-grow: 1;
-  margin: 0px 5px 5px 5px; }
-
-.remove-button {
-  -webkit-box-flex: 1;
-      -ms-flex-positive: 1;
-          flex-grow: 1;
-  margin: 0px 5px 5px 5px; }
-
-.hangout-on-air-button {
-  -webkit-box-flex: 1;
-      -ms-flex-positive: 1;
-          flex-grow: 1;
-  margin-top: 0; }
-
-.form-group {
-  margin-top: 5px;
-  margin-bottom: 10px; }
-
-.sync-indicator {
-  display: inline-block;
-  vertical-align: middle;
-  margin-top: 0;
-  width: 6px;
-  height: 6px;
-  border-radius: 6px;
-  background-color: #aaa;
-  box-shadow: 0px 0px 5px #c8c8c8; }
-  .sync-indicator.synced {
-    background-color: #0f0;
-    box-shadow: 0px 0px 5px #00c800; }
-  .sync-indicator.unsynced {
-    background-color: #f00;
-    box-shadow: 0px 0px 5px #c80000; }
-.breakout-header {
-  background-color: #2e7daa;
-  padding: 15px;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -ms-flex-flow: row wrap;
-      flex-flow: row wrap;
-  -webkit-box-pack: end;
-      -ms-flex-pack: end;
-          justify-content: flex-end;
-  overflow: visible; }
-  .breakout-header .btn-default {
-    -webkit-box-flex: 1;
-        -ms-flex-positive: 1;
-            flex-grow: 1;
-    color: #2e7daa;
-    margin: 5px; }
-    .breakout-header .btn-default.create-session-btn {
-      max-width: 36px;
-      padding-left: 5px;
-      padding-right: 5px; }
-  .breakout-header h4 {
-    -webkit-box-flex: 1;
-        -ms-flex-positive: 1;
-            flex-grow: 1;
-    color: #fff;
-    margin-right: auto; }
-  .breakout-header img {
-    max-width: 24px;
-    max-height: 24px; }
-
-.breakout {
-  width: calc(100% - 10px);
-  margin: 5px;
-  border-radius: 5px;
-  background-color: #eee;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -ms-flex-flow: column nowrap;
-      flex-flow: column nowrap; }
-  .breakout .main-breakout-container {
-    width: 100%;
-    min-height: 75px;
-    position: relative;
-    -webkit-box-flex: 1;
-        -ms-flex-positive: 1;
-            flex-grow: 1; }
-  .breakout .members-container {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-pack: start;
-        -ms-flex-pack: start;
-            justify-content: flex-start;
-    border: 1px solid #ccc;
-    padding: 5px;
-    border-radius: 5px;
-    border-bottom-left-radius: 0px;
-    border-bottom-right-radius: 0px; }
-    .breakout .members-container img {
-      width: 18px;
-      height: 18px; }
-    .breakout .members-container .members-avatars-container {
-      margin-left: 5px; }
-  .breakout .proposed-by-container {
-    position: absolute;
-    top: 5px;
-    right: 41px;
-    text-align: right;
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-align: center;
-        -ms-flex-align: center;
-            align-items: center;
-    font-size: .75em; }
-    .breakout .proposed-by-container img {
-      max-width: 18px;
-      max-height: 18px;
-      margin-left: 5px; }
-  .breakout h5 {
-    margin-bottom: auto;
-    margin-left: 36px;
-    margin-top: 0px;
-    padding: 5px; }
-  .breakout .btn {
-    background-color: #2e7daa;
-    border-color: #2e7daa;
-    color: #fff;
-    padding: 10px; }
-    .breakout .btn.join-btn {
-      height: 100%;
-      max-width: 36px;
-      position: absolute;
-      right: 0px;
-      top: 0px;
-      border-top-left-radius: 0px;
-      border-bottom-left-radius: 0px; }
-    .breakout .btn.delete-btn {
-      height: 100%;
-      max-width: 36px;
-      position: absolute;
-      left: 0px;
-      top: 0px;
-      background-color: #d9534f;
-      border-color: #d9534f;
-      border-top-right-radius: 0px;
-      border-bottom-right-radius: 0px; }
-    .breakout .btn.vote-btn {
-      height: 100%;
-      max-width: 36px;
-      position: absolute;
-      right: 0px;
-      top: 0px;
-      margin-left: 10px;
-      border-top-left-radius: 0px;
-      border-bottom-left-radius: 0px; }
-    .breakout .btn.voted .glyphicon {
-      color: #ffdb4d; }
-    .breakout .btn.approve-btn {
-      position: absolute;
-      bottom: 5px;
-      right: 41px;
-      padding: 5px;
-      padding-top: 0px;
-      padding-bottom: 0px; }
-  .breakout .title-input {
-    background-color: #eee;
-    border: 1px solid #eee;
-    box-shadow: none;
-    min-width: 30%;
-    max-width: 50%;
-    padding: 5px;
-    margin-bottom: auto;
-    margin-left: 36px;
-    margin-top: 5px; }
-    .breakout .title-input:hover {
-      background-color: #fff;
-      border: 1px solid #ccc;
-      border-radius: 4px; }
-    .breakout .title-input.title-focus {
-      background-color: #fff;
-      border: 1px solid;
-      border-radius: 4px;
-      border-color: #66afe9;
-      box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6); }
-  .breakout.proposal {
-    border: 2px dashed #2e7daa;
-    background-color: #fff; }
-    .breakout.proposal .title-input {
-      background-color: #fff;
-      border: 1px solid #fff; }
-      .breakout.proposal .title-input:hover {
-        background-color: #fff;
-        border: 1px solid #ccc;
-        border-radius: 4px; }
-
-.breakout-presence {
-  position: relative;
-  padding-bottom: 0.2em;
-  width: 100%; }
-  .breakout-presence .slot {
-    width: 32px;
-    height: 32px;
-    margin-right: 2px;
-    position: relative;
-    display: inline-block;
-    vertical-align: middle; }
-    .breakout-presence .slot.empty {
-      border: 1px solid #ccc; }
-  .breakout-presence img {
-    width: 100%;
-    height: 100%; }
-
-.breakout-presence {
-  position: relative;
-  padding-bottom: 0.2em;
-  width: 100%; }
-  .breakout-presence .slot {
-    width: 32px;
-    height: 32px;
-    margin-right: 2px;
-    position: relative;
-    display: inline-block;
-    vertical-align: middle; }
-    .breakout-presence .slot.empty {
-      border: 1px solid #ccc; }
-  .breakout-presence img {
-    width: 100%;
-    height: 100%; }
-
-.breakouts-container {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column; }
-.presence-container {
-  -webkit-box-flex: 1;
-      -ms-flex-positive: 1;
-          flex-grow: 1; }
-  .presence-container .presence-controls {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -ms-flex-flow: row wrap;
-        flex-flow: row wrap;
-    -webkit-box-pack: start;
-        -ms-flex-pack: start;
-            justify-content: flex-start;
-    -webkit-box-align: center;
-        -ms-flex-align: center;
-            align-items: center; }
-    .presence-container .presence-controls .presence-counter {
-      margin: 5px; }
-    .presence-container .presence-controls .grid-button {
-      margin-left: auto; }
-    .presence-container .presence-controls .btn {
-      margin-right: 5px; }
-  .presence-container .presence {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -ms-flex-flow: row wrap;
-        flex-flow: row wrap;
-    margin: 5px;
-    margin-top: 0px; }
-    .presence-container .presence .user-avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 5px;
-      margin: 5px; }
-    .presence-container .presence .user-details {
-      width: 100%; }
-.chat-container {
-  height: 100vh;
-  background-color: #eee;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column; }
-  .chat-container .chat-box {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-        -ms-flex-direction: column;
-            flex-direction: column;
-    -webkit-box-pack: end;
-        -ms-flex-pack: end;
-            justify-content: flex-end;
-    -webkit-box-flex: 1;
-        -ms-flex-positive: 1;
-            flex-grow: 1;
-    overflow: auto; }
-    .chat-container .chat-box .form-group {
-      margin: 5px; }
-      .chat-container .chat-box .form-group .input-group-addon {
-        padding: 0px; }
-      .chat-container .chat-box .form-group label {
-        margin-bottom: 0px; }
-      .chat-container .chat-box .form-group input[type="checkbox"] {
-        display: none; }
-      .chat-container .chat-box .form-group input[type="checkbox"] ~ label span {
-        display: inline-block;
-        cursor: pointer;
-        font-size: 1.25em;
-        vertical-align: middle;
-        margin: 5px; }
-      .chat-container .chat-box .form-group input[type="checkbox"]:checked ~ label span {
-        color: #cc0000; }
-
-.chat-log {
-  overflow: auto;
-  margin-bottom: auto; }
-
-.chat-message {
-  padding: 5px 18px;
-  position: relative;
-  vertical-align: top;
-  float: left;
-  margin: 0px;
-  clear: both;
-  width: 100%;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-orient: horizontal;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: row;
-          flex-direction: row; }
-  .chat-message .chat-message-text {
-    word-wrap: break-word; }
-  .chat-message .userName {
-    font-weight: 900;
-    color: #2c2d30; }
-  .chat-message:nth-child(even) {
-    background-color: #eee; }
-  .chat-message:nth-child(odd) {
-    background-color: #f2f2f2; }
-  .chat-message img {
-    height: 2em;
-    margin-right: 10px; }
-  .chat-message.highlight {
-    background-color: #e6f7ff; }
-.whiteboard .whiteboard-button {
-  float: right;
-  display: inline-block;
-  position: relative;
-  top: -1px;
-  background-color: #fff;
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
-  border: 1px solid #e1e1e8;
-  border-top: none;
-  padding: 0px 8px;
-  margin-right: 10px;
-  border-top-right-radius: 0px;
-  border-top-left-radius: 0px; }
-
-.whiteboard .panel {
-  margin: 0px; }
-
-.whiteboard .panel-body {
-  border: none; }
-
-.whiteboard .whiteboard-input {
-  border: 1px solid #fff;
-  border-radius: 4px;
-  padding: 5px; }
-  .whiteboard .whiteboard-input:hover {
-    border-color: #ccc; }
-  .whiteboard .whiteboard-input.whiteboard-focus {
-    border-color: #66afe9;
-    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6); }
-.plenary-info-container {
-  background-color: #2e7daa;
-  padding: 10px;
-  color: #fff;
-  border-bottom-right-radius: 0px;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-orient: horizontal;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: row;
-          flex-direction: row;
-  -ms-flex-wrap: wrap;
-      flex-wrap: wrap;
-  -webkit-box-align: end;
-      -ms-flex-align: end;
-          align-items: flex-end; }
-  .plenary-info-container h1 {
-    -webkit-box-flex: 0;
-        -ms-flex: 0 1 100%;
-            flex: 0 1 100%; }
-  .plenary-info-container .hosted {
-    -webkit-box-flex: 0;
-        -ms-flex: 0 1 100%;
-            flex: 0 1 100%; }
-  .plenary-info-container .organizer {
-    -webkit-box-flex: 0;
-        -ms-flex: 0 1 75%;
-            flex: 0 1 75%;
-    margin-top: 0px; }
-  .plenary-info-container .btn {
-    -webkit-box-flex: 0;
-        -ms-flex: 0 1 10%;
-            flex: 0 1 10%;
-    margin-left: auto;
-    max-height: 36px;
-    max-width: 36px;
-    padding-left: 10px;
-    padding-right: 10px; }
-    .plenary-info-container .btn .glyphicon {
-      margin: 0px; }
+.navbar-nav > li > a.btn-signup {
+  font-weight: bold;
+  background-color: orange; }
+  .navbar-nav > li > a.btn-signup:hover {
+    background-color: #e69500; }
