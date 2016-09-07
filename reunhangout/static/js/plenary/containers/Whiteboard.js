@@ -117,7 +117,7 @@ class Whiteboard extends React.Component {
     } else {
       return <div className="whiteboard">
         <BS.Panel collapsible expanded={this.state.panelOpen}>
-          {this.props.plenary.whiteboard}
+          <div dangerouslySetInnerHTML={{__html: this.props.plenary.whiteboard}} />
         </BS.Panel>
         <BS.Button 
         onClick={() => this.setState({ panelOpen: !this.state.panelOpen })}
