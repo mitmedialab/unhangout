@@ -88,7 +88,7 @@ def handle_chat(message, data, plenary):
         plenary=plenary,
         user=message.user,
         message=data['payload']['message'],
-        highlight=highlight
+        highlight=highlight or False
     )
     data = chat_message.serialize()
     broadcast(plenary.channel_group_name, type='chat', payload=data)
