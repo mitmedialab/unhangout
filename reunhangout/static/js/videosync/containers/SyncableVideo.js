@@ -79,27 +79,17 @@ class SyncableYoutubeVideo extends React.Component {
 
   onPlayerStateChange(e) {
     let stateName = this.STATE_NAMES[e.data];
-
-    // Catch an initial "play" after load -- the video will auto-start when
-    // loading, whether we want it to or not.  To avoid this, fire
-    // `this.syncVideo` when we get the first "playing" state after we were
-    // unstarted.  We don't just always forse `this.syncVideo` because that
-    // would prevent users from seeking/browsing around a video before global
-    // sync starts.
-    if (stateName === "unstarted") {
-      this.isUnstarted = true;
-    } else if (stateName === "ended") {
+    if (stateName === "ended") {
       if (this.props.showSyncControls && this.isPlayingForAll()) {
         this.videoEnded();
       }
-    } else if (stateName === "playing" && this.isUnstarted) {
-      this.syncVideo();
-      delete this.isUnstarted;
     }
   }
 
   componentDidMount() {
-    this.player = YoutubePlayer(this.playerId());
+    this.player = YoutubePlayer(this.playerId(), {
+      playerVars: {autoplay: 0, controls: 1}
+    });
     this.player.on('stateChange', (e) => this.onPlayerStateChange(e));
     this.syncVideo(this.props, true);
     // Set up an interval to advance our sync timer in between updates from the
@@ -139,7 +129,7 @@ class SyncableYoutubeVideo extends React.Component {
     let curSync = props.videosync[props.sync_id] || {};
     // Change out video if props have changed.
     if (firstLoad || this.props.embed.props.src !== props.embed.props.src) {
-      this.player.loadVideoById({
+      this.player.cueVideoById({
         videoId: youtube.getIdFromUrl(props.embed.props.src),
         startSeconds: this.state.syncTime,
       });
