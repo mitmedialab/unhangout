@@ -1,12 +1,21 @@
 ---
- - name: Sync auth providers
-   command: "{{django_venv_dir}}bin/python {{django_project_dir}}manage.py sync_auth_providers"
-   register: sync_auth_providers
-   changed_when: sync_auth_providers.stdout.find("changed") != -1
-   tags: ['reunhangout', 'reunhangout-post']
+- name: Sync auth providers
+  command: "{{django_venv_dir}}bin/python {{django_project_dir}}manage.py sync_auth_providers"
+  register: sync_auth_providers
+  changed_when: sync_auth_providers.stdout.find("changed") != -1
+  tags: ['reunhangout', 'reunhangout-post']
 
- - name: Build prod assets
-   command: "{{django_project_dir}}build_prod_assets.sh"
-   register: build_prod_assets
-   changed_when: build_prod_assets.stdout.find("Changed") != -1
-   notify: restart {{django_init_name}}
+- name: Build prod assets
+  become: yes
+  become_user: "{{main_user_name}}" 
+  command: "{{django_project_dir}}build_prod_assets.sh"
+  register: build_prod_assets
+  changed_when: build_prod_assets.stdout.find("Changed") != -1
+  notify: restart {{django_init_name}}
+
+- name: Collect static again
+  become: yes
+  become_user: "{{main_user_name}}" 
+  register: collectstatic_output
+  changed_when: 'not collectstatic_output.stdout.startswith("\n0 static files copied")'
+  command: "{{django_venv_dir}}bin/python {{django_project_dir}}manage.py collectstatic --noinput"
