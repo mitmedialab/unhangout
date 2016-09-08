@@ -14,7 +14,7 @@ CONFIG="reunhangout/webpack/config.prod.js"
 DIR=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
 cd $DIR
 
-NODE_ENV=production webpack --config $CONFIG > /dev/null
+NODE_ENV=production node_modules/.bin/webpack --config $CONFIG > /dev/null
 
 set +e
   diff "$SRC" "$DEST"
