@@ -29,16 +29,16 @@ module.exports = {
     ],
   },
   output: {
-    path: path.join(root, 'static', 'bundles'),
+    path: path.join(root, 'static', 'dev'),
     filename: '[name]-[hash].js',
     sourceMapFilename: '[name]-[hash].js.map',
-    publicPath: 'http://localhost:3000/static/bundles/',
+    publicPath: 'http://localhost:3000/static/dev/',
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoErrorsPlugin(),
     new BundleTracker({
-      path: path.join(root, 'static'),
+      path: path.join(root, 'static', 'dev'),
       filename: 'webpack-stats.json'
     }),
     //new ExtractTextPlugin('[name]-[hash].css')

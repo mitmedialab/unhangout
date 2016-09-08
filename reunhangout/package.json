@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "clean": "rimraf static/dist",
-    "clean:dev": "rimraf static/bundles",
-    "build": "npm run clean && NODE_ENV=production webpack --config reunhangout/webpack/config.prod.js",
+    "clean": "rimraf static/dist static/tmp",
+    "clean:dev": "rimraf static/dev",
+    "build": "./build_prod_assets.sh",
     "build:dev": "npm run clean:dev && NODE_ENV=development webpack --config reunhangout/webpack/config.dev.js"
   },
   "author": "Charlie DeTar",

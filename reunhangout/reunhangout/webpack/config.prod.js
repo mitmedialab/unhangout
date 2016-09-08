@@ -25,14 +25,14 @@ module.exports = {
     ],
   },
   output: {
-    path: path.join(root, 'static', 'dist'),
+    path: path.join(root, 'static', 'tmp'),
     filename: '[name]-[hash].js',
     publicPath: '/static/dist/'
   },
   plugins: [
     new BundleTracker({
-      path: path.join(root, 'static'),
-      filename: 'webpack-stats-prod.json'
+      path: path.join(root, 'static', 'tmp'),
+      filename: 'webpack-stats.json'
     }),
     new ExtractTextPlugin('[name]-[hash].css')
   ],
