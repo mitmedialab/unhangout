@@ -1,6 +1,5 @@
 {% load static %}
 {% load thumbnail %}
-{% load gravatar %}
 {% load account %}
 
 <div class='navbar navbar-inverse'>
@@ -34,7 +33,7 @@
                role='button'
                aria-haspopup='true'
                aria-expanded='false'>
-              {% gravatar user.email 32 %}
+             <img src='{{user.get_profile_image}}' width='32' height='32' />
               <span>{% user_display user %}</span>
             </a>
             <ul class='dropdown-menu'>

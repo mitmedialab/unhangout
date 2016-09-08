@@ -9,7 +9,7 @@ const DEFAULT_AVATAR = "../../../../media/assets/default_avatar.jpg";
 
 export class Avatar extends React.Component {
   render() {
-    let avatar = this.props.user.image || DEFAULT_AVATAR;
+    let avatar = this.props.user.image;
     if (this.props.gridView) {
       return (
         <img src={avatar} className="user-avatar" title={this.props.user.username} />

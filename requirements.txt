@@ -15,4 +15,5 @@ django-debug-toolbar
 django-gravatar2
 django-webpack-loader
 pillow
+requests
 sorl-thumbnail

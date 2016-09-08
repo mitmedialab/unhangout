@@ -1,8 +1,15 @@
-from django.db import models
+from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin, AnonymousUser
+from django.contrib.sites.models import Site
+from django.core.cache import cache
+from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
+
+from django_gravatar.helpers import get_gravatar_url
+from sorl.thumbnail import get_thumbnail
+import requests
 
 class UserManager(BaseUserManager):
     def create_user(self, username, password=None, **kwargs):
@@ -18,19 +25,20 @@ class UserManager(BaseUserManager):
         user.save()
         return user
 
+
 def serialize_public(user):
     if isinstance(user, AnonymousUser):
         # TODO: uniqify this somehow
         return {
             'username': 'Anonymous',
-            'image': None,
+            'image': User.default_profile_image(),
         }
     else:
+
         return {
             'username': user.username,
-            'image': None, #TODO
+            'image': user.get_profile_image(),
         }
-
 
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=30, unique=True,
@@ -79,6 +87,51 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def get_short_name(self):
         return self.username
+
+    def get_profile_image(self):
+        cache_key = "profile-image-{}".format(self.pk)
+        cached = cache.get(cache_key)
+        if cached:
+            return cached
+        else:
+            result = self._get_profile_image()
+            cache.set(cache_key, result, 60)
+        return result
+
+    def _get_profile_image(self):
+        socialaccounts = {}
+        for acct in self.socialaccount_set.all():
+            socialaccounts[acct.provider] = acct
+
+        if 'facebook' in socialaccounts:
+            redirect = 'https://graph.facebook.com/{}/picture'.format(acct.uid)
+            res = requests.head(redirect)
+            if res.status_code == 302:
+                return res.headers['Location']
+        if 'google' in socialaccounts:
+            try:
+                return acct.extra_data['picture']
+            except KeyError:
+                pass
+        if 'twitter' in socialaccounts:
+            try:
+                return acct.extra_data['profile_image_url_https']
+            except KeyError:
+                pass
+        if self.email:
+            return get_gravatar_url(self.email, size=64, secure=True,
+                default=self.default_profile_image())
+        return self.default_profile_image()
+
+    @classmethod
+    def default_profile_image(cls):
+        return "".join((
+            "https://",
+            Site.objects.get_current().domain,
+            settings.MEDIA_URL,
+            "assets/default_avatar.jpg"
+        ))
+
 
     def __str__(self):
         return self.username
