@@ -26,10 +26,12 @@ def plenary_detail(request, id_or_slug):
 
     breakouts = list(plenary.breakout_set.all())
 
+    # Most recent 100 messages, but presented in ascending order.
+    chat_messages = reversed(plenary.chatmessage_set.order_by('-date')[0:100])
     data = {
         'plenary': plenary.serialize(),
         'breakouts':  [breakout.serialize() for breakout in breakouts],
-        'chat_messages': [msg.serialize() for msg in plenary.chatmessage_set.all()],
+        'chat_messages': [msg.serialize() for msg in chat_messages],
     }
     data.update(serialize_auth_state(request.user, plenary))
 
