@@ -32,8 +32,9 @@ def account_settings(request, slug=None):
 
 class AccountSettings(settings_panel.BaseSettingsPanelView):
     template_name = "accounts/account_settings_panel.html"
-    def get_form(self, data=None, files=None, **kwargs):
-        return AccountSettingsForm(data, instance=self.request.user)
+    def get_form(self):
+        print(self.request.POST)
+        return AccountSettingsForm(self.request.POST or None, instance=self.request.user)
 
     def form_valid(self, form):
         form.save()
