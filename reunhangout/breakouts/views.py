@@ -6,6 +6,7 @@ from django.shortcuts import render
 
 from breakouts.models import Breakout
 from accounts.utils import serialize_auth_state
+from reunhangout.utils import json_dumps
 
 # Create your views here.
 @login_required
@@ -26,7 +27,7 @@ def breakout_detail(request, breakout_id):
     data.update(serialize_auth_state(request.user, plenary))
 
     return render(request, "breakouts/breakout_detail.html", {
-        'data': json.dumps(data),
+        'data': json_dumps(data),
         'breakout': breakout,
         'plenary': plenary
     })

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load escapejson %}
 {% load render_bundle from webpack_loader %}
 
 {% block title %}{{ plenary.name }}{% endblock %}
@@ -10,7 +11,7 @@
 
 {% block content %}
   <script type='text/javascript'>
-    window.__INITIAL_STATE__ = {{ data|safe }};
+    window.__INITIAL_STATE__ = {{ data|escapejson }};
   </script>
   <div id='plenary'></div>
 {% endblock %}

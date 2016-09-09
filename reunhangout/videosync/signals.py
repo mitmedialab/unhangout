@@ -1,7 +1,6 @@
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
-from reunhangout.utils import json_dumps
 from videosync.models import VideoSync
 
 @receiver(post_save, sender=VideoSync, dispatch_uid="broadcast_video_sync")

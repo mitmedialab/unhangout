@@ -11,6 +11,7 @@ from reunhangout.channels_utils import (
     send_over_capacity_error, send_already_connected_error, handle_error,
     prepare_message
 )
+from reunhangout.utils import json_dumps
 from analytics.models import track
 
 @enforce_ordering(slight=True)
@@ -61,7 +62,7 @@ def ws_receive(message, breakout_id):
     try:
         data = json.loads(message.content['text'])
     except ValueError:
-        message.reply_channel.send(json.dumps({
+        message.reply_channel.send(json_dumps({
             "error": "Message body must be json."
         }))
 

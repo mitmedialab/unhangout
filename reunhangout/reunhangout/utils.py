@@ -7,7 +7,7 @@ def json_dumps(obj):
     # character, and if we don't, printing this as a JSON data structure in a
     # script tag allows a malicious '</script>' to close the tag early and XSS
     # us!
-    return json.dumps(obj, cls=DjangoJSONEncoder).replace("/", "\\/")
+    return json.dumps(obj, cls=DjangoJSONEncoder)
 
 def random_webrtc_id(length=32):
     alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'

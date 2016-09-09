@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load render_bundle from webpack_loader %}
+{% load escapejson %}
 
 {% block title %}
   {% if breakout.title %}{{breakout.title}}{% else %}Breakout{% endif %}
@@ -12,7 +13,7 @@
 
 {% block content %}
   <script type='text/javascript'>
-    window.__INITIAL_STATE__ = {{ data|safe }};
+    window.__INITIAL_STATE__ = {{ data|escapejson }};
   </script>
   <div id='breakout'></div>
 {% endblock %}

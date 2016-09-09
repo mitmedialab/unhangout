@@ -3,6 +3,7 @@ channels
 asgi_redis
 celery[redis]
 django-celery
+escapejson
 pytz
 jsonfield
 django-timezone-field

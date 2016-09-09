@@ -2,8 +2,8 @@ import functools
 import json
 
 from channels import Group
-from django.core.serializers.json import DjangoJSONEncoder
 from analytics.models import track
+from reunhangout.utils import json_dumps
 
 def prepare_message(payload=None, error=None, type=None):
     obj = {}
@@ -13,7 +13,7 @@ def prepare_message(payload=None, error=None, type=None):
         obj['error'] = error
     if type:
         obj['type'] = type
-    return {'text': json.dumps(obj, cls=DjangoJSONEncoder)}
+    return {'text': json_dumps(obj)}
 
 def broadcast(group_name, **kwargs):
     Group(group_name).send(prepare_message(**kwargs))

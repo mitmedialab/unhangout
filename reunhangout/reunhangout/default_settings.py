@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'channels_presence',
     'django_gravatar',
     'djcelery',
+    'escapejson',
     'sorl.thumbnail',
     'webpack_loader',
 

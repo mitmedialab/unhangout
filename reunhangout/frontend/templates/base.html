@@ -1,5 +1,6 @@
 {% load render_bundle from webpack_loader %}
 {% load static %}
+{% load escapejson %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,7 +11,7 @@
   {% block styles %}
     {% render_bundle 'frontend' 'css' %}
   {% endblock %}
-  <script type='text/javascript'>window.__SETTINGS__ = {{public_settings}};</script>
+  <script type='text/javascript'>window.__SETTINGS__ = {{public_settings|escapejson}};</script>
   {% block head %}{% endblock %}
 </head>
 <body>
