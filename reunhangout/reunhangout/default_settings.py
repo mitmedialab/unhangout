@@ -204,14 +204,14 @@ SOCIALACCOUNT_PROVIDERS = {
 
 # Add client id's and secrets for social account providers. Changes only take
 # effect when you sync them to the database with `./manage.py sync_auth_providers`.
-ALLAUTH_APPS = {
+ALLAUTH_APP_KEYS = {
     'twitter': {'client_id': '', 'secret': ''},
     'facebook': {'client_id': '', 'secret': ''},
     'google': {'client_id': '', 'secret': ''},
 }
 
 # API keys for 3rd party services.  Don't put auth API keys here; put them in
-# ALLAUTH_APPS.
+# ALLAUTH_APP_KEYS.
 PUBLIC_API_KEYS = {
     'youtube': '', # Define in settings.py
 }

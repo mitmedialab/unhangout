@@ -16,7 +16,7 @@ class Command(BaseCommand):
         # that to be a manual process.
         changed = False
         site = Site.objects.get_current()
-        for provider, keys in settings.ALLAUTH_APPS.items():
+        for provider, keys in settings.ALLAUTH_APP_KEYS.items():
             if not keys['client_id']:
                 continue
             # We could just use `update_or_create` here, but then we
