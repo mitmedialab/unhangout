@@ -126,7 +126,7 @@ class ChatMessage(models.Model):
     highlight = models.BooleanField(default=False)
 
     def safe_message(self):
-        return self.message
+        return sanitize(self.message, tags=['b', 'i'], link=False)
 
     def __str__(self):
         return "%s: %s" % (self.user, self.message)

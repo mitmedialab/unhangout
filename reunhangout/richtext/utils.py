@@ -55,8 +55,9 @@ valid_attrs.update(markdown_attrs)
 valid_attrs['p'] = _p_attributes
 valid_attrs['span'] = _span_attributes
 
-def sanitize(html):
-    return mark_safe(bleach.linkify(bleach.clean(
-        html, markdown_tags, valid_attrs, []
-    )))
+def sanitize(html, link=True, tags=markdown_tags, attrs=valid_attrs, styles=None):
+    clean = bleach.clean(html, tags, attrs, styles or [])
+    if link:
+        clean = bleach.linkify(clean)
+    return mark_safe(clean)
 

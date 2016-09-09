@@ -86,7 +86,11 @@ class ChatMessage extends React.Component {
       return part;
     });
     let markedUp = _.flatten(atnamed).map((part, i) => {
-      return <span key={i}>{part}</span>;
+      if (_.isString(part)) {
+        return <span key={i} dangerouslySetInnerHTML={{__html: part}} />
+      } else {
+        return <span key={i}>{part}</span>;
+      }
     });
     return markedUp;
   }
