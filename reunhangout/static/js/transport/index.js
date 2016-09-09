@@ -25,7 +25,7 @@ export class SocketClient {
 
   connect() {
     console.log("SocketClient.connect");
-    this.url = window.location.href.replace(/^http/, 'ws');
+    this.url = window.location.href.replace(/^http/, 'ws').split("#")[0];
     this.socket = new WebSocket(this.url);
     this.socket.onmessage = (e) => this.onMessage(e);
     this.socket.onopen = (e) => this.onOpen(e);
