@@ -117,7 +117,7 @@ class Whiteboard extends React.Component {
                 onChange={this.onChange}
                 handleKeyCommand={this.handleKeyCommand}
                 plugins={[linkifyPlugin]}
-                keyBindingFn={(e) => this.keyBindingFn(e)} />;
+                keyBindingFn={(e) => this.keyBindingFn(e)} />
             </div>
           :
             <div dangerouslySetInnerHTML={{__html: this.props.plenary.whiteboard}} />
