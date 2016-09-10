@@ -55,9 +55,17 @@ valid_attrs.update(markdown_attrs)
 valid_attrs['p'] = _p_attributes
 valid_attrs['span'] = _span_attributes
 
+def _add_noopener(attrs, new=False):
+    attrs['rel'] = "nofollow noopener noreferrer"
+    return attrs
+
+def _add_target_blank(attrs, new=False):
+    attrs['target'] = '_blank'
+    return attrs
+
 def sanitize(html, link=True, tags=markdown_tags, attrs=valid_attrs, styles=None):
     clean = bleach.clean(html, tags, attrs, styles or [])
     if link:
-        clean = bleach.linkify(clean)
+        clean = bleach.linkify(clean, [_add_noopener, _add_target_blank])
     return mark_safe(clean)
 

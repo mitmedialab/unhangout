@@ -3,28 +3,10 @@ import _ from "lodash";
 import {connect} from "react-redux";
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
-import {urlRegex} from "../../utils";
 import * as style from "../../../scss/pages/plenary/_chatstyle.scss"
 import Whiteboard from './Whiteboard';
 import {Avatar} from './Presence';
 
-/**
- * Split 'text' into an array of react components or strings that represent the
- * message content, but with URLs transformed into links.
- */
-const linkify = (text) => {
-  let splitter = new RegExp(urlRegex, 'gim');
-  let parts = text.split(splitter);
-  return parts.map(function(part, i) {
-    if (i % 2 === 1) {
-      return <a href={part} target='_blank' rel='nofollow noopener noreferrer'>
-        {part}
-      </a>
-    } else {
-      return part;
-    }
-  });
-}
 
 /**
  * Split 'text' into an array of react components or strings, where at-names
@@ -78,13 +60,7 @@ class ChatMessage extends React.Component {
   }
 
   markup(message) {
-    let linked = linkify(message);
-    let atnamed = linked.map((part, i) => {
-      if (_.isString(part)) {
-        return atnamify(part, this.props.presence.members, this.props.msg.id);
-      }
-      return part;
-    });
+    let atnamed = atnamify(message, this.props.presence.members, this.props.msg.id);
     let markedUp = _.flatten(atnamed).map((part, i) => {
       if (_.isString(part)) {
         return <span key={i} dangerouslySetInnerHTML={{__html: part}} />

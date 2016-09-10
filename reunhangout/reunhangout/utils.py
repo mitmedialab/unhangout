@@ -3,10 +3,7 @@ import json
 from django.core.serializers.json import DjangoJSONEncoder
 
 def json_dumps(obj):
-    # Replace all '/' with '\\/'.  JSON allows optionally escaping the /
-    # character, and if we don't, printing this as a JSON data structure in a
-    # script tag allows a malicious '</script>' to close the tag early and XSS
-    # us!
+    # Be sure to escape this output in templates using `escapejson`.
     return json.dumps(obj, cls=DjangoJSONEncoder)
 
 def random_webrtc_id(length=32):
