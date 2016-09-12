@@ -24,7 +24,12 @@ class JitsiVideo extends React.Component {
       // parentNode
       div,
       // configOverwrite
-      undefined, 
+      {
+        callStatsID: JSON.stringify(""),
+        callStatsSecret: JSON.stringify(""),
+        disableThirdPartyRequests: JSON.stringify(true),
+        logStats: JSON.stringify(false)
+      }, 
       // interfaceConfigOvewrite
       {
         APP_NAME: JSON.stringify(this.props.settings.BRANDING.name),
