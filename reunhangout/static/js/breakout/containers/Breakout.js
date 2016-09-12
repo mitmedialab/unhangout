@@ -8,15 +8,11 @@ import {Presence} from '../../plenary/containers/Presence.js';
 import JitsiMeetExternalAPI from "../../vendor/jitsi-meet/external_api";
 import * as style from "../../../scss/pages/breakout/_breakoutstyle.scss";
 
-class Breakout extends React.Component {
-  handleDisconnectOthers(event) {
-    event && event.preventDefault();
-    this.props.disconnectOthers();
-  }
-
+class JitsiVideo extends React.Component {
   setupJitsiFrame(div) {
+    // API alternative to:
     // <iframe src={`https://meet.jit.si/${this.props.breakout.webrtc_id}`} frameBorder={0}></iframe>
-    let api = new JitsiMeetExternalAPI(
+    this.api = new JitsiMeetExternalAPI(
       // domain
       "meet.jit.si",
       // room_name
@@ -31,7 +27,7 @@ class Breakout extends React.Component {
       undefined, 
       // interfaceConfigOvewrite
       {
-        APP_NAME: JSON.stringify("foo"),
+        APP_NAME: JSON.stringify(this.props.settings.BRANDING.name),
         SHOW_JITSI_WATERMARK: JSON.stringify(false),
         DEFAULT_LOCAL_DISPLAY_NAME: JSON.stringify(this.props.auth.username),
         DEFAULT_REMOTE_DISPLAY_NAME: JSON.stringify("Fellow breakouter"),
@@ -41,9 +37,27 @@ class Breakout extends React.Component {
       // noSSL
       false
     );
-    setTimeout(() => {
-      api.executeCommand("displayName", this.props.auth.username);
-    }, 10000);
+    this.api.executeCommand("displayName", this.props.auth.username);
+  }
+  componentWillUnmount() {
+    this.api && this.api.dispose();
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    // Don't rerender the webrtc frame
+    return false;
+  }
+
+  render() {
+    return <div className='jitsi-video' ref={(div) => this.setupJitsiFrame(div)}></div>
+  }
+
+}
+
+class Breakout extends React.Component {
+  handleDisconnectOthers(event) {
+    event && event.preventDefault();
+    this.props.disconnectOthers();
   }
 
   render() {
@@ -85,7 +99,9 @@ class Breakout extends React.Component {
               </ul>
             : "" }
         </div>
-        <div className='breakout-right-col' ref={(div) => this.setupJitsiFrame(div)}></div>
+        <div className='breakout-right-col'>
+          <JitsiVideo {...this.props} />
+        </div>
       </div>
     </div>;
   }
