@@ -5,13 +5,47 @@ import {ConnectionStatus} from '../../transport';
 import * as A from '../actions';
 import * as PRESENCE_ACTIONS from '../../transport/actions';
 import {Presence} from '../../plenary/containers/Presence.js';
-import * as style from "../../../scss/pages/breakout/_breakoutstyle.scss"
+import JitsiMeetExternalAPI from "../../vendor/jitsi-meet/external_api";
+import * as style from "../../../scss/pages/breakout/_breakoutstyle.scss";
 
 class Breakout extends React.Component {
   handleDisconnectOthers(event) {
     event && event.preventDefault();
     this.props.disconnectOthers();
   }
+
+  setupJitsiFrame(div) {
+    // <iframe src={`https://meet.jit.si/${this.props.breakout.webrtc_id}`} frameBorder={0}></iframe>
+    let api = new JitsiMeetExternalAPI(
+      // domain
+      "meet.jit.si",
+      // room_name
+      this.props.breakout.webrtc_id,
+      // width
+      undefined,
+      // height
+      undefined,
+      // parentNode
+      div,
+      // configOverwrite
+      undefined, 
+      // interfaceConfigOvewrite
+      {
+        APP_NAME: JSON.stringify("foo"),
+        SHOW_JITSI_WATERMARK: JSON.stringify(false),
+        DEFAULT_LOCAL_DISPLAY_NAME: JSON.stringify(this.props.auth.username),
+        DEFAULT_REMOTE_DISPLAY_NAME: JSON.stringify("Fellow breakouter"),
+        SHOW_POWERED_BY: JSON.stringify(true),
+        TOOLBAR_BUTTONS: JSON.stringify("microphone,camera,etherpad,sharedvideo,settings"),
+      },
+      // noSSL
+      false
+    );
+    setTimeout(() => {
+      api.executeCommand("displayName", this.props.auth.username);
+    }, 10000);
+  }
+
   render() {
     if (!this.props.presence || !this.props.presence.channel_name) {
       return this.renderStatusMessage("Loading...");
@@ -51,9 +85,7 @@ class Breakout extends React.Component {
               </ul>
             : "" }
         </div>
-        <div className='breakout-right-col'>
-          <iframe src={`https://meet.jit.si/${this.props.breakout.webrtc_id}`} frameBorder={0}></iframe>
-        </div>
+        <div className='breakout-right-col' ref={(div) => this.setupJitsiFrame(div)}></div>
       </div>
     </div>;
   }
@@ -78,7 +110,8 @@ export default connect(
     plenary: state.plenary,
     breakout: state.breakout,
     breakoutMessages: state.breakoutMessages,
-    auth: state.auth
+    auth: state.auth,
+    settings: state.settings,
   }),
   // map dispatch to props
   (dispatch, ownProps) => ({

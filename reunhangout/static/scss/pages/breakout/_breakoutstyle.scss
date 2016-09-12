@@ -10,6 +10,11 @@ $breakout-left-col-width: 200px;
   height: 100vh;
   overflow: hidden;
   float: left;
+  & > div {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
   iframe {
     width: 100%;
     height: 100%;

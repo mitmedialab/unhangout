@@ -1,0 +1,4 @@
+"external_api.js" is taken from
+https://github.com/jitsi/jitsi-meet/blob/master/modules/API/external/external_api.js
+
+It depends on `postis` from npm.  It is licensed as per LICENSE in this directory.
