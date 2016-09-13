@@ -34,3 +34,18 @@ $breakout-left-col-width: 200px;
   padding: 20px;
   margin-bottom: 5px;
 }
+
+.breakout-messages {
+  position: absolute;
+  max-width: 300px;
+  top: 1em;
+  left: 1em;
+  background-color: #69f;
+  color: white;
+  padding: 1em;
+  border-radius: 5px;
+  li {
+    list-style-type: none;
+  }
+  box-shadow: 0px 0px 5px #666;
+}

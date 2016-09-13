@@ -324,8 +324,8 @@ def handle_message_breakouts(message, data, plenary):
     if not plenary.has_admin(message.user):
         return handle_error(message, "Must be an admin to message breakouts")
 
-    message = data['payload']['message']
+    msg_text = data['payload']['message']
     for breakout in plenary.breakout_set.all():
         broadcast(breakout.channel_group_name, type='message_breakouts',
-                payload={'message': message})
-    track("message_breakouts", message.user, {'message': message}, plenary=plenary)
+                payload={'message': msg_text})
+    track("message_breakouts", message.user, {'message': msg_text}, plenary=plenary)
