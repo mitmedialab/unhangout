@@ -25,6 +25,8 @@ class JitsiVideo extends React.Component {
       div,
       // configOverwrite
       {
+        disableStats: JSON.stringify(true),
+        enableWelcomePage: JSON.stringify(false),
         callStatsID: JSON.stringify(""),
         callStatsSecret: JSON.stringify(""),
         disableThirdPartyRequests: JSON.stringify(true),
