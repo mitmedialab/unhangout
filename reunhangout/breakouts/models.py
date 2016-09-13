@@ -46,9 +46,11 @@ class Breakout(models.Model):
     webrtc_id = models.CharField(max_length=100, default=random_webrtc_id,
             editable=False, unique=True)
 
+    CHANNEL_GROUP_NAME_PREFIX = "breakout-"
+
     @property
     def channel_group_name(self):
-        return "breakout-%s" % self.pk
+        return "".join((self.CHANNEL_GROUP_NAME_PREFIX, str(self.pk)))
 
     @classmethod
     def id_from_channel_group_name(cls, channel_group_name):

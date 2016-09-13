@@ -35,7 +35,7 @@ def connect_to_breakout(message, breakout):
         return send_over_capacity_error(message, breakout.channel_group_name)
 
     elif message.user.is_authenticated() and Presence.objects.filter(
-                room__channel_name=breakout.channel_group_name,
+                room__channel_name__startswith=Breakout.CHANNEL_GROUP_NAME_PREFIX,
                 user=message.user
             ).exists():
         # Only one connection per user.
@@ -87,23 +87,21 @@ class MessageProxy(object):
         self.user = user
 
 def handle_disconnecting_others(message, data, breakout):
-    try:
-        room = Room.objects.get(channel_name=breakout.channel_group_name)
-    except Room.DoesNotExist:
-        room = None
     if not message.user.is_authenticated():
         handle_error(message, "Can't disconnect others when not authenticated")
         return
 
-    if room:
-        presences = Presence.objects.filter(room=room, user=message.user)
-        for presence in presences:
-            if presence.channel_name != message.reply_channel.name:
-                room.remove_presence(presence=presence)
-                send_already_connected_error(
-                    MessageProxy(presence.channel_name, user=message.user),
-                    breakout.channel_group_name
-                )
+    presences = Presence.objects.filter(
+        room__channel_name__startswith=Breakout.CHANNEL_GROUP_NAME_PREFIX,
+        user=message.user
+    )
+    for presence in presences:
+        if presence.channel_name != message.reply_channel.name:
+            presence.room.remove_presence(presence=presence)
+            send_already_connected_error(
+                MessageProxy(presence.channel_name, user=message.user),
+                presence.room.channel_name
+            )
 
     connect_to_breakout(message, breakout)
 

@@ -46,19 +46,51 @@ class JitsiVideo extends React.Component {
     );
     this.api.executeCommand("displayName", this.props.auth.username);
   }
+  componentDidMount() {
+    if (!this.props.hide) {
+      this.setupJitsiFrame(this.refs.iframeHolder);
+    }
+  }
   componentWillUnmount() {
-    this.api && this.api.dispose();
+    if (this.api) {
+      this.api.dispose();
+    }
+  }
+  /**
+   * When receiving props, manually add the 'hide' class if we are
+   * transitioning to hidden.  `shouldComponentUpdate` will prevent a render in
+   * this case, so that we have time for `api.dispose` to run.
+   */
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.hide && !this.props.hide) {
+      if (this.api) {
+        this.api.dispose();
+      }
+      this.refs.iframeHolder.className = this.getClasses(nextProps.hide);
+    } else if (!nextProps.hide && this.props.hide) {
+      this.refs.iframeHolder.className = this.getClasses(nextProps.hide);
+      this.setupJitsiFrame(this.refs.iframeHolder);
+    }
   }
 
+  /**
+   * Never auto-render based on changes in props/state.
+   */
   shouldComponentUpdate(nextProps, nextState) {
-    // Don't rerender the webrtc frame
     return false;
   }
 
-  render() {
-    return <div className='jitsi-video' ref={(div) => this.setupJitsiFrame(div)}></div>
+  getClasses(hide) {
+    let classes = ['jitsi-video']
+    if (hide) {
+      classes.push('hide');
+    }
+    return classes.join(" ");
   }
 
+  render() {
+    return <div className={this.getClasses(this.props.hide)} ref='iframeHolder'></div>
+  }
 }
 
 class Breakout extends React.Component {
@@ -68,34 +100,41 @@ class Breakout extends React.Component {
   }
 
   render() {
+    let errorMessage;
     if (!this.props.presence || !this.props.presence.channel_name) {
-      return this.renderStatusMessage("Loading...");
+      errorMessage = "Loading...";
     }
     if (this.props.presence.error_code === 'over-capacity') {
-      return this.renderStatusMessage("We're sorry, but this breakout room is over capacity.  Please try another.");
+      errorMessage = "We're sorry, but this breakout room is over capacity.  Please try another.";
     }
     if (this.props.presence.error_code === 'already-connected') {
       let disconnecting = this.props.presence.action === PRESENCE_ACTIONS.DISCONNECTING_OTHERS;
-      return this.renderStatusMessage(<div>
+      errorMessage = <div>
         <h2>Already connected</h2>
-        <p>You seem to be connected to this breakout room in another window.</p>
+        <p>You seem to be connected to a breakout room in another window.</p>
         <BS.Button
             bsStyle='primary'
             onClick={(e) => this.handleDisconnectOthers(e)}
             disabled={disconnecting}>
           { disconnecting ? "..." : "Disconnect Others" }
         </BS.Button>
-      </div>);
+      </div>;
     }
 
     return <div className='breakout-detail'>
       <ConnectionStatus />
       <div className='breakout-columns'>
-        <div className='breakout-left-col'>
-          <div className="breakout-title-container">
-            <span>{this.props.breakout.title}</span>
-          </div>
-          <Presence presence={this.props.presence} auth={this.props.auth} />
+        <div className={'breakout-left-col' + (errorMessage ? ' hide' : '')}>
+          { errorMessage ?
+              ""
+            :
+              <div>
+                <div className="breakout-title-container">
+                  <span>{this.props.breakout.title}</span>
+                </div>
+                <Presence presence={this.props.presence} auth={this.props.auth} />
+              </div>
+          }
           { this.props.breakoutMessages.length > 0 ?
               <ul className='breakout-messages'>
                 {
@@ -107,7 +146,8 @@ class Breakout extends React.Component {
             : "" }
         </div>
         <div className='breakout-right-col'>
-          <JitsiVideo {...this.props} />
+          { errorMessage ? <div className='container'>{errorMessage}</div> : "" }
+          <JitsiVideo {...this.props} hide={!!errorMessage} />
         </div>
       </div>
     </div>;
