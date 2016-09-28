@@ -18,6 +18,6 @@ ALLAUTH_APP_KEYS['google']['client_id'] = ''
 ALLAUTH_APP_KEYS['google']['secret'] = ''
 
 # Add INSTALLED_APPS for any in-use social account providers.
-for name, keys in ALLAUTH_APP_KEYS.items()
+for name, keys in ALLAUTH_APP_KEYS.items():
     if keys['client_id']:
         INSTALLED_APPS.append('allauth.socialaccount.providers.%s' % name)
