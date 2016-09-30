@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import argparse
 import asyncio
 import functools
@@ -15,14 +17,14 @@ logger = logging.getLogger()
 
 parser = argparse.ArgumentParser("Loadtest a reunhangout server")
 parser.add_argument('url', help='HTTP(S) URL for server to test')
-parser.add_argument('event_slug', default='testy', help='Slug for event to test')
+parser.add_argument('plenary_slug', default='testy', help='Slug for plenary to test')
 parser.add_argument('--user-range-min', default=0, type=int, help='Bottom of user index range')
 parser.add_argument('--user-range-max', default=10, type=int, help='Top of user index range')
-parser.add_argument('--password', default='password', help='Password for loadtest users')
-parser.add_argument('--username-template', default='loadtest%s')
-parser.add_argument('--disable-chat', action='store_true')
-parser.add_argument('--disable-event-leaving', action='store_true')
-parser.add_argument('--disable-breakout-joining', action='store_true')
+parser.add_argument('--password', default='password', help='Password to set/use for loadtest users')
+parser.add_argument('--username-template', default='loadtest%s', help='Template string for creation of loadtest users. Must contain a single "%s".')
+parser.add_argument('--disable-chat', action='store_true', help='Disable chatting by loadtest users.')
+parser.add_argument('--disable-event-leaving', action='store_true', help='Disable loadtest users leaving and rejoining the plenary.')
+parser.add_argument('--disable-breakout-joining', action='store_true', help='Disable loadtest users joining breakout rooms.')
 parser.add_argument('--verbose', action='store_true')
 
 def main(args):
@@ -235,7 +237,7 @@ class Client:
 
     @asyncio.coroutine
     def get_plenary_data(self):
-        res = yield from self._get("/event/{}/".format(self.args.event_slug))
+        res = yield from self._get("/event/{}/".format(self.args.plenary_slug))
         if res.status_code == 200:
             match = re.search("window.__INITIAL_STATE__ = (.*);\s*$", res.text, re.M)
             if match:
@@ -246,7 +248,7 @@ class Client:
     @asyncio.coroutine
     def connect_websocket(self):
         self.debug("attempting to connect websocket")
-        plenary_url = ''.join((self.args.url, '/event/', self.args.event_slug))
+        plenary_url = ''.join((self.args.url, '/event/', self.args.plenary_slug))
         ws_url = re.sub('^http', 'ws', plenary_url)
         headers = {
             'Cookie': 'sessionid=%s' % self.cookie_jar.get('sessionid'),
