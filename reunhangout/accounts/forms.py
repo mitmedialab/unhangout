@@ -17,7 +17,7 @@ class AccountSettingsForm(forms.ModelForm):
         # image linked to a social profile rather than uploaded by the user).
         # We have to do this here because we don't get access to the user
         # instance once we're inside the widget.
-        current_image = self.instance.get_profile_image()
+        current_image = self.instance.get_profile_image_nocache()
         def render_profile_image(self, name, value, attrs=None):
             template = (
                 '<a href="%(initial_url)s" target="_blank" rel="noopener noreferrer">'
@@ -56,6 +56,15 @@ class AccountSettingsForm(forms.ModelForm):
         # Replace bound method
         pi_widget = self.fields['profile_image'].widget
         pi_widget.render = types.MethodType(render_profile_image, pi_widget)
+
+        # Replace help text for display name to reflect social auth name.
+        if not self.instance.display_name:
+            self.fields['display_name'].help_text = mark_safe(
+                "%s. Currently using <em>%s.</em>" % (
+                    escape(self.fields['display_name'].help_text),
+                    escape(self.instance.get_display_name_nocache())
+                )
+            )
 
     class Meta:
         model = User

@@ -18,3 +18,5 @@ from breakouts.models import *
 from frontend.models import *
 from plenaries.models import *
 from videosync.models import *
+from allauth.account.models import *
+from allauth.socialaccount.models import *

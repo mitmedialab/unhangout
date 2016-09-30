@@ -100,22 +100,60 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.username
 
     def get_display_name(self):
-        return self.display_name or self.username
+        if self.display_name:
+            return self.display_name
+
+        cache_key = "display-name-{}".format(self.pk)
+        cached = cache.get(cache_key)
+        if cached:
+            return cached
+        else:
+            result = self.get_display_name_nocache()
+            cache.set(cache_key, result, 60)
+        return result
+
+    def get_display_name_nocache(self):
+        if self.display_name:
+            return self.display_name
+
+        socialaccounts = {}
+        for acct in self.socialaccount_set.all():
+            socialaccounts[acct.provider] = acct
+
+        if 'facebook' in socialaccounts:
+            name = socialaccounts['facebook'].extra_data.get('name')
+            if name:
+                return name
+
+        if 'google' in socialaccounts:
+            name = socialaccounts['google'].extra_data.get('name')
+            if name:
+                return name
+
+        if 'twitter' in socialaccounts:
+            name = socialaccounts['twitter'].extra_data.get('name')
+            if name:
+                return name
+
+        return self.username
 
     def get_profile_image(self):
         if self.profile_image:
-            return get_thumbnail(self.profile_image, '64x64').url
+            return get_thumbnail(self.profile_image, '64x64', crop='center').url
 
         cache_key = "profile-image-{}".format(self.pk)
         cached = cache.get(cache_key)
         if cached:
             return cached
         else:
-            result = self._get_profile_image()
+            result = self.get_profile_image_nocache()
             cache.set(cache_key, result, 60)
         return result
 
-    def _get_profile_image(self):
+    def get_profile_image_nocache(self):
+        if self.profile_image:
+            return get_thumbnail(self.profile_image, '64x64', crop='center').url
+
         socialaccounts = {}
         for acct in self.socialaccount_set.all():
             socialaccounts[acct.provider] = acct
