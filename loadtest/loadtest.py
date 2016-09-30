@@ -22,6 +22,7 @@ parser.add_argument('--password', default='password', help='Password for loadtes
 parser.add_argument('--username-template', default='loadtest%s')
 parser.add_argument('--disable-chat', action='store_true')
 parser.add_argument('--disable-event-leaving', action='store_true')
+parser.add_argument('--disable-breakout-joining', action='store_true')
 parser.add_argument('--verbose', action='store_true')
 
 def main(args):
@@ -127,15 +128,16 @@ class Client:
             if op > 0.7:
                 yield from self.connect_websocket()
         else:
-            if op > 0.9:
+            if op > 0.95:
                 if self.is_in_breakout():
-                    yield from self.leave_breakout()
+                    if op > 0.995:
+                        yield from self.leave_breakout()
                 else:
                     yield from self.join_breakout()
             if op > 0.995 and not self.args.disable_event_leaving:
                 yield from self.disconnect_websocket()
                 self.info("disconnected websocket")
-            elif op > 0.98 and not self.args.disable_chat:
+            elif op > 0.99 and not self.args.disable_chat:
                 yield from self.send_json({
                     'type': 'chat',
                     'payload': {'message': random.choice(chat_messages)}
@@ -262,7 +264,7 @@ class Client:
 
     @asyncio.coroutine
     def join_breakout(self):
-        if self.plenary_data:
+        if self.plenary_data and not self.args.disable_breakout_joining:
             def usable_breakout(b):
                 return not b['is_proposal'] and not b['is_random'] and b['open']
             possible = [b for b in self.plenary_data['breakouts'] if usable_breakout(b)]

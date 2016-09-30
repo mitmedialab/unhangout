@@ -1,0 +1,21 @@
+---
+loadtest_user_min: 0
+loadtest_user_max: 100
+max_test_duration: 600
+
+ec2_count: 1
+ec2_instance_tags:
+  Name: "reunhangout-loadtest"
+  role: "reunhangout-loadtest"
+ec2_instance_type: "t2.nano"
+ec2_image: "ami-2d39803a"
+ec2_region: "us-east-1"
+
+# Secret vault keys
+loadtest_url: "{{vault_loadtest_url}}" 
+loadtest_slug: "{{vault_loadtest_slug}}"
+loadtest_user_password: "{{vault_loadtest_user_password}}"
+ec2_security_group_id: "{{vault_ec2_security_group_id}}"
+ec2_key_name: "{{vault_ec2_key_name}}"
+aws_access_key: "{{vault_aws_access_key}}"
+aws_secret_key: "{{vault_aws_secret_key}}"
