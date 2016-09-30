@@ -8,16 +8,29 @@ import * as A from "../actions";
 const DEFAULT_AVATAR = "../../../../media/assets/default_avatar.jpg";
 
 export class Avatar extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {'imageError': false};
+  }
+  onError(event) {
+    this.setState({'imageError': true});
+  }
   render() {
-    let avatar = this.props.user.image;
+    let imgProps = {
+      alt: this.props.user.display_name,
+      src: this.state.imageError ? DEFAULT_AVATAR : this.props.user.image,
+      className: 'user-avatar',
+      onError: (event) => this.onError(event),
+    }
     if (this.props.gridView) {
+      imgProps.title = this.props.user.display_name;
       return (
-        <img src={avatar} className="user-avatar" title={this.props.user.display_name} />
+        <img {...imgProps} />
       )
     } else {
       return (
       <div className='user-details'>
-        <img src={avatar} className="user-avatar" />
+        <img {...imgProps} />
         {this.props.user.display_name}
       </div>
       )
