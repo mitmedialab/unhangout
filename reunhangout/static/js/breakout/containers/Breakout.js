@@ -36,7 +36,7 @@ class JitsiVideo extends React.Component {
       {
         APP_NAME: JSON.stringify(this.props.settings.BRANDING.name),
         SHOW_JITSI_WATERMARK: JSON.stringify(false),
-        DEFAULT_LOCAL_DISPLAY_NAME: JSON.stringify(this.props.auth.username),
+        DEFAULT_LOCAL_DISPLAY_NAME: JSON.stringify(this.props.auth.display_name),
         DEFAULT_REMOTE_DISPLAY_NAME: JSON.stringify("Fellow breakouter"),
         SHOW_POWERED_BY: JSON.stringify(true),
         TOOLBAR_BUTTONS: JSON.stringify("microphone,camera,etherpad,sharedvideo,settings"),
@@ -44,7 +44,7 @@ class JitsiVideo extends React.Component {
       // noSSL
       false
     );
-    this.api.executeCommand("displayName", this.props.auth.username);
+    this.api.executeCommand("displayName", this.props.auth.display_name);
   }
   componentDidMount() {
     if (!this.props.hide) {

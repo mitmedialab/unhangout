@@ -16,9 +16,9 @@ const atnamify = (text, users, msgId) => {
   let parts = text.split(/(?:\b|^|\s)@([a-z0-9]+)/gim);
   return parts.map(function(part, i) {
     if (i % 2 === 1) {
-      var normalized = part.replace(/\s/g, "").toLowerCase();
-      var mentioned = _.find(users, (user) => {
-        return user.username.toLowerCase().indexOf(normalized) === 0;
+      let normalized = part.replace(/\s/g, "").toLowerCase();
+      let mentioned = _.find(users, (user) => {
+        return user.display_name.replace("/\s/g", "").toLowerCase().indexOf(normalized) === 0;
       });
       if (mentioned) {
         return <span>
@@ -36,7 +36,7 @@ class AtName extends React.Component {
     return <span className='atname'>
       <BS.OverlayTrigger trigger={['hover', 'focus']} placement='right' overlay={
         <BS.Popover id={this.props.id}>
-          {this.props.mentioned.username}
+          {this.props.mentioned.display_name}
         </BS.Popover>
       }>
         <span>{this.props.text}</span>
@@ -52,7 +52,7 @@ class ChatMessage extends React.Component {
     return <div className={`chat-message${msg.highlight ? " highlight" : ""}`}>
       <Avatar user={msg.user} gridView={true} />
       <div className="chat-message-text">
-        <span className='userName'>{msg.user.username}</span>
+        <span className='userName'>{msg.user.display_name}</span>
         <br></br>
         <span className='message'>{markedUp}</span>
       </div>

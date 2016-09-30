@@ -4,6 +4,7 @@ def serialize_auth_state(user, plenary=None):
             'auth': {
                 'is_authenticated': False,
                 'username': "Anonymous",
+                'display_name': 'Anonymous',
                 "image": User.default_profile_image(),
             }
         }
@@ -13,6 +14,7 @@ def serialize_auth_state(user, plenary=None):
             'is_authenticated': True,
             'id': user.id,
             'username': user.username,
+            'display_name': user.get_display_name(),
             'image': user.get_profile_image(),
             'email': user.email,
             'is_superuser': user.is_superuser,

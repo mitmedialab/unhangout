@@ -31,20 +31,31 @@ def serialize_public(user):
         # TODO: uniqify this somehow
         return {
             'username': 'Anonymous',
+            'display_name': 'Anonymous',
             'image': User.default_profile_image(),
         }
     else:
-
         return {
             'username': user.username,
+            'display_name': user.get_display_name(),
             'image': user.get_profile_image(),
         }
 
+def user_display(user):
+    return user.get_display_name()
+
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=30, unique=True,
-            error_messages={'unique': "An account with that username already exists."})
+            error_messages={'unique': "An account with that username already exists."},
+            help_text="Unique name to log in with")
     email = models.EmailField("Email address", blank=True, null=True,
             unique=True, default=None)
+    display_name = models.CharField(max_length=30, blank=True,
+            help_text="Name to display publicly in chat and lists")
+    profile_image = models.ImageField(upload_to="profile_images",
+            blank=True, null=True)
+
+    # TODO: Do something else with these
     twitter_handle = models.CharField(max_length=100, blank=True, null=True,
             unique=True, default=None)
     linkedin_profile = models.CharField(max_length=100, blank=True, null=True,
@@ -88,7 +99,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     def get_short_name(self):
         return self.username
 
+    def get_display_name(self):
+        return self.display_name or self.username
+
     def get_profile_image(self):
+        if self.profile_image:
+            return get_thumbnail(self.profile_image, '64x64').url
+
         cache_key = "profile-image-{}".format(self.pk)
         cached = cache.get(cache_key)
         if cached:
@@ -134,4 +151,4 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
     def __str__(self):
-        return self.username
+        return self.get_display_name()

@@ -16,9 +16,17 @@ class CustomUserCreationForm(UserCreationForm):
 
 @admin.register(User)
 class CustomuserAdmin(UserAdmin):
-    list_display = ['username', 'email', 'is_staff']
+    list_display = ['username', 'display_name', 'email', 'is_staff']
     fieldsets = (
-        (None, {'fields': ('username', 'email', 'password')}),
+        (None, {
+            'fields': (
+                'username',
+                'display_name',
+                'email',
+                'profile_image',
+                'password'
+            )
+        }),
         (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser',
             'groups', 'user_permissions')}),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
@@ -29,5 +37,5 @@ class CustomuserAdmin(UserAdmin):
             'fields': ('email', 'username', 'password1', 'password2')
         }),
     )
-    search_fields = ['username', 'email']
+    search_fields = ['username', 'display_name', 'email']
     ordering = ['date_joined']

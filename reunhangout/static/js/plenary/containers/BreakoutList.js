@@ -57,7 +57,7 @@ class BreakoutList extends React.Component {
     event.preventDefault();
     if (this.state.breakoutMessage) {
       this.props.onMessageBreakouts({
-        message: `${this.props.auth.username}: ${this.state.breakoutMessage}`
+        message: `${this.props.auth.display_name}: ${this.state.breakoutMessage}`
       })
       this.setState({"message-breakouts-dialog": false});
     }
@@ -242,7 +242,7 @@ class BreakoutList extends React.Component {
               <BS.Col sm={5}>
                 <h3>Preview</h3>
                 <div className='breakout-message-preview'>
-                  {this.props.auth.username}: {this.state.breakoutMessage}
+                  {this.props.auth.display_name}: {this.state.breakoutMessage}
                 </div>
               </BS.Col>
             </BS.FormGroup>

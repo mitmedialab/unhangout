@@ -12,13 +12,13 @@ export class Avatar extends React.Component {
     let avatar = this.props.user.image;
     if (this.props.gridView) {
       return (
-        <img src={avatar} className="user-avatar" title={this.props.user.username} />
+        <img src={avatar} className="user-avatar" title={this.props.user.display_name} />
       )
     } else {
       return (
       <div className='user-details'>
         <img src={avatar} className="user-avatar" />
-        {this.props.user.username}
+        {this.props.user.display_name}
       </div>
       )
     }
@@ -31,6 +31,7 @@ export const sortPresence = (presence, auth) => {
   for (let i = 0; i < presence.lurkers; i++) {
     members.push({
       username: `Anonymous ${i+1}`,
+      display_name: `Anonymous ${i+1}`,
       image: DEFAULT_AVATAR
     });
   }

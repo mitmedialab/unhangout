@@ -202,6 +202,7 @@ SOCIALACCOUNT_PROVIDERS = {
         'VERSION': 'v2.4'
     },
 }
+ACCOUNT_USER_DISPLAY = "accounts.models.user_display"
 
 # Add client id's and secrets for social account providers. Changes only take
 # effect when you sync them to the database with `./manage.py sync_auth_providers`.

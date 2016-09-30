@@ -45,7 +45,7 @@ class Plenary extends React.Component {
 
             <div className="user-menu-container">
               <Avatar user={this.props.auth} gridView={true} />
-              <h4>{this.props.auth.username}</h4>
+              <h4>{this.props.auth.display_name}</h4>
               <BS.Dropdown
                 id="user-menu-button"
                 dropup
