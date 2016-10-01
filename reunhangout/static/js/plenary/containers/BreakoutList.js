@@ -128,7 +128,7 @@ class BreakoutList extends React.Component {
     );
 
     return <div>
-      <div className="breakout-header">
+      <div className="breakout-list-header">
         <h4>Breakout Rooms</h4>
         { showCreateSession ?
             <BS.Button
@@ -170,7 +170,7 @@ class BreakoutList extends React.Component {
           : "" }
       </div>
 
-      <div className="breakouts-container">
+      <div className="breakout-list-container">
         { breakouts.map((breakout, i) => {
             return <Breakout
               breakout={breakout}

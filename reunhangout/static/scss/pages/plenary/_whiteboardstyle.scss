@@ -1,35 +1,23 @@
 .whiteboard {
-	.whiteboard-button {
-		float: right;
-	    display: inline-block;
-	    position: relative;
-	    top: -1px;
-		background-color: #fff;
-	    border-bottom-left-radius: 4px;
-	    border-bottom-right-radius: 4px;
-	    border: 1px solid #e1e1e8;
-	    border-top: none;
-	    padding: 2px 8px;
-	    margin-right: 10px;
-	    border-top-right-radius: 0px;
-	    border-top-left-radius: 0px;
-	}
-	.panel {
-		margin:0px;
-	}
-	.panel-body {
-		border: none;
-	}
-	.whiteboard-input {
-    border: 1px solid #fff;
-    border-radius: 4px;
-    padding: 5px;
-		&:hover {
-			border-color: #ccc;
-		}
-		&.whiteboard-focus {
-      border-color: #66afe9;
-      box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
-		}
-	}
+  .whiteboard-button {
+    float: right;
+    display: inline-block;
+    position: relative;
+    top: -1px;
+    background-color: #fff;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    border: 1px solid #e1e1e8;
+    border-top: none;
+    padding: 2px 8px;
+    margin-right: 10px;
+    border-top-right-radius: 0px;
+    border-top-left-radius: 0px;
+  }
+  .panel {
+    margin:0px;
+  }
+  .panel-body {
+    border: none;
+  }
 }

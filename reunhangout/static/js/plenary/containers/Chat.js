@@ -50,7 +50,7 @@ class ChatMessage extends React.Component {
     let msg = this.props.msg;
     let markedUp = this.markup(msg.message);
     return <div className={`chat-message${msg.highlight ? " highlight" : ""}`}>
-      <Avatar user={msg.user} gridView={true} />
+      <Avatar user={msg.user} />
       <div className="chat-message-text">
         <span className='userName'>{msg.user.display_name}</span>
         <br></br>

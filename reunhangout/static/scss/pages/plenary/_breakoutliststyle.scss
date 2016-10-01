@@ -1,4 +1,4 @@
-.breakout-header {
+.breakout-list-header {
   background-color: #2e7daa;
   padding: 15px;
   display: flex;
@@ -19,22 +19,46 @@
     max-height: 24px;
   }
 }
-.breakout {
-  width: calc(100% - 10px);
-  margin: 5px;
+
+.breakout-list-item {
+  $breakout-list-item-margin: 5px;
+  $join-width: 40px;
+
+  position: relative;
+  width: calc(100% - (#{$breakout-list-item-margin}*2));
+  margin: $breakout-list-item-margin;
+  margin-bottom: $breakout-list-item-margin*2;
   border-radius: 5px;
-  display: flex;
-  flex-flow: column nowrap;
-  .main-breakout-container {
-    width: 100%; 
-    min-height: 75px;
-    position: relative;
-    flex-grow: 1;
-    background-color: #eee;
+
+  &.proposal {
+    border: 2px dashed #2e7daa;
   }
-  .members-container {
-    display: flex;
-    justify-content: flex-start;
+
+  .breakout-list-item-row {
+    position: relative;
+    min-height: 75px;
+    background-color: #eee;
+    &:after {
+      content: "";
+      clear: both;
+    }
+  }
+
+  .breakout-list-item-left-col {
+    width: calc(100% - #{$join-width});
+    padding: 0.5em;
+  }
+
+  .breakout-list-item-right-col {
+    width: $join-width;
+  }
+
+  .breakout-title {
+    word-wrap: break-word;
+    max-width: 100%;
+  }
+
+  .breakout-assignees-container {
     border: 1px solid #ccc;
     padding: 5px;
     border-radius: 5px;
@@ -47,141 +71,70 @@
       margin-left: 5px;
     }
   }
-  .proposed-by-container {
-    position: absolute;
-    top: 5px;
-    right: 41px;
-    text-align: right;
-    display: flex;
-    align-items: center;
-    font-size: .75em;
+
+  .breakout-presence {
+    position: relative;
+    .slot {
+      position: relative;
+      width: 32px;
+      height: 32px;
+      margin-right: 2px;
+      display: inline-block;
+      vertical-align: middle;
+      border-radius: 5px;
+      margin-top: 2px;
+      &.empty {
+        border: 1px solid #ccc;
+      }
+    }
     img {
-      max-width: 18px;
-      max-height: 18px;
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .breakout-proposed-by-container {
+    font-size: .75em;
+    line-height: 3em;
+    img {
+      width: 18px;
+      height: 18px;
       margin-left: 5px;
     }
+    float: right;
   }
-  h5 {
-    margin-bottom: auto;
-    margin-left: 36px;
-    margin-top: 0px;
-    padding: 5px;
-  }
-  .btn {
-    background-color: #2e7daa;
-    border-color: #2e7daa;
-    color: #fff;
-    padding: 10px;
-    &.join-btn {
-      height: 100%;
-      max-width: 36px;
-      position: absolute;;
-      right: 0px;
-      top: 0px;
-      border-top-left-radius: 0px;
-      border-bottom-left-radius: 0px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-    &.delete-btn {
-      height: 100%;
-      max-width: 36px;
-      position: absolute;;
-      left: 0px;
-      top: 0px;
-      background-color: #d9534f;
-      border-color: #d9534f;
-      border-top-right-radius: 0px;
-      border-bottom-right-radius: 0px;
-    }
-    &.vote-btn {
-      height: 100%;
-      max-width: 36px;
-      position: absolute;;
-      right: 0px;
-      top: 0px;
-      margin-left: 10px;
-      border-top-left-radius: 0px;
-      border-bottom-left-radius: 0px;
-    }
-    &.voted {
-      .glyphicon {
-        color: #ffdb4d;
-      }
-    }
-    &.approve-btn {
-      position: absolute;
-      bottom: 5px;
-      right: 41px;
-      padding: 5px;
-      padding-top: 0px;
-      padding-bottom: 0px;
-    }
-  }
-  .title-input {
-    background-color: #eee;
-    border: 1px solid #eee;
-    box-shadow: none;
-    min-width: 30%;
-    max-width: 50%;
-    padding: 5px;
-    margin-bottom: auto;
-    margin-left: 36px;
-    margin-top: 5px;
-    &:hover {
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    &.title-focus {
-      background-color: #fff;
-      border: 1px solid;
-      border-radius: 4px;
-      border-color: #66afe9;
-      box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
-    }
-  }
-  &.proposal {
-    border: 2px dashed #2e7daa;
-    background-color: #fff;
-    .title-input {
-      background-color: #fff;
-      border: 1px solid #fff;
-      &:hover {
-        background-color: #fff;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-      }
-    }
-  }
-}
-.breakout-presence {
-  position: relative;
-  padding: 5px;
-  padding-bottom: 0.2em;
-  width: 70%;
-  margin-top: auto;
-  margin-left: 36px;
-  margin-bottom: 5px;
-  .slot {
-    width: 32px;
-    height: 32px;
-    margin-right: 2px;
-    position: relative;
-    display: inline-block;
-    vertical-align: middle;
-    border-radius: 5px;
-    margin-top: 2px;
-    &.empty {
-      border: 1px solid #ccc;
-    }
-  }
-  img {
-    width: 100%;
+
+  .join-btn, .vote-btn {
+    position: absolute;
+    right: 0;
+    top: 0;
     height: 100%;
+    width: $join-width;
+    border-radius: 0px 5px 5px 0px;
+  }
+  .join-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .approve-btn, .unapprove-btn {
+    float: right;
+    margin-left: 5px;
+  }
+
+  .delete-btn {
+    color: black;
+    &:hover {
+      color: white;
+      background-color: red;
+      border-radius: 5px;
+    }
+  }
+  .join-btn, .vote-btn, .approve-btn, .unapprove-btn {
+    color: #fff;
+    border-color: #2e7daa;
+    background-color: #2e7daa;
   }
 }
-.breakouts-container {
-  display: flex;
-  flex-direction: column;
-}
+

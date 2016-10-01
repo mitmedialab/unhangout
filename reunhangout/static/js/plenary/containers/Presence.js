@@ -22,18 +22,16 @@ export class Avatar extends React.Component {
       className: 'user-avatar',
       onError: (event) => this.onError(event),
     }
-    if (this.props.gridView) {
-      imgProps.title = this.props.user.display_name;
+    if (this.props.detailView) {
       return (
-        <img {...imgProps} />
+        <div className='user-details'>
+          <img {...imgProps} />
+          {this.props.user.display_name}
+        </div>
       )
     } else {
-      return (
-      <div className='user-details'>
-        <img {...imgProps} />
-        {this.props.user.display_name}
-      </div>
-      )
+      imgProps.title = this.props.user.display_name;
+      return <img {...imgProps} />;
     }
   }
 }
@@ -54,7 +52,7 @@ export const sortPresence = (presence, auth) => {
 export class Presence extends React.Component {
   constructor() {
     super();
-    this.state = {gridView: true};
+    this.state = {detailView: false};
   }
   render() {
     return (
@@ -65,19 +63,19 @@ export class Presence extends React.Component {
             {this.props.presence.members.length}
           </div>
           <BS.Button
-            onClick={() => this.setState({gridView: true})}
+            onClick={() => this.setState({detailView: false})}
             className="grid-button">
             <BS.Glyphicon glyph='th' />
           </BS.Button>
           <BS.Button
-            onClick={() => this.setState({gridView: false})}>
+            onClick={() => this.setState({detailView: true})}>
             <BS.Glyphicon glyph='th-list' />
           </BS.Button>
         </div>
         <div className='presence'>
           {
             sortPresence(this.props.presence, this.props.auth).map((user) => {
-              return <Avatar user={user} gridView={this.state.gridView} key={`user-${user.username}`} />
+              return <Avatar user={user} detailView={this.state.detailView} key={`user-${user.username}`} />
             })
           }
         </div>
