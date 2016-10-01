@@ -38,10 +38,6 @@
     position: relative;
     min-height: 75px;
     background-color: #eee;
-    &:after {
-      content: "";
-      clear: both;
-    }
   }
 
   .breakout-list-item-left-col {

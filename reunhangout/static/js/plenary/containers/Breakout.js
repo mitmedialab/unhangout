@@ -80,7 +80,7 @@ export default class Breakout extends React.Component {
     }
     return <div className={classes.join(" ")}>
       <div className="breakout-list-item-row">
-        <div className='breakout-list-item-left-col'>
+        <div className='breakout-list-item-left-col clearfix'>
           <InPlaceEditor maxLength={100}
                          readOnly={titleReadOnly}
                          className='breakout-title in-place-editor' 
