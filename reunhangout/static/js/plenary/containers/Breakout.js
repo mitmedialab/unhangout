@@ -92,7 +92,8 @@ export default class Breakout extends React.Component {
                 <span>Assigned Participants:</span>
                 <div className="members-avatars-container">
                   {this.props.breakout.members.map((member) => {
-                    return <Avatar user={member} />
+                    return <Avatar user={member}
+                                   idPart={`assignees-${this.props.breakout.id}`}/>
                   })}
                 </div>
               </div>
@@ -127,7 +128,8 @@ export default class Breakout extends React.Component {
           { showProposer ? 
               <div className="breakout-proposed-by-container">
                 <span>Proposed by</span>
-                <Avatar user={this.props.breakout.proposed_by} />
+                <Avatar user={this.props.breakout.proposed_by}
+                        idPart={`proposed-by-${this.props.breakout.id}`}/>
               </div>
             : "" }
         </div>
@@ -169,7 +171,11 @@ class BreakoutPresence extends React.Component {
     return <div className='breakout-presence'>
       { members.map((user, i) => (
           <span className={`slot${user === null ? " empty" : ""}`} key={`user-${i}`}>
-            { user === null ? "" : <Avatar user={user} key={user.username} /> }
+            { user === null ?
+                ""
+             : <Avatar user={user}
+                       idPart={`breakout-presence-${this.props.breakout.id}-${user.id}`} />
+            }
           </span>
         ))
       }

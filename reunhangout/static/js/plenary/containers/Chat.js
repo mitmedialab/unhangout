@@ -7,6 +7,30 @@ import * as style from "../../../scss/pages/plenary/_chatstyle.scss"
 import Whiteboard from './Whiteboard';
 import {Avatar} from './Presence';
 
+class AtName extends React.Component {
+  render() {
+    let classes = ['atname'];
+    if (this.props.auth.username === this.props.mentioned.username) {
+      classes.push('self');
+    }
+    return <span className={classes.join(" ")}>
+      <BS.OverlayTrigger trigger={['hover', 'focus']} placement='right' overlay={
+        <BS.Popover id={this.props.id}>
+          {this.props.mentioned.display_name}
+        </BS.Popover>
+      }>
+        <span>{this.props.text}</span>
+      </BS.OverlayTrigger>
+    </span>
+  }
+}
+const ConnectedAtName = connect(
+  (state) => ({
+    auth: state.auth
+  }),
+  (dispatch, ownProps) => ({
+  })
+)(AtName);
 
 /**
  * Split 'text' into an array of react components or strings, where at-names
@@ -21,28 +45,20 @@ const atnamify = (text, users, msgId) => {
         return user.display_name.replace("/\s/g", "").toLowerCase().indexOf(normalized) === 0;
       });
       if (mentioned) {
+        if (self.username === mentioned.username) {
+        }
         return <span>
           {' '}
-          <AtName text={`@${part}`} mentioned={mentioned} id={`atname-${msgId}-${i}`}/>
+          <ConnectedAtName text={`@${part}`}
+                           mentioned={mentioned}
+                           id={`atname-${msgId}-${i}`}/>
         </span>
+      } else {
+        return ` @${part}`;
       }
     }
     return part;
   });
-}
-
-class AtName extends React.Component {
-  render() {
-    return <span className='atname'>
-      <BS.OverlayTrigger trigger={['hover', 'focus']} placement='right' overlay={
-        <BS.Popover id={this.props.id}>
-          {this.props.mentioned.display_name}
-        </BS.Popover>
-      }>
-        <span>{this.props.text}</span>
-      </BS.OverlayTrigger>
-    </span>
-  }
 }
 
 class ChatMessage extends React.Component {
@@ -50,7 +66,7 @@ class ChatMessage extends React.Component {
     let msg = this.props.msg;
     let markedUp = this.markup(msg.message);
     return <div className={`chat-message${msg.highlight ? " highlight" : ""}`}>
-      <Avatar user={msg.user} />
+      <Avatar user={msg.user} idPart={`chat-message-author-${msg.id}`}/>
       <div className="chat-message-text">
         <span className='userName'>{msg.user.display_name}</span>
         <br></br>

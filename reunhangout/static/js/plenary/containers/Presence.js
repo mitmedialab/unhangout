@@ -15,6 +15,10 @@ export class Avatar extends React.Component {
   onError(event) {
     this.setState({'imageError': true});
   }
+  getPopoverId() {
+    let u = encodeURIComponent(this.props.user.username).replace(/\%/g, '::');
+    return `avatar-${u}-${this.props.key}`;
+  }
   render() {
     let imgProps = {
       alt: this.props.user.display_name,
@@ -30,10 +34,22 @@ export class Avatar extends React.Component {
         </div>
       )
     } else {
-      imgProps.title = this.props.user.display_name;
-      return <img {...imgProps} />;
+      let popover = <BS.Popover id={this.getPopoverId()}>
+        {this.props.user.display_name}
+      </BS.Popover>;
+      return <BS.OverlayTrigger rootClose trigger='click' overlay={popover} placement='top'>
+        <img {...imgProps} />
+      </BS.OverlayTrigger>
     }
   }
+}
+Avatar.propTypes = {
+  user: React.PropTypes.shape({
+    username: React.PropTypes.string.isRequired,
+    display_name: React.PropTypes.string.isRequired,
+    image: React.PropTypes.string.isRequired,
+  }).isRequired,
+  idPart: React.PropTypes.string.isRequired,
 }
 
 export const sortPresence = (presence, auth) => {
@@ -75,7 +91,8 @@ export class Presence extends React.Component {
         <div className='presence'>
           {
             sortPresence(this.props.presence, this.props.auth).map((user) => {
-              return <Avatar user={user} detailView={this.state.detailView} key={`user-${user.username}`} />
+              return <Avatar user={user} detailView={this.state.detailView}
+                             idPart={`presence-${user.username}`} />
             })
           }
         </div>

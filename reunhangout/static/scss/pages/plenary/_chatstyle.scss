@@ -70,3 +70,10 @@
     background-color: #e6f7ff;
   }
 }
+
+.atname {
+  font-weight: bold;
+  &.self {
+    background-color: #ffe800;
+  }
+}
