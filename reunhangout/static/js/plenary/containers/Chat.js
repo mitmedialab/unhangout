@@ -37,7 +37,7 @@ const ConnectedAtName = connect(
  * are highlighted.
  */
 const atnamify = (text, users, msgId) => {
-  let parts = text.split(/(?:\b|^|\s)@([a-z0-9]+)/gim);
+  let parts = text.split(/(?:^|\s)@([a-z0-9]+)/gim);
   return parts.map(function(part, i) {
     if (i % 2 === 1) {
       let normalized = part.replace(/\s/g, "").toLowerCase();
@@ -99,7 +99,12 @@ class Chat extends React.Component {
   }
   componentWillUpdate() {
     let chatLog = this.refs.chatLog;
-    this.shouldScrollBottom = chatLog.scrollTop + chatLog.offsetHeight === chatLog.scrollHeight;
+    let latestMessage = this.props.chat_messages[this.props.chat_messages.length - 1];
+    this.shouldScrollBottom = (
+      (chatLog.scrollTop + chatLog.offsetHeight >= chatLog.scrollHeight) ||
+      latestMessage && latestMessage.user.username === this.props.auth.username
+    );
+    console.log("shouldScrollBottom", this.shouldScrollBottom);
   }
   componentDidUpdate() {
     if (this.shouldScrollBottom) {
@@ -124,20 +129,17 @@ class Chat extends React.Component {
     return <div className="chat-container">
       { showWhiteboard ? 
         <Whiteboard />
-        : ""}
-        <div className="chat-box">
-        <div
-          className="chat-log"
-          ref="chatLog">
-        {this.props.chat_messages.map((msg, i) => {
-          return <ChatMessage msg={msg} plenary={this.props.plenary}
-            presence={this.props.presence} key={`${i}`} auth={this.props.auth} />
-        })}
+      : ""}
+      <div className="chat-box">
+        <div className="chat-log" ref="chatLog">
+          {this.props.chat_messages.map((msg, i) => {
+            return <ChatMessage msg={msg} plenary={this.props.plenary}
+              presence={this.props.presence} key={`${i}`} auth={this.props.auth} />
+          })}
         </div>
         <form className={
-                `chat-input${this.props.plenary.chat.state === "error" ? " has-error" : ""}`
-              }
-              onSubmit={(e) => this.onSubmit(e)}>
+            `chat-input${this.props.plenary.chat.state === "error" ? " has-error" : ""}`
+        } onSubmit={(e) => this.onSubmit(e)}>
           { is_admin ?
             <BS.FormGroup>
               <BS.InputGroup>

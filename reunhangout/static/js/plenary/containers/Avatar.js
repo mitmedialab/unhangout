@@ -16,7 +16,7 @@ export class Avatar extends React.Component {
   }
   getPopoverId() {
     let u = encodeURIComponent(this.props.user.username).replace(/\%/g, '::');
-    return `avatar-${u}-${this.props.key}`;
+    return `avatar-${u}-${this.props.idPart}`;
   }
   render() {
     let imgProps = {

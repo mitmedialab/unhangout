@@ -161,13 +161,15 @@ def handle_breakout(message, data, plenary):
             return admin_required_error()
         if 'title' not in payload:
             return handle_error(message, "Missing 'title'")
-        breakout = Breakout.objects.create(
+        breakout = Breakout(
             plenary=plenary,
             title=payload['title'],
             max_attendees=payload.get('max_attendees') or 10,
             is_proposal=(not is_admin or payload.get('is_proposal', False)),
             proposed_by=message.user
         )
+        breakout.full_clean()
+        breakout.save()
         if breakout.is_proposal:
             track("propose_breakout", message.user, breakout=breakout)
         return respond_with_breakouts()

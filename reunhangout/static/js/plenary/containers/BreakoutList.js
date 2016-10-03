@@ -13,7 +13,8 @@ class BreakoutList extends React.Component {
       "random-dialog": false,
       "message-breakouts-dialog": false,
       "breakout-mode-dialog": false,
-      "breakout_mode": this.props.plenary.breakout_mode
+      "breakout_mode": this.props.plenary.breakout_mode,
+      "max_attendees": 10,
     }
   }
   componentWillReceiveNewProps(newProps) {
@@ -21,6 +22,19 @@ class BreakoutList extends React.Component {
   }
   handleCreateBreakout(event, isProposal) {
     event.preventDefault();
+    if (!this.state.title) {
+      this.setState({"title-error": "Title is required"});
+      return;
+    } else {
+      this.setState({"title-error": ""});
+    }
+    let maxAttendees = parseInt(this.state.max_attendees);
+    if (isNaN(maxAttendees) || maxAttendees < 2 || maxAttendees > 10) {
+      this.setState({"max_attendees-error": "Must be a number between 2 and 10."});
+      return;
+    } else {
+      this.setState({"max_attendees-error": ""});
+    }
     this.props.onChangeBreakouts({
       action: "create",
       title: this.state.title,
@@ -29,7 +43,6 @@ class BreakoutList extends React.Component {
     });
     this.setState({
       title: "",
-      max_attendees: "",
       'create-session-dialog': false,
     });
   }
@@ -131,11 +144,16 @@ class BreakoutList extends React.Component {
       <div className="breakout-list-header">
         <h4>Breakout Rooms</h4>
         { showCreateSession ?
-            <BS.Button
-            onClick={() => this.setState({"create-session-dialog": true})}
-            className="create-session-btn">
-              <BS.Glyphicon glyph="plus" />
-            </BS.Button>
+            <BS.OverlayTrigger placement='left' overlay={
+              <BS.Tooltip id='add-breakout-tooltip'>
+                {breakout_mode === "user" ? "Propose breakout" : "Add breakout"}
+              </BS.Tooltip>
+            }>
+              <BS.Button onClick={() => this.setState({"create-session-dialog": true})}
+                  className="create-session-btn">
+                <BS.Glyphicon glyph="plus" />
+              </BS.Button>
+            </BS.OverlayTrigger>
           : "" }
         { breakout_mode === "random" ?
             <BS.Button onClick={(e) => this.handleGroupMe(e)}>
@@ -143,25 +161,31 @@ class BreakoutList extends React.Component {
             </BS.Button>
           : "" }
         { this.props.auth.is_admin ?
-          <BS.Dropdown
-            id="user-menu-button"
-            pullRight>
-            <BS.Dropdown.Toggle
-              noCaret
-              className="breakout-settings-btn">
-              <img src="../../../../media/assets/control-panel-icon" />
-            </BS.Dropdown.Toggle>
-            <BS.Dropdown.Menu>
-              <BS.MenuItem
-                onClick={() => this.setState({"message-breakouts-dialog": true})}>
-                Message All Breakouts
-              </BS.MenuItem>
-              <BS.MenuItem
-                onClick={() => this.setState({"breakout-mode-dialog": true})}>
-                Breakout Mode
-              </BS.MenuItem>
-            </BS.Dropdown.Menu>
-          </BS.Dropdown>
+            <BS.OverlayTrigger placement='left' overlay={
+              <BS.Tooltip id='configure-breakouts-tooltip'>
+                Configure Breakouts
+              </BS.Tooltip>
+            }>
+              <BS.Dropdown
+                id="user-menu-button"
+                pullRight>
+                <BS.Dropdown.Toggle
+                  noCaret
+                  className="breakout-settings-btn">
+                  <img src="../../../../media/assets/control-panel-icon" />
+                </BS.Dropdown.Toggle>
+                <BS.Dropdown.Menu>
+                  <BS.MenuItem
+                    onClick={() => this.setState({"message-breakouts-dialog": true})}>
+                    Message All Breakouts
+                  </BS.MenuItem>
+                  <BS.MenuItem
+                    onClick={() => this.setState({"breakout-mode-dialog": true})}>
+                    Breakout Mode
+                  </BS.MenuItem>
+                </BS.Dropdown.Menu>
+              </BS.Dropdown>
+            </BS.OverlayTrigger>
           : "" }
         { this.props.breakoutCrud.error ?
             <div className="breakout-error">
@@ -186,26 +210,47 @@ class BreakoutList extends React.Component {
           "create-session-dialog",
           "Create Session",
           <div>
-            <BS.FormGroup controlId="session-name">
-              <BS.Col sm={2}>Session Name</BS.Col>
-              <BS.Col sm={10}><BS.FormControl type="text"
-              placeholder="Session Name"
-              title={(this.state && this.state.title) || ""}
-              onChange={(e) => this.setState({title: e.target.value})} />
+            <BS.FormGroup controlId="session-name"
+                validationState={this.state['title-error'] ? 'error' : undefined}>
+              <BS.Col sm={2}>
+                <BS.ControlLabel>Session Name</BS.ControlLabel>
+              </BS.Col>
+              <BS.Col sm={10}>
+                <BS.FormControl type="text"
+                  placeholder="Session Name"
+                  title={(this.state && this.state.title) || ""}
+                  onChange={(e) => this.setState({title: e.target.value})} />
+                { this.state['title-error'] ?
+                    <BS.HelpBlock>{this.state['title-error']}</BS.HelpBlock>
+                  : "" }
               </BS.Col>
             </BS.FormGroup>
-            <BS.FormGroup controlId="participant-limit">
-              <BS.Col sm={2}>Participant Limit</BS.Col>
-              <BS.Col sm={10}><BS.FormControl type="text"
-              placeholder="Max 10, Min 2"
-              max_attendees={(this.state && this.state.max_attendees) || ""}
-              onChange={(e) => this.setState({max_attendees: e.target.value})}/>
+            <BS.FormGroup controlId="participant-limit"
+              validationState={
+                this.state['max_attendees-error'] ? 'error' : undefined
+            }>
+              <BS.Col sm={2}>
+                <BS.ControlLabel>Participant Limit</BS.ControlLabel>
+              </BS.Col>
+              <BS.Col sm={10}>
+                <BS.FormControl type="text"
+                  placeholder="Max 10, Min 2"
+                  min={2}
+                  max={10}
+                  value={this.state.max_attendees || ""}
+                  onChange={(e) => this.setState({max_attendees: e.target.value})} />
+                <BS.HelpBlock>
+                  { this.state['max_attendees-error'] ?
+                      this.state['max_attendees-error']
+                    : "Minimum 2, Maximum 10" }
+                </BS.HelpBlock>
               </BS.Col>
             </BS.FormGroup>
           </div>,
           breakout_mode === "user" ? "Propose Session" : "Create Session",
           (e) => this.handleCreateBreakout(e, breakout_mode === "user")
-        ) }
+        )
+      }
 
       { this.renderModalForm(
           "random-dialog",
