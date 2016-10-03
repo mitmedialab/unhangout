@@ -5,7 +5,7 @@ import * as BS from "react-bootstrap";
 import * as A from "../actions";
 import * as style from "../../../scss/pages/plenary/_chatstyle.scss"
 import Whiteboard from './Whiteboard';
-import {Avatar} from './Presence';
+import {Avatar} from './Avatar';
 
 class AtName extends React.Component {
   render() {

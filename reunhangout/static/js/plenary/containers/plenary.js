@@ -9,7 +9,7 @@ import Chat from './Chat';
 import PlenaryInfo from './PlenaryInfo';
 import {ConnectionStatus} from '../../transport';
 import * as A from '../actions';
-import {Avatar} from './Presence';
+import {Avatar} from './Avatar';
 
 class Plenary extends React.Component {
   constructor() {

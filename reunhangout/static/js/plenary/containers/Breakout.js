@@ -3,7 +3,8 @@ import {connect} from "react-redux";
 import * as style from "../../../scss/pages/plenary/_breakoutliststyle.scss";
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
-import {Avatar, sortPresence} from './Presence';
+import {sortPresence} from './Presence';
+import {Avatar} from './Avatar';
 import {InPlaceEditor} from './InPlaceEditor';
 
 export default class Breakout extends React.Component {
