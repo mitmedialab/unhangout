@@ -47,3 +47,34 @@
     box-shadow: 0px 0px 5px rgba(200, 0, 0, 1);
   }
 }
+.previous-embed-list-item {
+  width: 240px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  .previous-embed-list-item-thumbnail {
+  }
+  .previous-embed-list-item-title {
+    flex: 2 1 auto;
+    display: block;
+    font-size: 12px;
+    line-height: 1.1;
+    height: 3.3 * 12px + 5px;
+    overflow: hidden;
+    white-space: normal;
+    word-wrap: break-words;
+    max-width: 100%;
+    padding-left: 5px;
+    padding-right: 5px;
+    // text-overflow: ellipsis; not supported with word wrap.
+  }
+  .previous-embed-list-item-delete i {
+    display: inline-block;
+    padding: 5px;
+    &:hover {
+      color: white;
+      background-color: red;
+    }
+  }
+}
+

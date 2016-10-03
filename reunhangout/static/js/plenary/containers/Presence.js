@@ -46,6 +46,7 @@ export class Presence extends React.Component {
           {
             sortPresence(this.props.presence, this.props.auth).map((user) => {
               return <Avatar user={user} detailView={this.state.detailView}
+                             key={`presence-${user.username}`}
                              idPart={`presence-${user.username}`} />
             })
           }

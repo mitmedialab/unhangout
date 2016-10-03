@@ -98,6 +98,10 @@ class Embed extends React.Component {
     }
   }
   removeEmbed(event, index=null) {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
     if (index === null) {
       // Just remove the "current"; don't remove from queue
       this.props.onAdminSendEmbeds({
@@ -168,6 +172,16 @@ class Embed extends React.Component {
     let hasPrevEmbeds = (!chosen && this.props.embeds.embeds.length > 0) ||
                         (chosen && this.props.embeds.embeds.length > 1);
 
+    let embedDisplay = this.props.embeds.embeds.filter((embed, i) => {
+      return i !== this.props.embeds.current
+    }).map((embed, i) => {
+      let details = this.props.embedDetails[embed.props.src];
+      return {
+        title: details && details.title ? details.title : embed.props.src,
+        image: details && details.thumbnails && details.thumbnails.default.url,
+      }
+    });
+
     return <div className='embed-admin-controls'>
       <form>
         { chosen && chosen.type === "youtube" ?
@@ -186,41 +200,42 @@ class Embed extends React.Component {
             { hasPrevEmbeds ?
               <BS.InputGroup.Button>
                 <BS.Dropdown id="embed-list input">
-                  <BS.Dropdown.Toggle>
-                      <BS.Glyphicon glyph="menu-hamburger" />
-                  </BS.Dropdown.Toggle>
+                  <BS.Dropdown.Toggle><i className='fa fa-list' /></BS.Dropdown.Toggle>
                   <BS.Dropdown.Menu>
-                    {this.props.embeds.embeds.map((embed, i) => {
-                      if (i !== this.props.embeds.current) {
-                        return <BS.MenuItem key={i}
-                          onClick={(event) => this.setCurrent(event, i)}
-                        >
-                          {
-                            /* No embed details? Show URL. */
-                            !this.props.embedDetails[embed.props.src] ?
-                              embed.props.src
-                            /* Currently loading the details.. */
-                            : this.props.embedDetails[embed.props.src].loading ?
-                              embed.props.src
-                            /* Have embed details */
-                            : <span>
-                                <img src={this.props.embedDetails[embed.props.src].thumbnails.default.url}
-                                    width={64}
-                                    height={48}
-                                    alt="" />
-                                {this.props.embedDetails[embed.props.src].title}
-                              </span>
-                          }
-                          <i className='fa fa-trash'
-                             onClick={(e) => this.removeEmbed(e, i)} />
-                        </BS.MenuItem>;
-                      }
-                      return "";
-                    })}
+                    {
+                      embedDisplay.map(({title, image}, i) => (
+                        <BS.MenuItem key={i}
+                            onClick={(event) => this.setCurrent(event, i)}>
+                          <span className='previous-embed-list-item'>
+                            { image ?
+                                <img src={image}
+                                     className='previous-embed-list-item-thumbnail'
+                                     width={64}
+                                     height={48}
+                                     alt='' />
+                              : ""
+                            }
+
+                            <span className='previous-embed-list-item-title'>
+                              {title}
+                            </span>
+                            <span className='previous-embed-list-item-delete'>
+                              <BS.OverlayTrigger placement='left' overlay={
+                                <BS.Tooltip id='remove-embed'>Remove embed</BS.Tooltip>
+                              }>
+                                <i className='fa fa-trash'
+                                   onClick={(e) => this.removeEmbed(e, i)} />
+                              </BS.OverlayTrigger>
+                            </span>
+                          </span>
+                        </BS.MenuItem>
+                      ))
+                    }
                   </BS.Dropdown.Menu>
                 </BS.Dropdown>
               </BS.InputGroup.Button>
-              : "" }
+              : ""
+            }
             <BS.FormControl
               type="text"
               placeholder="YouTube URL or embed code"
@@ -236,9 +251,9 @@ class Embed extends React.Component {
               <BS.MenuItem key="2" onClick={(e) => this.enqueueEmbed(e)}>Enqueue</BS.MenuItem>
             </BS.DropdownButton>
           </BS.InputGroup>
-          </BS.FormGroup>
+        </BS.FormGroup>
         <div className="button-flex-container">
-        <BS.Button className="hangout-on-air-button">Create Hangout-on-Air</BS.Button>
+          <BS.Button className="hangout-on-air-button">Create Hangout-on-Air</BS.Button>
         </div>
       </form>
     </div>

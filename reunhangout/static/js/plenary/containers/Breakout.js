@@ -104,25 +104,39 @@ export default class Breakout extends React.Component {
           { showPresence ?  <BreakoutPresence {...this.props} /> : "" }
 
           { showDelete ?
-              <BS.Button bsStyle="link" className='delete-btn'
-                         onClick= {(e) => this.handleDelete(e)}>
-                <i className='fa fa-trash' />
-              </BS.Button>
+              <BS.OverlayTrigger placement='top' overlay={
+                <BS.Tooltip id='delete-breakout-list-item'>Remove breakout</BS.Tooltip>
+              }>
+                <BS.Button bsStyle="link" className='delete-btn'
+                           onClick= {(e) => this.handleDelete(e)}>
+                  <i className='fa fa-trash' />
+                </BS.Button>
+              </BS.OverlayTrigger>
             : ""
           }
 
 
           { showApprove ?
-              <BS.Button onClick={(e) => this.handleApprove(e)} className="approve-btn">
-                <i className="fa fa-check" aria-hidden="true"></i>
-              </BS.Button>
+              <BS.OverlayTrigger placement='top' overlay={
+                <BS.Tooltip id='approve-breakout-list-item'>Approve breakout</BS.Tooltip>
+              }>
+                <BS.Button onClick={(e) => this.handleApprove(e)} className="approve-btn">
+                  <i className="fa fa-check" aria-hidden="true"></i>
+                </BS.Button>
+              </BS.OverlayTrigger>
             : ""
           }
 
           { showUnapprove ?
-              <BS.Button onClick={(e) => this.handleApprove(e)} className="approve-btn">
-                <i className="fa fa-close" aria-hidden="true"></i>
-              </BS.Button>
+              <BS.OverlayTrigger placement='top' overlay={
+                <BS.Tooltip id='unapprove-breakout-list-item'>
+                  Unapprove breakout
+                </BS.Tooltip>
+              }>
+                <BS.Button onClick={(e) => this.handleApprove(e)} className="approve-btn">
+                  <i className="fa fa-close" aria-hidden="true"></i>
+                </BS.Button>
+              </BS.OverlayTrigger>
             : ""
           }
 
@@ -135,20 +149,35 @@ export default class Breakout extends React.Component {
             : "" }
         </div>
         <div className='breakout-list-item-right-col'>
-          { showVote ?
-              <BS.Button onClick={(e) => this.handleVote(e)}
-                  className={`vote-btn${votedForThis ? " voted" : ""}`}>
-                <BS.Glyphicon glyph="arrow-up" />
-                <br></br>
-                {this.props.breakout.votes.length}
-              </BS.Button>
-            : showJoin ?
-              <BS.Button className="join-btn" href={this.props.breakout.url} target='_blank'>
-                <BS.Glyphicon glyph="log-in" />
-              </BS.Button>
-            :
-              <BS.Button className="join-btn" disabled><BS.Glyphicon glyph="lock" /></BS.Button>
-          }
+          <BS.OverlayTrigger placement='left' overlay={
+            <BS.Tooltip id='main-breakout-action'>
+              {
+                showVote ?
+                  (votedForThis ? "Cancel vote " : "Vote this up")
+                : showJoin ?
+                  "Join Breakout"
+                : "Breakout locked"
+              }
+            </BS.Tooltip>
+          }>
+            {
+              showVote ?
+                <BS.Button onClick={(e) => this.handleVote(e)}
+                    className={`vote-btn${votedForThis ? " voted" : ""}`}>
+                  <BS.Glyphicon glyph="arrow-up" />
+                  <br></br>
+                  {this.props.breakout.votes.length}
+                </BS.Button>
+              : showJoin ?
+                <BS.Button className="join-btn" href={this.props.breakout.url} target='_blank'>
+                  <BS.Glyphicon glyph="log-in" />
+                </BS.Button>
+              :
+                <BS.Button className="join-btn" disabled>
+                  <BS.Glyphicon glyph="lock" />
+                </BS.Button>
+            }
+          </BS.OverlayTrigger>
         </div>
       </div>
     </div>
