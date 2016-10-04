@@ -5,6 +5,8 @@ ALLOWED_HOSTS = ['{{ django_domain }}']
 DEFAULT_FROM_EMAIL = SERVER_EMAIL = "noreply@{{ django_domain }}"
 ADMINS = MANAGERS = [("Charlie DeTar", "cfd@media.mit.edu")]
 
+PLENARY_SERVER = 'https://plenary.unhangout.io'
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',

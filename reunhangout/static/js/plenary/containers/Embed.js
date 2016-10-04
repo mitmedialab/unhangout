@@ -305,7 +305,7 @@ class Embed extends React.Component {
                             </span>
                             <span className='previous-embed-list-item-delete'>
                               <BS.OverlayTrigger placement='left' overlay={
-                                <BS.Tooltip id='remove-embed'>Remove embed</BS.Tooltip>
+                                <BS.Tooltip id='remove-embed'>Remove from list</BS.Tooltip>
                               }>
                                 <i className='fa fa-trash'
                                    onClick={(e) => this.removeEmbed(e, index)} />
