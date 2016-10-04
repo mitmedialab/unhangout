@@ -2,7 +2,7 @@ import React from "react";
 import {connect} from "react-redux";
 import * as BS from "react-bootstrap";
 
-const classMap = {
+const cssClassMap = {
   [WebSocket.CONNECTING]: "conecting",
   [WebSocket.OPEN]: "open",
   [WebSocket.CLOSING]: "closing",
@@ -11,16 +11,27 @@ const classMap = {
 
 class ConnectionStatus extends React.Component {
   render() {
+    /*
     if (this.props.socket.state === WebSocket.OPEN) {
       return null;
     }
-    return <div className='connection'>
-      <div className={classMap[this.props.socket.state]}>
+    */
+    let classes = ['connection'];
+    if (this.props.socket.state === WebSocket.OPEN) {
+      classes.push("open");
+    }
+    return <div className={classes.join(" ")}>
+      <div className={cssClassMap[this.props.socket.state]}>
         { this.props.socket.state === WebSocket.CONNECTING ? this.renderConnecting() :
           this.props.socket.state === WebSocket.CLOSING ?    this.renderClosing() :
-          this.props.socket.state === WebSocket.CLOSED ?     this.renderClosed() : "" }
+          this.props.socket.state === WebSocket.CLOSED ?     this.renderClosed() :
+          this.props.socket.state === WebSocket.OPEN ?       this.renderOpen() : ""}
       </div>
     </div>
+  }
+
+  renderOpen() {
+    return <span>Connected!</span>
   }
 
   renderConnecting() {
