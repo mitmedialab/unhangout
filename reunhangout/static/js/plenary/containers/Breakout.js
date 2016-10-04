@@ -92,8 +92,9 @@ export default class Breakout extends React.Component {
               <div className="breakout-assignees-container">
                 <span>Assigned Participants:</span>
                 <div className="members-avatars-container">
-                  {this.props.breakout.members.map((member) => {
+                  {this.props.breakout.members.map((member, i) => {
                     return <Avatar user={member}
+                                   key={`${this.props.breakout.id}${i}`}
                                    idPart={`assignees-${this.props.breakout.id}`}/>
                   })}
                 </div>

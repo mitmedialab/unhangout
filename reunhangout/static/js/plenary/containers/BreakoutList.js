@@ -10,11 +10,11 @@ class BreakoutList extends React.Component {
     super(props);
     this.state= {
       "create-session-dialog": false,
-      "random-dialog": false,
       "message-breakouts-dialog": false,
-      "breakout-mode-dialog": false,
+      "breakout-mode-dialog": true,
       "breakout_mode": this.props.plenary.breakout_mode,
       "max_attendees": 10,
+      "random_max_attendees": this.props.plenary.random_max_attendees || 10,
     }
   }
   componentWillReceiveNewProps(newProps) {
@@ -24,6 +24,9 @@ class BreakoutList extends React.Component {
     event.preventDefault();
     if (!this.state.title) {
       this.setState({"title-error": "Title is required"});
+      return;
+    } else if (this.state.title.length > 100) {
+      this.setState({"title-error": "Maximum length 100 characters"});
       return;
     } else {
       this.setState({"title-error": ""});
@@ -49,21 +52,21 @@ class BreakoutList extends React.Component {
 
   handleModeChange(event) {
     event.preventDefault();
-    if (this.state.breakout_mode === "random") {
-      this.setState({"random-dialog": true})
-    } else {
-      this.props.onChangeBreakoutMode({breakout_mode: this.state.breakout_mode})
+    let update = {breakout_mode: this.state.breakout_mode};
+    if (update.breakout_mode === "random") {
+      let maxAttendees = parseInt(this.state.random_max_attendees);
+      if (isNaN(maxAttendees) || maxAttendees < 2 || maxAttendees > 10) {
+        this.setState({
+          "random_max_attendees-error": "Must be a number between 2 and 10."
+        });
+        return;
+      } else {
+        this.setState({"random_max_attendees-error": ""});
+      }
+      update.random_max_attendees = this.state.random_max_attendees;
     }
+    this.props.onChangeBreakoutMode({breakout_mode: this.state.breakout_mode})
     this.setState({"breakout-mode-dialog": false})
-  }
-
-  handleRandomMode(event) {
-    event.preventDefault();
-    this.props.onChangeBreakoutMode({
-      breakout_mode: "random",
-      random_max_attendees: this.state.max_attendees
-    });
-    this.setState({max_attendees: "", "random-dialog": false});
   }
 
   handleMessageBreakouts(event) {
@@ -98,16 +101,16 @@ class BreakoutList extends React.Component {
         <BS.Modal.Header closeButton>
           <BS.Modal.Title>{title}</BS.Modal.Title>
         </BS.Modal.Header>
-        <BS.Modal.Body>
-          <BS.Form horizontal onSubmit={handler}>
+        <BS.Form onSubmit={handler}>
+          <BS.Modal.Body className='form-horizontal'>
             {body}
-          </BS.Form>
-        </BS.Modal.Body>
+          </BS.Modal.Body>
+        </BS.Form>
         <BS.Modal.Footer>
           <BS.Button onClick={() => this.setState({[name]: false})}>
             Close
           </BS.Button>
-          <BS.Button onClick={handler}>{actionName}</BS.Button>
+          <BS.Button bsStyle='primary' onClick={handler}>{actionName}</BS.Button>
         </BS.Modal.Footer>
       </BS.Modal>
     </div>
@@ -210,41 +213,36 @@ class BreakoutList extends React.Component {
           "create-session-dialog",
           "Create Session",
           <div>
-            <BS.FormGroup controlId="session-name"
+            <BS.FormGroup controlId="session-name" className='non-margined'
                 validationState={this.state['title-error'] ? 'error' : undefined}>
-              <BS.Col sm={2}>
-                <BS.ControlLabel>Session Name</BS.ControlLabel>
-              </BS.Col>
-              <BS.Col sm={10}>
-                <BS.FormControl type="text"
+              <BS.ControlLabel>Session Name</BS.ControlLabel>
+              <BS.FormControl type="text"
                   placeholder="Session Name"
                   title={(this.state && this.state.title) || ""}
                   onChange={(e) => this.setState({title: e.target.value})} />
-                { this.state['title-error'] ?
-                    <BS.HelpBlock>{this.state['title-error']}</BS.HelpBlock>
-                  : "" }
-              </BS.Col>
+              { this.state['title-error'] ?
+                  <BS.HelpBlock>{this.state['title-error']}</BS.HelpBlock>
+                : "" }
             </BS.FormGroup>
-            <BS.FormGroup controlId="participant-limit"
+            <BS.FormGroup
+              className='non-margined'
+              controlId="participant-limit"
               validationState={
                 this.state['max_attendees-error'] ? 'error' : undefined
-            }>
-              <BS.Col sm={2}>
-                <BS.ControlLabel>Participant Limit</BS.ControlLabel>
-              </BS.Col>
-              <BS.Col sm={10}>
-                <BS.FormControl type="text"
-                  placeholder="Max 10, Min 2"
-                  min={2}
-                  max={10}
-                  value={this.state.max_attendees || ""}
-                  onChange={(e) => this.setState({max_attendees: e.target.value})} />
-                <BS.HelpBlock>
-                  { this.state['max_attendees-error'] ?
-                      this.state['max_attendees-error']
-                    : "Minimum 2, Maximum 10" }
-                </BS.HelpBlock>
-              </BS.Col>
+              }
+            >
+              <BS.ControlLabel>Participant Limit</BS.ControlLabel>
+              <BS.FormControl type="text"
+                placeholder="Max 10, Min 2"
+                min={2}
+                max={10}
+                value={this.state.max_attendees || ""}
+                onChange={(e) => this.setState({max_attendees: e.target.value})} />
+              <BS.HelpBlock>
+                { this.state['max_attendees-error'] ?
+                    this.state['max_attendees-error']
+                  : "Minimum 2, Maximum 10" }
+              </BS.HelpBlock>
             </BS.FormGroup>
           </div>,
           breakout_mode === "user" ? "Propose Session" : "Create Session",
@@ -253,45 +251,23 @@ class BreakoutList extends React.Component {
       }
 
       { this.renderModalForm(
-          "random-dialog",
-          "Random Breakout Assignment",
-          <div>
-            <BS.FormGroup controlId="participant-limit">
-              <BS.Col sm={2}>Participant Limit</BS.Col>
-              <BS.Col sm={10}>
-                <BS.FormControl
-                  type="text"
-                  placeholder="Max 10, Min 2"
-                  value={(this.state && this.state.max_attendees) || ""}
-                  onChange={(e) => this.setState({max_attendees: e.target.value})} />
-              </BS.Col>
-            </BS.FormGroup>
-          </div>,
-          "Set Random Mode",
-          (e) => this.handleRandomMode(e)
-        ) }
-
-      { this.renderModalForm(
           "message-breakouts-dialog",
           "Message All Breakouts",
-          <div>
-            <BS.FormGroup controlId='breakout-message'>
-              <BS.Col sm={2}>Message</BS.Col>
-              <BS.Col sm={5}>
-                <BS.FormControl
-                  componentClass='textarea'
-                  placeholder='Message'
-                  value={this.state.breakoutMessage}
-                  onChange={(e) => this.setState({breakoutMessage: e.target.value})} />
-              </BS.Col>
-              <BS.Col sm={5}>
-                <h3>Preview</h3>
-                <div className='breakout-message-preview'>
-                  {this.props.auth.display_name}: {this.state.breakoutMessage}
-                </div>
-              </BS.Col>
-            </BS.FormGroup>
-          </div>,
+          <BS.FormGroup controlId='breakout-message' className='non-margined'>
+            <BS.HelpBlock>
+              Send a text message to all breakout groups.
+            </BS.HelpBlock>
+            <BS.ControlLabel>Message</BS.ControlLabel>
+            <BS.FormControl
+              componentClass='textarea'
+              placeholder='Message'
+              value={this.state.breakoutMessage}
+              onChange={(e) => this.setState({breakoutMessage: e.target.value})} />
+            <h4>Preview</h4>
+            <div className='breakout-message-preview'>
+              {this.props.auth.display_name}: {this.state.breakoutMessage}
+            </div>
+          </BS.FormGroup>,
           "Send Message",
           (e) => this.handleMessageBreakouts(e)
         ) }
@@ -300,45 +276,61 @@ class BreakoutList extends React.Component {
             "breakout-mode-dialog",
             "Breakout Mode",
             <div>
-              <BS.FormGroup controlId="admin-mode">
-                <BS.Col sm={2}>
+              <BS.FormGroup controlId="admin-mode" className='non-margined'>
                 <BS.Radio
-                  checked={this.state.breakout_mode==="admin"}
-                  onChange={() => this.setState({"breakout_mode": "admin"})} />
-                </BS.Col>
-                <BS.Col sm={10}>
+                    checked={this.state.breakout_mode==="admin"}
+                    onChange={() => this.setState({"breakout_mode": "admin"})}>
                   Admin Proposed Sessions
-                </BS.Col>
-                <BS.Col sm={10}>
-                  <p>Admins can create breakout sessions</p>
-                </BS.Col>
-
-                <BS.Col sm={2}>
-                  <BS.Radio
-                    checked={this.state.breakout_mode==="user"}
-                    onChange={() => this.setState({"breakout_mode": "user"})} />
-                </BS.Col>
-                <BS.Col sm={10}>
+                </BS.Radio>
+                <BS.HelpBlock>
+                  Admins can create breakout sessions
+                </BS.HelpBlock>
+                <BS.Radio checked={this.state.breakout_mode==="user"}
+                    onChange={() => this.setState({"breakout_mode": "user"})}>
                   Participant Proposed Sessions
-                </BS.Col>
-                <BS.Col sm={10}>
-                  <p>All users can propose breakout sessions which can be voted on by all users.
-                  Admins can approve these sessions after which users can join the sessions.</p>
-                </BS.Col>
-
-                <BS.Col sm={2}>
-                <BS.Radio
-                  checked={this.state.breakout_mode==="random"}
-                  onChange={() => this.setState({"breakout_mode": "random"})} />
-                </BS.Col>
-                <BS.Col sm={10}>
+                </BS.Radio>
+                <BS.HelpBlock>
+                  All users can propose breakout sessions which can be voted on
+                  by all users.  Admins can approve these sessions after which
+                  users can join the sessions.
+                </BS.HelpBlock>
+                <BS.Radio checked={this.state.breakout_mode==="random"}
+                    onChange={() => this.setState({"breakout_mode": "random"})}>
                   Randomly Assigned Sessions
-                </BS.Col>
-                <BS.Col sm={10}>
-                  <p>Users are randomly assigned to breakout sessions and will always be in the same breakout session.
-                  Users are given the option of leaving their group and joining a new one with the "Regroup Me" button. </p>
-                </BS.Col>
+                </BS.Radio>
+                <BS.HelpBlock>
+                  Users are randomly assigned to breakout sessions and will
+                  always be in the same breakout session.  Users are given the
+                  option of leaving their group and joining a new one with the
+                  "Regroup Me" button.
+                </BS.HelpBlock>
               </BS.FormGroup>
+              { this.state.breakout_mode === "random" ?
+                <BS.FormGroup
+                  className='non-margined'
+                  controlId="participant-limit"
+                  validationState={
+                    this.state['random_max_attendees-error'] ? 'error' : undefined
+                  }
+                >
+                  <BS.ControlLabel>
+                    Maximum number of participants per breakout
+                  </BS.ControlLabel>
+                  <BS.FormControl
+                    type="text"
+                    placeholder="Max 10, Min 2"
+                    value={this.state.random_max_attendees}
+                    onChange={
+                      (e) => this.setState({random_max_attendees: e.target.value})
+                    } />
+                  { this.state['random_max_attendees-error'] ?
+                      <BS.HelpBlock>
+                        {this.state['random_max_attendees-error']}
+                      </BS.HelpBlock>
+                    : "" }
+                </BS.FormGroup>
+                : ""
+              }
             </div>,
             "Set",
             (e) => this.handleModeChange(e)
