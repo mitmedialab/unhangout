@@ -217,6 +217,7 @@ ALLAUTH_APP_KEYS = {
 PUBLIC_API_KEYS = {
     'youtube': '', # Define in settings.py
 }
+PLENARY_SERVER = "http://localhost:8000" # Override in settings.py
 BRANDING = {
     'logo': 'assets/unhangout-logo-blue-full.png',
     'navbar_logo': 'assets/nav-bar-logo-full.png',

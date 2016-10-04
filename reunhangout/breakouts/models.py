@@ -23,7 +23,6 @@ class Breakout(models.Model):
     plenary = models.ForeignKey('plenaries.Plenary',
             on_delete=models.CASCADE,
             blank=True, null=True)
-    is_hoa = models.BooleanField(default=False)
     is_proposal = models.BooleanField(default=False)
     is_random = models.BooleanField(default=False)
 
@@ -83,7 +82,6 @@ class Breakout(models.Model):
             'activities': self.activities,
             'history': self.history,
             'plenary': self.plenary.id if self.plenary else None,
-            'is_hoa': self.is_hoa,
             'is_proposal': self.is_proposal,
             'is_random': self.is_random,
             'proposed_by': self.proposed_by.serialize_public() if self.proposed_by else None,

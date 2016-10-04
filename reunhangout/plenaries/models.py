@@ -69,6 +69,8 @@ class Plenary(models.Model):
     webrtc_id = models.CharField(max_length=100, default=random_webrtc_id,
             editable=False, unique=True)
 
+    live_participants = models.ManyToManyField(settings.AUTH_USER_MODEL,
+            related_name='plenaries_participating_live')
     admins = models.ManyToManyField(settings.AUTH_USER_MODEL)
 
     @property
@@ -103,7 +105,10 @@ class Plenary(models.Model):
             'history': self.history,
             'open': self.open,
             'breakouts_open': self.breakouts_open,
-            'admins': [admin.username for admin in self.admins.all()],
+            'admins': [username for username in
+                self.admins.values_list('username', flat=True)],
+            'live_participants': [username for username in
+                self.live_participants.values_list('username', flat=True)],
             'video_sync_id': self.channel_group_name,
             'webrtc_id': self.webrtc_id,
         }

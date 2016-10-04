@@ -42,7 +42,12 @@ export const plenary = (state=null, action) => {
     case A.SET_PLENARY:
       newstate = {...state, ...action.payload.plenary};
       return newstate
-
+    case A.SET_LIVE_PARTICIPANTS:
+      newstate = {
+        ...state,
+        live_participants: action.payload.live_participants
+      }
+      return newstate
   }
   return state;
 };

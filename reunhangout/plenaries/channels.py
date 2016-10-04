@@ -16,7 +16,9 @@ from breakouts.models import Breakout
 from videosync.models import VideoSync
 from reunhangout.channels_utils import broadcast, handle_error, require_payload_keys
 from analytics.models import track
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 
 @enforce_ordering(slight=True)
 @channel_session_user_from_http
@@ -75,6 +77,10 @@ def route_message(message, data, plenary):
         handle_video_sync(message, data, plenary)
     elif data['type'] == "message_breakouts":
         handle_message_breakouts(message, data, plenary)
+    elif data['type'] == "add_live_participant":
+        handle_add_live_participant(message, data, plenary)
+    elif data['type'] == "remove_live_participant":
+        handle_remove_live_participant(message, data, plenary)
     else:
         handle_error(message, "Type not understood")
 
@@ -102,8 +108,13 @@ def handle_embeds(message, data, plenary):
     error = None
     clean = []
     for embed in data.get('payload', {}).get('embeds', []):
-        if not isinstance(embed, dict) or not isinstance(embed.get('props'), dict):
+        if not isinstance(embed, dict):
             error = "Malformed embed"
+        elif embed['type'] == 'live':
+            clean.append({'type': 'live'})
+            continue
+        elif not isinstance(embed.get('props'), dict):
+            error = "Malformed embed: missing props"
         elif embed.get('type') not in ("youtube", "url"):
             error = "Invalid type: {}".format(embed['type'])
         else:
@@ -112,10 +123,11 @@ def handle_embeds(message, data, plenary):
                 error = "Only https URLs allowed"
         if error:
             return handle_error(message, error)
-        clean.append({
-            'props': {'src': embed['props']['src']},
-            'type': embed['type']
-        })
+        else:
+            clean.append({
+                'props': {'src': embed['props']['src']},
+                'type': embed['type']
+            })
     current = data['payload'].get('current', None)
     if current is not None and not isinstance(current, int):
         return handle_error(message, "Invalid 'current' type")
@@ -277,6 +289,60 @@ def handle_plenary(message, data, plenary):
     update.update({key: getattr(plenary, "safe_" + key)() for key in sanitized_keys})
     broadcast(plenary.channel_group_name, type='plenary',
             payload={'plenary': update})
+
+@require_payload_keys(['username'])
+def handle_add_live_participant(message, data, plenary):
+    print("handle_add_live_participant", data)
+    if not plenary.has_admin(message.user):
+        return handle_error(message, "Must be an admin to do add live participants.")
+
+    try:
+        user = User.objects.get(username=data['payload']['username'])
+    except User.DoesNotExist:
+        return handle_error(message, "User not found.")
+
+    plenary.live_participants.add(user)
+    payload = {
+        'live_participants': list(
+            plenary.live_participants.values_list('username', flat=True)
+        )
+    }
+    print("broadcast", payload)
+    broadcast(
+        plenary.channel_group_name,
+        type='live_participants',
+        payload=payload
+    )
+    
+
+@require_payload_keys(['username'])
+def handle_remove_live_participant(message, data, plenary):
+    print("handle_remove_live_participant", data)
+    authorized = (
+        (data['payload']['username'] == message.user.username) or
+        plenary.has_admin(message.user)
+    )
+    if not authorized:
+        return handle_error(message, "Must be an admin to remove live participants other than yourself")
+
+    try:
+        user = User.objects.get(username=data['payload']['username'])
+    except User.DoesNotExist:
+        return handle_error(message, "User not found")
+
+    plenary.live_participants.remove(user)
+    payload = {
+        'live_participants': list(
+            plenary.live_participants.values_list('username', flat=True)
+        )
+    }
+    print(payload)
+    broadcast(
+        plenary.channel_group_name,
+        type='live_participants',
+        payload=payload
+    )
+
 
 @require_payload_keys([])
 def handle_auth(message, data, plenary):

@@ -104,7 +104,6 @@ class Chat extends React.Component {
       (chatLog.scrollTop + chatLog.offsetHeight >= chatLog.scrollHeight) ||
       latestMessage && latestMessage.user.username === this.props.auth.username
     );
-    console.log("shouldScrollBottom", this.shouldScrollBottom);
   }
   componentDidUpdate() {
     if (this.shouldScrollBottom) {

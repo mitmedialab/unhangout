@@ -8,7 +8,11 @@ import * as youtube from "../youtube";
 import {SyncableVideo, isEmbedSyncable} from "../../videosync";
 import * as VIDEOSYNC_ACTIONS from "../../videosync/actions";
 
-const uniqueEmbeds = (embeds) => _.uniqBy(embeds, (e) => e.props.src);
+const BROADCAST_IMAGE = '/media/assets/broadcast.png';
+
+const uniqueEmbeds = (embeds) => _.uniqBy(embeds, (e) => {
+  return e.type === 'live' ? 'live' : e.props.src
+});
 
 class Embed extends React.Component {
   constructor(props) {
@@ -26,7 +30,7 @@ class Embed extends React.Component {
    */
   updateEmbedDetails() {
     this.props.embeds.embeds.map((embed, i) => {
-      if (!this.props.embedDetails[embed.props.src]) {
+      if (embed.props && !this.props.embedDetails[embed.props.src]) {
         this.props.fetchEmbedDetails(embed, this.props.settings);
       }
     });
@@ -81,6 +85,7 @@ class Embed extends React.Component {
       throw new Error("URL or embed code not understood.");
     }
   }
+
   setEmbed(event) {
     let parsed;
     try {
@@ -97,6 +102,7 @@ class Embed extends React.Component {
       this.setState({embedValue: ''});
     }
   }
+
   removeEmbed(event, index=null) {
     if (event) {
       event.stopPropagation();
@@ -124,6 +130,7 @@ class Embed extends React.Component {
       this.props.onAdminSendEmbeds(next);
     }
   }
+
   enqueueEmbed(event) {
     let parsed;
     try {
@@ -141,16 +148,69 @@ class Embed extends React.Component {
 
     }
   }
+
+  addLiveVideo(event) {
+    let live = {type: 'live'};
+    let embeds = uniqueEmbeds([...this.props.embeds.embeds, live]);
+    this.props.onAdminSendEmbeds({
+      embeds: embeds,
+      current: embeds.length - 1
+    });
+  }
+
   setCurrent(event, index) {
     this.props.onAdminSendEmbeds({
       embeds: this.props.embeds.embeds,
       current: index
     });
   }
-  render() {
-    let chosen;
+
+  isLiveParticipant() {
+    return this.props.plenary.live_participants.filter(
+      (username) => username === this.props.auth.username
+    ).length > 0;
+  }
+
+  hasLive() {
+    return this.props.plenary.embeds.embeds.filter(
+      (e) => e.type === "live"
+    ).length > 0;
+  }
+
+  isCurrentLive() {
+    let current = this.getCurrentEmbed();
+    return (!!current) && current.type === "live";
+  }
+
+  getCurrentEmbed() {
     if (_.isNumber(this.props.embeds.current)) {
-      chosen = this.props.embeds.embeds[this.props.embeds.current];
+      return this.props.embeds.embeds[this.props.embeds.current];
+    }
+  }
+
+  toggleLiveParticipation(event) {
+    event.preventDefault();
+    if (this.isLiveParticipant()) {
+      console.log("onLeaveLiveBroadcast", this.props.auth.username);
+      this.props.onLeaveLiveBroadcast({username: this.props.auth.username});
+    } else {
+      console.log("onAdminJoinLiveBroadcast", this.props.auth.username);
+      this.props.onAdminJoinLiveBroadcast({username: this.props.auth.username});
+    }
+  }
+
+  render() {
+    let chosen = this.getCurrentEmbed();
+
+    // "Live" type is special, since we need to choose between the participate
+    // and listen endpoints depending on the user's status.
+    if (chosen && chosen.type === 'live') {
+      let url = [
+        this.props.settings.PLENARY_SERVER,
+        this.isLiveParticipant() ? "participate" : "listen",
+        this.props.plenary.webrtc_id,
+      ].join('/');
+      chosen = {...chosen, props: {src: url}}
     }
     return <div className='plenary-embed'>
       { chosen ?
@@ -165,26 +225,50 @@ class Embed extends React.Component {
         )
         : ""
       }
+      {
+        this.isLiveParticipant() ?
+          <BS.Button className='toggle-live-participation-button'
+                     onClick={(e) => this.toggleLiveParticipation(e)}>
+            <i className='fa fa-video-camera'></i> Leave live broadcast
+          </BS.Button>
+        : this.props.auth.is_admin && this.isCurrentLive() ?
+          <BS.Button className='toggle-live-participation-button'
+                     onClick={(e) => this.toggleLiveParticipation(e)}>
+            <i className='fa fa-video-camera'></i> Join live broadcast
+          </BS.Button>
+        : ""
+      }
       { this.props.auth.is_admin ? this.renderAdminControls(chosen) : "" }
     </div>;
   }
+
   renderAdminControls(chosen) {
     let hasPrevEmbeds = (!chosen && this.props.embeds.embeds.length > 0) ||
                         (chosen && this.props.embeds.embeds.length > 1);
 
-    let embedDisplay = this.props.embeds.embeds.filter((embed, i) => {
-      return i !== this.props.embeds.current
-    }).map((embed, i) => {
-      let details = this.props.embedDetails[embed.props.src];
-      return {
-        title: details && details.title ? details.title : embed.props.src,
-        image: details && details.thumbnails && details.thumbnails.default.url,
+    let embedDisplay = [];
+    this.props.embeds.embeds.forEach((embed, i) => {
+      if (i === this.props.embeds.current) {
+        return;
+      } else if (embed.type === "live") {
+        embedDisplay.push({
+          index: i,
+          title: "Live Broadcast",
+          image: BROADCAST_IMAGE,
+        });
+      } else {
+        let details = this.props.embedDetails[embed.props.src];
+        embedDisplay.push({
+          index: i,
+          title: details && details.title ? details.title : embed.props.src,
+          image: details && details.thumbnails && details.thumbnails.default.url,
+        });
       }
     });
 
     return <div className='embed-admin-controls'>
       <form>
-        { chosen && chosen.type === "youtube" ?
+        { chosen ?
           <div className="button-flex-container">
             <BS.Button bsStyle='danger' className="remove-button"
                 onClick={(e) => this.removeEmbed(e, null)}>
@@ -203,9 +287,9 @@ class Embed extends React.Component {
                   <BS.Dropdown.Toggle><i className='fa fa-list' /></BS.Dropdown.Toggle>
                   <BS.Dropdown.Menu>
                     {
-                      embedDisplay.map(({title, image}, i) => (
-                        <BS.MenuItem key={i}
-                            onClick={(event) => this.setCurrent(event, i)}>
+                      embedDisplay.map(({title, image, index}) => (
+                        <BS.MenuItem key={index}
+                            onClick={(event) => this.setCurrent(event, index)}>
                           <span className='previous-embed-list-item'>
                             { image ?
                                 <img src={image}
@@ -224,7 +308,7 @@ class Embed extends React.Component {
                                 <BS.Tooltip id='remove-embed'>Remove embed</BS.Tooltip>
                               }>
                                 <i className='fa fa-trash'
-                                   onClick={(e) => this.removeEmbed(e, i)} />
+                                   onClick={(e) => this.removeEmbed(e, index)} />
                               </BS.OverlayTrigger>
                             </span>
                           </span>
@@ -253,7 +337,12 @@ class Embed extends React.Component {
           </BS.InputGroup>
         </BS.FormGroup>
         <div className="button-flex-container">
-          <BS.Button className="hangout-on-air-button">Create Hangout-on-Air</BS.Button>
+          { this.hasLive() ? "" :
+            <BS.Button className="add-live-video-button"
+                       onClick={(e) => this.addLiveVideo(e)}>
+              <i className='fa fa-video-camera'></i> Add Live Video
+            </BS.Button>
+          }
         </div>
       </form>
     </div>
@@ -274,12 +363,13 @@ export default connect(
   // map dispatch to props
   (dispatch, ownProps) => ({
     // admin -- youtube only
-    onAdminCreateHoA: () => dispatch(A.adminCreateHoA()),
     onAdminSendEmbeds: (payload) => dispatch(A.adminSendEmbeds(payload)),
     onAdminEmbedsError: (payload) => dispatch(A.adminEmbedsError(payload)),
+    onAdminJoinLiveBroadcast: (payload) => dispatch(A.adminJoinLiveBroadcast(payload)),
 
     // user
     fetchEmbedDetails: (embed, settings) => dispatch(A.fetchEmbedDetails(embed, settings)),
+    onLeaveLiveBroadcast: (payload) => dispatch(A.leaveLiveBroadcast(payload)),
   })
 )(Embed);
 

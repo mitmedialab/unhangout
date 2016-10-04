@@ -85,6 +85,9 @@ export class SocketClient {
         alert(`Server error: ${error}`);
         console.error(error);
         break;
+      case "live_participants":
+        this.store.dispatch(PLENARY_ACTIONS.setLiveParticipants(data.payload));
+        break;
       default:
         console.log("transport.js: Unhandled message:", data);
         break;

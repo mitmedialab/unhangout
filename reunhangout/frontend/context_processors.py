@@ -13,6 +13,7 @@ def public_settings(request):
                 settings.MEDIA_URL,
                 settings.BRANDING['logo'],
             ),
+            'PLENARY_SERVER': settings.PLENARY_SERVER
         },
         'branding': settings.BRANDING,
     }

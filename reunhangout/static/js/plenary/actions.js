@@ -70,6 +70,32 @@ export function fetchEmbedDetails(embed, settings) {
   }
 }
 
+// Live broadcasts
+export const JOIN_LIVE_BROADCAST_SENDING = 'JOIN_LIVE_BROADCAT_SENDING';
+export const JOIN_LIVE_BROADCAST_SENT = 'JOIN_LIVE_BROADCAT_SENT';
+export const JOIN_LIVE_BROADCAST_ERROR = 'JOIN_LIVE_BROADCAT_ERROR';
+export const LEAVE_LIVE_BROADCAST_SENDING = 'LEAVE_LIVE_BROADCAT_SENDING';
+export const LEAVE_LIVE_BROADCAST_SENT = 'LEAVE_LIVE_BROADCAT_SENT';
+export const LEAVE_LIVE_BROADCAST_ERROR = 'LEAVE_LIVE_BROADCAT_ERROR';
+export const SET_LIVE_PARTICIPANTS = 'SET_LIVE_PARTICIPANTS';
+export const adminJoinLiveBroadcast = (payload) => {
+  return (dispatch) => {
+    dispatch({type: JOIN_LIVE_BROADCAST_SENDING, payload});
+    sendSocketMessage({type: 'add_live_participant', payload})
+      .then(() => dispatch({type: JOIN_LIVE_BROADCAST_SENT, payload}))
+      .catch(() => dispatch({type: JOIN_LIVE_BROADCAST_ERROR, payload}))
+  }
+}
+export const leaveLiveBroadcast = (payload) => {
+  return (dispatch) => {
+    dispatch({type: LEAVE_LIVE_BROADCAST_SENDING, payload});
+    sendSocketMessage({type: 'remove_live_participant', payload})
+      .then(() => dispatch({type: LEAVE_LIVE_BROADCAST_SENT, payload}))
+      .catch(() => dispatch({type: LEAVE_LIVE_BROADCAST_ERROR, payload}))
+  }
+}
+export const setLiveParticipants = (payload) => ({type: SET_LIVE_PARTICIPANTS, payload});
+
 //Breakouts
 export const BREAKOUT_CHANGING = 'BREAKOUT_CHANGING';
 export const BREAKOUT_CREATED = 'BREAKOUT_CHANGED';
