@@ -11,7 +11,7 @@ class BreakoutList extends React.Component {
     this.state= {
       "create-session-dialog": false,
       "message-breakouts-dialog": false,
-      "breakout-mode-dialog": true,
+      "breakout-mode-dialog": false,
       "breakout_mode": this.props.plenary.breakout_mode,
       "max_attendees": 10,
       "random_max_attendees": this.props.plenary.random_max_attendees || 10,
