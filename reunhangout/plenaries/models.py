@@ -70,7 +70,7 @@ class Plenary(models.Model):
             editable=False, unique=True)
 
     live_participants = models.ManyToManyField(settings.AUTH_USER_MODEL,
-            related_name='plenaries_participating_live')
+            related_name='plenaries_participating_live', blank=True)
     admins = models.ManyToManyField(settings.AUTH_USER_MODEL)
 
     @property
@@ -114,7 +114,7 @@ class Plenary(models.Model):
         }
 
     def has_admin(self, user):
-        return self.admins.filter(pk=user.pk).exists()
+        return user.is_superuser or self.admins.filter(pk=user.pk).exists()
 
     def __str__(self):
         return self.name
