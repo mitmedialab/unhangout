@@ -37,6 +37,7 @@
     "moment": "^2.15.1",
     "moment-timezone": "^0.5.5",
     "node-sass": "~3.10.1",
+    "pikaday": "^1.4.0",
     "postcss-loader": "~0.13.0",
     "postis": "^2.2.0",
     "prosemirror": "^0.10.0",
