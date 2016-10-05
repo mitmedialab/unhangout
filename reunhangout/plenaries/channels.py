@@ -1,10 +1,12 @@
 import json
 import functools
+import datetime
 
 from urllib.parse import urlparse
 from django.core.exceptions import ValidationError
 from django.db.models import F, Count
 from django.db import transaction
+from django.utils.timezone import now
 
 from channels.sessions import enforce_ordering
 from channels.auth import channel_session_user, channel_session_user_from_http
@@ -142,6 +144,7 @@ def handle_embeds(message, data, plenary):
         'embeds': clean,
         'current': current
     }
+    plenary.full_clean()
     plenary.save()
     broadcast(plenary.channel_group_name, type='embeds', payload=plenary.embeds)
     track("change_embeds", message.user, plenary.embeds, plenary=plenary)
@@ -263,16 +266,49 @@ def handle_plenary(message, data, plenary):
         return handle_error(message, "Must be an admin to do that.")
 
     payload = data['payload']
+    # Keys that are straight get/set
     simple_update_keys = (
-        'random_max_attendees', 'breakout_mode', 'name',
-        'organizer', 'start_date',
-        'open', 'breakouts_open',
+        'random_max_attendees', 'breakout_mode', 'name', 'organizer',
+        'start_date', 'end_date', 'doors_open', 'doors_close',
+        'breakouts_open', 'canceled', 'slug'
     )
+    # Keys that we use a `safe_%s` proxy for
     sanitized_keys = ('whiteboard', 'description')
+    # Keys for getting the update result, but not set directly.
+    extra_get_keys = ('open',)
 
     for key in simple_update_keys + sanitized_keys:
         if key in payload:
             setattr(plenary, key, payload[key])
+
+    # Handle special boolean "open" nudging.
+    change_open = payload.get('open')
+    if change_open is not None:
+        right_now = now()
+        is_open = plenary.open
+        if change_open == True:
+            # Un-cancel if we're changing to open.
+            if plenary.canceled:
+                plenary.canceled = False
+            if right_now < plenary.doors_open:
+                # Doors haven't opened. Open them.
+                plenary.doors_open = right_now 
+            elif plenary.doors_open < right_now < plenary.doors_close:
+                # Already open. Do nothing.
+                pass
+            elif plenary.doors_close <= right_now:
+                # Doors already closed. Reopen them.
+                plenary.doors_close = right_now + datetime.timedelta(hours=1)
+        elif change_open == False:
+            if right_now < plenary.doors_open:
+                # Doors haven't opened. Do nothing.
+                pass
+            elif plenary.doors_open < right_now < plenary.doors_close:
+                # Already open. Close now.
+                plenary.doors_close = plenary.end_date = right_now
+            elif plenary.doors_close <= right_now:
+                # Doors already closed. Do nothing.
+                pass
 
     breakouts_changed = False
 
@@ -297,6 +333,7 @@ def handle_plenary(message, data, plenary):
 
     update = {key: getattr(plenary, key) for key in simple_update_keys}
     update.update({key: getattr(plenary, "safe_" + key)() for key in sanitized_keys})
+    update.update({key: getattr(plenary, key) for key in extra_get_keys})
     broadcast(plenary.channel_group_name, type='plenary', payload={'plenary': update})
 
     if breakouts_changed:

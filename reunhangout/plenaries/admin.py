@@ -12,8 +12,7 @@ class PlenaryForm(forms.ModelForm):
 @admin.register(Plenary)
 class PlenaryAdmin(admin.ModelAdmin):
     form = PlenaryForm
-    list_display = ['name', 'organizer', 'open']
-    list_editable = ['open']
+    list_display = ['name', 'organizer', 'start_date', 'doors_open', 'doors_close']
     search_fields = ['name', 'organizer', 'description']
     prepopulated_fields = {'slug': ['name']}
     readonly_fields = ['embeds', 'history']

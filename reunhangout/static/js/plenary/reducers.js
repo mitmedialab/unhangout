@@ -41,6 +41,12 @@ export const plenary = (state=null, action) => {
       return newstate
     case A.SET_PLENARY:
       newstate = {...state, ...action.payload.plenary};
+      // Special case: rewrite slug if given. We can't just replace state here,
+      // because we'd also have to reconnect the socket.  Full page load is
+      // easier.
+      if (state && state.slug && newstate.slug && state.slug !== newstate.slug) {
+        window.location.href = `/event/${newstate.slug}/`;
+      }
       return newstate
     case A.SET_LIVE_PARTICIPANTS:
       newstate = {

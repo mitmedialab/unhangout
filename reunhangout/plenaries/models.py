@@ -2,9 +2,11 @@ import re
 
 from django.db import models
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.translation import ugettext_lazy as _
+from django.utils.timezone import now
 from richtext.utils import sanitize
 from reunhangout.utils import random_webrtc_id
 
@@ -41,8 +43,13 @@ class Plenary(models.Model):
     slug = models.SlugField(help_text=_("Short name for URL"))
     organizer = models.CharField(max_length=100, default="", blank=True)
     image = models.ImageField(upload_to="plenaries", blank=True, null=True)
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField()
+
+    start_date  = models.DateTimeField(help_text=_("When will the event start?"))
+    doors_open  = models.DateTimeField(help_text=_("When should the lobby be opened, allowing participants to chat before the event?"))
+    end_date    = models.DateTimeField(help_text=_("When will the event end?"))
+    doors_close = models.DateTimeField(help_text=_("When should the lobby be closed, ending chat?"))
+    canceled = models.BooleanField(default=False)
+
     time_zone = TimeZoneField(default='America/New_York',
         help_text=_("Default time zone to display times in."))
     public = models.BooleanField(default=False,
@@ -61,10 +68,9 @@ class Plenary(models.Model):
 
     embeds = JSONField(blank=True, null=True)
     history = JSONField(blank=True, null=True)
-    open = models.BooleanField(default=False,
-            help_text=_("Check to allow people to chat in this plenary"))
-    breakouts_open = models.BooleanField(default=False,
-            help_text=_("Check to allow people to join breakouts associated with this plenary"))
+
+    breakouts_open = models.BooleanField(default=False, help_text=_(
+        "Check to allow people to join breakouts associated with this plenary"))
 
     webrtc_id = models.CharField(max_length=100, default=random_webrtc_id,
             editable=False, unique=True)
@@ -73,9 +79,22 @@ class Plenary(models.Model):
             related_name='plenaries_participating_live', blank=True)
     admins = models.ManyToManyField(settings.AUTH_USER_MODEL)
 
+    def clean(self):
+        if self.start_date >= self.end_date:
+            raise ValidationError("End date must be after start date")
+        if self.doors_open > self.start_date:
+            raise ValidationError("Doors open must be before or equal to start date")
+        if self.doors_close < self.end_date:
+            raise ValidationError("Doors close must be after or equal to end date")
+
     @property
     def channel_group_name(self):
         return "plenary-%s" % self.pk
+
+    @property
+    def open(self):
+        n = now()
+        return (not self.canceled) and (n < self.doors_close) and (n >= self.doors_open)
 
     def safe_description(self):
         return sanitize(self.description) if self.description else ""
@@ -88,6 +107,7 @@ class Plenary(models.Model):
 
     def serialize(self):
         return {
+            'id': self.id,
             'series_name': self.series and self.series.name,
             'name': self.name,
             'slug': self.slug,
@@ -96,6 +116,9 @@ class Plenary(models.Model):
             'image': self.image.url if self.image else None,
             'start_date': self.start_date.isoformat(),
             'end_date': self.end_date.isoformat(),
+            'doors_open': self.doors_open.isoformat(),
+            'doors_close': self.doors_close.isoformat(),
+            'canceled': self.canceled,
             'time_zone': str(self.time_zone),
             'public': self.public,
             'description': self.safe_description(),

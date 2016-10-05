@@ -63,7 +63,9 @@ def _add_target_blank(attrs, new=False):
     attrs['target'] = '_blank'
     return attrs
 
-def sanitize(html, link=True, tags=markdown_tags, attrs=valid_attrs, styles=None):
+def sanitize(html, link=True, tags=None, attrs=valid_attrs, styles=None):
+    if tags is None:
+        tags = markdown_tags + ['ins']
     clean = bleach.clean(html, tags, attrs, styles or [])
     if link:
         clean = bleach.linkify(clean, [_add_noopener, _add_target_blank])

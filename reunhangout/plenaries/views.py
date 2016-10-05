@@ -1,4 +1,4 @@
-from django.http import Http404
+from django.http import Http404, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 
@@ -60,4 +60,16 @@ def plenary_detail(request, id_or_slug):
 
 def plenary_list(request):
     pass
+
+def slug_check(request):
+    slug = request.GET.get("slug")
+    pk = request.GET.get("id")
+    if not slug or not pk:
+        raise HttpResponseBadRequest("Missing 'slug' or 'id' params")
+    available = not Plenary.objects.exclude(pk=pk).filter(slug=slug).exists()
+    return JsonResponse({
+        "slug": slug,
+        "available": available
+    })
+
 
