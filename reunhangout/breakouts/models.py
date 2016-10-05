@@ -85,8 +85,6 @@ class Breakout(models.Model):
             'is_proposal': self.is_proposal,
             'is_random': self.is_random,
             'proposed_by': self.proposed_by.serialize_public() if self.proposed_by else None,
-            'mode': self.plenary.breakout_mode if self.plenary else "permalink",
-            'open': self.plenary.breakouts_open if self.plenary else True,
             'votes': votes,
             'members': members,
         }

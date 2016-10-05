@@ -200,6 +200,7 @@ class BreakoutList extends React.Component {
       <div className="breakout-list-container">
         { breakouts.map((breakout, i) => {
             return <Breakout
+              plenary={this.props.plenary}
               breakout={breakout}
               presence={this.props.breakout_presence[breakout.id] || {}}
               auth={this.props.auth}

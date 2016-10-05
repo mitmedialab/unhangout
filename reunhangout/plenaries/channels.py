@@ -311,7 +311,6 @@ def handle_plenary(message, data, plenary):
                 pass
 
     breakouts_changed = False
-
     try:
         with transaction.atomic():
             plenary.full_clean()
@@ -327,9 +326,6 @@ def handle_plenary(message, data, plenary):
                     breakouts_changed = True
     except ValidationError as e:
         return handle_error(message, json_dumps(e.message_dict))
-
-    if "breakouts_open" in payload:
-        breakouts_changed = True
 
     update = {key: getattr(plenary, key) for key in simple_update_keys}
     update.update({key: getattr(plenary, "safe_" + key)() for key in sanitized_keys})

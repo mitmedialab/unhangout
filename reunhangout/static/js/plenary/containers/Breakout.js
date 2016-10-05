@@ -42,22 +42,22 @@ export default class Breakout extends React.Component {
 
   render() {
     let showProposer = (
-      this.props.breakout.mode === "user" &&
+      this.props.plenary.breakout_mode === "user" &&
       !this.props.breakout.is_random &&
       !!this.props.breakout.proposed_by
     );
     let showApprove = (
       this.props.auth.is_admin &&
       this.props.breakout.is_proposal &&
-      this.props.breakout.mode == "user"
+      this.props.plenary.breakout_mode == "user"
     );
     let showUnapprove = (
       this.props.auth.is_admin &&
       !this.props.breakout.is_proposal &&
-      this.props.breakout.mode == "user"
+      this.props.plenary.breakout_mode == "user"
     );
     let showDelete = this.props.auth.is_admin;
-    let isProposer = this.props.breakout.mode === "user" && (
+    let isProposer = this.props.plenary.breakout_mode === "user" && (
       this.props.breakout.proposed_by &&
       this.props.breakout.proposed_by.username === this.props.auth.username
     );
@@ -66,14 +66,14 @@ export default class Breakout extends React.Component {
     );
 
     let showVote = this.props.breakout.is_proposal;
-    let showJoin = this.props.breakout.open && (
-      this.props.breakout.mode !== "user" ||
+    let showJoin = this.props.plenary.breakouts_open && (
+      this.props.plenary.breakout_mode !== "user" ||
       !this.props.breakout.is_proposal
     );
     let votedForThis = !!_.find(this.props.breakout.votes, (vote) => {
       return vote.username === this.props.auth.username
     });
-    let showPresence = this.props.breakout.open && !this.props.breakout.is_proposal;
+    let showPresence = this.props.plenary.breakouts_open && !this.props.breakout.is_proposal;
     let showAssignees = this.props.breakout.is_random;
 
     let classes = ['breakout-list-item'];
