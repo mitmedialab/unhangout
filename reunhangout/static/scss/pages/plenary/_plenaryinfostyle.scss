@@ -3,5 +3,13 @@
   color: #fff;
   border-bottom-right-radius: 0px;
   padding: 10px;
+  a {
+    color: white;
+    font-weight: bold;
+    &:hover {
+      color: #ddd;
+      text-decoration: underline;
+    }
+  }
 }
 
