@@ -53,7 +53,6 @@ export class DateTimePicker extends React.Component {
         minutes = "0" + minutes;
       }
       let parsedTime = `${hours}:${minutes}`;
-      console.log(parsedTime);
       let newState = {...this.state, time: v, parsedTime: parsedTime};
       this.sendOnChange(newState);
       this.setState({
@@ -73,7 +72,6 @@ export class DateTimePicker extends React.Component {
   }
   interpretStateAsDate(state) {
     state = state || this.state;
-    console.log(state.parsedTime);
     let m = moment.tz({
       year: state.date.getFullYear(),
       month: state.date.getMonth(),
