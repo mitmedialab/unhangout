@@ -27,7 +27,7 @@
       <ul class='nav navbar-nav navbar-right'>
         {% if user.is_authenticated %}
           <li>
-            <a href='{% url "accounts_profile" %}'
+            <a href='{% url "accounts_settings" %}'
                class='dropdown-toggle user-name'
                data-toggle='dropdown'
                role='button'
@@ -41,11 +41,13 @@
                 <li><a href='{% url "admin:index" %}'>Admin</a></li>
                 <li role='separator' class='divider'></li>
               {% endif %}
+              <!--
               <li>
                 <a href='{% url "accounts_profile" %}'>
                   <i class='fa fa-user'></i> Profile
                 </a>
               </li>
+              -->
               <li>
                 <a href='{% url "accounts_settings" %}'>
                   <i class='fa fa-cog'></i> Settings

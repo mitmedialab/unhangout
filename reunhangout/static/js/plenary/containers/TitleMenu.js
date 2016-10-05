@@ -131,7 +131,7 @@ export class TitleMenu extends React.Component {
   render() {
     return (
       <div style={{'position': 'relative', 'width': '100%'}}
-           onClick={(e) => e.preventDefault()}>
+           >
         <div ref='target' className='title-button' onClick={(e) => this.toggle(e)}>
           <div className='title'>
             {this.props.plenary.name} <i className='fa fa-caret-down' />
@@ -141,7 +141,7 @@ export class TitleMenu extends React.Component {
           </div>
         </div>
 
-        <BS.Overlay
+        <BS.Overlay rootClose
           show={this.state.show}
           onHide={() => this.setState({show: false})}
           placement='bottom'
@@ -153,11 +153,6 @@ export class TitleMenu extends React.Component {
               <Avatar idPart={'title-menu-overlay'} user={this.props.auth} />
               {this.props.auth.display_name}
               <div style={{clear: 'both'}} />
-            </div>
-            <div className='menu-item'>
-              <a href='/accounts/profile/'>
-                <i className='fa fa-user' /> Profile
-              </a>
             </div>
             <div className='menu-item'>
               <a href='/accounts/settings/account'>
@@ -193,7 +188,10 @@ export class TitleMenu extends React.Component {
             : ""}
           </div>
         </BS.Overlay>
-        <BS.Modal show={this.state.plenarySettingsModalOpen} >
+        <BS.Modal
+          show={this.state.plenarySettingsModalOpen}
+          onHide={() => this.setState({plenarySettingsModalOpen: false})}
+        >
           <BS.Form onSubmit={(e) => this.updatePlenaryFromModal(e)}>
             <BS.Modal.Body className='form-horizontal'>
                 {this.renderControl("Title", "name",
