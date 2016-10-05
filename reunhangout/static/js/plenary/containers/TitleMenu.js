@@ -50,7 +50,7 @@ export class TitleMenu extends React.Component {
     ];
     this.state = {
       show: false,
-      plenarySettingsModalOpen: true
+      plenarySettingsModalOpen: false
     };
   }
 
