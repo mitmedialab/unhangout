@@ -1,31 +1,7 @@
 .plenary-info-container {
-  	background-color: #2e7daa;
-  	padding: 10px;
-  	color: #fff;
-    border-bottom-right-radius: 0px;
-  	display: flex;
-  	flex-direction: row;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    h1 {
-      flex: 0 1 100%;
-    }
-   .hosted {
-      flex: 0 1 100%;
-    }
-    .organizer {
-      flex: 0 1 75%;
-      margin-top: 0px;
-    }
-    .btn {
-      flex: 0 1 10%;
-      margin-left: auto;
-      max-height: 36px;
-      max-width: 36px;
-      padding-left: 10px;
-      padding-right: 10px;
-      .glyphicon {
-        margin: 0px;
-      }
-    }
+  background-color: #2e7daa;
+  color: #fff;
+  border-bottom-right-radius: 0px;
+  padding: 10px;
 }
+

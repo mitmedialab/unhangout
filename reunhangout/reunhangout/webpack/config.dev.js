@@ -46,6 +46,10 @@ module.exports = {
   module: {
     loaders: [
       {
+        test: /react-selectize\/themes\/index.css$/,
+        loader: 'style-loader!css-loader',
+      },
+      {
         test: /\.jsx?$/,
         exclude: /node_modules/,
         loader: 'babel-loader'
@@ -56,7 +60,12 @@ module.exports = {
       },
       {
         test: /\.css$/,
+        exclude: /react-selectize\/themes\/index.css$/,
         loader: 'style-loader!css-loader!postcss-loader'
+      },
+      {
+        test: /\.json$/,
+        loader: 'json-loader'
       },
       {test: /\.woff2?(\?v=.*)?$/, loader: "url?limit=10000&mimetype=application/font-woff" },
       {test: /\.ttf(\?v=.*)?$/, loader: "url?limit=10000&mimetype=application/octet-stream" },

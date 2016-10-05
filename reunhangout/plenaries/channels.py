@@ -263,13 +263,18 @@ def handle_plenary(message, data, plenary):
         return handle_error(message, "Must be an admin to do that.")
 
     payload = data['payload']
-    simple_update_keys = ('random_max_attendees', 'breakout_mode', 'name',
-            'organizer', 'start_date')
+    simple_update_keys = (
+        'random_max_attendees', 'breakout_mode', 'name',
+        'organizer', 'start_date',
+        'open', 'breakouts_open',
+    )
     sanitized_keys = ('whiteboard', 'description')
 
     for key in simple_update_keys + sanitized_keys:
         if key in payload:
             setattr(plenary, key, payload[key])
+
+    breakouts_changed = False
 
     try:
         with transaction.atomic():
@@ -283,12 +288,20 @@ def handle_plenary(message, data, plenary):
                     breakout.max_attendees = plenary.random_max_attendees
                     breakout.full_clean()
                     breakout.save()
+                    breakouts_changed = True
     except ValidationError as e:
         return handle_error(message, json_dumps(e.message_dict))
+
+    if "breakouts_open" in payload:
+        breakouts_changed = True
+
     update = {key: getattr(plenary, key) for key in simple_update_keys}
     update.update({key: getattr(plenary, "safe_" + key)() for key in sanitized_keys})
-    broadcast(plenary.channel_group_name, type='plenary',
-            payload={'plenary': update})
+    broadcast(plenary.channel_group_name, type='plenary', payload={'plenary': update})
+
+    if breakouts_changed:
+        broadcast(plenary.channel_group_name, type='breakout_receive',
+            payload=[b.serialize() for b in plenary.breakout_set.all()])
 
 @require_payload_keys(['username'])
 def handle_add_live_participant(message, data, plenary):

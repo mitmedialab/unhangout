@@ -51,6 +51,10 @@ module.exports = {
         test: /\.css$/,
         loader: 'style-loader!css-loader!postcss-loader'
       },
+      {
+        test: /\.json$/,
+        loader: 'json-loader'
+      },
       {test: /\.woff2?(\?v=.*)?$/, loader: "url?limit=10000&mimetype=application/font-woff" },
       {test: /\.ttf(\?v=.*)?$/, loader: "url?limit=10000&mimetype=application/octet-stream" },
       {test: /\.eot(\?v=.*)?$/, loader: "file" },

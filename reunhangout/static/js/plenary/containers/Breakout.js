@@ -58,6 +58,7 @@ export default class Breakout extends React.Component {
     );
     let showDelete = this.props.auth.is_admin;
     let isProposer = this.props.breakout.mode === "user" && (
+      this.props.breakout.proposed_by &&
       this.props.breakout.proposed_by.username === this.props.auth.username
     );
     let titleReadOnly = this.props.breakout.is_random || !(

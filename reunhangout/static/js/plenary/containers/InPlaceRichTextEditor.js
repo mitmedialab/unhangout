@@ -14,13 +14,13 @@ export class InPlaceRichTextEditor extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      editing: false,
       editorState: EditorState.createWithContent(
         this.getContentState(props.value)
       ),
       value: props.value,
       maxLength: this.props.maxLength || 800,
     }
-    this.editing = false;
 
     this.globalClick = (e) => this.stopEditing(e);
   }

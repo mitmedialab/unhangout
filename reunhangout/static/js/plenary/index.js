@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import {Provider} from "react-redux";
 
 // The weird syntax here is to import as a mutable variable for hot reloading
-let Plenary = require("./containers/plenary.js")['default'];
+let Plenary = require("./containers/Plenary.js")['default'];
 
 export function loadPlenary(store) {
   const _loadPlenary = function() {
@@ -15,9 +15,9 @@ export function loadPlenary(store) {
       );
     }
   }
-  module.hot && module.hot.accept("./containers/plenary.js", () => {
+  module.hot && module.hot.accept("./containers/Plenary.js", () => {
     if (store) {
-      Plenary = require("./containers/plenary.js")['default'];
+      Plenary = require("./containers/Plenary.js")['default'];
       _loadPlenary(store);
     }
   });
