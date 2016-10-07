@@ -203,6 +203,7 @@ SOCIALACCOUNT_PROVIDERS = {
     },
 }
 ACCOUNT_USER_DISPLAY = "accounts.models.user_display"
+LOGIN_REDIRECT_URL = "/events/"
 
 # Add client id's and secrets for social account providers. Changes only take
 # effect when you sync them to the database with `./manage.py sync_auth_providers`.

@@ -32,8 +32,8 @@ def plenary_detail(request, id_or_slug):
     except Plenary.DoesNotExist:
         raise Http404
 
-    messages.info(request, "You must be signed in to attend events.")
     if plenary.open and not request.user.is_authenticated():
+        messages.info(request, "You must be signed in to attend events.")
         return redirect('%s?next=%s' % (settings.LOGIN_URL, request.path))
 
     breakouts = list(plenary.breakout_set.all())
