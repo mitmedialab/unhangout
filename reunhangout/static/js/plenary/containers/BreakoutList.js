@@ -145,51 +145,53 @@ class BreakoutList extends React.Component {
 
     return <div className='breakout-list-component'>
       <div className="breakout-list-header">
-        <h4>Breakout Rooms</h4>
-        { showCreateSession ?
-            <BS.OverlayTrigger placement='left' overlay={
-              <BS.Tooltip id='add-breakout-tooltip'>
-                {breakout_mode === "user" ? "Propose breakout" : "Add breakout"}
-              </BS.Tooltip>
-            }>
-              <BS.Button onClick={() => this.setState({"create-session-dialog": true})}
-                  className="create-session-btn">
-                <BS.Glyphicon glyph="plus" />
+        <span className='pull-right'>
+          { showCreateSession ?
+              <BS.OverlayTrigger placement='left' overlay={
+                <BS.Tooltip id='add-breakout-tooltip'>
+                  {breakout_mode === "user" ? "Propose breakout" : "Add breakout"}
+                </BS.Tooltip>
+              }>
+                <BS.Button onClick={() => this.setState({"create-session-dialog": true})}
+                    className="create-session-btn">
+                  <BS.Glyphicon glyph="plus" />
+                </BS.Button>
+              </BS.OverlayTrigger>
+            : "" }
+          { breakout_mode === "random" ?
+              <BS.Button onClick={(e) => this.handleGroupMe(e)}>
+                { breakouts.length === 0 ? "Group me" : "Regroup me" }
               </BS.Button>
-            </BS.OverlayTrigger>
-          : "" }
-        { breakout_mode === "random" ?
-            <BS.Button onClick={(e) => this.handleGroupMe(e)}>
-              { breakouts.length === 0 ? "Group me" : "Regroup me" }
-            </BS.Button>
-          : "" }
-        { this.props.auth.is_admin ?
-            <BS.OverlayTrigger placement='left' overlay={
-              <BS.Tooltip id='configure-breakouts-tooltip'>
-                Configure Breakouts
-              </BS.Tooltip>
-            }>
-              <BS.Dropdown
-                id="user-menu-button"
-                pullRight>
-                <BS.Dropdown.Toggle
-                  noCaret
-                  className="breakout-settings-btn">
-                  <img src="../../../../media/assets/control-panel-icon" />
-                </BS.Dropdown.Toggle>
-                <BS.Dropdown.Menu>
-                  <BS.MenuItem
-                    onClick={() => this.setState({"message-breakouts-dialog": true})}>
-                    Message All Breakouts
-                  </BS.MenuItem>
-                  <BS.MenuItem
-                    onClick={() => this.setState({"breakout-mode-dialog": true})}>
-                    Breakout Mode
-                  </BS.MenuItem>
-                </BS.Dropdown.Menu>
-              </BS.Dropdown>
-            </BS.OverlayTrigger>
-          : "" }
+            : "" }
+          { this.props.auth.is_admin ?
+              <BS.OverlayTrigger placement='left' overlay={
+                <BS.Tooltip id='configure-breakouts-tooltip'>
+                  Configure Breakouts
+                </BS.Tooltip>
+              }>
+                <BS.Dropdown
+                  id="user-menu-button"
+                  pullRight>
+                  <BS.Dropdown.Toggle
+                    noCaret
+                    className="breakout-settings-btn">
+                    <img src="../../../../media/assets/control-panel-icon" />
+                  </BS.Dropdown.Toggle>
+                  <BS.Dropdown.Menu>
+                    <BS.MenuItem
+                      onClick={() => this.setState({"message-breakouts-dialog": true})}>
+                      Message All Breakouts
+                    </BS.MenuItem>
+                    <BS.MenuItem
+                      onClick={() => this.setState({"breakout-mode-dialog": true})}>
+                      Breakout Mode
+                    </BS.MenuItem>
+                  </BS.Dropdown.Menu>
+                </BS.Dropdown>
+              </BS.OverlayTrigger>
+            : "" }
+        </span>
+        <h4>Breakout Rooms</h4>
         { this.props.breakoutCrud.error ?
             <div className="breakout-error">
               {this.props.breakoutCrud.error.message}
