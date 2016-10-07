@@ -1,18 +1,9 @@
 .breakout-list-header {
   background-color: #2e7daa;
   padding: 15px;
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: flex-end;
-  overflow: visible;
   .btn-default {
     color: #2e7daa;
     margin: 5px;
-  }
-  h4 {
-    flex-grow: 1;
-    color: #fff;
-    margin-right: auto;
   }
   img {
     max-width: 24px;

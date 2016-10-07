@@ -21,7 +21,8 @@
     </div>
     <div class='collapse navbar-collapse' id='navbar-ex-collapse'>
       {% if not hidenav %}
-      <ul class='nav navbar-nav alt'>
+      <ul class='nav navbar-nav'>
+        <li><a href='{% url "plenary_list" %}'>Upcoming events</a></li>
       </ul>
       {% endif %}
       <ul class='nav navbar-nav navbar-right'>

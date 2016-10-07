@@ -1,79 +1,74 @@
 .chat-container {
-  height: 100vh;
+  overflow: auto; // Needed for firefox. Not redundant.
+  width: 100%;
   background-color: #eee;
+  // as child
+  flex-grow: 2;
+  // as parent
   display: flex;
   flex-direction: column;
+  justify-content: flex-end;
+
   .chat-box {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    flex-grow: 1;
     overflow: auto;
-    .form-group {
+    width: 100%;
+  }
+  .chat-input {
+    .form-group { margin: 5px };
+    .input-group-addon { padding: 0px; }
+    label { margin-bottom: 0px; }
+    input[type="checkbox"] { display: none; }
+    input[type="checkbox"] ~ label span {
+      display: inline-block;
+      cursor: pointer;
+      font-size: 1.25em;
+      vertical-align: middle;
       margin: 5px;
-      .input-group-addon {
-        padding: 0px;
-      }
-      label {
-        margin-bottom: 0px;
-      }
-      input[type="checkbox"] {
-        display: none;
-      }
-      input[type="checkbox"] ~ label span {
-        display: inline-block;
-        cursor: pointer;
-        font-size: 1.25em;
-        vertical-align: middle;
-        margin: 5px;
-      }
-      input[type="checkbox"]:checked ~ label span {
-        color: #cc0000;
-      }
+    }
+    input[type="checkbox"]:checked ~ label span {
+      color: #cc0000;
     }
   }
 }
 
-.chat-log {
-  overflow: auto;
-  margin-bottom: auto;
-  }
-
 .chat-message {
-  padding: 5px 18px;
-  position: relative;
-  vertical-align: top;
-  float: left;
-  margin: 0px;
-  clear: both;
+  margin-top: 10px;
   width: 100%;
+  // as parent
   display: flex;
   flex-direction: row;
-  .chat-message-text{
-    word-wrap: break-word;
-  }
-  .userName {
-    font-weight: 900;
-    color: #2c2d30
-  }
+  flex-wrap: nowrap;
+  justify-content: flex-start;
   &:nth-child(even) {
     background-color: #eee;
   }
   &:nth-child(odd) {
     background-color: #f2f2f2;
   }
-  img {
-    height: 2em;
-    margin-right: 10px;
-  }
   &.highlight {
     background-color: #e6f7ff;
   }
-}
 
-.atname {
-  font-weight: bold;
-  &.self {
-    background-color: #ffe800;
+  .user-avatar {
+    img {
+      height: 2em;
+      margin: 0px 10px;
+    }
+  }
+
+  .chat-message-text {
+    // TRICKY: http://stackoverflow.com/a/36150764
+    min-width: 10%;
+    word-wrap: break-word;
+    .userName {
+      font-weight: 900;
+      color: #2c2d30
+    }
+    .atname {
+      font-weight: bold;
+      &.self {
+        background-color: #ffe800;
+      }
+    }
   }
 }

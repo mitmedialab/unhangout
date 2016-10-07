@@ -4,7 +4,6 @@ import {connect} from "react-redux";
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
 import * as style from "../../../scss/pages/plenary/_chatstyle.scss"
-import Whiteboard from './Whiteboard';
 import {Avatar} from './Avatar';
 
 class AtName extends React.Component {
@@ -94,21 +93,20 @@ class Chat extends React.Component {
     this.state = {highlight: false}
   }
   componentDidMount() {
-    let chatLog = this.refs.chatLog;
-    chatLog.scrollTop = chatLog.scrollHeight
+    let chatBox = this.refs.chatBox;
+    chatBox.scrollTop = chatBox.scrollHeight
   }
   componentWillUpdate() {
-    let chatLog = this.refs.chatLog;
+    let chatBox = this.refs.chatBox;
     let latestMessage = this.props.chat_messages[this.props.chat_messages.length - 1];
     this.shouldScrollBottom = (
-      (chatLog.scrollTop + chatLog.offsetHeight >= chatLog.scrollHeight) ||
+      (chatBox.scrollTop + chatBox.offsetHeight >= chatBox.scrollHeight) ||
       latestMessage && latestMessage.user.username === this.props.auth.username
     );
   }
   componentDidUpdate() {
     if (this.shouldScrollBottom) {
-      let chatLog = this.refs.chatLog;
-      chatLog.scrollTop = chatLog.scrollHeight
+      this.refs.chatBox.scrollTop = this.refs.chatBox.scrollHeight
     }
   }
   onSubmit(event) {
@@ -124,47 +122,44 @@ class Chat extends React.Component {
   }
   render() {
     let is_admin = this.props.auth.is_admin
-    let showWhiteboard = this.props.plenary.whiteboard.length > 7 ||is_admin;
     return <div className="chat-container">
-      { showWhiteboard ? 
-        <Whiteboard />
-      : ""}
-      <div className="chat-box">
-        <div className="chat-log" ref="chatLog">
+      <div className="chat-box" ref='chatBox'>
+        <div className="chat-log">
           {this.props.chat_messages.map((msg, i) => {
             return <ChatMessage msg={msg} plenary={this.props.plenary}
               presence={this.props.presence} key={`${i}`} auth={this.props.auth} />
           })}
         </div>
-        <form className={
-            `chat-input${this.props.plenary.chat.state === "error" ? " has-error" : ""}`
-        } onSubmit={(e) => this.onSubmit(e)}>
-          { is_admin ?
+      </div>
+      <form className={
+          `chat-input${this.props.plenary.chat.state === "error" ? " has-error" : ""}`
+      } onSubmit={(e) => this.onSubmit(e)}>
+        { is_admin ?
             <BS.FormGroup>
               <BS.InputGroup>
                 {this.props.plenary.chat.state === "error" ?
                   <BS.HelpBlock>{this.props.plenary.chat.error}</BS.HelpBlock> : "" }
                 <BS.FormControl
-                  className="chat-composer"
-                  type='text'
-                  placeholder='Chat...'
-                  disabled={this.props.plenary.chat.state === "sending"}
-                  value={(this.state && this.state.value) || ""}
-                  onChange={(e) => this.setState({value: e.target.value})} />
+                    className="chat-composer"
+                    type='text'
+                    placeholder='Chat...'
+                    disabled={this.props.plenary.chat.state === "sending"}
+                    value={(this.state && this.state.value) || ""}
+                    onChange={(e) => this.setState({value: e.target.value})} />
                   <BS.InputGroup.Addon>
                     <input type="checkbox"
                       name="highlight"
                       id="highlight"
                       checked={this.state && this.state.highlight}
-                      onChange={(e) =>
-                        this.setState({highlight: e.target.checked})} />
+                      onChange={(e) => this.setState({highlight: e.target.checked})}
+                    />
                       <label htmlFor="highlight">
                         <BS.Glyphicon glyph="exclamation-sign" />
                       </label>
                   </BS.InputGroup.Addon>
               </BS.InputGroup>
             </BS.FormGroup>
-            :
+          :
             <BS.FormGroup>
                 {this.props.plenary.chat.state === "error" ?
                   <BS.HelpBlock>{this.props.plenary.chat.error}</BS.HelpBlock> : "" }
@@ -175,9 +170,9 @@ class Chat extends React.Component {
                   disabled={this.props.plenary.chat.state === "sending"}
                   value={(this.state && this.state.value) || ""}
                   onChange={(e) => this.setState({value: e.target.value})} />
-            </BS.FormGroup> }
-        </form>
-      </div>
+            </BS.FormGroup>
+        }
+      </form>
     </div>
   }
 };

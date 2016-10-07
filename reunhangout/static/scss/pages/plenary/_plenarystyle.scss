@@ -1,40 +1,31 @@
 .plenary {
-	overflow: hidden;
-}
-.column {
-  padding-left: 0px;
-  padding-right: 0px;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  overflow: auto;
-  .logo {
-      width:90%;
-      margin-left: auto;
-      margin-right: auto;
-      margin-top: 5px;
-    }
-
-  .user-menu-container {
-		margin-top: auto;
-    background-color: #2e7daa;
-    color: #fff;
+  .plenary-grid {
+    // as child
+    flex-grow: 2;
+    overflow: hidden;
+    // as parent
     display: flex;
-    flex-flow: row wrap;
-    justify-content: center;
-		align-items: center;
-    img {
-      height: 2em;
-      width: 2em;
-      border-radius: 5px;
-      margin: 5px;
-			margin-right: 10px;
+    flex-direction: row;
+    .column {
+      position: relative;
+      // as child
+      flex-grow: 2;
+      // as parent
+      display: flex;
+      flex-direction: column;
     }
-    #user-menu-button {
-      margin: 5px;
-			border: none;
-			background-color: #2e7daa;
-			color: #fff;
+    .users-col {
+      width: 25%;
+    }
+    .chat-col {
+      width: 40%;
+    }
+    .breakout-col {
+      width: 35%;
+      overflow: auto;
     }
   }
 }

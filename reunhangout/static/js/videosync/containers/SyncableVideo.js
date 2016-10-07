@@ -141,7 +141,6 @@ class SyncableYoutubeVideo extends React.Component {
       this.player.getDuration(),
     ]).then(([state, time, duration]) => {
       let stateName = this.STATE_NAMES[state];
-      //console.log("syncVideo:", stateName, time, duration, curSync);
       // Stop playback if we've exceeded the duration
       if (stateName === "ended" || (this.syncTime > duration && curSync.state === "playing")) {
         if (this.props.showSyncControls) {

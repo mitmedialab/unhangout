@@ -25,6 +25,13 @@ class Whiteboard extends React.Component {
   }
 
   render() {
+    let showWhiteboard = (
+      this.props.plenary.whiteboard.length > 7 ||
+      this.props.auth.is_admin
+    );
+    if (!showWhiteboard) {
+      return "";
+    }
     return (
       <div className="whiteboard">
         <BS.Panel collapsible expanded={this.state.panelOpen}>

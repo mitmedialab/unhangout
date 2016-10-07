@@ -172,7 +172,7 @@ class Embed extends React.Component {
   }
 
   hasLive() {
-    return this.props.plenary.embeds.embeds.filter(
+    return this.props.plenary.embeds && this.props.plenary.embeds.embeds.filter(
       (e) => e.type === "live"
     ).length > 0;
   }
@@ -191,10 +191,8 @@ class Embed extends React.Component {
   toggleLiveParticipation(event) {
     event.preventDefault();
     if (this.isLiveParticipant()) {
-      console.log("onLeaveLiveBroadcast", this.props.auth.username);
       this.props.onLeaveLiveBroadcast({username: this.props.auth.username});
     } else {
-      console.log("onAdminJoinLiveBroadcast", this.props.auth.username);
       this.props.onAdminJoinLiveBroadcast({username: this.props.auth.username});
     }
   }

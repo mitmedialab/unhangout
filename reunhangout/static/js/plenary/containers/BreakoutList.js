@@ -143,7 +143,7 @@ class BreakoutList extends React.Component {
       (this.props.auth.is_admin && breakout_mode === "admin")
     );
 
-    return <div>
+    return <div className='breakout-list-component'>
       <div className="breakout-list-header">
         <h4>Breakout Rooms</h4>
         { showCreateSession ?

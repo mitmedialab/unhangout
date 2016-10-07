@@ -18,3 +18,4 @@ django-webpack-loader
 pillow
 requests
 sorl-thumbnail
+iso8601

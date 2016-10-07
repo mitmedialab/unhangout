@@ -4,7 +4,7 @@ import {connect} from "react-redux";
 import * as style from "../../../scss/pages/plenary/_presencestyle.scss"
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
-import {Avatar} from "./Avatar";
+import {Avatar, DEFAULT_AVATAR} from "./Avatar";
 
 export const sortPresence = (presence, auth) => {
   // Sort self first, others second.

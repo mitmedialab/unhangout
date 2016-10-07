@@ -12,6 +12,7 @@ from reunhangout.utils import random_webrtc_id
 
 from jsonfield import JSONField
 from timezone_field import TimeZoneField
+import iso8601
 
 class Series(models.Model):
     name = models.CharField(max_length=100)
@@ -80,6 +81,17 @@ class Plenary(models.Model):
     admins = models.ManyToManyField(settings.AUTH_USER_MODEL)
 
     def clean(self):
+        if self.slug:
+            self.slug = self.slug.lower()
+        for key in ["start_date", "end_date", "doors_open", "doors_close"]:
+            date = getattr(self, key)
+            if isinstance(date, str):
+                try:
+                    setattr(self, key, iso8601.parse_date(date))
+                except iso8601.ParseError:
+                    raise ValidationError("%s: date format not understood" % key)
+        if re.match('^[0-9]+$', self.slug):
+            raise ValidationError("Slug must contain at least one letter")
         if self.start_date >= self.end_date:
             raise ValidationError("End date must be after start date")
         if self.doors_open > self.start_date:

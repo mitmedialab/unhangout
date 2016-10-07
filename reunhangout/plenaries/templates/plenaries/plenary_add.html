@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% load render_bundle from webpack_loader %}
+
+{% block title %}Add an Event{% endblock %}
+{% block styles %}{% render_bundle 'main' 'css' %}{% endblock %}
+
+{% block content %}
+  <div id='plenary-add'></div>
+{% endblock %}
+{% block scripts %}{% render_bundle 'main' 'js' %}{% endblock %}

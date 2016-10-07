@@ -16,13 +16,8 @@ export class DateTimePicker extends React.Component {
   componentWillReceiveProps(newProps) {
     this.parseValueToState(newProps.value);
   }
-  sendOnChange(state) {
-    state = state || this.state;
-    this.props.onChange && this.props.onChange({
-      target: {
-        value: this.interpretStateAsDate(state).format()
-      }
-    });
+  sendOnChange() {
+    this.props.onChange && this.props.onChange(this.interpretStateAsDate().format());
   }
   parseValueToState(value) {
     // zone to interpret the date by. Default to guess.
@@ -30,7 +25,7 @@ export class DateTimePicker extends React.Component {
     let m = moment(value || undefined).tz(zone);
     this.setState({
       date: new Date(m.year(), m.month(), m.date()),
-      time: (this.state && this.state.time) || m.format('h:mm a'),
+      time: this.state.time === undefined ? m.format('h:mm a') : this.state.time,
       parsedTime: m.format('HH:mm'),
       // Reset the zone to default if it is strictly undefined, otherwise use
       // the state zone. We need to allow an empty value so that the select box
@@ -40,9 +35,7 @@ export class DateTimePicker extends React.Component {
     });
   }
   onDateChange(v) {
-    let newState = {...this.state, date: v};
-    this.sendOnChange(newState);
-    this.setState({date: v});
+    this.setState({date: v}, () => this.sendOnChange())
   }
   onTimeChange(v) {
     let match = /^(\d+)(?::(\d+))?\s*(am?|pm?)?$/i.exec(v.trim());
@@ -65,13 +58,11 @@ export class DateTimePicker extends React.Component {
       if (minutes < 10) { minutes = "0" + minutes; }
 
       let parsedTime = `${hours}:${minutes}`;
-      let newState = {...this.state, time: v, parsedTime: parsedTime};
-      this.sendOnChange(newState);
       this.setState({
         time: v,
         parsedTime: parsedTime,
         "time-error": false,
-      });
+      }, () => this.sendOnChange());
     } else {
       this.setState({"time-error": true});
       this.setState({time: v});
@@ -79,19 +70,16 @@ export class DateTimePicker extends React.Component {
   }
   onZoneChange(v) {
     let zone = v ? v.value : "";
-    let newState = {...this.state, zone: zone};
-    this.sendOnChange(newState);
-    this.setState({zone: zone});
+    this.setState({zone: zone}, () => this.sendOnChange());
   }
-  interpretStateAsDate(state) {
-    state = state || this.state;
+  interpretStateAsDate() {
     let m = moment.tz({
-      year: state.date.getFullYear(),
-      month: state.date.getMonth(),
-      date: state.date.getDate(),
-      hours: parseInt(state.parsedTime.split(":")[0], 10),
-      minutes: parseInt(state.parsedTime.split(":")[1], 10),
-    }, state.zone || moment.tz.guess());
+      year: this.state.date.getFullYear(),
+      month: this.state.date.getMonth(),
+      date: this.state.date.getDate(),
+      hours: parseInt(this.state.parsedTime.split(":")[0], 10),
+      minutes: parseInt(this.state.parsedTime.split(":")[1], 10),
+    }, this.state.zone || moment.tz.guess());
     return m;
   }
   render() {
@@ -115,7 +103,7 @@ export class DateTimePicker extends React.Component {
           </span>
         </div>
         <div>
-          <SimpleSelect {...selectProps}>
+          Timezone: <SimpleSelect {...selectProps}>
             { moment.tz.names().map((name, i) => {
               return <option value={name} key={i}>{name}</option>
             })}

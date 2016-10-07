@@ -1,9 +1,12 @@
-import json
-import functools
+import base64
 import datetime
+import functools
+import json
+import uuid
 
 from urllib.parse import urlparse
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import F, Count
 from django.db import transaction
 from django.utils.timezone import now
@@ -17,6 +20,7 @@ from plenaries.models import Plenary, ChatMessage
 from breakouts.models import Breakout
 from videosync.models import VideoSync
 from reunhangout.channels_utils import broadcast, handle_error, require_payload_keys
+from reunhangout.utils import json_dumps
 from analytics.models import track
 from django.contrib.auth import get_user_model
 
@@ -25,12 +29,12 @@ User = get_user_model()
 @enforce_ordering(slight=True)
 @channel_session_user_from_http
 def ws_connect(message, slug):
-    if not message.user.is_authenticated():
-        return handle_error(message, "Authentication required")
     try:
         plenary = Plenary.objects.get(slug=slug)
     except Plenary.DoesNotExist:
         return handle_error(message,  'Plenary not found')
+    if plenary.open and not message.user.is_authenticated():
+        return handle_error(message, "Authentication required to connect to open plenaries")
 
     # Here would be the place for enforcing a connection/user cap or other
     # auth, if such were needed.
@@ -52,6 +56,8 @@ def ws_disconnect(message, slug=None):
 @enforce_ordering(slight=True)
 @channel_session_user
 def ws_receive(message, slug):
+    if not message.user.is_authenticated():
+        return handle_error(message, "Authentication required")
     try:
         data = json.loads(message.content['text'])
     except ValueError:
@@ -260,28 +266,46 @@ def handle_breakout(message, data, plenary):
         track("change_breakout_vote", message.user, breakout=breakout)
         return respond_with_breakouts()
 
-@require_payload_keys([])
-def handle_plenary(message, data, plenary):
-    if not plenary.has_admin(message.user):
-        return handle_error(message, "Must be an admin to do that.")
+_image_type_ext_map = {
+    'image/jpeg': '.jpg',
+    'image/png': '.png',
+    'image/gif': '.gif',
+}
 
-    payload = data['payload']
-    # Keys that are straight get/set
-    simple_update_keys = (
-        'random_max_attendees', 'breakout_mode', 'name', 'organizer',
-        'start_date', 'end_date', 'doors_open', 'doors_close',
-        'breakouts_open', 'canceled', 'slug'
-    )
-    # Keys that we use a `safe_%s` proxy for
-    sanitized_keys = ('whiteboard', 'description')
-    # Keys for getting the update result, but not set directly.
-    extra_get_keys = ('open',)
+def _b64_image_to_uploaded_file(b64data):
+    content_type, image_b64 = b64data.split(";base64,")
+    content_type = content_type.replace("data:", "")
+    if content_type not in _image_type_ext_map:
+        raise ValidationError("Invalid image type")
+    image_bytes = base64.b64decode(image_b64)
+    filename = "".join((str(uuid.uuid4()), _image_type_ext_map[content_type]))
+    return SimpleUploadedFile(filename, image_bytes, content_type)
 
-    for key in simple_update_keys + sanitized_keys:
+PLENARY_SIMPLE_UPDATE_KEYS = (
+    'random_max_attendees', 'breakout_mode', 'name', 'organizer',
+    'start_date', 'end_date', 'doors_open', 'doors_close',
+    'breakouts_open', 'canceled', 'slug', 'public',
+)
+PLENARY_SANITIZED_KEYS = (
+    'whiteboard', 'description'
+)
+
+def update_plenary(plenary, payload):
+    print(payload)
+    for key in PLENARY_SIMPLE_UPDATE_KEYS + PLENARY_SANITIZED_KEYS:
         if key in payload:
             setattr(plenary, key, payload[key])
 
-    # Handle special boolean "open" nudging.
+    # Images - read in base64 type
+    if payload.get('image') and payload['image'].startswith("data:image/"):
+        try:
+            plenary.image = _b64_image_to_uploaded_file(payload['image'])
+        except (ValidationError, ValueError, TypeError) as e:
+            raise ValidationError("Invalid image")
+    elif payload.get('image', False) is None:
+        plenary.image = None
+
+    # Handle date arithmetic for boolean "open" nudging.
     change_open = payload.get('open')
     if change_open is not None:
         right_now = now()
@@ -310,6 +334,18 @@ def handle_plenary(message, data, plenary):
                 # Doors already closed. Do nothing.
                 pass
 
+
+@require_payload_keys([])
+def handle_plenary(message, data, plenary):
+    if not plenary.has_admin(message.user):
+        return handle_error(message, "Must be an admin to do that.")
+
+    payload = data['payload']
+    try:
+        update_plenary(plenary, payload)
+    except ValidationError as e:
+        handle_error(message, json_dumps(e.message_dict))
+
     breakouts_changed = False
     try:
         with transaction.atomic():
@@ -320,16 +356,18 @@ def handle_plenary(message, data, plenary):
                 # signals for eventual use of django-channels data binding:
                 # http://channels.readthedocs.io/en/latest/binding.html
                 for breakout in plenary.breakout_set.filter(is_random=True):
-                    breakout.max_attendees = plenary.random_max_attendees
-                    breakout.full_clean()
-                    breakout.save()
-                    breakouts_changed = True
+                    if breakout.max_attendees != plenary.random_max_attendees:
+                        breakout.max_attendees = plenary.random_max_attendees
+                        breakout.full_clean()
+                        breakout.save()
+                        breakouts_changed = True
     except ValidationError as e:
         return handle_error(message, json_dumps(e.message_dict))
 
-    update = {key: getattr(plenary, key) for key in simple_update_keys}
-    update.update({key: getattr(plenary, "safe_" + key)() for key in sanitized_keys})
-    update.update({key: getattr(plenary, key) for key in extra_get_keys})
+    update = {key: getattr(plenary, key) for key in PLENARY_SIMPLE_UPDATE_KEYS}
+    update.update({key: getattr(plenary, "safe_" + key)() for key in PLENARY_SANITIZED_KEYS})
+    update['open'] = plenary.open
+    update['image'] = plenary.image.url if plenary.image else None
     broadcast(plenary.channel_group_name, type='plenary', payload={'plenary': update})
 
     if breakouts_changed:
@@ -338,7 +376,6 @@ def handle_plenary(message, data, plenary):
 
 @require_payload_keys(['username'])
 def handle_add_live_participant(message, data, plenary):
-    print("handle_add_live_participant", data)
     if not plenary.has_admin(message.user):
         return handle_error(message, "Must be an admin to do add live participants.")
 
@@ -353,7 +390,6 @@ def handle_add_live_participant(message, data, plenary):
             plenary.live_participants.values_list('username', flat=True)
         )
     }
-    print("broadcast", payload)
     broadcast(
         plenary.channel_group_name,
         type='live_participants',
@@ -363,7 +399,6 @@ def handle_add_live_participant(message, data, plenary):
 
 @require_payload_keys(['username'])
 def handle_remove_live_participant(message, data, plenary):
-    print("handle_remove_live_participant", data)
     authorized = (
         (data['payload']['username'] == message.user.username) or
         plenary.has_admin(message.user)
@@ -382,7 +417,6 @@ def handle_remove_live_participant(message, data, plenary):
             plenary.live_participants.values_list('username', flat=True)
         )
     }
-    print(payload)
     broadcast(
         plenary.channel_group_name,
         type='live_participants',

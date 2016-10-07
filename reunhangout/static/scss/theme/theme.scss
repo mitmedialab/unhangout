@@ -1,4 +1,7 @@
 // Allow forms with buttons-as-links in dropdown menus to enable POST-ing
+.navbar-nav > li > a {
+  line-height: 26px;
+}
 .dropdown-menu > li > form {
   width: 100%;
   .btn-link {

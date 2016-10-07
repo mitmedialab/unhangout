@@ -22,18 +22,25 @@ export class RelativeTime extends React.Component {
   }
 
   componentWillReceiveProps(newProps) {
-    if (newProps.value !== this.props.value) {
+    if (moment(newProps.value).diff(this.state.value, 'seconds', true) > 1) {
       this.setState({
         deltaMinutes: this.timeToDelta(
           newProps.reference, newProps.value, newProps.after),
         value: moment(newProps.value)
       })
     } else if (newProps.reference !== this.props.reference) {
+      let newValue = this.deltaToTime(
+        newProps.reference, this.state.deltaMinutes, newProps.after
+      );
+      let changed = newValue !== this.state.value;
       this.setState({
         deltaMinutes: this.state.deltaMinutes,
-        value: this.deltaToTime(
-          newProps.reference, this.state.deltaMinutes, newProps.after
-        )
+        value: newValue
+      }, () => {
+        // If our value is different after a change in reference, trigger.
+        if (changed) {
+          this.onChange(this.state.deltaMinutes);
+        }
       });
     }
   }
@@ -66,8 +73,9 @@ export class RelativeTime extends React.Component {
       deltaMinutes: deltaMinutesStr,
       value: time,
       "deltaMinutes-error": false,
+    }, () => {
+      this.props.onChange && this.props.onChange(time.format())
     });
-    this.props.onChange && this.props.onChange({target: {value: time.format()}})
   }
 
   render() {

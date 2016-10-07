@@ -4,7 +4,7 @@ import {connect} from "react-redux";
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
 
-const DEFAULT_AVATAR = "../../../../media/assets/default_avatar.jpg";
+export const DEFAULT_AVATAR = "../../../../media/assets/default_avatar.jpg";
 
 export class Avatar extends React.Component {
   constructor(props) {

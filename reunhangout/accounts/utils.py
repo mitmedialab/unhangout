@@ -1,4 +1,6 @@
 def serialize_auth_state(user, plenary=None):
+    from accounts.models import User
+
     if not user.is_authenticated():
         return {
             'auth': {
@@ -15,7 +17,9 @@ def serialize_auth_state(user, plenary=None):
             'id': user.id,
             'username': user.username,
             'display_name': user.get_display_name(),
+            'has_display_name': bool(user.display_name),
             'image': user.get_profile_image(),
+            'has_default_image': user.get_profile_image() == User.default_profile_image(), 
             'email': user.email,
             'is_superuser': user.is_superuser,
             'is_admin': user.is_superuser or (plenary and plenary.admins.filter(pk=user.pk).exists()),

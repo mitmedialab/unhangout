@@ -1,5 +1,6 @@
 import React from "react";
 import {connect} from "react-redux";
+import moment from 'moment-timezone';
 import * as style from "../../../scss/pages/plenary/_plenarystyle.scss"
 import * as BS from "react-bootstrap";
 import Embed from './Embed';
@@ -11,6 +12,8 @@ import {ConnectionStatus} from '../../transport';
 import * as A from '../actions';
 import {Avatar} from './Avatar';
 import TitleMenu from './TitleMenu';
+import PlenaryStatusBanner from './PlenaryStatusBanner';
+import Whiteboard from './Whiteboard';
 
 class Plenary extends React.Component {
   constructor() {
@@ -33,68 +36,122 @@ class Plenary extends React.Component {
     });
     this.setState({contactInfoModalOpen: false})
   }
+  isOpen() {
+    let now = moment();
+    return (
+      !this.props.plenary.canceled &&
+      moment(this.props.plenary.doors_open) < now &&
+      moment(this.props.plenary.doors_close) > now
+    );
+  }
+  componentWillMount() {
+    this.openClockInterval = setInterval(() => {
+      if (this.isOpen() !== this.state.open) {
+        this.setState({open: this.isOpen()})
+      }
+    }, 1000);
+    this.setState({open: this.isOpen()});
+  }
+  componentWillUnmount() {
+    this.openClockInterval && this.clearInterval(this.openClock);
+  }
   render() {
-    if (this.props.plenary.open) {
+    if (this.state.open) {
+      if (!this.props.auth.is_authenticated) {
+        document.location.href = `/accounts/login/?next=${encodeURIComponent(document.location.pathname)}`;
+      }
       return <div className='plenary open'>
+        { this.props.auth.is_admin ? <PlenaryStatusBanner /> : "" }
         <ConnectionStatus />
-        <BS.Grid fluid>
-          <BS.Row>
-            <BS.Col xs={3} className="column users-col">
+        <div className='plenary-grid'>
+          <div className='column users-col'>
             <TitleMenu />
             <PlenaryInfo plenary={this.props.plenary} />
             <Presence presence={this.props.presence} auth={this.props.auth} />
-
-
-
-            </BS.Col>
-            <BS.Col xs={5} className="column chat-col">
-              <Chat />
-            </BS.Col>
-            <BS.Col xs={4} className="column breakout-col">
+          </div>
+          <div className='column chat-col'>
+            <Whiteboard />
+            <Chat />
+          </div>
+          <div className='column breakout-col'>
             <Embed />
-              <BreakoutList />
-            </BS.Col>
-          </BS.Row>
-        </BS.Grid>
+            <BreakoutList />
+          </div>
+        </div>
       </div>
     } else {
+      let startDate = moment(this.props.plenary.start_date).tz(moment.tz.guess());
+      let endDate = moment(this.props.plenary.end_date).tz(moment.tz.guess());
+      let doorsOpen = moment(this.props.plenary.doors_open).tz(moment.tz.guess());
+      let doorsClose = moment(this.props.plenary.doors_close).tz(moment.tz.guess());
+      let now = moment();
+      let upcoming = !this.props.plenary.canceled && doorsOpen > now;
       return <div className="plenary closed">
+        { this.props.auth.is_admin ? <PlenaryStatusBanner /> : "" }
         <BS.Grid fluid>
           <BS.Row>
-            <BS.Col xs={3} className="column users-col">
+            <BS.Col xs={3} className="column">
               <TitleMenu />
-              <PlenaryInfo plenary={this.props.plenary} />
+              { this.props.plenary.image ?
+                  <img src={this.props.plenary.image} alt='' className='img-responsive' />
+                : "" }
             </BS.Col>
-            <BS.Col xs={8} className="column chat-col">
-              {this.state.alertVisible ?
-                this.props.auth.is_authenticated ?
-                <BS.Alert
-                  bsStyle="success"
-                  onDismiss={() => {
-                    this.handleAlertDismiss()}
-                  }>
-                  <h4>Thanks for logging in. Come back at the posted start time to participate!</h4>
-                </BS.Alert>
+            <BS.Col xs={8}>
+              <div className="details">
+                <h1>{this.props.plenary.name}</h1>
+                { this.props.plenary.organizer ?
+                    <p>hosted by <em>{this.props.plenary.organizer}</em></p>
+                  : "" }
+                { this.props.plenary.canceled ?
+                  <p><b>CANCELED</b>. This event has been canceled by the organizer.</p>
                 :
-                <BS.Alert
-                  bsStyle="warning"
-                  onDismiss={() => {
-                    this.handleAlertDismiss()}
-                  }>
-                  <h4>Please log-in above, and you will be automatically connected when the event starts.</h4>
-                </BS.Alert>
-
-              : ""}
-              <div className="guidelines">
-                <h4>Get Ready for the Event:</h4>
-                <ul>
-                  <li>
-                    Make sure you have a recent version of Firefox or Chrome.
-                    (We're sorry, but breakout sessions don't work with
-                    Safari, Internet Explorer/Edge, or on iOS yet. You can
-                    watch the event with those browsers.)
-                  </li>
-                </ul>
+                  <p><b>{startDate.format('dddd LL, LT')} to {endDate.format('LT')}</b></p>
+                }
+                { upcoming ?
+                  <p>Doors open at {doorsOpen.format('LT')}</p>
+                : this.props.plenary.canceled ?
+                  ""
+                :
+                  <p><em>This event has ended.</em></p>
+                }
+                <div dangerouslySetInnerHTML={{__html: this.props.plenary.description}} />
+                { upcoming ? 
+                  <div>
+                    <h3>Get Ready for the Event:</h3>
+                    <ul>
+                      {
+                        this.props.auth.is_authenticated ? "" :
+                          <li>
+                            <div className='alert alert-success'>
+                              <a href='/accounts/login'>Login</a> or{' '}
+                              <a href='/accounts/signup'>sign up</a>. You must be
+                              signed in to attend this event.
+                            </div>
+                          </li>
+                      }
+                      <li>
+                        <p>
+                        Make sure you have a recent version of Firefox or Chrome.
+                        </p>
+                        <div className='text-muted'>
+                          <p>
+                          (We're sorry, but breakout sessions don't work with
+                          Safari, Internet Explorer/Edge, or on iOS yet. You can
+                          still watch the event with those browsers.)
+                          </p>
+                        </div>
+                      </li>
+                      <li>
+                        <p>
+                          Check your <a href='/accounts/settings/account/'>account settings</a> and
+                          update your profile image
+                          (<img src={this.props.auth.image} width={24} height={24} alt='' />)
+                          or display name (<em>{this.props.auth.display_name}</em>).
+                        </p>
+                      </li>
+                    </ul>
+                  </div>
+                : ""}
               </div>
             </BS.Col>
           </BS.Row>
