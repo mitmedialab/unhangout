@@ -30,7 +30,7 @@ class Whiteboard extends React.Component {
       this.props.auth.is_admin
     );
     if (!showWhiteboard) {
-      return "";
+      return null;
     }
     return (
       <div className="whiteboard">

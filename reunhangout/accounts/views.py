@@ -53,7 +53,7 @@ class ConnectionsView(AllauthConnectionsView, settings_panel.BaseSettingsPanelVi
     template_name = "accounts/connections_settings_panel.html"
     success_url = reverse_lazy("accounts_settings", args=["connections"])
     def get_success_url(self):
-        return success_url
+        return self.success_url
 settings_panel.register(ConnectionsView, "connections", _("Connections"))
 
 @login_required
