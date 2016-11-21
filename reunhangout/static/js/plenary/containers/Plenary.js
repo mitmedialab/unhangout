@@ -56,7 +56,7 @@ class Plenary extends React.Component {
     this.openClockInterval && this.clearInterval(this.openClock);
   }
   render() {
-    if (this.state.open) {
+    if (this.state.open || this.props.auth.is_admin) {
       if (!this.props.auth.is_authenticated) {
         document.location.href = `/accounts/login/?next=${encodeURIComponent(document.location.pathname)}`;
       }
