@@ -18,7 +18,7 @@ if ! which virtualenv > /dev/null 2>&1; then
 fi
 
 NODE_VERSION=`node --version`
-if ! [[ $NODE_VERSION =~ ^v[456]\.[0-9]+\.[0-9]+$ ]]; then
+if ! [[ $NODE_VERSION =~ ^v[4567]\.[0-9]+\.[0-9]+$ ]]; then
     echo "Please install nodejs version 4 or higher.  $NODE_VERSION installed."
     exit 1
 fi
