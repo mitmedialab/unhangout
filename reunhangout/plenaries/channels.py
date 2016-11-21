@@ -291,7 +291,7 @@ PLENARY_SANITIZED_KEYS = (
 )
 
 def update_plenary(plenary, payload):
-    print(payload)
+    #print(payload)
     for key in PLENARY_SIMPLE_UPDATE_KEYS + PLENARY_SANITIZED_KEYS:
         if key in payload:
             setattr(plenary, key, payload[key])
