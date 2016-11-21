@@ -203,6 +203,7 @@ SOCIALACCOUNT_PROVIDERS = {
     },
 }
 ACCOUNT_USER_DISPLAY = "accounts.models.user_display"
+ACCOUNT_AUTHENTICATION_METHOD = "username_email"
 LOGIN_REDIRECT_URL = "/events/"
 
 # Add client id's and secrets for social account providers. Changes only take
