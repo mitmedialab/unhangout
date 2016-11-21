@@ -297,6 +297,7 @@ class BreakoutList extends React.Component {
                   by all users.  Admins can approve these sessions after which
                   users can join the sessions.
                 </BS.HelpBlock>
+                {/* Hiding random mode for now.. Issue #33.
                 <BS.Radio checked={this.state.breakout_mode==="random"}
                     onChange={() => this.setState({"breakout_mode": "random"})}>
                   Randomly Assigned Sessions
@@ -307,6 +308,7 @@ class BreakoutList extends React.Component {
                   option of leaving their group and joining a new one with the
                   "Regroup Me" button.
                 </BS.HelpBlock>
+                */}
               </BS.FormGroup>
               { this.state.breakout_mode === "random" ?
                 <BS.FormGroup
