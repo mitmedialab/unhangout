@@ -43,8 +43,9 @@ class PlenaryStatusBanner extends React.Component {
     let endDate = moment(this.props.plenary.end_date);
     let doorsClose = moment(this.props.plenary.doors_close);
 
-    let startsToday = startDate > now && startDate.date() === now.date();
     let startsSoon = startDate > now && startDate.diff(now, 'hours', true) <= 2;
+    let startsToday = startDate > now && startDate.date() === now.date();
+    let startsFuture = startDate > now
     let closing = now < doorsClose && now > endDate;
     let ended = now > doorsClose;
 
@@ -56,15 +57,19 @@ class PlenaryStatusBanner extends React.Component {
       <div>
         { canceled ?
             <span>This event has been canceled. {edit}</span>
+          : startsSoon ?
+            <span>
+              This event starts <span>{startDate.from(now)}</span>.
+              Doors open <span>{doorsOpen.from(now)}</span>. {edit}
+            </span>
           : startsToday ?
             <span>
               This event starts today at <span>{startDate.format('LT')}</span>.
               Doors open at <span>{doorsOpen.format('LT')}</span>. {edit}
             </span>
-          : startsSoon ?
+          : startsFuture ?
             <span>
-              This event starts <span>{startDate.from(now)}</span>.
-              Doors open <span>{doorsOpen.from(now)}</span>. {edit}
+              This event starts on <span>{startDate.format("dddd, MMM Do, YYYY, LT")}</span>. {edit}
             </span>
           : closing ?
             <span>
