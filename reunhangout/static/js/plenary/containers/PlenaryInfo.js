@@ -14,11 +14,12 @@ export default class PlenaryInfo extends React.Component {
             hosted by <b>{this.props.plenary.organizer}</b>
           </div>
         : ""}
-        { this.props.plenary.description ?
+        {/* Hide this for now.
+          this.props.plenary.description ?
           <div className='description'
                dangerouslySetInnerHTML={{__html: this.props.plenary.description}}
           />
-        : ""}
+        : "" */}
       </div>
     );
   }
