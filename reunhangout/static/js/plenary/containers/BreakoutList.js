@@ -1,5 +1,6 @@
 import React from "react";
 import {connect} from "react-redux";
+import {LabeledSwitch} from './LabeledSwitch';
 import * as style from "../../../scss/pages/plenary/_breakoutliststyle.scss";
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
@@ -82,6 +83,12 @@ class BreakoutList extends React.Component {
   handleGroupMe(event) {
     event.preventDefault();
     this.props.onChangeBreakouts({action: 'group_me'});
+  }
+
+  toggleBreakoutsOpen() {
+    this.props.onAdminSendPlenaryDetails({
+      breakouts_open: !this.props.plenary.breakouts_open
+    });
   }
 
   sortBreakouts(breakouts) {
@@ -178,6 +185,14 @@ class BreakoutList extends React.Component {
                     <img src="../../../../media/assets/control-panel-icon" />
                   </BS.Dropdown.Toggle>
                   <BS.Dropdown.Menu>
+                    <li className='menu-item'>
+                      <LabeledSwitch
+                          on={this.props.plenary.breakouts_open}
+                          onLabel='Breakouts open'
+                          offLabel='Breakouts closed'
+                          onClick={() => this.toggleBreakoutsOpen()} />
+                    </li>
+
                     <BS.MenuItem
                       onClick={() => this.setState({"message-breakouts-dialog": true})}>
                       Message All Breakouts
@@ -357,5 +372,6 @@ export default connect(
     onChangeBreakouts: (payload) => dispatch(A.changeBreakouts(payload)),
     onChangeBreakoutMode: (payload) => dispatch(A.changeBreakoutMode(payload)),
     onMessageBreakouts: (payload) => dispatch(A.messageBreakouts(payload)),
+    onAdminSendPlenaryDetails: (payload) => dispatch(A.adminSendPlenaryDetails(payload)),
   })
 )(BreakoutList);

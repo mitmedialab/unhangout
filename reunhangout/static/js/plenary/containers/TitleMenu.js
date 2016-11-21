@@ -1,12 +1,11 @@
 import React from "react";
 import {connect} from "react-redux";
-import Switch from 'react-toggle-switch';
-import * as switchStyle from "react-toggle-switch/dist/css/switch.min.css"
 import * as BS from "react-bootstrap";
 import * as style from "../../../scss/pages/plenary/_titleMenu.scss"
 import * as A from "../actions";
 import {Avatar} from './Avatar';
 import {PlenaryEditor} from './PlenaryEditor';
+import {LabeledSwitch} from './LabeledSwitch';
 import moment from 'moment-timezone';
 
 export class TitleMenu extends React.Component {
@@ -112,36 +111,6 @@ export class TitleMenu extends React.Component {
         </BS.Modal>
       </div>
     )
-  }
-}
-
-class LabeledSwitch extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {on: props.on};
-  }
-  componentWillReceiveProps(newProps) {
-    if (newProps.on !== undefined) {
-      this.setState({on: newProps.on});
-    }
-  }
-  toggle(event) {
-    event && event.stopPropagation();
-    event && event.preventDefault();
-
-    this.setState({on: !this.state.on});
-    this.props.onClick && this.props.onClick();
-  }
-  render() {
-    return (
-      <div className='labeled-switch' style={{cursor: "pointer"}}
-          onClick={(e) => this.toggle(e)}>
-        <Switch on={this.state.on}
-          onClick={() => this.props.onClick && this.props.onClick()} />
-        {this.state.on ? this.props.onLabel : this.props.offLabel}
-        <div style={{clear: "both"}} />
-      </div>
-    );
   }
 }
 
