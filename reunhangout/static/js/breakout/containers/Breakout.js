@@ -39,7 +39,13 @@ class JitsiVideo extends React.Component {
         DEFAULT_LOCAL_DISPLAY_NAME: JSON.stringify(this.props.auth.display_name),
         DEFAULT_REMOTE_DISPLAY_NAME: JSON.stringify("Fellow breakouter"),
         SHOW_POWERED_BY: JSON.stringify(true),
-        TOOLBAR_BUTTONS: JSON.stringify("microphone,camera,etherpad,sharedvideo,settings"),
+        TOOLBAR_BUTTONS: JSON.stringify([
+          "microphone","camera",
+          //"desktop", // May be able to enable; need more tests
+          "chat", "etherpad", "filmstrip",
+          "sharedvideo","settings",
+          "recording" // As of 2016-11-27, jitsi fails if recording button isn't included
+        ]),
       },
       // noSSL
       false
