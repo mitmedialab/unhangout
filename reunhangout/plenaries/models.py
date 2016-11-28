@@ -56,7 +56,7 @@ class Plenary(models.Model):
     public = models.BooleanField(default=False,
         help_text=_("Check to display this plenary on the public events list"))
     description = models.TextField(default="", blank=True,)
-    whiteboard = models.TextField(default="", blank=True, max_length=800)
+    whiteboard = models.TextField(default="", blank=True)
     breakout_mode = models.CharField(max_length=20, choices=(
         ("admin", _("Admin controlled")),
         ("user", _("Participant proposed")),

@@ -38,7 +38,6 @@ class Whiteboard extends React.Component {
           <InPlaceRichTextEditor
               className='whiteboard-input in-place-editor'
               readOnly={!this.props.auth.is_admin}
-              maxLength={200}
               value={this.props.plenary.whiteboard}
               onChange={(event) => this.handleChangeWhiteboard(event)} />
         </BS.Panel>

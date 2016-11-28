@@ -39,9 +39,6 @@ export class InPlaceRichTextEditor extends React.Component {
   }
 
   onChange(editorState) {
-    if (editorState.getCurrentContent().getPlainText().length >= this.state.maxLength) {
-      return;
-    }
     this.setState({
       editorState: editorState,
       value: stateToHTML(this.state.editorState.getCurrentContent())

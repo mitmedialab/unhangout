@@ -1,9 +1,14 @@
 .whiteboard {
+  position: relative;
+  max-height: 40vh;
+  .whiteboard-input {
+    max-height: 100%;
+    overflow: auto;
+  }
   .whiteboard-button {
-    float: right;
-    display: inline-block;
-    position: relative;
-    top: -1px;
+    position: absolute;
+    top: calc(100% - 1px);
+    right: 0;
     background-color: #fff;
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
@@ -15,10 +20,18 @@
     border-top-left-radius: 0px;
   }
   .panel {
-    margin:0px;
+    margin: 0px;
     box-shadow: none;
   }
   .panel-body {
     border: none;
+  }
+  .panel {
+    position: relative;
+    height: 100%;
+  }
+  .panel-collapse, .panel-body {
+    height: 100%;
+
   }
 }
