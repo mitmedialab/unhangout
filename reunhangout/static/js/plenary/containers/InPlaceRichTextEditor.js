@@ -1,6 +1,6 @@
 import React from "react";
 
-import {EditorState, ContentState, RichUtils, convertFromHTML} from 'draft-js';
+import Draft from 'draft-js';
 import PluginEditor from 'draft-js-plugins-editor';
 import createLinkifyPlugin from 'draft-js-linkify-plugin';
 import {stateToHTML} from 'draft-js-export-html';
@@ -9,13 +9,17 @@ import 'draft-js-linkify-plugin/lib/plugin.css';
 import * as style from "../../../scss/partials/_inPlaceEditor.scss";
 
 const linkifyPlugin = createLinkifyPlugin({target: '_blank'});
+const blockRenderMap = Draft.DefaultDraftBlockRenderMap.set('p', {
+  element: 'p',
+});
 
 export class InPlaceRichTextEditor extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      editing: false,
-      editorState: EditorState.createWithContent(
+      //editing: false,
+      editing: true, // FIXME
+      editorState: Draft.EditorState.createWithContent(
         this.getContentState(props.value)
       ),
       value: props.value,
@@ -34,8 +38,13 @@ export class InPlaceRichTextEditor extends React.Component {
   }
 
   getContentState(html) {
-    let blockArray = convertFromHTML(html);
-    return ContentState.createFromBlockArray(blockArray);
+    let blockArray = Draft.convertFromHTML(html, Draft.getSafeBodyFromHTML, blockRenderMap);
+    // Workaround for contents of paragraph tags getting merged:
+    // https://github.com/facebook/draft-js/issues/523#issuecomment-258193649
+    blockArray = blockArray.map((block) => {
+      return block.get('type') === 'p' ? block.set('type', 'unstyled') : block
+    });
+    return Draft.ContentState.createFromBlockArray(blockArray);
   }
 
   onChange(editorState) {
@@ -47,7 +56,7 @@ export class InPlaceRichTextEditor extends React.Component {
 
   componentWillReceiveProps(newProps) {
     if (newProps.value !== this.props.value) {
-      let editorState = EditorState.push(
+      let editorState = Draft.EditorState.push(
         this.state.editorState,
         this.getContentState(newProps.value)
       );
@@ -79,7 +88,7 @@ export class InPlaceRichTextEditor extends React.Component {
   }
 
   handleKeyCommand(command) {
-    const newState = RichUtils.handleKeyCommand(this.state.editorState, command);
+    const newState = Draft.RichUtils.handleKeyCommand(this.state.editorState, command);
     if (newState) {
       this.onChange(newState);
       return 'handled';
