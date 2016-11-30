@@ -7,7 +7,7 @@ from reunhangout.utils import json_dumps
 
 def prepare_message(payload=None, error=None, type=None):
     obj = {}
-    if payload:
+    if payload is not None:
         obj['payload'] = payload
     if error:
         obj['error'] = error
