@@ -52,6 +52,13 @@ def ws_disconnect(message, slug=None):
             plenary = None
         track("leave_plenary", message.user, plenary=plenary)
 
+        # Remove live participant record if any, so that participants who close
+        # their tab or refresh have to explicitly reconnect. Issue #44.
+        if plenary:
+            if plenary.live_participants.filter(id=message.user.id).exists():
+                payload = {'payload': {'username': message.user.username}}
+                handle_remove_live_participant(message, payload, plenary)
+
 @touch_presence
 @enforce_ordering(slight=True)
 @channel_session_user
