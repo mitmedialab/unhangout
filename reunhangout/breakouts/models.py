@@ -4,6 +4,7 @@ from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.translation import ugettext_lazy as _
+from django.utils import timezone
 from django.template.defaultfilters import slugify
 from jsonfield import JSONField
 from richtext.utils import sanitize
@@ -44,6 +45,8 @@ class Breakout(models.Model):
 
     webrtc_id = models.CharField(max_length=100, default=random_webrtc_id,
             editable=False, unique=True)
+
+    created = models.DateTimeField(default=timezone.now)
 
     CHANNEL_GROUP_NAME_PREFIX = "breakout-"
 
@@ -96,3 +99,6 @@ class Breakout(models.Model):
 
     def __str__(self):
         return self.title
+
+    class Meta:
+        ordering = ['created']
