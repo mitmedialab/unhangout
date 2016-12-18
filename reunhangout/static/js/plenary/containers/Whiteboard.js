@@ -35,11 +35,13 @@ class Whiteboard extends React.Component {
     return (
       <div className="whiteboard">
         <BS.Panel collapsible expanded={this.state.panelOpen}>
-          <InPlaceRichTextEditor
-              className='whiteboard-input in-place-editor'
-              readOnly={!this.props.auth.is_admin}
-              value={this.props.plenary.whiteboard}
-              onChange={(event) => this.handleChangeWhiteboard(event)} />
+          <div>
+            <InPlaceRichTextEditor
+                className='whiteboard-input in-place-editor'
+                readOnly={!this.props.auth.is_admin}
+                value={this.props.plenary.whiteboard}
+                onChange={(event) => this.handleChangeWhiteboard(event)} />
+          </div>
         </BS.Panel>
         <BS.Button
             onClick={() => this.setState({ panelOpen: !this.state.panelOpen })}
