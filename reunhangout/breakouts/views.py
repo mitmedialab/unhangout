@@ -17,7 +17,12 @@ def breakout_detail(request, breakout_id):
         raise Http404
 
     plenary = breakout.plenary
-    if plenary and (not plenary.open or not plenary.breakouts_open):
+    closed = (
+        bool(plenary) and
+        (not plenary.open or not plenary.breakouts_open) and
+        not plenary.has_admin(request.user)
+    )
+    if closed:
         raise Http404
 
     data = {
