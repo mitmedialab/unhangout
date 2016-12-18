@@ -100,7 +100,7 @@ class Chat extends React.Component {
     let chatBox = this.refs.chatBox;
     let latestMessage = this.props.chat_messages[this.props.chat_messages.length - 1];
     this.shouldScrollBottom = (
-      (chatBox.scrollTop + chatBox.offsetHeight >= chatBox.scrollHeight) ||
+      ((chatBox.scrollTop + chatBox.offsetHeight + 15) >= chatBox.scrollHeight) ||
       latestMessage && latestMessage.user.username === this.props.auth.username
     );
   }
