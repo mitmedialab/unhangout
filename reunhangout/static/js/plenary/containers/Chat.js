@@ -39,9 +39,9 @@ const atnamify = (text, users, msgId) => {
   let parts = text.split(/(?:^|\s)@([a-z0-9]+)/gim);
   return parts.map(function(part, i) {
     if (i % 2 === 1) {
-      let normalized = part.replace(/\s/g, "").toLowerCase();
+      let normalized = normalizeDisplayName(part);
       let mentioned = _.find(users, (user) => {
-        return user.display_name.replace("/\s/g", "").toLowerCase().indexOf(normalized) === 0;
+        return normalizeDisplayName(user.display_name).indexOf(normalized) === 0;
       });
       if (mentioned) {
         if (self.username === mentioned.username) {
@@ -59,6 +59,7 @@ const atnamify = (text, users, msgId) => {
     return part;
   });
 }
+const normalizeDisplayName = (name) => name.replace(/\s/g, "").toLowerCase();
 
 class ChatMessage extends React.Component {
   render() {
@@ -75,7 +76,7 @@ class ChatMessage extends React.Component {
   }
 
   markup(message) {
-    let atnamed = atnamify(message, this.props.presence.members, this.props.msg.id);
+    let atnamed = atnamify(message, this.props.members, this.props.msg.id);
     let markedUp = _.flatten(atnamed).map((part, i) => {
       if (_.isString(part)) {
         return <span key={i} dangerouslySetInnerHTML={{__html: part}} />
@@ -88,9 +89,15 @@ class ChatMessage extends React.Component {
 };
 
 class Chat extends React.Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {highlight: false}
+  }
+  componentWillReceiveProps(newProps) {
+    this._updateMembers(newProps);
+  }
+  componentWillMount() {
+    this._updateMembers(this.props)
   }
   componentDidMount() {
     let chatBox = this.refs.chatBox;
@@ -108,6 +115,14 @@ class Chat extends React.Component {
     if (this.shouldScrollBottom) {
       this.refs.chatBox.scrollTop = this.refs.chatBox.scrollHeight
     }
+  }
+  _updateMembers(props) {
+    this.setState({
+      members: _.uniqBy(
+        props.presence.members.concat(props.chat_messages.map(msg => msg.user)),
+        (member) => member.username
+      )
+    });
   }
   onSubmit(event) {
     event.preventDefault();
@@ -127,7 +142,7 @@ class Chat extends React.Component {
         <div className="chat-log">
           {this.props.chat_messages.map((msg, i) => {
             return <ChatMessage msg={msg} plenary={this.props.plenary}
-              presence={this.props.presence} key={`${i}`} auth={this.props.auth} />
+              members={this.state.members} key={`${i}`} auth={this.props.auth} />
           })}
         </div>
       </div>
