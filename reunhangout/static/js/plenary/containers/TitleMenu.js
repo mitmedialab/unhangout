@@ -60,19 +60,30 @@ export class TitleMenu extends React.Component {
           target={() => this.refs.target}
         >
           <div className='title-menu-overlay' onClick={(e) => e.stopPropagation()}>
-            <div className='user'>
-              <Avatar idPart={'title-menu-overlay'} user={this.props.auth} />
-              {this.props.auth.display_name}
-              <div style={{clear: 'both'}} />
-            </div>
-            <div className='menu-item'>
-              <a href='/accounts/settings/account'>
-                <i className='fa fa-cog' /> Account settings
-              </a>
-            </div>
-            <div className='menu-item'>
-              <a href='/accounts/logout/'>Logout</a>
-            </div>
+            {this.props.auth.is_authenticated ?
+              [
+                <div className='user' key='1'>
+                  <Avatar idPart={'title-menu-overlay'} user={this.props.auth} />
+                  {this.props.auth.display_name}
+                  <div style={{clear: 'both'}} />
+                </div>,
+                <div className='menu-item' key='2'>
+                  <a href='/accounts/settings/account'>
+                    <i className='fa fa-cog' /> Account settings
+                  </a>
+                </div>,
+                <div className='menu-item' key='3'>
+                  <a href='/accounts/logout/'>Logout</a>
+                </div>,
+              ]
+            :
+              <div className='menu-item'>
+                <a href={`/accounts/login/?next=${encodeURIComponent(document.location.pathname)}`}>
+                  Login
+                </a>
+              </div>
+            }
+
             {this.props.auth.is_admin ? 
               <div>
                 <hr />

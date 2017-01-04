@@ -469,10 +469,14 @@ def handle_video_sync(message, data, plenary):
         )
         track("start_play_for_all", message.user, plenary=plenary)
     elif payload['action'] == "pause":
-        VideoSync.objects.stop(
+        VideoSync.objects.pause_for_all(
             sync_id=plenary.channel_group_name
         )
         track("stop_play_for_all", message.user, plenary=plenary)
+    elif payload['action'] == "endSync":
+        VideoSync.objects.end_sync(
+            sync_id=plenary.channel_group_name
+        )
 
 @require_payload_keys(['message'])
 def handle_message_breakouts(message, data, plenary):

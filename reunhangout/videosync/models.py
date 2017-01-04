@@ -16,12 +16,22 @@ class VideoSyncManager(models.Manager):
         vs.current_time_index = time_index
         vs.save()
 
-    def stop(self, sync_id):
+    def pause_for_all(self, sync_id):
         try:
             vs = self.get(sync_id=sync_id)
         except VideoSync.DoesNotExist:
             pass
         else:
+            vs.broadcast_pause()
+            vs.delete()
+
+    def end_sync(self, sync_id):
+        try:
+            vs = self.get(sync_id=sync_id)
+        except VideoSync.DoesNotExist:
+            pass
+        else:
+            vs.broadcast_end_sync()
             vs.delete()
 
     def tick(self):
@@ -39,6 +49,10 @@ class VideoSync(models.Model):
 
     objects = VideoSyncManager()
 
+    def save(self, *args, **kwargs):
+        self.broadcast_tick()
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.sync_id
 
@@ -51,13 +65,19 @@ class VideoSync(models.Model):
             'state': 'playing',
         }
 
-    def broadcast(self):
+    def broadcast_tick(self):
         broadcast(self.channel_group_name, type='videosync', payload=self.serialize())
 
     def broadcast_pause(self):
         broadcast(self.channel_group_name, type='videosync', payload={
             'sync_id': self.sync_id,
             'state': "paused"
+        })
+
+    def broadcast_end_sync(self):
+        broadcast(self.channel_group_name, type='videosync', payload={
+            'sync_id': self.sync_id,
+            'state': "ended"
         })
 
     def tick(self):

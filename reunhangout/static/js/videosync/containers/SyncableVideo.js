@@ -33,7 +33,7 @@ class SyncableYoutubeVideo extends React.Component {
       syncTime: this.getCurSync().current_time_index || 0
     };
     // How many seconds can we drift by before we reposition?
-    this.RESYNC_THRESHOLD = 15;
+    this.RESYNC_THRESHOLD = 20;
     this.STATE_NAMES = {
       '-1': 'unstarted',
       0: 'ended',
@@ -53,10 +53,10 @@ class SyncableYoutubeVideo extends React.Component {
   togglePlayForAll(event) {
     event && event.preventDefault();
     if (this.isPlayingForAll()) {
-      this.props.onPauseForAll({syncId: this.props.sync_id});
+      this.props.pauseForAll({syncId: this.props.sync_id});
     } else {
       this.player.getCurrentTime().then((time) => {
-        this.props.onPlayForAll({
+        this.props.playForAll({
           sync_id: this.props.sync_id,
           time_index: time
         });
@@ -65,22 +65,24 @@ class SyncableYoutubeVideo extends React.Component {
   }
 
   videoEnded() {
-    this.props.onPauseForAll({syncId: this.props.sync_id});
+    if (this.props.showSyncControls) {
+      this.props.endSync({syncId: this.props.sync_id});
+    }
   }
 
   toggleSyncIntent(event) {
     event.preventDefault();
     if (this.getCurSync().synced) {
-      this.props.onBreakSyncPlayback({sync_id: this.props.sync_id});
+      this.props.breakSyncPlayback({sync_id: this.props.sync_id});
     } else {
-      this.props.onSyncPlayback({sync_id: this.props.sync_id});
+      this.props.syncPlayback({sync_id: this.props.sync_id});
     }
   }
 
   onPlayerStateChange(e) {
     let stateName = this.STATE_NAMES[e.data];
     if (stateName === "ended") {
-      if (this.props.showSyncControls && this.isPlayingForAll()) {
+      if (this.isPlayingForAll()) {
         this.videoEnded();
       }
     }
@@ -116,7 +118,6 @@ class SyncableYoutubeVideo extends React.Component {
   componentWillReceiveProps(props) {
     let newSync = props.videosync[props.sync_id] || {};
     this.setState({syncTime: newSync.current_time_index || 0});
-
     this.syncVideo(props);
   }
 
@@ -140,24 +141,34 @@ class SyncableYoutubeVideo extends React.Component {
       this.player.getCurrentTime(),
       this.player.getDuration(),
     ]).then(([state, time, duration]) => {
-      let stateName = this.STATE_NAMES[state];
-      // Stop playback if we've exceeded the duration
-      if (stateName === "ended" || (this.syncTime > duration && curSync.state === "playing")) {
-        if (this.props.showSyncControls) {
-          this.videoEnded();
-        }
-        return;
-      }
       if (curSync.synced === false) {
         // No intent to sync. Carry on.
         return;
       }
-      if (stateName === "playing" && curSync.state !== "playing") {
+      let playerState = this.STATE_NAMES[state];
+      console.log("videosync syncVideo", playerState, time, duration, curSync);
+      if (playerState === "ended" && Math.abs(duration - this.state.syncTime) < this.RESYNC_THRESHOLD) {
+        // Stop sync signal if the video has ended.
+        this.videoEnded();
+      } else if (playerState === "playing" && curSync.state === "ended") {
+        if (Math.abs(duration - time) < this.RESYNC_THRESHOLD) {
+          // Sync has ended, but let it play out.
+          console.log("videosync LET IT PLAY OUT")
+          return;
+        } else {
+          // We're too far out of bounds; stop ourselves.
+          console.log("videosync ENED TOO FAR OUT OF BOUNDS, PAUSE")
+          this.player.pauseVideo();
+        }
+      } else if (playerState === "playing" && curSync.state !== "playing") {
+        console.log("videosync SWITCH TO PAUSE")
         this.player.pauseVideo();
-      } else if (stateName !== "playing" && curSync.state === "playing") {
+      } else if (playerState !== "playing" && curSync.state === "playing") {
+        console.log("videosync SWITCH TO PLAY", this.state.syncTime)
         this.player.playVideo();
         this.player.seekTo(this.state.syncTime);
-      } else if (Math.abs(time - this.state.syncTime) > this.RESYNC_THRESHOLD) {
+      } else if (curSync.state === "playing" && Math.abs(time - this.state.syncTime) > this.RESYNC_THRESHOLD) {
+        console.log("videosync SEEK TO", this.state.syncTime)
         this.player.seekTo(this.state.syncTime);
       }
     });
@@ -187,12 +198,12 @@ class SyncableYoutubeVideo extends React.Component {
     let intendToSync = curSync.synced !== false;
     let classes = ['sync-indicator'];
     let message;
-    if (synced) {
+    if (!syncAvailable) {
+      classes.push("no-sync");
+      message = "No sync";
+    } else if (synced) {
       classes.push("synced");
       message = "Synced";
-    } else if (!syncAvailable) {
-      classes.push("No sync");
-      message = "No sync";
     } else if (intendToSync) {
       classes.push("syncing");
       message = "Syncing..";
@@ -236,10 +247,11 @@ export default connect(
   }),
   // map dispatch to props
   (dispatch, ownProps) => ({
-    onPlayForAll: (payload) => dispatch(A.playForAll(payload)),
-    onPauseForAll: (payload) => dispatch(A.pauseForAll(payload)),
-    onSyncPlayback: (payload) => dispatch(A.syncPlayback(payload)),
-    onBreakSyncPlayback: (payload) => dispatch(A.breakSyncPlayback(payload)),
+    playForAll: (payload) => dispatch(A.playForAll(payload)),
+    pauseForAll: (payload) => dispatch(A.pauseForAll(payload)),
+    endSync: (payload) => dispatch(A.endSync(payload)),
+    syncPlayback: (payload) => dispatch(A.syncPlayback(payload)),
+    breakSyncPlayback: (payload) => dispatch(A.breakSyncPlayback(payload)),
   }),
 )(SyncableVideo);
 
