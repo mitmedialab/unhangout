@@ -195,7 +195,7 @@ class Chat extends React.Component {
 export default connect(
   // map state to props
   (state) => ({
-    chat_messages: state.chat_messages,
+    chat_messages: _.filter(state.chat_messages, (m) => !m.archived),
     presence: state.presence,
     plenary: state.plenary,
     auth: state.auth,

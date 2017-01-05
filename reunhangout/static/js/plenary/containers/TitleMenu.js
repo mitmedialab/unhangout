@@ -21,13 +21,13 @@ export class TitleMenu extends React.Component {
   }
 
   togglePlenaryOpen() {
-    this.props.onAdminSendPlenaryDetails({
+    this.props.adminSendPlenaryDetails({
       open: !this.props.plenary.open
     });
   }
 
   toggleBreakoutsOpen() {
-    this.props.onAdminSendPlenaryDetails({
+    this.props.adminSendPlenaryDetails({
       breakouts_open: !this.props.plenary.breakouts_open
     });
   }
@@ -38,6 +38,14 @@ export class TitleMenu extends React.Component {
       show: false,
       plenarySettingsModalOpen: true
     });
+  }
+
+  archiveChatMessages(event) {
+    event && event.preventDefault();
+    this.props.adminArchiveChatMessages({
+      message_ids: this.props.chat_messages.map(msg => msg.id)
+    });
+    this.setState({ show: false });
   }
 
   render() {
@@ -106,6 +114,11 @@ export class TitleMenu extends React.Component {
                     <i className='fa fa-cogs' /> Plenary settings
                   </a>
                 </div>
+                <div className='menu-item'>
+                  <a href='#' onClick={(e) => this.archiveChatMessages(e)}>
+                    <i className='fa fa-archive'></i> Archive chat messages
+                  </a>
+                </div>
               </div>
             : ""}
           </div>
@@ -115,7 +128,7 @@ export class TitleMenu extends React.Component {
           <PlenaryEditor
             plenary={this.props.plenary}
             onChange={(update) => {
-              this.props.onAdminSendPlenaryDetails(update);
+              this.props.adminSendPlenaryDetails(update);
               this.setState({plenarySettingsModalOpen: false});
             }}
             onClose={() => this.setState({plenarySettingsModalOpen: false})} />
@@ -129,11 +142,12 @@ export default connect(
   // map state to props
   (state) => ({
     plenary: state.plenary,
+    chat_messages: state.chat_messages,
     auth: state.auth,
   }),
   // map dispatch to props
   (dispatch, ownProps) => ({
-    onAdminSendPlenaryDetails: (payload) => dispatch(A.adminSendPlenaryDetails(payload)),
-    onSendAuthDetails: (payload) => dispatch(A.sendAuthDetails(payload)),
+    adminSendPlenaryDetails: (payload) => dispatch(A.adminSendPlenaryDetails(payload)),
+    adminArchiveChatMessages: (payload) => dispatch(A.adminArchiveChatMessages(payload)),
   })
 )(TitleMenu);

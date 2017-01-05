@@ -27,7 +27,7 @@ def plenary_detail(request, id_or_slug):
         pass
     try:
         plenary = Plenary.objects.select_related().prefetch_related(
-            'breakout_set', 'breakout_set__votes', 'chatmessage_set', 'admins'
+            'breakout_set', 'breakout_set__votes', 'admins'
         ).get(slug=id_or_slug)
     except Plenary.DoesNotExist:
         raise Http404
@@ -39,7 +39,9 @@ def plenary_detail(request, id_or_slug):
     breakouts = list(plenary.breakout_set.all())
 
     # Most recent 100 messages, but presented in ascending order.
-    chat_messages = reversed(plenary.chatmessage_set.order_by('-created')[0:100])
+    chat_messages = reversed(
+        plenary.chatmessage_set.filter(archived=False).order_by('-created')[0:100]
+    )
     data = {
         'plenary': plenary.serialize(),
         'breakouts':  [breakout.serialize() for breakout in breakouts],

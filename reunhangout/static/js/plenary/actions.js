@@ -23,6 +23,12 @@ export const chatMessageReceive = (payload) => {
     dispatch({type: CHAT_MESSAGE_RECEIVE, payload});
   }
 };
+export const CHAT_MESSAGE_REPLACE = 'CHAT_MESSAGE_REPLACE';
+export const chatMessageReplace = (payload) => {
+  return (dispatch) => {
+    dispatch({type: CHAT_MESSAGE_REPLACE, payload});
+  }
+};
 
 // Embeds
 export const SET_EMBEDS = 'SET_EMBEDS';
@@ -158,6 +164,18 @@ export const adminSendPlenaryDetails = (payload) => {
       });
   };
 };
+
+export const ADMIN_ARCHIVE_CHAT_SENDING = 'ADMIN_ARCHIVE_CHAT_SENDING';
+export const ADMIN_ARCHIVE_CHAT_SENT = 'ADMIN_ARCHIVE_CHAT_SENT';
+export const ADMIN_ARCHIVE_CHAT_ERROR = 'ADMIN_ARCHIVE_CHAT_ERROR';
+export const adminArchiveChatMessages = (payload) => {
+  return (dispatch) => {
+    dispatch({type: ADMIN_ARCHIVE_CHAT_SENDING, payload})
+    sendSocketMessage({type: "archive_chat", payload})
+    .then(() => dispatch({type: ADMIN_ARCHIVE_CHAT_SENT, payload}))
+    .catch((err) => dispatch({type: ADMIN_ARCHIVE_CHAT_ERROR, payload}))
+  }
+}
 
 // Auth details
 export const AUTH_DETAILS_SENDING = 'AUTH_DETAILS_SENDING';

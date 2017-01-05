@@ -164,6 +164,7 @@ class ChatMessage(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     message = models.TextField(default="", blank=True)
     highlight = models.BooleanField(default=False)
+    archived = models.BooleanField(default=False)
 
     def safe_message(self):
         return sanitize(self.message, tags=['b', 'i'])
@@ -178,6 +179,7 @@ class ChatMessage(models.Model):
             'created': self.created.isoformat(),
             'message': self.safe_message(),
             'highlight': self.highlight,
+            'archived': self.archived,
         }
 
     class Meta:

@@ -80,6 +80,8 @@ def route_message(message, data, plenary):
         handle_error(message, "Missing type")
     elif data['type'] == "chat":
         handle_chat(message, data, plenary)
+    elif data['type'] == "archive_chat":
+        handle_archive_chat(message, data, plenary)
     elif data['type'] == "embeds":
         handle_embeds(message, data, plenary)
     elif data['type'] == "breakout":
@@ -114,6 +116,17 @@ def handle_chat(message, data, plenary):
     data = chat_message.serialize()
     broadcast(plenary.channel_group_name, type='chat', payload=data)
     track("plenary_chat", message.user, data, plenary=plenary)
+
+@require_payload_keys(['message_ids'])
+def handle_archive_chat(message, data, plenary):
+    if not plenary.has_admin(message.user):
+        return handle_error(message, "Must be an admin to archive chat messages")
+
+    message_ids = data['payload'].get('message_ids')
+    chat_messages = ChatMessage.objects.filter(id__in=message_ids, plenary=plenary)
+    chat_messages.update(archived=True)
+    broadcast(plenary.channel_group_name, type='chat_replace',
+            payload=[m.serialize() for m in chat_messages])
 
 @require_payload_keys(['embeds'])
 def handle_embeds(message, data, plenary):

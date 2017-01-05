@@ -93,6 +93,11 @@ export const chat_messages = (state=null, action) => {
   switch (action.type) {
     case A.CHAT_MESSAGE_RECEIVE:
       return [...state, action.payload]
+    case A.CHAT_MESSAGE_REPLACE:
+      let messages = {}
+      state.forEach(msg => { messages[msg.id] = msg });
+      action.payload.forEach(msg => { messages[msg.id] = msg })
+      return _.values(messages)
   }
   return state;
 };

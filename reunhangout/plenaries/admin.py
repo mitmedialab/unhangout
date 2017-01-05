@@ -31,7 +31,7 @@ class SeriesAdmin(admin.ModelAdmin):
 
 @admin.register(ChatMessage)
 class ChatMessageAdmin(admin.ModelAdmin):
-    list_display = ['created', 'plenary', 'user', 'message_trunc']
+    list_display = ['created', 'plenary', 'user', 'message_trunc', 'archived']
 
     def message_trunc(self, obj):
         return obj.message[0:100]

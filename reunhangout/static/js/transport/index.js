@@ -59,6 +59,9 @@ export class SocketClient {
       case "chat": 
         this.store.dispatch(PLENARY_ACTIONS.chatMessageReceive(data.payload));
         break;
+      case "chat_replace":
+        this.store.dispatch(PLENARY_ACTIONS.chatMessageReplace(data.payload));
+        break;
       case "embeds":
         this.store.dispatch(PLENARY_ACTIONS.setEmbeds(data.payload));
         break;
