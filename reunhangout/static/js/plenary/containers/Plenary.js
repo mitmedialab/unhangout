@@ -14,6 +14,7 @@ import {Avatar} from './Avatar';
 import TitleMenu from './TitleMenu';
 import PlenaryStatusBanner from './PlenaryStatusBanner';
 import Whiteboard from './Whiteboard';
+import WebRTCStatus from './WebRTCStatus';
 
 class Plenary extends React.Component {
   constructor() {
@@ -62,6 +63,7 @@ class Plenary extends React.Component {
       }
       return <div className='plenary open'>
         { this.props.auth.is_admin ? <PlenaryStatusBanner /> : "" }
+        <WebRTCStatus />
         <ConnectionStatus />
         <div className='plenary-grid'>
           <div className='column users-col'>
@@ -88,6 +90,7 @@ class Plenary extends React.Component {
       let upcoming = !this.props.plenary.canceled && doorsOpen > now;
       return <div className="plenary closed">
         { this.props.auth.is_admin ? <PlenaryStatusBanner /> : "" }
+        <WebRTCStatus />
         <BS.Grid fluid>
           <BS.Row>
             <BS.Col xs={3} className="column">
