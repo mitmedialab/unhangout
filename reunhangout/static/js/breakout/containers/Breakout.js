@@ -5,6 +5,7 @@ import {ConnectionStatus} from '../../transport';
 import * as A from '../actions';
 import * as PRESENCE_ACTIONS from '../../transport/actions';
 import {Presence} from '../../plenary/containers/Presence.js';
+import WebRTCStatus from '../../plenary/containers/WebRTCStatus';
 import JitsiMeetExternalAPI from "../../vendor/jitsi-meet/external_api";
 import * as style from "../../../scss/pages/breakout/_breakoutstyle.scss";
 
@@ -129,6 +130,7 @@ class Breakout extends React.Component {
 
     return <div className='breakout-detail'>
       <ConnectionStatus />
+      <WebRTCStatus />
       <div className='breakout-columns'>
         <div className={'breakout-left-col' + (errorMessage ? ' hide' : '')}>
           { errorMessage ?
