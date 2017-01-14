@@ -21,16 +21,18 @@ from reunhangout.utils import json_dumps
 from reunhangout.channels_utils import serialize_room
 
 def plenary_detail(request, id_or_slug):
-    try:
-        return redirect(Plenary.objects.get(pk=id_or_slug).get_absolute_url())
-    except (Plenary.DoesNotExist, ValueError):
-        pass
+    if re.match('^\d+$', id_or_slug):
+        query = {'id': id_or_slug}
+    else:
+        query = {'slug': id_or_slug}
     try:
         plenary = Plenary.objects.select_related().prefetch_related(
             'breakout_set', 'breakout_set__votes', 'admins'
-        ).get(slug=id_or_slug)
+        ).get(**query)
     except Plenary.DoesNotExist:
         raise Http404
+    if id_or_slug != plenary.slug:
+        return redirect(plenary.get_absolute_url())
 
     if plenary.open and not request.user.is_authenticated():
         messages.info(request, "You must be signed in to attend events.")
