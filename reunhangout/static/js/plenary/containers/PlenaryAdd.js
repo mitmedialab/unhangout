@@ -46,6 +46,8 @@ export default class PlenaryAdd extends React.Component {
     return <div className='container'>
       <h1>Create a new event</h1>
       <PlenaryEditor onChange={(details) => this.onChange(details)}
+                     copyablePlenaries={window.COPYABLE_PLENARIES}
+                     copyFromId={window.COPY_FROM_ID || undefined}
                      loading={this.state && this.state.loading} />
     </div>
   }

@@ -7,6 +7,7 @@ import uuid
 from urllib.parse import urlparse
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db.models.fields.files import FieldFile
 from django.db.models import F, Count
 from django.db import transaction
 from django.utils.timezone import now
@@ -317,7 +318,9 @@ def update_plenary(plenary, payload):
             setattr(plenary, key, payload[key])
 
     # Images - read in base64 type
-    if payload.get('image') and payload['image'].startswith("data:image/"):
+    if isinstance(payload.get('image'), FieldFile):
+        plenary.image = payload['image']
+    elif isinstance(payload.get('image'), str) and payload['image'].startswith("data:image/"):
         try:
             plenary.image = _b64_image_to_uploaded_file(payload['image'])
         except (ValidationError, ValueError, TypeError) as e:

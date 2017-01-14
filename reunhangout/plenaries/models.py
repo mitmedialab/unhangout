@@ -15,23 +15,10 @@ from timezone_field import TimeZoneField
 import iso8601
 
 class Series(models.Model):
-    name = models.CharField(max_length=100)
     slug = models.SlugField(help_text="Short name for URL")
-    organizer = models.CharField(max_length=100, default="", blank=True)
-    image = models.ImageField(upload_to="series", blank=True, null=True)
-    description = models.TextField(default="", blank=True)
-    start_date = models.DateTimeField(_("Start date (UTC)"))
-    end_date = models.DateTimeField(_("End date (UTC)"))
-    time_zone = TimeZoneField(default='America/New_York',
-           help_text=_("Default time zone to display times in."))
-
-    admins = models.ManyToManyField(settings.AUTH_USER_MODEL)
-
-    def safe_description(self):
-        return sanitize(self.description)
 
     def __str__(self):
-        return self.name
+        return self.slug
 
     class Meta:
         verbose_name = _("Series")
@@ -41,7 +28,7 @@ class Series(models.Model):
 class Plenary(models.Model):
     series = models.ForeignKey(Series, on_delete=models.CASCADE, blank=True, null=True)
     name = models.CharField(max_length=100)
-    slug = models.SlugField(help_text=_("Short name for URL"))
+    slug = models.SlugField(help_text=_("Short name for URL"), unique=True)
     organizer = models.CharField(max_length=100, default="", blank=True)
     image = models.ImageField(upload_to="plenaries", blank=True, null=True)
 
@@ -120,7 +107,7 @@ class Plenary(models.Model):
     def serialize(self):
         return {
             'id': self.id,
-            'series_name': self.series and self.series.name,
+            'series_name': self.series and self.series.slug,
             'name': self.name,
             'slug': self.slug,
             'url': self.get_absolute_url(),

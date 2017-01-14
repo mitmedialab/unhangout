@@ -82,7 +82,7 @@ class PlenaryStatusBanner extends React.Component {
           : ended ?
             <span>
               This event has ended.{' '}
-              <BS.Button bsStyle='default' href='/events/add/'>
+              <BS.Button bsStyle='default' href={`/events/add/?copy_from_id=${this.props.plenary.id}`}>
                 Schedule another
               </BS.Button>
             </span>

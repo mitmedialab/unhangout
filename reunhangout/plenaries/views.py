@@ -1,7 +1,7 @@
 import json
 import re
 
-from django.http import Http404, HttpResponseBadRequest, JsonResponse
+from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -13,7 +13,7 @@ from django.utils.timezone import now
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 from channels_presence.models import Room
-from plenaries.models import Plenary
+from plenaries.models import Plenary, Series
 from plenaries.channels import update_plenary
 from videosync.models import VideoSync
 from accounts.utils import serialize_auth_state
@@ -87,20 +87,60 @@ def plenary_list(request):
 @login_required
 @ensure_csrf_cookie
 def plenary_add(request):
+    copyable = Plenary.objects.filter(admins=request.user)
+    copyable_fields = ('name', 'image', 'organizer', 'time_zone', 'doors_close',
+            'public', 'description', 'whiteboard', 'slug')
+    serialized_fields = ('id', 'start_date', 'end_date') + copyable_fields
+
     if request.method == 'POST':
         try:
             payload = json.loads(request.POST.get('data'))
         except ValueError:
             return HttpResponseBadRequest("Invalid JSON")
-        plenary = Plenary()
+
+        copy_from = None
+        if payload.get('copy_from_id'):
+            try:
+                copy_from = copyable.get(id=payload.get('copy_from_id'))
+            except Plenary.DoesNotExist:
+                return HttpResponseBadRequest("copy_from_id plenary not found")
+
+            for key in copyable_fields:
+                if key not in payload:
+                    payload[key] = getattr(copy_from, key)
+            if copy_from.image and payload['image'] == copy_from.image.url:
+                payload['image'] = copy_from.image
+
+
         try:
-            update_plenary(plenary, payload)
+            with transaction.atomic():
+                if copy_from and payload['slug'] == copy_from.slug:
+                    series, created = Series.objects.get_or_create(slug=payload['slug'])
+                    copy_from.series = series
+                    copy_from.slug = str(copy_from.pk)
+                    copy_from.save()
+
+                plenary = Plenary()
+                update_plenary(plenary, payload)
+                plenary.save()
+                plenary.admins.add(request.user)
+                if copy_from:
+                    for admin in copy_from.admins.all():
+                        plenary.admins.add(admin)
+                return HttpResponse("success")
+
         except ValidationError as e:
             return HttpResponseBadRequest(json_dumps(e.message_dict))
-        with transaction.atomic():
-            plenary.save()
-            plenary.admins.add(request.user)
-    return render(request, "plenaries/plenary_add.html")
+
+    copyable_data = {}
+    for plenary in copyable:
+        serialized = plenary.serialize()
+        copyable_data[plenary.id] = {key: serialized[key] for key in serialized_fields}
+
+    return render(request, "plenaries/plenary_add.html", {
+        'copyable': copyable_data,
+        'copy_from_id': request.GET.get("copy_from_id"),
+    })
 
 def slug_check(request):
     slug = request.GET.get("slug")

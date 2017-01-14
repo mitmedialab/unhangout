@@ -1,5 +1,16 @@
 {% extends "base.html" %}
 {% load render_bundle from webpack_loader %}
+{% load escapejson %}
+
+{% block head %}
+{{block.super}}
+<script type='text/javascript'>
+  window.COPYABLE_PLENARIES = {{copyable|escapejson}};
+{% if copy_from_id %}
+  window.COPY_FROM_ID = {{copy_from_id}};
+{% endif %}
+</script>
+{% endblock %}
 
 {% block title %}Add an Event{% endblock %}
 {% block styles %}{% render_bundle 'main' 'css' %}{% endblock %}

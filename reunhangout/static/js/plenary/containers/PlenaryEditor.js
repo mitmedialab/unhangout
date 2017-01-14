@@ -1,6 +1,7 @@
 import React from "react";
 import * as BS from "react-bootstrap";
 import moment from 'moment-timezone';
+import _ from 'lodash';
 import {InPlaceRichTextEditor} from './InPlaceRichTextEditor';
 import {DateTimePicker} from './DateTimePicker';
 import {RelativeTime} from './RelativeTime';
@@ -12,7 +13,7 @@ export class PlenaryEditor extends React.Component {
     this.plenarySettingsFields = [
       'name', 'organizer', 'start_date', 'end_date', 'doors_open',
       'doors_close', 'description', 'slug', 'public', 'image',
-      'canceled',
+      'canceled', 'copy_from_id'
     ];
     this.plenarySettingsFieldsRequired = ['name', 'slug'];
   }
@@ -37,6 +38,9 @@ export class PlenaryEditor extends React.Component {
     let update = {};
     this.plenarySettingsFields.forEach((f) => update[f] = props.plenary[f]);
     this.setState(update);
+    if (props.copyFromId) {
+      this.setCopyFrom({target: {value: props.copyFromId}});
+    }
   }
 
   renderControl(label, stateName, placeholder="", type="text", help="") {
@@ -88,7 +92,20 @@ export class PlenaryEditor extends React.Component {
                        }
                      }}/>
                {"/"}
+               {this._getCopyFrom() && this._getCopyFrom()[stateName] === this.state[stateName] ?
+                 <div className='alert alert-info'>
+                   The URL for the previous{' '}
+                   <b>
+                    <a href={`/event/${this.state[stateName]}`}
+                       target='_blank'
+                       rel='noopener noreferrer'>/event/{this.state[stateName]}/</a>
+                   </b>
+                   {' '}will be reset to <b>/event/{this.state.copy_from_id}</b>.
+                 </div>
+               : ""}
                <div className='text-muted'>
+
+
                  Changing URL causes all participants to reload, interupting video.
                </div>
             </div>
@@ -138,6 +155,18 @@ export class PlenaryEditor extends React.Component {
               value={this.state[stateName]}
               onChange={(value) => this.setState({[stateName]: value})} />
 
+          : type === "copy_from" ?
+            <BS.FormControl
+                componentClass='select'
+                onChange={this.setCopyFrom.bind(this)}
+                value={this.state[stateName]}>
+              <option value=''>----</option>
+              {_.map(this.props.copyablePlenaries, (plenary, id) => (
+                <option value={plenary.id} key={`copy-from-${id}`}>
+                  {plenary.name} - /event/{plenary.slug}
+                </option>
+              ))}
+            </BS.FormControl>
           : ""
         }
         { this.state[`${stateName}-error`] ?
@@ -148,9 +177,67 @@ export class PlenaryEditor extends React.Component {
     )
   }
 
+  _hasCopyablePlenaries() {
+    return this.props.copyablePlenaries && _.size(this.props.copyablePlenaries) > 0;
+  }
+
+  _getCopyFrom() {
+    return this.props.copyablePlenaries &&
+      this.props.copyablePlenaries[this.state.copy_from_id];
+  }
+
+  setCopyFrom(event) {
+    let copyFromId = event.target.value;
+    let update = {copy_from_id: copyFromId};
+    if (copyFromId) {
+      let copyFrom = this.props.copyablePlenaries[copyFromId];
+      [
+        "name", "image", "organizer", "time_zone", "public",
+        "description", "whiteboard"
+      ].forEach(key => {
+        update[key] = copyFrom[key];
+      });
+      if (!/^\d+$/.test(copyFrom.slug)) {
+        update.slug = copyFrom.slug;
+      }
+      let now = moment();
+      let cfStartDate = moment(copyFrom.start_date);
+      let cfEndDate = moment(copyFrom.end_date);
+      let cfDoorsClose = moment(copyFrom.doors_close);
+      let durationMillis = cfEndDate.diff(cfStartDate);
+      let doorsCloseMillis = cfDoorsClose.diff(cfEndDate);
+      update.start_date = now.format()
+      update.end_date = now.add(durationMillis, 'milliseconds').format();
+      update.doors_close = now.add(durationMillis + doorsCloseMillis, 'milliseconds').format();
+    }
+    this.setState(update);
+  }
+
+  maybeRenderCopyFrom() {
+    if (this._hasCopyablePlenaries()) {
+      return this.renderControl('Copy details from an existing event',
+                                'copy_from_id',
+                                '',
+                                'copy_from');
+    }
+    return "";
+  }
+
   checkSlugAvailability(stateName, slug) {
     if (!this._checkSlugAvailability) {
       this._checkSlugAvailability = _.debounce((stateName, slug) => {
+        // Allow duplicate slug that is the same as a copied-from plenary.
+        if (/^\d$$/.test(slug)) {
+          this.setState({[`${stateName}-error`]: "At least one letter required"});
+          return;
+        }
+
+        let copyFrom = this._getCopyFrom();
+        if (copyFrom && copyFrom[stateName] === slug) {
+          this.setState({[`${stateName}-error`]: ""});
+          return;
+        }
+
         let urlParts = [
           "/slug-check?slug=",
           encodeURIComponent(slug),
@@ -206,6 +293,7 @@ export class PlenaryEditor extends React.Component {
     return (
       <BS.Form onSubmit={(e) => this.onChange(e)}>
         <BS.Modal.Body className='form-horizontal'>
+            {this.maybeRenderCopyFrom()}
             {this.renderControl("Title", "name", "Give your event a catchy title")}
             {this.renderControl("Image", "image", "", "image")}
             {this.renderControl("Host", "organizer", "Tell your attendees who's organizing this event")}

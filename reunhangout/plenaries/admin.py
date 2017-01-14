@@ -18,16 +18,10 @@ class PlenaryAdmin(admin.ModelAdmin):
     readonly_fields = ['embeds', 'history']
     filter_horizontal = ['admins']
 
-class SeriesForm(forms.ModelForm):
-    description = RichTextField(required=False)
-
 @admin.register(Series)
 class SeriesAdmin(admin.ModelAdmin):
-    form = SeriesForm
-    list_display = ['name', 'organizer', 'start_date', 'end_date']
-    search_fields = ['name', 'organizer', 'description']
-    prepopulated_fields = {'slug': ['name']}
-    filter_horizontal = ['admins']
+    list_display = ['slug']
+    search_fields = ['slug']
 
 @admin.register(ChatMessage)
 class ChatMessageAdmin(admin.ModelAdmin):
