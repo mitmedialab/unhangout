@@ -11,10 +11,10 @@ import * as style from "../../../scss/pages/breakout/_breakoutstyle.scss";
 class JitsiVideo extends React.Component {
   setupJitsiFrame(div) {
     // API alternative to:
-    // <iframe src={`https://meet.jit.si/${this.props.breakout.webrtc_id}`} frameBorder={0}></iframe>
+    // <iframe src={`https://jitsi.unhangout.io/${this.props.breakout.webrtc_id}`} frameBorder={0}></iframe>
     this.api = new JitsiMeetExternalAPI(
       // domain
-      "meet.jit.si",
+      "jitsi.unhangout.io",
       // room_name
       this.props.breakout.webrtc_id,
       // width
