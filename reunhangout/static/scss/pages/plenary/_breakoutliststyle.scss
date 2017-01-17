@@ -1,5 +1,7 @@
+$brand-primary: #3652d3;
+
 .breakout-list-header {
-  background-color: #2e7daa;
+  background-color: $brand-primary;
   padding: 15px;
   .btn-default {
     color: #2e7daa;

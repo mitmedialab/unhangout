@@ -29,17 +29,21 @@ export class Presence extends React.Component {
       <div className='presence-container'>
         <div className='presence-controls'>
           <div className ='presence-counter'>
-            <BS.Glyphicon glyph='user' />
+            <i className='fa fa-child' />
             {this.props.presence.members.length}
           </div>
           <BS.Button
             onClick={() => this.setState({detailView: false})}
+            bsStyle="default"
+            bsSize="small"
             className="grid-button">
-            <BS.Glyphicon glyph='th' />
+            <i className='fa fa-th-large' />
           </BS.Button>
           <BS.Button
+            bsStyle="default"
+            bsSize="small"
             onClick={() => this.setState({detailView: true})}>
-            <BS.Glyphicon glyph='th-list' />
+            <i className='fa fa-th-list' />
           </BS.Button>
         </div>
         <div className='presence'>

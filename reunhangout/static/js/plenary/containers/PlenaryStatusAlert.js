@@ -2,11 +2,11 @@ import React from 'react';
 import {connect} from "react-redux";
 import * as BS from 'react-bootstrap';
 import * as A from '../actions';
-import * as style from "../../../scss/pages/plenary/_statusBanner.scss"
+import * as style from "../../../scss/pages/plenary/_plenaryStatusAlert.scss"
 import moment from 'moment-timezone';
 import {PlenaryEditor} from './PlenaryEditor';
 
-class PlenaryStatusBanner extends React.Component {
+class PlenaryStatusAlert extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -49,14 +49,14 @@ class PlenaryStatusBanner extends React.Component {
     let closing = now < doorsClose && now > endDate;
     let ended = now > doorsClose;
 
-    let edit = <BS.Button bsStyle='default' onClick={(e) => this.openModal(e)}>
+    let edit = <BS.Button bsStyle='default' bsSize='xsmall' onClick={(e) => this.openModal(e)}>
       Edit
     </BS.Button>;
 
-    return <div className='plenary-status-banner'>
+    return <div className='plenary-status-alert'>
       <div>
         { canceled ?
-            <span>This event has been canceled. {edit}</span>
+            <span>This event has been canceled <i className='fa fa-frown-o' />{edit}</span>
           : startsSoon ?
             <span>
               This event starts <span>{startDate.from(now)}</span>.
@@ -73,21 +73,21 @@ class PlenaryStatusBanner extends React.Component {
             </span>
           : closing ?
             <span>
-              This event is past its end time, and will auto-close
-              {' '}<span>{doorsClose.from(now)}</span>.
-              <BS.Button bsStyle='default' onClick={(e) => this.extendTime(e, 10)}>
+              This event has ended, and will auto-close
+              {' '}<span>{doorsClose.from(now)} <i className='fa fa-magic' /></span>
+              <BS.Button bsStyle='default' bsSize='xsmall' onClick={(e) => this.extendTime(e, 10)}>
                 Extend by 10 minutes
               </BS.Button>
             </span>
           : ended ?
             <span>
-              This event has ended.{' '}
-              <BS.Button bsStyle='default' href='/events/add/'>
-                Schedule another
+              This event has ended. <i className='fa fa-hand-peace-o' />{' '}
+              <BS.Button bsStyle='default' bsSize='xsmall' href='/events/add/'>
+                Schedule another 
               </BS.Button>
             </span>
           : 
-            <span>This event is live! {edit}</span>
+            <span>This event is live! <i className='fa fa-rocket' />{edit}</span>
         }
       </div>
       <BS.Modal show={this.state.plenarySettingsModalOpen}
@@ -115,4 +115,4 @@ export default connect(
     onAdminSendPlenaryDetails: (payload) => dispatch(A.adminSendPlenaryDetails(payload)),
     onSendAuthDetails: (payload) => dispatch(A.sendAuthDetails(payload)),
   })
-)(PlenaryStatusBanner);
+)(PlenaryStatusAlert);
