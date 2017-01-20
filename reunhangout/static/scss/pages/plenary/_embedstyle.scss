@@ -4,41 +4,41 @@
 }
 
 .embed-admin-controls {
-  background-color: #f3bd71;
+  background-color: #83ffcd;
   padding: 10px;
+  .alert-error{
+    padding:3px;
+    background-color: #fffda0;
+    color: darken(#fcf3af,60%);
+    margin: 0;
+    text-align: center;
+    i{
+      padding-right: 5px;
+    }
   }
-.button-flex-container {
-  display: flex;
-  flex-flow: row wrap;
-  flex-just: space-around;
-}
-.play-button {
-  flex-grow: 1;
-  margin: 0px 5px 5px 5px;
-}
-.remove-button {
-  flex-grow: 1; 
-  margin: 0px 5px 5px 5px;
 }
 
-.sync-indicator {
-  display: inline-block;
-  vertical-align: middle;
-  margin-top: 0;
-  width: 6px;
-  height: 6px;
-  border-radius: 6px;
-  background-color: #aaa;
-  box-shadow: 0px 0px 5px rgba(200, 200, 200, 1);
-  &.synced {
-    background-color: #0f0;
-    box-shadow: 0px 0px 5px rgba(0, 200, 0, 1);
-  }
-  &.unsynced {
-    background-color: #f00;
-    box-shadow: 0px 0px 5px rgba(200, 0, 0, 1);
+.embed-input-form-group{
+  margin-bottom: 10px;
+  .input-field{
+    border: 2px solid #222;
   }
 }
+
+.button-flex-container {
+  margin-top: 5px;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+}
+
+.remove-button {
+  flex-grow: 0; 
+  i{
+    margin-right: 3px;
+  }
+}
+
 .previous-embed-list-item {
   width: 240px;
   display: flex;

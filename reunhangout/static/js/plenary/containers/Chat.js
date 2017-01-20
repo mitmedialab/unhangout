@@ -157,7 +157,7 @@ class Chat extends React.Component {
                 <BS.FormControl
                     className="chat-composer"
                     type='text'
-                    placeholder='Chat...'
+                    placeholder='Type a message&hellip;'
                     disabled={this.props.plenary.chat.state === "sending"}
                     value={(this.state && this.state.value) || ""}
                     onChange={(e) => this.setState({value: e.target.value})} />
@@ -169,7 +169,7 @@ class Chat extends React.Component {
                       onChange={(e) => this.setState({highlight: e.target.checked})}
                     />
                       <label htmlFor="highlight">
-                        <BS.Glyphicon glyph="exclamation-sign" />
+                        <i className='fa fa-exclamation-circle' />
                       </label>
                   </BS.InputGroup.Addon>
               </BS.InputGroup>
@@ -181,7 +181,7 @@ class Chat extends React.Component {
                 <BS.FormControl
                   className="chat-composer"
                   type='text'
-                  placeholder='Chat...'
+                  placeholder='Type a message&hellip;'
                   disabled={this.props.plenary.chat.state === "sending"}
                   value={(this.state && this.state.value) || ""}
                   onChange={(e) => this.setState({value: e.target.value})} />

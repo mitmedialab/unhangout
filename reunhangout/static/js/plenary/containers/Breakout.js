@@ -82,7 +82,7 @@ export default class Breakout extends React.Component {
     }
     return <div className={classes.join(" ")}>
       <div className="breakout-list-item-row">
-        <div className='breakout-list-item-left-col clearfix'>
+        <div className='breakout-list-item-left-col'>
           <InPlaceEditor maxLength={100}
                          readOnly={titleReadOnly}
                          className='breakout-title in-place-editor' 
@@ -103,52 +103,56 @@ export default class Breakout extends React.Component {
             : ""
           }
 
-          { showPresence ?  <BreakoutPresence {...this.props} /> : "" }
-
-          { showDelete ?
-              <BS.OverlayTrigger placement='top' overlay={
-                <BS.Tooltip id='delete-breakout-list-item'>Remove breakout</BS.Tooltip>
-              }>
-                <BS.Button bsStyle="link" className='delete-btn'
-                           onClick= {(e) => this.handleDelete(e)}>
-                  <i className='fa fa-trash' />
-                </BS.Button>
-              </BS.OverlayTrigger>
-            : ""
-          }
-
-
-          { showApprove ?
-              <BS.OverlayTrigger placement='top' overlay={
-                <BS.Tooltip id='approve-breakout-list-item'>Approve breakout</BS.Tooltip>
-              }>
-                <BS.Button onClick={(e) => this.handleApprove(e)} className="approve-btn">
-                  <i className="fa fa-check" aria-hidden="true"></i>
-                </BS.Button>
-              </BS.OverlayTrigger>
-            : ""
-          }
-
-          { showUnapprove ?
-              <BS.OverlayTrigger placement='top' overlay={
-                <BS.Tooltip id='unapprove-breakout-list-item'>
-                  Unapprove breakout
-                </BS.Tooltip>
-              }>
-                <BS.Button onClick={(e) => this.handleApprove(e)} className="approve-btn">
-                  <i className="fa fa-close" aria-hidden="true"></i>
-                </BS.Button>
-              </BS.OverlayTrigger>
-            : ""
-          }
-
+          { showPresence ?  <BreakoutPresence {...this.props} /> : "" }  
+        </div>
+        <div className='breakout-list-item-middle-col'>
           { showProposer ? 
               <div className="breakout-proposed-by-container">
-                <span>Proposed by</span>
+                <span><small>proposed<br/>by:</small></span>
                 <Avatar user={this.props.breakout.proposed_by}
                         idPart={`proposed-by-${this.props.breakout.id}`}/>
               </div>
-            : "" }
+            : "" 
+          }
+          <div className='breakout-controls-container'>
+            { showDelete ?
+                <BS.OverlayTrigger placement='top' overlay={
+                  <BS.Tooltip id='delete-breakout-list-item'>Remove breakout</BS.Tooltip>
+                }>
+                  <BS.Button bsStyle="danger" className='delete-btn' bsSize="xsmall"
+                             onClick= {(e) => this.handleDelete(e)}>
+                    <i className='fa fa-trash' />
+                  </BS.Button>
+                </BS.OverlayTrigger>
+              : ""
+            }
+
+
+            { showApprove ?
+                <BS.OverlayTrigger placement='top' overlay={
+                  <BS.Tooltip id='approve-breakout-list-item'>Approve breakout</BS.Tooltip>
+                }>
+                  <BS.Button onClick={(e) => this.handleApprove(e)} className="approve-btn" bsSize="small">
+                    <i className="fa fa-check" aria-hidden="true"></i>
+                  </BS.Button>
+                </BS.OverlayTrigger>
+              : ""
+            }
+
+            { showUnapprove ?
+                <BS.OverlayTrigger placement='top' overlay={
+                  <BS.Tooltip id='unapprove-breakout-list-item'>
+                    Unapprove breakout
+                  </BS.Tooltip>
+                }>
+                  <BS.Button onClick={(e) => this.handleApprove(e)} className="undo-btn" bsSize="small">
+                    <i className="fa fa-undo" aria-hidden="true"></i>
+                  </BS.Button>
+                </BS.OverlayTrigger>
+              : ""
+            }
+          </div>
+
         </div>
         <div className='breakout-list-item-right-col'>
           <BS.OverlayTrigger placement='left' overlay={
@@ -166,17 +170,17 @@ export default class Breakout extends React.Component {
               showVote ?
                 <BS.Button onClick={(e) => this.handleVote(e)}
                     className={`vote-btn${votedForThis ? " voted" : ""}`}>
-                  <BS.Glyphicon glyph="arrow-up" />
+                  <i className='fa fa-arrow-up' />
                   <br></br>
                   {this.props.breakout.votes.length}
                 </BS.Button>
               : showJoin ?
                 <BS.Button className="join-btn" href={this.props.breakout.url} target='_blank'>
-                  <BS.Glyphicon glyph="log-in" />
+                  <i className='fa fa-hand-o-right' />
                 </BS.Button>
               :
                 <BS.Button className="join-btn" disabled>
-                  <BS.Glyphicon glyph="lock" />
+                  <i className='fa fa-lock' />
                 </BS.Button>
             }
           </BS.OverlayTrigger>

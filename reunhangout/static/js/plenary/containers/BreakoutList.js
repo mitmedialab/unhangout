@@ -161,7 +161,7 @@ class BreakoutList extends React.Component {
               }>
                 <BS.Button onClick={() => this.setState({"create-session-dialog": true})}
                     className="create-session-btn">
-                  <BS.Glyphicon glyph="plus" />
+                  <i className='fa fa-plus' />
                 </BS.Button>
               </BS.OverlayTrigger>
             : "" }
@@ -173,40 +173,40 @@ class BreakoutList extends React.Component {
           { this.props.auth.is_admin ?
               <BS.OverlayTrigger placement='left' overlay={
                 <BS.Tooltip id='configure-breakouts-tooltip'>
-                  Configure Breakouts
+                  Breakout settings
                 </BS.Tooltip>
               }>
                 <BS.Dropdown
-                  id="user-menu-button"
+                  id="breakout-settings-button"
                   pullRight>
                   <BS.Dropdown.Toggle
-                    noCaret
-                    className="breakout-settings-btn">
-                    <img src="../../../../media/assets/control-panel-icon" />
+                    noCaret>
+                    <i className='fa fa-wrench' />
                   </BS.Dropdown.Toggle>
                   <BS.Dropdown.Menu>
                     <li className='menu-item'>
                       <LabeledSwitch
                           on={this.props.plenary.breakouts_open}
-                          onLabel='Breakouts open'
-                          offLabel='Breakouts closed'
+                          onLabel='Breakouts Open'
+                          offLabel='Breakouts Closed'
                           onClick={() => this.toggleBreakoutsOpen()} />
                     </li>
-
                     <BS.MenuItem
-                      onClick={() => this.setState({"message-breakouts-dialog": true})}>
-                      Message All Breakouts
+                      onClick={() => this.setState({"breakout-mode-dialog": true})}
+                      className='menu-item'>
+                      <span><i className='fa fa-sliders' /> Breakout Mode</span>
                     </BS.MenuItem>
                     <BS.MenuItem
-                      onClick={() => this.setState({"breakout-mode-dialog": true})}>
-                      Breakout Mode
+                      onClick={() => this.setState({"message-breakouts-dialog": true})}
+                      className='menu-item'>
+                      <span><i className='fa fa-paper-plane' /> Message Breakouts</span>
                     </BS.MenuItem>
                   </BS.Dropdown.Menu>
                 </BS.Dropdown>
               </BS.OverlayTrigger>
             : "" }
         </span>
-        <h4>Breakout Rooms</h4>
+        <h4>Breakouts</h4>
         { this.props.breakoutCrud.error ?
             <div className="breakout-error">
               {this.props.breakoutCrud.error.message}
@@ -229,13 +229,13 @@ class BreakoutList extends React.Component {
 
       { this.renderModalForm(
           "create-session-dialog",
-          "Create Session",
+          "Create Breakout",
           <div>
             <BS.FormGroup controlId="session-name" className='non-margined'
                 validationState={this.state['title-error'] ? 'error' : undefined}>
-              <BS.ControlLabel>Session Name</BS.ControlLabel>
+              <BS.ControlLabel>Breakout Name</BS.ControlLabel>
               <BS.FormControl type="text"
-                  placeholder="Session Name"
+                  placeholder="Breakout Name"
                   title={(this.state && this.state.title) || ""}
                   onChange={(e) => this.setState({title: e.target.value})} />
               { this.state['title-error'] ?
@@ -263,7 +263,7 @@ class BreakoutList extends React.Component {
               </BS.HelpBlock>
             </BS.FormGroup>
           </div>,
-          breakout_mode === "user" ? "Propose Session" : "Create Session",
+          breakout_mode === "user" ? "Propose Breakout" : "Create Breakout",
           (e) => this.handleCreateBreakout(e, breakout_mode === "user")
         )
       }
@@ -273,7 +273,7 @@ class BreakoutList extends React.Component {
           "Message All Breakouts",
           <BS.FormGroup controlId='breakout-message' className='non-margined'>
             <BS.HelpBlock>
-              Send a text message to all breakout groups.
+              Send a notification message to all breakouts.
             </BS.HelpBlock>
             <BS.ControlLabel>Message</BS.ControlLabel>
             <BS.FormControl
@@ -281,9 +281,9 @@ class BreakoutList extends React.Component {
               placeholder='Message'
               value={this.state.breakoutMessage}
               onChange={(e) => this.setState({breakoutMessage: e.target.value})} />
-            <h4>Preview</h4>
+            <h5>Preview</h5>
             <div className='breakout-message-preview'>
-              {this.props.auth.display_name}: {this.state.breakoutMessage}
+              <strong>{this.props.auth.display_name} says</strong>: {this.state.breakoutMessage}
             </div>
           </BS.FormGroup>,
           "Send Message",
@@ -298,19 +298,17 @@ class BreakoutList extends React.Component {
                 <BS.Radio
                     checked={this.state.breakout_mode==="admin"}
                     onChange={() => this.setState({"breakout_mode": "admin"})}>
-                  Admin Proposed Sessions
+                  <strong>Host-Proposed Breakouts</strong>
                 </BS.Radio>
                 <BS.HelpBlock>
-                  Admins can create breakout sessions
+                  Hosts can create breakout sessions.
                 </BS.HelpBlock>
                 <BS.Radio checked={this.state.breakout_mode==="user"}
                     onChange={() => this.setState({"breakout_mode": "user"})}>
-                  Participant Proposed Sessions
+                  <strong>Participant-Proposed Breakouts</strong>
                 </BS.Radio>
                 <BS.HelpBlock>
-                  All users can propose breakout sessions which can be voted on
-                  by all users.  Admins can approve these sessions after which
-                  users can join the sessions.
+                  Unconference mode. All participants can propose and vote on breakouts.
                 </BS.HelpBlock>
                 {/* Hiding random mode for now.. Issue #33.
                 <BS.Radio checked={this.state.breakout_mode==="random"}

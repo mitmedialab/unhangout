@@ -132,14 +132,27 @@
   }
 }
 
-.btn-warning{
+.btn-primary{
+  border: 2px solid #222; 
+  &:hover{
+    box-shadow: 2px 2px 0 #222;
+    background-color: darken(#3652d3,2%);
+    border: 2px solid #222; 
+  }
+  &:focus,&:active{
+      background-color: #3652d3;
+      border: 2px solid #222;
+  }
+}
+
+.btn-success{
   border-width: 2px; 
-  box-shadow: 4px 4px 0 #222;
+  box-shadow: 2px 2px 0 #222;
   &:focus{
     color: #222;
+    background-color: darken(#9DE0FC,10%);
   }
   &:hover{
-    background-color: #9DE0FC;
-    box-shadow: 2px 2px 0 #222;
+    background-color: darken(#9DE0FC,10%);
   }
 }

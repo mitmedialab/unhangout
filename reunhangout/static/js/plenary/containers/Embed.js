@@ -266,23 +266,12 @@ class Embed extends React.Component {
 
     return <div className='embed-admin-controls'>
       <form>
-        { chosen ?
-          <div className="button-flex-container">
-            <BS.Button bsStyle='danger' className="remove-button"
-                onClick={(e) => this.removeEmbed(e, null)}>
-              Remove Embed
-            </BS.Button>
-          </div>
-          : "" }
-        { this.props.embedsSending.state === "error" ? 
-          <div className='alert alert-error'>{this.props.embedsSending.error}</div>
-          : "" }
-        <BS.FormGroup>
+        <BS.FormGroup className='embed-input-form-group'>
           <BS.InputGroup>
             { hasPrevEmbeds ?
               <BS.InputGroup.Button>
                 <BS.Dropdown id="embed-list input">
-                  <BS.Dropdown.Toggle><i className='fa fa-list' /></BS.Dropdown.Toggle>
+                  <BS.Dropdown.Toggle><i className='fa fa-align-justify' /></BS.Dropdown.Toggle>
                   <BS.Dropdown.Menu>
                     {
                       embedDisplay.map(({title, image, index}) => (
@@ -322,6 +311,7 @@ class Embed extends React.Component {
               type="text"
               placeholder="YouTube URL or embed code"
               value={this.state.embedValue}
+              className='input-field'
               onChange={(e) => this.setState({embedValue: e.target.value})}/>
             <BS.DropdownButton
               componentClass={BS.InputGroup.Button}
@@ -329,11 +319,14 @@ class Embed extends React.Component {
               title="Action"
               pullRight
             >
-              <BS.MenuItem key="1" onClick={(e) => this.setEmbed(e)}>Set</BS.MenuItem>
-              <BS.MenuItem key="2" onClick={(e) => this.enqueueEmbed(e)}>Enqueue</BS.MenuItem>
+              <BS.MenuItem key="1" onClick={(e) => this.setEmbed(e)}>Embed</BS.MenuItem>
+              <BS.MenuItem key="2" onClick={(e) => this.enqueueEmbed(e)}>Add to list</BS.MenuItem>
             </BS.DropdownButton>
           </BS.InputGroup>
         </BS.FormGroup>
+        { this.props.embedsSending.state === "error" ? 
+          <div className='alert alert-error'><i className='fa fa-exclamation-triangle' />{this.props.embedsSending.error}</div>
+          : "" }
         <div className="button-flex-container">
           { this.hasLive() ? "" :
             <BS.Button className="add-live-video-button"
@@ -341,6 +334,12 @@ class Embed extends React.Component {
               <i className='fa fa-video-camera'></i> Add Live Video
             </BS.Button>
           }
+          { chosen ?
+            <BS.Button bsStyle='danger' className="remove-button"
+                onClick={(e) => this.removeEmbed(e, null)}>
+              <i className='fa fa-eject' /> Un-Embed
+            </BS.Button>
+          : "" }
         </div>
       </form>
     </div>

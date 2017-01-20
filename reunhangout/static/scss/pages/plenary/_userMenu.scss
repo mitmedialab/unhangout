@@ -55,9 +55,10 @@
     color: #3652D3;
   }
 
-  & div.menu-item > .btn-warning{
+  & div.menu-item > .btn-default{
+    background-color: #9DE0FC;
     &:hover, &:focus{
-      background-color: #9DE0FC;
+      background-color: darken(#9DE0FC,5%);
       color: #222;
     }
 

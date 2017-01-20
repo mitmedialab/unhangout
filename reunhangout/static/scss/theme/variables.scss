@@ -20,7 +20,7 @@ $brand-primary:         #3652d3 !default;
 $brand-success:         #5cb85c !default;
 $brand-info:            #5bc0de !default;
 $brand-warning:         #f0ad4e !default;
-$brand-danger:          #d9534f !default;
+$brand-danger:          darken(#d9534f,20%) !default;
 
 
 //== Scaffolding
@@ -158,17 +158,17 @@ $btn-primary-color:              #fff !default;
 $btn-primary-bg:                 $brand-primary !default;
 $btn-primary-border:             darken($btn-primary-bg, 5%) !default;
 
-$btn-success-color:              #fff !default;
-$btn-success-bg:                 $brand-success !default;
-$btn-success-border:             darken($btn-success-bg, 5%) !default;
+$btn-success-color:              #222 !default;
+$btn-success-bg:                 #9de0fc !default;
+$btn-success-border:             #222;
 
 $btn-info-color:                 #fff !default;
 $btn-info-bg:                    $brand-info !default;
 $btn-info-border:                darken($btn-info-bg, 5%) !default;
 
 $btn-warning-color:              #fff !default;
-$btn-warning-bg:                 #9de0fc !default;
-$btn-warning-border:             #222 !default;
+$btn-warning-bg:                 $brand-warning !default;
+$btn-warning-border:             darken($btn-warning-bg, 5%) !default;
 
 $btn-danger-color:               #fff !default;
 $btn-danger-bg:                  $brand-danger !default;
@@ -194,7 +194,7 @@ $input-bg-disabled:              $gray-lighter !default;
 //** Text color for `<input>`s
 $input-color:                    $gray !default;
 //** `<input>` border color
-$input-border:                   #ccc !default;
+$input-border:                   #9b9b9b !default;
 
 // TODO: Rename `$input-border-radius` to `$input-border-radius-base` in v4
 //** Default `.form-control` border radius
@@ -206,10 +206,10 @@ $input-border-radius-large:      $border-radius-large !default;
 $input-border-radius-small:      $border-radius-small !default;
 
 //** Border color for inputs on focus
-$input-border-focus:             #66afe9 !default;
+$input-border-focus:             #9de0fc !default;
 
 //** Placeholder text color
-$input-color-placeholder:        #999 !default;
+$input-color-placeholder:        #9b9b9b !default;
 
 //** Default `.form-control` height
 $input-height-base:              ($line-height-computed + ($padding-base-vertical * 2) + 2) !default;

@@ -90,7 +90,7 @@ export class UserMenu extends React.Component {
             :
               <div className='user-menu-items'>
                 <div className='menu-item'>
-                  <BS.Button bsStyle='warning' href={`/accounts/login/?next=${encodeURIComponent(document.location.pathname)}`}>
+                  <BS.Button href={`/accounts/login/?next=${encodeURIComponent(document.location.pathname)}`}>
                     Login 
                   </BS.Button>
                 </div>
