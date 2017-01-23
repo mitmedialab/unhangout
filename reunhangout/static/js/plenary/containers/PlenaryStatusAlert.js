@@ -60,7 +60,8 @@ class PlenaryStatusAlert extends React.Component {
           : startsSoon ?
             <span>
               This event starts <span>{startDate.from(now)}</span>.
-              Doors open <span>{doorsOpen.from(now)}</span>. {edit}
+              Doors {doorsOpen <= now ? "opened" : "open"}
+              {' '}<span>{doorsOpen.from(now)}</span>. {edit}
             </span>
           : startsToday ?
             <span>
