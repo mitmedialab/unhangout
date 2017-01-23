@@ -1,34 +1,58 @@
 .presence-container {
-  overflow: auto;
-	flex-grow: 1;
+	padding: 10px;
+	overflow: auto;
+	flex-grow: 1;	
 	.presence-controls {
 		display:flex;
 		flex-flow: row wrap;
 		justify-content: flex-start;
 		align-items: center;
 		.presence-counter {
-			margin: 5px;
+			i {
+				margin-right: 5px;
+				font-size: 1.2em;
+			}
 		}
 		.grid-button {
 			margin-left: auto;
-		}
-		.btn {
 			margin-right: 5px;
 		}
+		.btn {
+			font-size: 1em;
+		}
 	}
+	
 	.presence{
+		margin-top: 5px;
 		display: flex;
 		flex-flow: row wrap;
-		margin: 5px;
-		margin-top: 0px;
-		.user-avatar img {
+		.user-avatar > img {
 			width: 48px;
 			height: 48px;
-			border-radius: 5px;
-			margin: 5px;
+			border-radius: 7px;
+			margin: 0 7px 7px 0;
+			&:hover{
+				cursor: pointer;
+				box-shadow: 4px 4px 0 #83ffcd;
+			}
+			&:active{
+				box-shadow: none;
+			}
 		}
 		.user-details {
 			width: 100%;
 		}
 	}
+}
+
+.popover{
+	background-color: #f5f5f5;
+	border: 2px solid #222;
+	&:hover{
+		cursor:default;
+	}
+}
+
+.popover-content{
+	padding: 3px 10px 5px 10px;
 }

@@ -11,8 +11,8 @@ import PlenaryInfo from './PlenaryInfo';
 import {ConnectionStatus} from '../../transport';
 import * as A from '../actions';
 import {Avatar} from './Avatar';
-import TitleMenu from './TitleMenu';
-import PlenaryStatusBanner from './PlenaryStatusBanner';
+import UserMenu from './UserMenu';
+import PlenaryStatusAlert from './PlenaryStatusAlert';
 import Whiteboard from './Whiteboard';
 import WebRTCStatus from './WebRTCStatus';
 
@@ -62,13 +62,13 @@ class Plenary extends React.Component {
         document.location.href = `/accounts/login/?next=${encodeURIComponent(document.location.pathname)}`;
       }
       return <div className='plenary open'>
-        { this.props.auth.is_admin ? <PlenaryStatusBanner /> : "" }
         <WebRTCStatus />
         <ConnectionStatus />
         <div className='plenary-grid'>
           <div className='column users-col'>
-            <TitleMenu />
+            { this.props.auth.is_admin ? <PlenaryStatusAlert /> : "" }
             <PlenaryInfo plenary={this.props.plenary} />
+            <UserMenu />
             <Presence presence={this.props.presence} auth={this.props.auth} />
           </div>
           <div className='column chat-col'>
@@ -89,12 +89,12 @@ class Plenary extends React.Component {
       let now = moment();
       let upcoming = !this.props.plenary.canceled && doorsOpen > now;
       return <div className="plenary closed">
-        { this.props.auth.is_admin ? <PlenaryStatusBanner /> : "" }
         <WebRTCStatus />
         <BS.Grid fluid>
           <BS.Row>
             <BS.Col xs={3} className="column">
-              <TitleMenu />
+              <PlenaryInfo plenary={this.props.plenary} />
+              <UserMenu />
               { this.props.plenary.image ?
                   <img src={this.props.plenary.image} alt='' className='img-responsive' />
                 : "" }

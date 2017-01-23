@@ -47,7 +47,7 @@ class Whiteboard extends React.Component {
             onClick={() => this.setState({ panelOpen: !this.state.panelOpen })}
             className="whiteboard-button">
           {this.props.plenary.plenaryDetailsState == "sending" ?
-            <Spinner spinnerName="circle" noFadeIn />
+            <Spinner spinnerName="circle" className="whiteboard-spinner" noFadeIn />
           :
             <BS.Glyphicon glyph={this.state.panelOpen ? "chevron-up" : "chevron-down"} />
           }

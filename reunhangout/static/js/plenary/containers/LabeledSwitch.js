@@ -25,7 +25,7 @@ export class LabeledSwitch extends React.Component {
       <div className='labeled-switch' style={{cursor: "pointer"}}
           onClick={(e) => this.toggle(e)}>
         <span className='switch-label'>
-          {this.state.on ? this.props.onLabel : this.props.offLabel}
+          <strong>{this.state.on ? this.props.onLabel : this.props.offLabel}</strong>
         </span>
         <Switch on={this.state.on}
           onClick={() => this.props.onClick && this.props.onClick()} />

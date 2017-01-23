@@ -1,8 +1,16 @@
 .plenary-info-container {
-  background-color: #2e7daa;
+  padding: 12px;
+  background-color: #3652d3;
   color: #fff;
   border-bottom-right-radius: 0px;
-  padding: 10px;
+
+  .title {
+    font-weight: 700;
+    font-size: 1.5em;
+    margin-bottom: 5px;
+    line-height: 1.3em;
+  }
+
   a {
     color: white;
     font-weight: bold;

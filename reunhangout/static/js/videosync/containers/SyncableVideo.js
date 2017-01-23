@@ -5,6 +5,8 @@ import * as BS from 'react-bootstrap';
 import YoutubePlayer from 'youtube-player';
 import * as A from "../actions";
 import * as youtube from '../../plenary/youtube';
+import * as style from "../../../scss/pages/plenary/_syncableVideoStyle.scss"
+
 
 class SyncableVideo extends React.Component {
   constructor(props) {
@@ -179,13 +181,13 @@ class SyncableYoutubeVideo extends React.Component {
       <div id={this.playerId()}></div>
 
       <div className='video-sync-controls'>
+        {this.renderSyncState()}
         { this.props.showSyncControls ?
             <BS.Button bsStyle='success' className="play-button"
                 onClick={(e) => this.togglePlayForAll(e)}>
-              { this.isPlayingForAll() ? "Pause for all" : "Play for all" }
+              { this.isPlayingForAll() ? <span><i className='fa fa-pause' /> Pause for All</span> : <span><i className='fa fa-play' /> Play for All</span> }
             </BS.Button>
           : "" }
-        {this.renderSyncState()}
       </div>
     </div>
   }
@@ -211,10 +213,10 @@ class SyncableYoutubeVideo extends React.Component {
       classes.push("unsynced");
       message = "Out of sync";
     }
-    return <span>
+    return <span className='sync-status-indicator'>
       <span className={classes.join(" ")}></span>{' '}
       {message}{' '}
-      <BS.Button className='sync-intent' onClick={(e) => this.toggleSyncIntent(e)}>
+      <BS.Button className='sync-intent' bsSize='xsmall' onClick={(e) => this.toggleSyncIntent(e)}>
         <i className={'fa fa-' + (intendToSync ? 'lock' : 'unlock')}></i>
         {' '}
         <span className='time-indicator'>{this.formatTime(this.state.syncTime)}</span>

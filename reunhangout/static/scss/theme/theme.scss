@@ -110,3 +110,49 @@
     transition: opacity 0.5s ease-out;
   }
 }
+
+// button styles
+
+.btn{
+  &:focus, &:active, &.active, &:focus:active {
+  outline: none;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  }
+}
+
+.btn-default{
+  border-width: 2px; 
+  &:focus{
+    background-color: #fff;
+  }
+  &:hover{
+    background-color: #f5f5f5;
+    box-shadow: 2px 2px 0 #222;
+  }
+}
+
+.btn-primary{
+  border: 2px solid #222; 
+  &:hover{
+    box-shadow: 2px 2px 0 #222;
+    background-color: darken(#3652d3,2%);
+    border: 2px solid #222; 
+  }
+  &:focus,&:active{
+      background-color: #3652d3;
+      border: 2px solid #222;
+  }
+}
+
+.btn-success{
+  border-width: 2px; 
+  box-shadow: 2px 2px 0 #222;
+  &:focus{
+    color: #222;
+    background-color: darken(#9DE0FC,10%);
+  }
+  &:hover{
+    background-color: darken(#9DE0FC,10%);
+  }
+}

@@ -1,5 +1,11 @@
-.plenary-status-banner {
-  background-color: #f3bd71;
+.webrtc-status-banner {
+  background-color: #fffda0;
   text-align: center;
-  padding: 0.2em;
+  padding: 0.7em;
+
+  p{
+  	max-width: 900px;
+  	margin: auto;
+  	color: darken(#fcf3af,60%);
+  }
 }
