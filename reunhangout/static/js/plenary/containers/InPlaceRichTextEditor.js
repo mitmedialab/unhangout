@@ -17,8 +17,7 @@ export class InPlaceRichTextEditor extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      //editing: false,
-      editing: true, // FIXME
+      editing: false,
       editorState: Draft.EditorState.createWithContent(
         this.getContentState(props.value)
       ),
