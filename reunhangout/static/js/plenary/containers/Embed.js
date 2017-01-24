@@ -87,6 +87,7 @@ class Embed extends React.Component {
   }
 
   setEmbed(event) {
+    event && event.preventDefault();
     let parsed;
     try {
       parsed = this.parseEmbedValue();
@@ -132,6 +133,7 @@ class Embed extends React.Component {
   }
 
   enqueueEmbed(event) {
+    event && event.preventDefault();
     let parsed;
     try {
       parsed = this.parseEmbedValue();
@@ -265,7 +267,7 @@ class Embed extends React.Component {
     });
 
     return <div className='embed-admin-controls'>
-      <form>
+      <form onSubmit={(e) => this.setEmbed(e)}>
         <BS.FormGroup className='embed-input-form-group'>
           <BS.InputGroup>
             <BS.InputGroup.Button>
