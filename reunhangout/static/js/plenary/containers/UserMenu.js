@@ -8,6 +8,14 @@ import {PlenaryEditor} from './PlenaryEditor';
 import {LabeledSwitch} from './LabeledSwitch';
 import moment from 'moment-timezone';
 
+// Prevents BS.Overlay from injecting props into div.
+// See https://github.com/react-bootstrap/react-overlays/issues/103
+const OverlayPassThrough = (props) => (
+  <div className={props.className} onClick={props.onClick} style={props.style}>
+    {props.children}
+  </div>
+)
+
 export class UserMenu extends React.Component {
   constructor(props) {
     super(props);
@@ -65,7 +73,8 @@ export class UserMenu extends React.Component {
           container={this}
           target={() => this.refs.target}
         >
-          <div className='user-menu-overlay' onClick={(e) => e.stopPropagation()}>
+          <OverlayPassThrough className='user-menu-overlay'
+                              onClick={(e) => e.stopPropagation()}>
             {this.props.auth.is_authenticated ?
               <div className='user-menu-items'>
                 <div className='menu-title'><small>User Menu</small> <small><i className='fa fa-cutlery' /></small></div>
@@ -128,7 +137,7 @@ export class UserMenu extends React.Component {
                 </div>
               </div>
             : ""}
-          </div>
+          </OverlayPassThrough>
         </BS.Overlay>
         <BS.Modal show={this.state.plenarySettingsModalOpen}
                   onHide={() => this.setState({plenarySettingsModalOpen: false})}>
