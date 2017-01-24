@@ -43,7 +43,9 @@ export class PlenaryEditor extends React.Component {
     }
   }
 
-  renderControl(label, stateName, placeholder="", type="text", help="") {
+  renderControl(label, stateName, type="text", props={}) {
+    let help = props.help;
+    delete props.help;
     return (
       <BS.FormGroup
         controlId={`plenary-${stateName}`}
@@ -52,7 +54,8 @@ export class PlenaryEditor extends React.Component {
       >
         { type === "checkbox" ?
           <BS.Checkbox checked={this.state[stateName] || false}
-              onChange={(e) => this.setState({[stateName]: e.target.checked})}>
+              onChange={(e) => this.setState({[stateName]: e.target.checked})}
+              {...props} >
             {label}
           </BS.Checkbox>
         :
@@ -61,12 +64,12 @@ export class PlenaryEditor extends React.Component {
         { type === "text" ?
             <BS.FormControl
               type={type}
-              placeholder={placeholder}
               value={this.state[stateName] || ""}
               onChange={(e) => this.setState({
                 [stateName]: e.target.value,
                 [`${stateName}-error`]: ''
-              })} />
+              })}
+              {...props} />
 
           : type === "slug" ?
 
@@ -90,7 +93,8 @@ export class PlenaryEditor extends React.Component {
                        } else {
                          doError("Only letters, numbers, dash and underscore allowed.");
                        }
-                     }}/>
+                     }}
+                     {...props} />
                {"/"}
                {this._getCopyFrom() && this._getCopyFrom()[stateName] === this.state[stateName] ?
                  <div className='alert alert-info'>
@@ -104,8 +108,6 @@ export class PlenaryEditor extends React.Component {
                  </div>
                : ""}
                <div className='text-muted'>
-
-
                  Changing URL causes all participants to reload, interupting video.
                </div>
             </div>
@@ -114,13 +116,15 @@ export class PlenaryEditor extends React.Component {
 
             <InPlaceRichTextEditor
               value={this.state[stateName] || ""}
-              onChange={(e) => this.setState({[stateName]: e.target.value})} />
+              onChange={(e) => this.setState({[stateName]: e.target.value})}
+              {...props} />
 
           : type === "datetime" ?
 
             <DateTimePicker
               value={this.state[stateName] || ""}
-              onChange={(value) => this.setState({[stateName]: value})} />
+              onChange={(value) => this.setState({[stateName]: value})}
+              {...props} />
             
           : type === "before_start_date" ?
 
@@ -129,7 +133,8 @@ export class PlenaryEditor extends React.Component {
               referenceName='start time'
               defaultDeltaMinutes={30}
               value={this.state[stateName]}
-              onChange={(value) => this.setState({[stateName]: value})} />
+              onChange={(value) => this.setState({[stateName]: value})}
+              {...props} />
 
           : type === "after_start_date" ?
 
@@ -138,7 +143,8 @@ export class PlenaryEditor extends React.Component {
               referenceName='start time'
               defaultDeltaMinutes={90}
               value={this.state[stateName]}
-              onChange={(value) => this.setState({[stateName]: value})} />
+              onChange={(value) => this.setState({[stateName]: value})}
+              {...props} />
 
           : type === "after_end_date" ?
 
@@ -147,19 +153,22 @@ export class PlenaryEditor extends React.Component {
               reference={this.state.end_date || moment().add(90, 'minutes').format()}
               referenceName='the event ends'
               value={this.state[stateName]}
-              onChange={(value) => this.setState({[stateName]: value})} />
+              onChange={(value) => this.setState({[stateName]: value})}
+              {...props} />
 
           : type === "image" ?
 
             <ImageInput
               value={this.state[stateName]}
-              onChange={(value) => this.setState({[stateName]: value})} />
+              onChange={(value) => this.setState({[stateName]: value})}
+              {...props} />
 
           : type === "copy_from" ?
             <BS.FormControl
                 componentClass='select'
                 onChange={this.setCopyFrom.bind(this)}
-                value={this.state[stateName]}>
+                value={this.state[stateName]}
+                {...props}>
               <option value=''>----</option>
               {_.map(this.props.copyablePlenaries, (plenary, id) => (
                 <option value={plenary.id} key={`copy-from-${id}`}>
@@ -217,7 +226,6 @@ export class PlenaryEditor extends React.Component {
     if (this._hasCopyablePlenaries()) {
       return this.renderControl('Copy details from an existing event',
                                 'copy_from_id',
-                                '',
                                 'copy_from');
     }
     return "";
@@ -294,18 +302,24 @@ export class PlenaryEditor extends React.Component {
       <BS.Form onSubmit={(e) => this.onChange(e)}>
         <BS.Modal.Body className='form-horizontal'>
             {this.maybeRenderCopyFrom()}
-            {this.renderControl("Title", "name", "Give your event a catchy title")}
-            {this.renderControl("Image", "image", "", "image")}
-            {this.renderControl("Host", "organizer", "Tell your attendees who's organizing this event")}
-            {this.renderControl("Start time", "start_date", "", "datetime")}
-            {this.renderControl("Doors open", "doors_open", "", "before_start_date")}
-            {this.renderControl("Event duration", "end_date", "", "after_start_date", "", "")}
-            {this.renderControl("Doors close", "doors_close", "", "after_end_date")}
-            {this.renderControl("Description", "description", "", "richtext")}
-            {this.renderControl("Public calendar", "public", "", "checkbox", "List event on the public events calendar")}
-            {this.renderControl("URL", "slug", "Short name for URL", "slug")}
+            {this.renderControl("Title", "name", "text",
+                                {placeholder: "Give your event a catchy title",
+                                 maxLength: 100})}
+            {this.renderControl("Image", "image", "image")}
+            {this.renderControl("Host", "organizer", "text",
+                                {placeholder: "Tell your attendees who's organizing this event",
+                                 maxLength: 100})}
+            {this.renderControl("Start time", "start_date", "datetime")}
+            {this.renderControl("Doors open", "doors_open", "before_start_date")}
+            {this.renderControl("Event duration", "end_date", "after_start_date")}
+            {this.renderControl("Doors close", "doors_close", "after_end_date")}
+            {this.renderControl("Description", "description", "richtext")}
+            {this.renderControl("Public calendar", "public", "checkbox",
+                                {help: "List event on the public events calendar"})}
+            {this.renderControl("URL", "slug", "slug")}
             {this.props.plenary.id ?
-              this.renderControl("Cancel event", "canceled", "", "checkbox", "Mark event as canceled?")
+              this.renderControl("Cancel event", "canceled", "checkbox",
+                                 {help: "Mark event as canceled?"})
             : ""}
 
         </BS.Modal.Body>
