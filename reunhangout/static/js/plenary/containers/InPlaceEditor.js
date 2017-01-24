@@ -27,7 +27,12 @@ export class InPlaceEditor extends React.Component {
 
   onChange(event) {
     let value = event.target.value;
-    if (this.props.maxLength === undefined || value.length < this.props.maxLength) {
+    // Don't enforce minimum on setting value, or people won't be able to clear
+    // the slate before typing.  Minimum length is enforced in `stopEditing`.
+    let settable = (
+      (this.props.maxLength === undefined || value.length < this.props.maxLength)
+    );
+    if (settable) {
       this.setState({value});
     }
   }
@@ -48,7 +53,10 @@ export class InPlaceEditor extends React.Component {
     if (!this.props.readOnly && this.state.editing) {
       event && event.preventDefault();
       this.setState({editing: false});
-      if (this.state.value !== this.props.value) {
+      if (this.props.minLength !== undefined &&
+          this.state.value.length < this.props.minLength) {
+        this.setState({value: this.props.value});
+      } else if (this.state.value !== this.props.value) {
         this.props.onChange && this.props.onChange({
           target: {value: this.state.value}
         });
