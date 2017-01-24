@@ -66,10 +66,12 @@ export default class Breakout extends React.Component {
     );
 
     let showVote = this.props.breakout.is_proposal;
-    let showJoin = this.props.plenary.breakouts_open && (
-      this.props.plenary.breakout_mode !== "user" ||
-      !this.props.breakout.is_proposal
+    let showJoin = (
+      this.props.plenary.breakouts_open &&
+      this.props.presence.members.length < this.props.breakout.max_attendees &&
+      (this.props.plenary.breakout_mode !== "user" || !this.props.breakout.is_proposal)
     );
+
     let votedForThis = !!_.find(this.props.breakout.votes, (vote) => {
       return vote.username === this.props.auth.username
     });
