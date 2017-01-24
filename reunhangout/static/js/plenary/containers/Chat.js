@@ -63,20 +63,24 @@ const normalizeDisplayName = (name) => name.replace(/\s/g, "").toLowerCase();
 
 class ChatMessage extends React.Component {
   render() {
-    let msg = this.props.msg;
-    let markedUp = this.markup(msg.message);
-    return <div className={`chat-message${msg.highlight ? " highlight" : ""}`}>
-      <Avatar user={msg.user} idPart={`chat-message-author-${msg.id}`}/>
+    let firstMsg = this.props.messages[0];
+    return <div className={`chat-message${firstMsg.highlight ? " highlight" : ""}`}>
+      <Avatar user={firstMsg.user} idPart={`chat-message-author-${firstMsg.id}`}/>
       <div className="chat-message-text">
-        <span className='userName'>{msg.user.display_name}</span>
-        <br></br>
-        <span className='message'>{markedUp}</span>
+        <div className='userName'>{firstMsg.user.display_name}</div>
+        <div className='message'>
+          {this.props.messages.map((msg, i) => (
+            <div key={`msg-${i}`}>
+              {this.markup(msg)}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   }
 
-  markup(message) {
-    let atnamed = atnamify(message, this.props.members, this.props.msg.id);
+  markup(msg) {
+    let atnamed = atnamify(msg.message, this.props.members, msg.id);
     let markedUp = _.flatten(atnamed).map((part, i) => {
       if (_.isString(part)) {
         return <span key={i} dangerouslySetInnerHTML={{__html: part}} />
@@ -153,12 +157,28 @@ class Chat extends React.Component {
       value={(this.state && this.state.value) || ""}
       onChange={(e) => this.setState({value: e.target.value})} />;
 
+    // Group messages by author.
+    let messagesGrouped = [];
+    this.props.chat_messages.forEach(msg => {
+      let prevGroup = messagesGrouped[messagesGrouped.length - 1];
+      if (prevGroup && prevGroup[0].user.username === msg.user.username &&
+                       prevGroup[0].highlight === msg.highlight) {
+        prevGroup.push(msg);
+      } else {
+        messagesGrouped.push([msg]);
+      }
+    })
+
     return <div className="chat-container">
       <div className="chat-box" ref='chatBox'>
         <div className="chat-log">
-          {this.props.chat_messages.map((msg, i) => {
-            return <ChatMessage msg={msg} plenary={this.props.plenary}
-              members={this.state.members} key={`${i}`} auth={this.props.auth} />
+          {messagesGrouped.map((msgGroup, i) => {
+            return <ChatMessage
+                      messages={msgGroup}
+                      plenary={this.props.plenary}
+                      members={this.state.members}
+                      key={`${i}`}
+                      auth={this.props.auth} />
           })}
         </div>
       </div>
