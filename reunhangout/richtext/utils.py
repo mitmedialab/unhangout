@@ -1,6 +1,7 @@
 from django import forms
 from django.utils.safestring import mark_safe
 from webpack_loader.templatetags.webpack_loader import get_files
+from webpack_loader.exceptions import WebpackError
 import bleach
 from bleach_whitelist.bleach_whitelist import markdown_tags, markdown_attrs
 
@@ -14,7 +15,7 @@ def maybe_get_files(arg_sets):
     for args in arg_sets:
         try:
             out += get_files(*args)
-        except OSError:
+        except (OSError, WebpackError):
             print("Missing assets for {}".format(args))
     return out
 
