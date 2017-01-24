@@ -12,7 +12,7 @@
   register: build_prod_assets
   changed_when: build_prod_assets.stdout.find("Changed") != -1
   notify: restart {{django_init_name}}
-  tags: ['reunhangout', 'reunhangout-post']
+  tags: ['reunhangout', 'reunhangout-post', 'djangocode']
 
 - name: Collect static again
   become: yes
@@ -20,4 +20,4 @@
   register: collectstatic_output
   changed_when: 'not collectstatic_output.stdout.startswith("\n0 static files copied")'
   command: "{{django_venv_dir}}bin/python {{django_project_dir}}manage.py collectstatic --noinput"
-  tags: ['reunhangout', 'reunhangout-post']
+  tags: ['reunhangout', 'reunhangout-post', 'djangocode']

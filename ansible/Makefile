@@ -17,7 +17,10 @@ firstrun:
 	ansible-playbook -i hosts.cfg app.yml $(VAULT) --user root
 
 app:
-	ansible-playbook -i hosts.cfg app.yml $(VAULT) --tags reunhangout
+	ansible-playbook -i hosts.cfg app.yml $(VAULT) --tags reunhangout,django
+
+code:
+	ansible-playbook -i hosts.cfg app.yml $(VAULT) --tags djangocode
 
 upgrades:
 	ansible-playbook -i hosts.cfg upgrades.yml $(VAULT)
