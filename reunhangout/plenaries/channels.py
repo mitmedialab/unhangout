@@ -165,7 +165,7 @@ def handle_embeds(message, data, plenary):
 
     # Stop any current video sync if we're changing the current embed.
     if plenary.embeds and plenary.embeds['current'] != current:
-        VideoSync.objects.stop(plenary.channel_group_name)
+        VideoSync.objects.pause_for_all(plenary.channel_group_name)
 
     plenary.embeds = {
         'embeds': clean,

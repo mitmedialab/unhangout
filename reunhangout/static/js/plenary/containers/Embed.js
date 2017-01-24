@@ -268,45 +268,46 @@ class Embed extends React.Component {
       <form>
         <BS.FormGroup className='embed-input-form-group'>
           <BS.InputGroup>
-            { hasPrevEmbeds ?
-              <BS.InputGroup.Button>
-                <BS.Dropdown id="embed-list input">
-                  <BS.Dropdown.Toggle><i className='fa fa-align-justify' /></BS.Dropdown.Toggle>
-                  <BS.Dropdown.Menu>
-                    {
-                      embedDisplay.map(({title, image, index}) => (
-                        <BS.MenuItem key={index}
-                            onClick={(event) => this.setCurrent(event, index)}>
-                          <span className='previous-embed-list-item'>
-                            { image ?
-                                <img src={image}
-                                     className='previous-embed-list-item-thumbnail'
-                                     width={64}
-                                     height={48}
-                                     alt='' />
-                              : ""
-                            }
+            <BS.InputGroup.Button>
+              <BS.Dropdown id="embed-list input">
+                <BS.Dropdown.Toggle><i className='fa fa-align-justify' /></BS.Dropdown.Toggle>
+                <BS.Dropdown.Menu>
+                  { embedDisplay.length === 0 ?
+                      <BS.MenuItem><em>Nothing here yet.</em></BS.MenuItem>
+                    : ""
+                  }
+                  {
+                    embedDisplay.map(({title, image, index}) => (
+                      <BS.MenuItem key={index}
+                          onClick={(event) => this.setCurrent(event, index)}>
+                        <span className='previous-embed-list-item'>
+                          { image ?
+                              <img src={image}
+                                   className='previous-embed-list-item-thumbnail'
+                                   width={64}
+                                   height={48}
+                                   alt='' />
+                            : ""
+                          }
 
-                            <span className='previous-embed-list-item-title'>
-                              {title}
-                            </span>
-                            <span className='previous-embed-list-item-delete'>
-                              <BS.OverlayTrigger placement='left' overlay={
-                                <BS.Tooltip id='remove-embed'>Remove from list</BS.Tooltip>
-                              }>
-                                <i className='fa fa-trash'
-                                   onClick={(e) => this.removeEmbed(e, index)} />
-                              </BS.OverlayTrigger>
-                            </span>
+                          <span className='previous-embed-list-item-title'>
+                            {title}
                           </span>
-                        </BS.MenuItem>
-                      ))
-                    }
-                  </BS.Dropdown.Menu>
-                </BS.Dropdown>
-              </BS.InputGroup.Button>
-              : ""
-            }
+                          <span className='previous-embed-list-item-delete'>
+                            <BS.OverlayTrigger placement='left' overlay={
+                              <BS.Tooltip id='remove-embed'>Remove from list</BS.Tooltip>
+                            }>
+                              <i className='fa fa-trash'
+                                 onClick={(e) => this.removeEmbed(e, index)} />
+                            </BS.OverlayTrigger>
+                          </span>
+                        </span>
+                      </BS.MenuItem>
+                    ))
+                  }
+                </BS.Dropdown.Menu>
+              </BS.Dropdown>
+            </BS.InputGroup.Button>
             <BS.FormControl
               type="text"
               placeholder="YouTube URL or embed code"
