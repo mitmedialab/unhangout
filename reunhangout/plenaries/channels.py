@@ -261,7 +261,13 @@ def handle_breakout(message, data, plenary):
         return respond_with_breakouts()
 
     elif action == 'modify':
-        if not is_admin:
+        can_modify = (
+            is_admin or
+            (plenary.breakout_mode == "user" and breakout.proposed_by == message.user)
+        )
+        if not can_modify:
+            if plenary.breakout_mode == "user":
+                return handle_error(message, "Must be breakout proposer or admin to do that")
             return admin_required_error()
         if 'title' in payload:
             breakout.title = payload['title']
