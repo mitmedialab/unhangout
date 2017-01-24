@@ -91,7 +91,7 @@ class ChatMessage extends React.Component {
 class Chat extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {highlight: false}
+    this.state = {highlight: false, focus: false}
   }
   componentWillReceiveProps(newProps) {
     this._updateMembers(newProps);
@@ -115,6 +115,9 @@ class Chat extends React.Component {
     if (this.shouldScrollBottom) {
       this.refs.chatBox.scrollTop = this.refs.chatBox.scrollHeight
     }
+    if (this.state.focusOnUpdate && !this.state.focus) {
+      this.setState({focus: true, focusOnUpdate: false});
+    }
   }
   _updateMembers(props) {
     this.setState({
@@ -132,11 +135,24 @@ class Chat extends React.Component {
     });
     this.setState({
       value: "",
-      highlight: false
+      highlight: false,
+      focusOnUpdate: true,
     });
   }
   render() {
     let is_admin = this.props.auth.is_admin
+    let chatInput = <BS.FormControl
+      className="chat-composer"
+      onFocus={(e) => this.setState({focus: true})}
+      onBlur={(e) => this.setState({focus: false})}
+      autoFocus={this.state.focus}
+      inputRef={input => input && this.state.focus && input.focus()}
+      type='text'
+      placeholder='Type a message&hellip;'
+      disabled={this.props.plenary.chat.state === "sending"}
+      value={(this.state && this.state.value) || ""}
+      onChange={(e) => this.setState({value: e.target.value})} />;
+
     return <div className="chat-container">
       <div className="chat-box" ref='chatBox'>
         <div className="chat-log">
@@ -154,13 +170,7 @@ class Chat extends React.Component {
               <BS.InputGroup>
                 {this.props.plenary.chat.state === "error" ?
                   <BS.HelpBlock>{this.props.plenary.chat.error}</BS.HelpBlock> : "" }
-                <BS.FormControl
-                    className="chat-composer"
-                    type='text'
-                    placeholder='Type a message&hellip;'
-                    disabled={this.props.plenary.chat.state === "sending"}
-                    value={(this.state && this.state.value) || ""}
-                    onChange={(e) => this.setState({value: e.target.value})} />
+                  {chatInput}
                   <BS.InputGroup.Addon>
                     <input type="checkbox"
                       name="highlight"
@@ -178,13 +188,7 @@ class Chat extends React.Component {
             <BS.FormGroup>
                 {this.props.plenary.chat.state === "error" ?
                   <BS.HelpBlock>{this.props.plenary.chat.error}</BS.HelpBlock> : "" }
-                <BS.FormControl
-                  className="chat-composer"
-                  type='text'
-                  placeholder='Type a message&hellip;'
-                  disabled={this.props.plenary.chat.state === "sending"}
-                  value={(this.state && this.state.value) || ""}
-                  onChange={(e) => this.setState({value: e.target.value})} />
+                {chatInput}
             </BS.FormGroup>
         }
       </form>
