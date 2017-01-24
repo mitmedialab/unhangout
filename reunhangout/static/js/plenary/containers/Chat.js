@@ -36,7 +36,8 @@ const ConnectedAtName = connect(
  * are highlighted.
  */
 const atnamify = (text, users, msgId) => {
-  let parts = text.split(/(?:^|\s)@([a-z0-9]+)/gim);
+  // Match @Name, @Name-name, @Name.name, but leave trailing period out.
+  let parts = text.split(/(?:^|\s)@((?:[-_a-z0-9]|\.(?!$|\s))+)/gim);
   return parts.map(function(part, i) {
     if (i % 2 === 1) {
       let normalized = normalizeDisplayName(part);
