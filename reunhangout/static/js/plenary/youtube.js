@@ -1,3 +1,5 @@
+import 'whatwg-fetch'; // polyfill for fetch for safari
+
 /**
  * Get the 11-character youtube ID from a URL.
  * From http://stackoverflow.com/a/6904504 , covering any of the 15 or so
