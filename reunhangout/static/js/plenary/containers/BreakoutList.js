@@ -26,8 +26,8 @@ class BreakoutList extends React.Component {
     if (!this.state.title) {
       this.setState({"title-error": "Title is required"});
       return;
-    } else if (this.state.title.length > 100) {
-      this.setState({"title-error": "Maximum length 100 characters"});
+    } else if (this.state.title.length > 80) {
+      this.setState({"title-error": "Maximum length 80 characters"});
       return;
     } else {
       this.setState({"title-error": ""});

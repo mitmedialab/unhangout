@@ -11,7 +11,7 @@ from richtext.utils import sanitize
 from reunhangout.utils import random_webrtc_id
 
 class Breakout(models.Model):
-    title = models.CharField(max_length=100, default="", blank=True)
+    title = models.CharField(max_length=80, default="", blank=True)
     slug = models.SlugField(blank=True)
     description = models.TextField(blank=True, default="")
     max_attendees = models.IntegerField(default=10, validators=[
