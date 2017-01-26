@@ -69,7 +69,10 @@ class Plenary extends React.Component {
             { this.props.auth.is_admin ? <PlenaryStatusAlert /> : "" }
             <PlenaryInfo plenary={this.props.plenary} />
             <UserMenu />
-            <Presence presence={this.props.presence} auth={this.props.auth} />
+            <Presence
+              presence={this.props.presence}
+              auth={this.props.auth}
+              muteOthers={!this.state.open ? this.props.plenary.admins : undefined}/>
           </div>
           <div className='column chat-col'>
             <Whiteboard />

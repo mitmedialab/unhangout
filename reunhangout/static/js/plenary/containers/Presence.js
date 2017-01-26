@@ -8,7 +8,7 @@ import {Avatar, DEFAULT_AVATAR} from "./Avatar";
 
 export const sortPresence = (presence, auth) => {
   // Sort self first, others second.
-  let members = _.sortBy(presence.members, (u) => u.username !== auth.username);
+  let members = _.sortBy(presence.members, (u) => u.id !== auth.id);
   for (let i = 0; i < presence.lurkers; i++) {
     members.push({
       username: `Anonymous ${i+1}`,
@@ -25,6 +25,14 @@ export class Presence extends React.Component {
     this.state = {detailView: false};
   }
   render() {
+    let mute = {};
+    if (this.props.muteOthers !== undefined) {
+      this.props.presence.members.forEach(member => {
+        if (this.props.muteOthers.indexOf(member.id) === -1) {
+          mute[member.id] = true;
+        }
+      })
+    }
     return (
       <div className='presence-container'>
         <div className='presence-controls'>
@@ -49,7 +57,10 @@ export class Presence extends React.Component {
         <div className='presence'>
           {
             sortPresence(this.props.presence, this.props.auth).map((user) => {
-              return <Avatar user={user} detailView={this.state.detailView}
+              let className = mute[user.id] ? "muted" : undefined;
+              return <Avatar user={user}
+                             detailView={this.state.detailView}
+                             className={className}
                              key={`presence-${user.username}`}
                              idPart={`presence-${user.username}`} />
             })

@@ -221,6 +221,7 @@ class BreakoutList extends React.Component {
               breakout={breakout}
               presence={this.props.breakout_presence[breakout.id] || {}}
               auth={this.props.auth}
+              users={this.props.users}
               key={`${i}`}
               onChangeBreakouts={this.props.onChangeBreakouts} />
           })
@@ -364,6 +365,7 @@ export default connect(
     breakoutCrud: state.breakoutCrud,
     plenary: state.plenary,
     auth: state.auth,
+    users: state.users,
     breakout_presence: state.breakout_presence,
   }),
   (dispatch, ownProps) => ({

@@ -48,6 +48,7 @@ def plenary_detail(request, id_or_slug):
         'plenary': plenary.serialize(),
         'breakouts':  [breakout.serialize() for breakout in breakouts],
         'chat_messages': [msg.serialize() for msg in chat_messages],
+        'users': {u.id: u.serialize_public() for u in plenary.associated_users()},
     }
     data.update(serialize_auth_state(request.user, plenary))
 

@@ -9,7 +9,7 @@ import {Avatar} from './Avatar';
 class AtName extends React.Component {
   render() {
     let classes = ['atname'];
-    if (this.props.auth.username === this.props.mentioned.username) {
+    if (this.props.auth.id === this.props.mentioned.id) {
       classes.push('self');
     }
     return <span className={classes.join(" ")}>
@@ -41,12 +41,10 @@ const atnamify = (text, users, msgId) => {
   return parts.map(function(part, i) {
     if (i % 2 === 1) {
       let normalized = normalizeDisplayName(part);
-      let mentioned = _.find(users, (user) => {
+      let mentioned = _.find(users, user => {
         return normalizeDisplayName(user.display_name).indexOf(normalized) === 0;
       });
       if (mentioned) {
-        if (self.username === mentioned.username) {
-        }
         return <span>
           {' '}
           <ConnectedAtName text={`@${part}`}
@@ -62,13 +60,14 @@ const atnamify = (text, users, msgId) => {
 }
 const normalizeDisplayName = (name) => name.replace(/\s/g, "").toLowerCase();
 
-class ChatMessage extends React.Component {
+class RawChatMessage extends React.Component {
   render() {
     let firstMsg = this.props.messages[0];
+    let user = this.props.users[firstMsg.user];
     return <div className={`chat-message${firstMsg.highlight ? " highlight" : ""}`}>
       <Avatar user={firstMsg.user} idPart={`chat-message-author-${firstMsg.id}`}/>
       <div className="chat-message-text">
-        <div className='userName'>{firstMsg.user.display_name}</div>
+        <div className='userName'>{user.display_name}</div>
         <div className='message'>
           {this.props.messages.map((msg, i) => (
             <div key={`msg-${i}`}>
@@ -81,7 +80,7 @@ class ChatMessage extends React.Component {
   }
 
   markup(msg) {
-    let atnamed = atnamify(msg.message, this.props.members, msg.id);
+    let atnamed = atnamify(msg.message, this.props.users, msg.id);
     let markedUp = _.flatten(atnamed).map((part, i) => {
       if (_.isString(part)) {
         return <span key={i} dangerouslySetInnerHTML={{__html: part}} />
@@ -92,17 +91,12 @@ class ChatMessage extends React.Component {
     return markedUp;
   }
 };
+const ChatMessage = connect(state => ({users: state.users}))(RawChatMessage)
 
 class Chat extends React.Component {
   constructor(props) {
     super(props);
     this.state = {highlight: false, focus: false}
-  }
-  componentWillReceiveProps(newProps) {
-    this._updateMembers(newProps);
-  }
-  componentWillMount() {
-    this._updateMembers(this.props)
   }
   componentDidMount() {
     let chatBox = this.refs.chatBox;
@@ -113,7 +107,7 @@ class Chat extends React.Component {
     let latestMessage = this.props.chat_messages[this.props.chat_messages.length - 1];
     this.shouldScrollBottom = (
       ((chatBox.scrollTop + chatBox.offsetHeight + 15) >= chatBox.scrollHeight) ||
-      latestMessage && latestMessage.user.username === this.props.auth.username
+      latestMessage && latestMessage.user === this.props.auth.id
     );
   }
   componentDidUpdate() {
@@ -123,14 +117,6 @@ class Chat extends React.Component {
     if (this.state.focusOnUpdate && !this.state.focus) {
       this.setState({focus: true, focusOnUpdate: false});
     }
-  }
-  _updateMembers(props) {
-    this.setState({
-      members: _.uniqBy(
-        props.presence.members.concat(props.chat_messages.map(msg => msg.user)),
-        (member) => member.username
-      )
-    });
   }
   onSubmit(event) {
     event.preventDefault();
@@ -162,7 +148,7 @@ class Chat extends React.Component {
     let messagesGrouped = [];
     this.props.chat_messages.forEach(msg => {
       let prevGroup = messagesGrouped[messagesGrouped.length - 1];
-      if (prevGroup && prevGroup[0].user.username === msg.user.username &&
+      if (prevGroup && prevGroup[0].user === msg.user &&
                        prevGroup[0].highlight === msg.highlight) {
         prevGroup.push(msg);
       } else {
@@ -177,7 +163,6 @@ class Chat extends React.Component {
             return <ChatMessage
                       messages={msgGroup}
                       plenary={this.props.plenary}
-                      members={this.state.members}
                       key={`${i}`}
                       auth={this.props.auth} />
           })}

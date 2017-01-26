@@ -168,9 +168,7 @@ class Embed extends React.Component {
   }
 
   isLiveParticipant() {
-    return this.props.plenary.live_participants.filter(
-      (username) => username === this.props.auth.username
-    ).length > 0;
+    return this.props.plenary.live_participants.indexOf(this.props.auth.id) != -1;
   }
 
   hasLive() {
@@ -193,9 +191,9 @@ class Embed extends React.Component {
   toggleLiveParticipation(event) {
     event.preventDefault();
     if (this.isLiveParticipant()) {
-      this.props.onLeaveLiveBroadcast({username: this.props.auth.username});
+      this.props.onLeaveLiveBroadcast({id: this.props.auth.id});
     } else {
-      this.props.onAdminJoinLiveBroadcast({username: this.props.auth.username});
+      this.props.onAdminJoinLiveBroadcast({id: this.props.auth.id});
     }
   }
 

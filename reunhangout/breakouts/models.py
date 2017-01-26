@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -59,6 +60,15 @@ class Breakout(models.Model):
         if channel_group_name.startswith("breakout-"):
             return channel_group_name[len("breakout-"):]
 
+    def associated_users(self):
+        User = get_user_model()
+        return User.objects.filter(
+            models.Q(member_of_breakouts=self) |
+            models.Q(voted_on_breakouts=self) |
+            models.Q(proposed_breakouts=self) |
+            models.Q(presence__room__channel_name=self.channel_group_name)
+        ).distinct()
+
     def safe_description(self):
         return sanitize(self.description)
 
@@ -67,11 +77,11 @@ class Breakout(models.Model):
 
     def serialize(self):
         if self.is_proposal:
-            votes = [v.serialize_public() for v in self.votes.all()]
+            votes = list(self.votes.values_list('id', flat=True))
         else:
             votes = []
         if self.is_random:
-            members = [m.serialize_public() for m in self.members.all()]
+            members = list(self.members.values_list('id', flat=True))
         else:
             members = []
         return {
@@ -84,10 +94,10 @@ class Breakout(models.Model):
             'max_attendees': self.max_attendees,
             'activities': self.activities,
             'history': self.history,
-            'plenary': self.plenary.id if self.plenary else None,
+            'plenary': self.plenary_id if self.plenary_id else None,
             'is_proposal': self.is_proposal,
             'is_random': self.is_random,
-            'proposed_by': self.proposed_by.serialize_public() if self.proposed_by else None,
+            'proposed_by': self.proposed_by_id if self.proposed_by_id else None,
             'votes': votes,
             'members': members,
         }

@@ -1,4 +1,5 @@
 import * as A from './actions';
+import * as TRANSPORT_ACTIONS from '../transport/actions';
 
 export const plenary = (state=null, action) => {
   state = state || {};
@@ -98,6 +99,21 @@ export const chat_messages = (state=null, action) => {
       state.forEach(msg => { messages[msg.id] = msg });
       action.payload.forEach(msg => { messages[msg.id] = msg })
       return _.values(messages)
+  }
+  return state;
+};
+
+export const users = (state=null, action) => {
+  state = state || {}
+  switch (action.type) {
+    case TRANSPORT_ACTIONS.SET_PRESENCE:
+      action.payload.members.forEach(user => state[user.id] = user);
+      break;
+    case A.SET_USERS:
+      for (let id in action.payload) {
+        state[id] = action.payload[id];
+      }
+      break;
   }
   return state;
 };

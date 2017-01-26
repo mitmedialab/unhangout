@@ -36,6 +36,7 @@ def serialize_public(user):
         }
     else:
         return {
+            'id': user.id,
             'username': user.username,
             'display_name': user.get_display_name(),
             'image': user.get_profile_image(),

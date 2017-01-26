@@ -6,7 +6,7 @@ import * as A from "../actions";
 
 export const DEFAULT_AVATAR = "../../../../media/assets/default_avatar.jpg";
 
-export class Avatar extends React.Component {
+class RawAvatar extends React.Component {
   constructor(props) {
     super(props);
     this.state = {'imageError': false};
@@ -14,30 +14,42 @@ export class Avatar extends React.Component {
   onError(event) {
     this.setState({'imageError': true});
   }
-  getPopoverId() {
-    let u = encodeURIComponent(this.props.user.username).replace(/\%/g, '::');
-    return `avatar-${u}-${this.props.idPart}`;
-  }
   render() {
+    let user;
+    if (_.isNumber(this.props.user)) {
+      user = this.props.users[this.props.user];
+    } else {
+      user = this.props.user;
+    }
+      
     let imgProps = {
-      alt: this.props.user.display_name,
-      src: this.state.imageError ? DEFAULT_AVATAR : this.props.user.image,
+      alt: user.display_name,
+      src: this.state.imageError ? DEFAULT_AVATAR : user.image,
       onError: (event) => this.onError(event),
     }
+    let u = encodeURIComponent(user.username).replace(/\%/g, '::');
+    let popoverId = `avatar-${u}-${this.props.idPart}`;
+    let classes = [];
+    if (this.props.className) {
+      classes.push(this.props.className);
+    }
+
     if (this.props.detailView) {
+      classes.push("user-details");
       return (
-        <div className='user-details'>
+        <div className={classes.join(" ")}>
           <span className='user-avatar'>
             <img {...imgProps} />
           </span>
-          {this.props.user.display_name}
+          {user.display_name}
         </div>
       )
     } else {
-      let popover = <BS.Popover id={this.getPopoverId()}>
-        {this.props.user.display_name}
+      let popover = <BS.Popover id={popoverId}>
+        {user.display_name}
       </BS.Popover>;
-      return <span className='user-avatar'>
+      classes.push("user-avatar");
+      return <span className={classes.join(" ")}>
         <BS.OverlayTrigger rootClose trigger='click' overlay={popover} placement='top'>
           <img {...imgProps} />
         </BS.OverlayTrigger>
@@ -45,11 +57,21 @@ export class Avatar extends React.Component {
     }
   }
 }
-Avatar.propTypes = {
-  user: React.PropTypes.shape({
-    username: React.PropTypes.string.isRequired,
-    display_name: React.PropTypes.string.isRequired,
-    image: React.PropTypes.string.isRequired,
-  }).isRequired,
+RawAvatar.propTypes = {
+  user: React.PropTypes.oneOfType([
+    React.PropTypes.number,
+    React.PropTypes.shape({
+      id: React.PropTypes.number,
+      username: React.PropTypes.string.isRequired,
+      display_name: React.PropTypes.string.isRequired,
+      image: React.PropTypes.string.isRequired,
+    })
+  ]),
   idPart: React.PropTypes.string.isRequired,
 }
+
+
+export const Avatar = connect(
+  state => ({users: state.users}),
+  dispatch => ({})
+)(RawAvatar);

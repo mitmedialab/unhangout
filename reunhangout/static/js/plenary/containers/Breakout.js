@@ -59,7 +59,7 @@ export default class Breakout extends React.Component {
     let showDelete = this.props.auth.is_admin;
     let isProposer = this.props.plenary.breakout_mode === "user" && (
       this.props.breakout.proposed_by &&
-      this.props.breakout.proposed_by.username === this.props.auth.username
+      this.props.breakout.proposed_by === this.props.auth.id
     );
     let titleReadOnly = this.props.breakout.is_random || !(
       this.props.auth.is_admin || isProposer
@@ -73,7 +73,7 @@ export default class Breakout extends React.Component {
     );
 
     let votedForThis = !!_.find(this.props.breakout.votes, (vote) => {
-      return vote.username === this.props.auth.username
+      return vote === this.props.auth.id
     });
     let showPresence = this.props.plenary.breakouts_open && !this.props.breakout.is_proposal;
     let showAssignees = this.props.breakout.is_random;
@@ -226,3 +226,4 @@ BreakoutPresence.propTypes = {
   'presence': React.PropTypes.object.isRequired,
   'auth': React.PropTypes.object.isRequired,
 }
+

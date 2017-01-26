@@ -2,6 +2,7 @@ import re
 
 from django.db import models
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -86,6 +87,19 @@ class Plenary(models.Model):
         if self.doors_close < self.end_date:
             raise ValidationError("Doors close must be after or equal to end date")
 
+    def associated_users(self):
+        User = get_user_model()
+        plenary_users = User.objects.filter(
+            models.Q(plenary=self) |
+            models.Q(presence__room__channel_name=self.channel_group_name) |
+            models.Q(mentioned_chats__plenary=self) |
+            models.Q(chatmessage__plenary=self) |
+            models.Q(plenaries_participating_live=self)
+        ).distinct()
+        for breakout in self.breakout_set.all():
+            plenary_users |= breakout.associated_users()
+        return plenary_users
+
     @property
     def channel_group_name(self):
         return "plenary-%s" % self.pk
@@ -107,7 +121,6 @@ class Plenary(models.Model):
     def serialize(self):
         return {
             'id': self.id,
-            'series_name': self.series and self.series.slug,
             'name': self.name,
             'slug': self.slug,
             'url': self.get_absolute_url(),
@@ -127,10 +140,8 @@ class Plenary(models.Model):
             'history': self.history,
             'open': self.open,
             'breakouts_open': self.breakouts_open,
-            'admins': [username for username in
-                self.admins.values_list('username', flat=True)],
-            'live_participants': [username for username in
-                self.live_participants.values_list('username', flat=True)],
+            'admins': list(self.admins.values_list('id', flat=True)),
+            'live_participants': list(self.live_participants.values_list('id', flat=True)),
             'video_sync_id': self.channel_group_name,
             'webrtc_id': self.webrtc_id,
         }
@@ -152,6 +163,8 @@ class ChatMessage(models.Model):
     message = models.TextField(default="", blank=True)
     highlight = models.BooleanField(default=False)
     archived = models.BooleanField(default=False)
+    mentions = models.ManyToManyField(settings.AUTH_USER_MODEL,
+            related_name="mentioned_chats")
 
     def safe_message(self):
         return sanitize(self.message, tags=['b', 'i'])
@@ -162,11 +175,12 @@ class ChatMessage(models.Model):
     def serialize(self):
         return {
             'id': self.id,
-            'user': self.user.serialize_public(),
+            'user': self.user_id,
             'created': self.created.isoformat(),
             'message': self.safe_message(),
             'highlight': self.highlight,
             'archived': self.archived,
+            'mentions': list(self.mentions.values_list('id', flat=True))
         }
 
     class Meta:

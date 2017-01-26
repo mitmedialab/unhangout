@@ -1,3 +1,4 @@
+import re
 import base64
 import datetime
 import functools
@@ -8,7 +9,7 @@ from urllib.parse import urlparse
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models.fields.files import FieldFile
-from django.db.models import F, Count
+from django.db.models import F, Count, Q
 from django.db import transaction
 from django.utils.timezone import now
 
@@ -108,15 +109,38 @@ def handle_chat(message, data, plenary):
         data['payload'].get('highlight') and \
         (message.user.is_superuser or plenary.has_admin(message.user))
     )
-    chat_message = ChatMessage.objects.create(
-        plenary=plenary,
-        user=message.user,
-        message=data['payload']['message'],
-        highlight=highlight or False
-    )
-    data = chat_message.serialize()
-    broadcast(plenary.channel_group_name, type='chat', payload=data)
-    track("plenary_chat", message.user, data, plenary=plenary)
+    with transaction.atomic():
+        chat_message = ChatMessage.objects.create(
+            plenary=plenary,
+            user=message.user,
+            message=data['payload']['message'],
+            highlight=highlight or False
+        )
+        at_split = re.split(r"(?:^|\s)@((?:[-_A-Za-z0-9]|\.(?!$|\s))+)",
+                data['payload']['message'])
+        at_names = [a.lower() for a in at_split[1::2]]
+        mentions = []
+        if at_names:
+            # We're searching for a display name that contains a concatenated
+            # version of the username (e.g. with spaces removed). The username
+            # can also come from a variety of sources (e.g. twitter, facebook,
+            # manual). So just (expensively) grab the whole lot via python.
+            pool = []
+            for user in plenary.associated_users():
+                pool.append((
+                    re.sub("[^a-zA-Z0-9_.-]", "", user.get_display_name()).lower(),
+                    user
+                ))
+            for at_name in at_names:
+                for norm_name, user in pool:
+                    if norm_name.startswith(at_name.lower()):
+                        mentions.append(user)
+                        break
+        chat_message.mentions.set(mentions)
+
+        data = chat_message.serialize()
+        broadcast(plenary.channel_group_name, type='chat', payload=data)
+        track("plenary_chat", message.user, data, plenary=plenary)
 
 @require_payload_keys(['message_ids'])
 def handle_archive_chat(message, data, plenary):
@@ -403,20 +427,20 @@ def handle_plenary(message, data, plenary):
         broadcast(plenary.channel_group_name, type='breakout_receive',
             payload=[b.serialize() for b in plenary.breakout_set.all()])
 
-@require_payload_keys(['username'])
+@require_payload_keys(['id'])
 def handle_add_live_participant(message, data, plenary):
     if not plenary.has_admin(message.user):
         return handle_error(message, "Must be an admin to do add live participants.")
 
     try:
-        user = User.objects.get(username=data['payload']['username'])
+        user = User.objects.get(id=data['payload']['id'])
     except User.DoesNotExist:
         return handle_error(message, "User not found.")
 
     plenary.live_participants.add(user)
     payload = {
         'live_participants': list(
-            plenary.live_participants.values_list('username', flat=True)
+            plenary.live_participants.values_list('id', flat=True)
         )
     }
     broadcast(
@@ -426,24 +450,24 @@ def handle_add_live_participant(message, data, plenary):
     )
     
 
-@require_payload_keys(['username'])
+@require_payload_keys(['id'])
 def handle_remove_live_participant(message, data, plenary):
     authorized = (
-        (data['payload']['username'] == message.user.username) or
+        (data['payload']['id'] == message.user.id) or
         plenary.has_admin(message.user)
     )
     if not authorized:
         return handle_error(message, "Must be an admin to remove live participants other than yourself")
 
     try:
-        user = User.objects.get(username=data['payload']['username'])
+        user = User.objects.get(id=data['payload']['id'])
     except User.DoesNotExist:
         return handle_error(message, "User not found")
 
     plenary.live_participants.remove(user)
     payload = {
         'live_participants': list(
-            plenary.live_participants.values_list('username', flat=True)
+            plenary.live_participants.values_list('id', flat=True)
         )
     }
     broadcast(
