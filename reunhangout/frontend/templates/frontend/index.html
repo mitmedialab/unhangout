@@ -1,17 +1,19 @@
 {% extends "base.html" %}
-{% load thumbnail %}
 {% load page_components %}
 
 {% block title %}{{ branding.name }}{% endblock %}
 
 {% block content %}
-<div class='container'>
+<div class='container homepage-container'>
   <div class='row'>
     <div class='col-sm-6 col-sm-offset-3'>
-      {% thumbnail branding.logo_png "x400" format="PNG" as thumb %}
-      <img src='{{thumb.url }}' alt='{{ branding.name }}' class='img-responsive' />
-      {% endthumbnail %}
-      {% page_component "front_page_blurb" default="<p>Unhangout is an open source platform for running large-scale, participant-driven discussion events.</p>" %}
+      <img src='../../../media/{{ branding.logo }}' alt='{{ branding.name }}' class='img-responsive' />
+      <p class='front-page-blurb'>Unhangout is an open source platform for running large-scale, participant-driven events online.</p>
+      <div class='homepage-add-event-btn'>
+        <a class='btn btn-primary btn-large' href='{% url "plenary_add" %}'>
+          <i class='fa fa-plus'></i> Create an Unhangout
+        </a>
+      </div>
     </div>
   </div>
 </div>

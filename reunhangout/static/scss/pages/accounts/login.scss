@@ -22,24 +22,3 @@
     }
   }
 }
-
-.navbar-right{
-  > button{
-    margin-top: 17px;
-    margin-bottom: 17px;
-  }
-}
-
-.navbar-nav > li > a {
-  line-height: 40px;
-}
-
-.navbar-brand{
-  height: 100%;
-  > img{
-    height: 40px;
-  }
-  &:hover{
-    opacity: 0.9;
-  }
-}

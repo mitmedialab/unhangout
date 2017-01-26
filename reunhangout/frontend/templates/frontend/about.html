@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load page_components %}
+
+{% block title %}About{% endblock %}
+
+{% block content %}
+<div class='container '>
+  <div class='row'>
+    <div class='col-sm-8 col-sm-offset-2'>
+    	<h1> About </h1>
+    	<p> Unhangout is an open source platform for running large-scale, participant-driven events online.</p>
+    	<p>Each event has a landing page, which we call the lobby. When participants arrive, they can see who else is there and chat with each other. Hosts can welcome their community and do introductions in a video window that gets streamed into the lobby. Participants can then join breakouts, which are small group video chats, for in-depth conversations, peer-to-peer learning, and collaboration on projects.</p>
+    	<strong><p> Unhangout facilitates participant-driven, community-based learning, rather than top-down information transfer.</p></strong>    	
+    	<h1>The Team</h1>
+    	<p>Our small design and development team is (mostly) based at the MIT Media Lab in Cambridge, MA, USA.</p>
+    	<div class='team-container'>
+    		<div class='team-member'>
+    			<a href='https://www.media.mit.edu/people/kamcco/overview/' target='_blank'><img src="../../../media/assets/katherine-hs.jpg" alt="Katherine McConachie"></img></a>
+    			<p>Katherine McConachie</p>
+    		</div>
+    		<div class='team-member'>
+    			<a href='https://tirl.org/' target='_blank'><img src="../../../media/assets/charlie_98x98.jpg" alt="Charlie DeTar"></img></a>
+    			<p>Charlie DeTar</p>
+    		</div>
+    		<div class='team-member'>
+    			<a href='https://www.media.mit.edu/people/ps1/overview/' target='_blank'><img src="../../../media/assets/PS_headshot.png" alt="Philipp Schmidt"></img></a>
+    			<p>Philipp Schmidt</p>
+    		</div>
+    		<div class='team-member'>
+    			<a href='https://www.media.mit.edu/people/yumikom/overview/' target='_blank'><img src="../../../media/assets/yumiko.png" alt="Yumiko Murai"></img></a>
+    			<p>Yumiko Murai</p>
+    		</div>
+    		<div class='mit-ml-logo'>
+    			<img src='../../../media/assets/MIT_ML_Logo_K_RGB.png'></img>
+    		</div>
+    	</div>
+    	<h1> Etc. </h1>
+    	<p> Unhangout is an open source project. You can find the code on our Github.</p>
+    	<p>Questions? Say hello at <a href='mailto:unhangout@media.mit.edu' target='_blank'>unhangout@media.mit.edu</a>.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
