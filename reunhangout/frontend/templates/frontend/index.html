@@ -7,17 +7,11 @@
 {% block content %}
 <div class='container'>
   <div class='row'>
-    <div class='col-sm-7'>
-      <div class="videowrapper">
-        <iframe src="https://player.vimeo.com/video/90475288?title=0&amp;byline=0&amp;portrait=0" height="300" frameborder="0" webkitallowfullscreen="" mozallowfullscreen="" allowfullscreen="" style='width: 100%;'></iframe> 
-      </div>
-    </div>
-    <div class='col-sm-5'>
-      {% thumbnail branding.logo "x400" format="PNG" as thumb %}
+    <div class='col-sm-6 col-sm-offset-3'>
+      {% thumbnail branding.logo_png "x400" format="PNG" as thumb %}
       <img src='{{thumb.url }}' alt='{{ branding.name }}' class='img-responsive' />
       {% endthumbnail %}
-      {% page_component "front_page_blurb" default="<p>Unhangout is an open source platform for running large-scale, unconferences online. We use Google Hangouts to create as many small breakout sessions as needed, and help users find others with shared interests.</p>" %}
-
+      {% page_component "front_page_blurb" default="<p>Unhangout is an open source platform for running large-scale, participant-driven discussion events.</p>" %}
     </div>
   </div>
 </div>

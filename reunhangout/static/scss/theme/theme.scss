@@ -1,7 +1,5 @@
 // Allow forms with buttons-as-links in dropdown menus to enable POST-ing
-.navbar-nav > li > a {
-  line-height: 26px;
-}
+
 .dropdown-menu > li > form {
   width: 100%;
   .btn-link {
@@ -129,6 +127,17 @@
   &:hover{
     background-color: #f5f5f5;
     box-shadow: 2px 2px 0 #222;
+  }
+}
+
+.btn-danger{
+  border: 2px solid #222;
+  &:hover{
+    border: 2px solid #222;
+    box-shadow: 2px 2px 0 #222;
+  }
+  &:focus,&:active{
+    border: 2px solid #222;
   }
 }
 

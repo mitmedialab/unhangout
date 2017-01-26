@@ -13,9 +13,7 @@
       </button>
       {% if not brandless %}
         <a class='navbar-brand' href='/'>
-          {% thumbnail branding.navbar_logo "x34" format="PNG" as logo %}
-            <img src='{{ logo.url }}' alt='{{ branding.name }}' />
-          {% endthumbnail %}
+            <img src='../../../media/{{ branding.logo }}' class="img-responsive" alt='{{ branding.name }}' />
         </a>
       {% endif %}
     </div>
@@ -63,12 +61,8 @@
             </ul>
           </li>
         {% else %}
-          <li>
-            <a href='{% url "account_login" %}' class='btn btn-login'>Login</a>
-          </li>
-          <li>
-            <a href='{% url "account_signup" %}' class='btn btn-signup'>Sign up</a>
-          </li>
+          <button href='{% url "account_login" %}' type='button' class='btn btn-default navbar-btn btn-login'>Login</button>
+          <button href='{% url "account_signup" %}' type='button' class='btn btn-success navbar-btn btn-signup'>Sign up</button>
         {% endif %}
       </ul>
     </div>

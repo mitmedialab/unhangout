@@ -70,6 +70,11 @@ class Plenary extends React.Component {
             <PlenaryInfo plenary={this.props.plenary} />
             <UserMenu />
             <Presence presence={this.props.presence} auth={this.props.auth} />
+            <div className='logo-container'>
+              <a href="/" target="_blank">
+                <img src="../../../media/assets/unhangout-logo-FULL.svg" alt="Unhangout logo"></img>
+              </a>
+            </div>
           </div>
           <div className='column chat-col'>
             <Whiteboard />

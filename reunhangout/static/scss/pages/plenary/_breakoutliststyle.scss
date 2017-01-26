@@ -139,9 +139,9 @@
       }
 
       .breakout-list-item-right-col{
+        display: flex;
+        justify-content: center;
         > .btn{
-          height:100%;
-          min-width: 42px;
           border: 2px solid #222;
           border-radius: 0 7px 7px 0;
           &:hover{
@@ -149,14 +149,13 @@
           }
           &.join-btn{
             display: flex;
-            justify-content: center;
             background-color: #3652d3;
             color: #fff;
             &:hover{
               background-color: lighten(#3652d3,3%);
             }
             > i{
-              align-self: center;
+              margin: auto;
             }
           }
           &.vote-btn{
