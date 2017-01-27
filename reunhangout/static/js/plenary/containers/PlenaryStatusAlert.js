@@ -95,6 +95,7 @@ class PlenaryStatusAlert extends React.Component {
       <BS.Modal show={this.state.plenarySettingsModalOpen}
                 onHide={() => this.setState({plenarySettingsModalOpen: false})}>
         <PlenaryEditor
+          settings={this.props.settings}
           plenary={this.props.plenary}
           onChange={(update) => {
             this.props.onAdminSendPlenaryDetails(update);
@@ -111,6 +112,7 @@ export default connect(
   (state) => ({
     plenary: state.plenary,
     auth: state.auth,
+    settings: state.settings,
   }),
   // map dispatch to props
   (dispatch, ownProps) => ({

@@ -10,14 +10,15 @@ import JitsiMeetExternalAPI from "../../vendor/jitsi-meet/external_api";
 import * as style from "../../../scss/pages/breakout/_breakoutstyle.scss";
 
 class JitsiVideo extends React.Component {
-  setupJitsiFrame(div) {
+  setupJitsiFrame(div, props) {
+    props = props || this.props;
     // API alternative to:
-    // <iframe src={`https://jitsi.unhangout.io/${this.props.breakout.webrtc_id}`} frameBorder={0}></iframe>
+    // <iframe src={`https://${props.breakout.jitsi_server}/${props.breakout.webrtc_id}`} frameBorder={0}></iframe>
     this.api = new JitsiMeetExternalAPI(
       // domain
-      "jitsi.unhangout.io",
+      props.breakout.jitsi_server,
       // room_name
-      this.props.breakout.webrtc_id,
+      props.breakout.webrtc_id,
       // width
       undefined,
       // height
@@ -35,9 +36,9 @@ class JitsiVideo extends React.Component {
       }, 
       // interfaceConfigOvewrite
       {
-        APP_NAME: JSON.stringify(this.props.settings.BRANDING.name),
+        APP_NAME: JSON.stringify(props.settings.BRANDING.name),
         SHOW_JITSI_WATERMARK: JSON.stringify(false),
-        DEFAULT_LOCAL_DISPLAY_NAME: JSON.stringify(this.props.auth.display_name),
+        DEFAULT_LOCAL_DISPLAY_NAME: JSON.stringify(props.auth.display_name),
         DEFAULT_REMOTE_DISPLAY_NAME: JSON.stringify("Fellow breakouter"),
         SHOW_POWERED_BY: JSON.stringify(true),
         TOOLBAR_BUTTONS: JSON.stringify([
@@ -51,7 +52,7 @@ class JitsiVideo extends React.Component {
       // noSSL
       false
     );
-    this.api.executeCommand("displayName", this.props.auth.display_name);
+    this.api.executeCommand("displayName", props.auth.display_name);
   }
   componentDidMount() {
     if (!this.props.hide) {
@@ -77,6 +78,9 @@ class JitsiVideo extends React.Component {
     } else if (!nextProps.hide && this.props.hide) {
       this.refs.iframeHolder.className = this.getClasses(nextProps.hide);
       this.setupJitsiFrame(this.refs.iframeHolder);
+    } else if (nextProps.breakout.jitsi_server != this.props.breakout.jitsi_server) {
+      this.api.dispose();
+      this.setupJitsiFrame(this.refs.iframeHolder, nextProps);
     }
   }
 

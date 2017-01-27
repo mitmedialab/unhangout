@@ -16,6 +16,7 @@ def public_settings(request):
             ),
             'PLENARY_SERVER': settings.PLENARY_SERVER,
             'MEDIA_URL': settings.MEDIA_URL,
+            'JITSI_SERVERS': settings.JITSI_SERVERS,
         },
         # available as context processor for Django templates. (not duplicate)
         'branding': settings.BRANDING,

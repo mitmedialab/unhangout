@@ -13,7 +13,7 @@ export class PlenaryEditor extends React.Component {
     this.plenarySettingsFields = [
       'name', 'organizer', 'start_date', 'end_date', 'doors_open',
       'doors_close', 'description', 'slug', 'public', 'image',
-      'canceled', 'copy_from_id'
+      'canceled', 'copy_from_id', 'jitsi_server'
     ];
     this.plenarySettingsFieldsRequired = ['name', 'slug'];
   }
@@ -176,6 +176,20 @@ export class PlenaryEditor extends React.Component {
                 </option>
               ))}
             </BS.FormControl>
+
+          : type === "jitsi_server" ?
+            <BS.FormControl
+                componentClass='select'
+                onChange={(event) => this.setState({[stateName]: event.target.value})}
+                value={this.state[stateName]}
+                {...props}>
+              {this.props.settings.JITSI_SERVERS.map(server => (
+                <option value={server} key={server}>
+                  {server}
+                </option>
+              ))}
+            </BS.FormControl>
+
           : ""
         }
         { this.state[`${stateName}-error`] ?
@@ -317,6 +331,7 @@ export class PlenaryEditor extends React.Component {
             {this.renderControl("Public calendar", "public", "checkbox",
                                 {help: "List event on the public events calendar"})}
             {this.renderControl("URL", "slug", "slug")}
+            {this.renderControl("Breakout server", "jitsi_server", "jitsi_server")}
             {this.props.plenary.id ?
               this.renderControl("Cancel event", "canceled", "checkbox",
                                  {help: "Mark event as canceled?"})
@@ -341,6 +356,7 @@ export class PlenaryEditor extends React.Component {
 
 PlenaryEditor.propTypes = {
   plenary: React.PropTypes.object,
+  settings: React.PropTypes.object,
   onChange: React.PropTypes.func.isRequired,
   loading: React.PropTypes.bool,
 }

@@ -1,4 +1,5 @@
 import React from "react";
+import {connect} from "react-redux";
 import * as BS from 'react-bootstrap';
 import {PlenaryEditor} from './PlenaryEditor';
 
@@ -18,7 +19,7 @@ function getCookie(name) {
   return cookieValue;
 }
 
-export default class PlenaryAdd extends React.Component {
+class PlenaryAdd extends React.Component {
   onChange(data) {
     this.setState({loading: true});
     let formData = new FormData();
@@ -46,9 +47,14 @@ export default class PlenaryAdd extends React.Component {
     return <div className='container'>
       <h1>Create a new event</h1>
       <PlenaryEditor onChange={(details) => this.onChange(details)}
+                     settings={this.props.settings}
                      copyablePlenaries={window.COPYABLE_PLENARIES}
                      copyFromId={window.COPY_FROM_ID || undefined}
                      loading={this.state && this.state.loading} />
     </div>
   }
 }
+
+export default connect(
+  (state) => ({settings: state.settings}),
+)(PlenaryAdd)

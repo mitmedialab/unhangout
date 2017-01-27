@@ -9,3 +9,6 @@ export const message = (payload) => {
     }, 10000);
   }
 }
+
+export const SET_BREAKOUT = 'SET_BREAKOUT';
+export const setBreakout = (payload) => ({type: SET_BREAKOUT, payload});

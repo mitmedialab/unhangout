@@ -143,6 +143,7 @@ export class UserMenu extends React.Component {
                   onHide={() => this.setState({plenarySettingsModalOpen: false})}>
           <PlenaryEditor
             plenary={this.props.plenary}
+            settings={this.props.settings}
             onChange={(update) => {
               this.props.adminSendPlenaryDetails(update);
               this.setState({plenarySettingsModalOpen: false});
@@ -158,6 +159,7 @@ export default connect(
   // map state to props
   (state) => ({
     plenary: state.plenary,
+    settings: state.settings,
     chat_messages: state.chat_messages,
     auth: state.auth,
   }),

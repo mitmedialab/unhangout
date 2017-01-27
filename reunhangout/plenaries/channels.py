@@ -333,9 +333,9 @@ def _b64_image_to_uploaded_file(b64data):
     return SimpleUploadedFile(filename, image_bytes, content_type)
 
 PLENARY_SIMPLE_UPDATE_KEYS = (
-    'random_max_attendees', 'breakout_mode', 'name', 'organizer',
-    'start_date', 'end_date', 'doors_open', 'doors_close',
-    'breakouts_open', 'canceled', 'slug', 'public',
+    'random_max_attendees', 'breakout_mode', 'name', 'organizer', 'start_date',
+    'end_date', 'doors_open', 'doors_close', 'breakouts_open', 'canceled',
+    'slug', 'public', 'jitsi_server',
 )
 PLENARY_SANITIZED_KEYS = (
     'whiteboard', 'description'
@@ -393,6 +393,7 @@ def handle_plenary(message, data, plenary):
     if not plenary.has_admin(message.user):
         return handle_error(message, "Must be an admin to do that.")
 
+    old_jitsi_server = plenary.jitsi_server
     payload = data['payload']
     try:
         update_plenary(plenary, payload)
@@ -400,6 +401,8 @@ def handle_plenary(message, data, plenary):
         handle_error(message, json_dumps(e.message_dict))
 
     breakouts_changed = False
+    if plenary.jitsi_server != old_jitsi_server:
+        breakouts_changed = True
     try:
         with transaction.atomic():
             plenary.full_clean()
@@ -424,8 +427,16 @@ def handle_plenary(message, data, plenary):
     broadcast(plenary.channel_group_name, type='plenary', payload={'plenary': update})
 
     if breakouts_changed:
+        breakouts_serialized = [(b, b.serialize()) for b in plenary.breakout_set.all()]
+
+        # Broadcast new breakouts to plenary
         broadcast(plenary.channel_group_name, type='breakout_receive',
-            payload=[b.serialize() for b in plenary.breakout_set.all()])
+            payload=[b[1] for b in breakouts_serialized])
+
+        # Broadcast new breakouts to breakouts
+        for breakout, serialized in breakouts_serialized:
+            broadcast(breakout.channel_group_name, type='breakout', payload=serialized)
+
 
 @require_payload_keys(['id'])
 def handle_add_live_participant(message, data, plenary):

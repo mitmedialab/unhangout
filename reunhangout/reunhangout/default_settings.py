@@ -229,4 +229,8 @@ BRANDING = {
     'name': 'Unhangout',
     'default_avatar': "assets/default_avatar.jpg",
 }
+JITSI_SERVERS = [
+    'meet.jit.si',
+    'jitsi.unhangout.io',
+]
 

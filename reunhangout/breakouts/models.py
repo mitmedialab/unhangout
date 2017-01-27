@@ -84,6 +84,11 @@ class Breakout(models.Model):
             members = list(self.members.values_list('id', flat=True))
         else:
             members = []
+        if self.plenary_id:
+            jitsi_server = self.plenary.jitsi_server
+        else:
+            jitsi_server = settings.JITSI_SERVERS[0]
+
         return {
             'id': self.id,
             'title': self.title,
@@ -100,6 +105,7 @@ class Breakout(models.Model):
             'proposed_by': self.proposed_by_id if self.proposed_by_id else None,
             'votes': votes,
             'members': members,
+            'jitsi_server': jitsi_server,
         }
 
     def save(self, *args, **kwargs):

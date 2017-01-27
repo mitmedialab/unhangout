@@ -5,8 +5,9 @@ export const breakout = (state=null, action) => {
   state = state || {};
   switch (action.type) {
     case A.BREAKOUTS_DISCONNECTING_OTHERS:
-      state.disconnectingOthers = true;
-      return state;
+      return {...state, disconnectingOthers: true};
+    case A.SET_BREAKOUT:
+      return action.payload;
   }
   return state;
 }

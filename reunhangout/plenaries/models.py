@@ -67,6 +67,9 @@ class Plenary(models.Model):
     live_participants = models.ManyToManyField(settings.AUTH_USER_MODEL,
             related_name='plenaries_participating_live', blank=True)
     admins = models.ManyToManyField(settings.AUTH_USER_MODEL)
+    jitsi_server = models.CharField(max_length=255, choices=(
+        [(a,a) for a in settings.JITSI_SERVERS]
+    ), default=settings.JITSI_SERVERS[0])
 
     def clean(self):
         if self.slug:
