@@ -73,7 +73,7 @@
         .breakout-title{
           max-height: 44px;
           min-height: 44px;
-          overflow: scroll;
+          overflow: auto;
           .in-place-editor{
             &:focus,&:active{
               border: none;
