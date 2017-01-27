@@ -23,7 +23,8 @@ before use.
    as plain text; but if you don't use ansible-vault, be careful not to commit
    the file to source control, as it contains keys to the kingdom.  The file
    should define the following variables:
-    * `reunhangout_domain`: The domain name as found in `hosts.cfg`.
+    * `uh_domain`: The domain name as found in `hosts.cfg`.
+    * `uh_domain_aliases`: Any aliases to redirect to the domain name as found in `hosts.cfg`.
     * `main_user_name`: The username to use for deployment
     * `main_user_salt`: A 16-character-ish alphanumerical string for salting
       the password in /etc/shadow. (This allows idempotent password changes).
@@ -44,11 +45,11 @@ before use.
       for letsencrypt. Can be generated with `openssl genrsa 4096`.
 5. Run the first deployment:
   ```
-  make firstrun
+  make firstrunprod
   ```
 6. Create an initial Django superuser:
   ```
-  make createsuperuser
+  make createsuperuserprod
   ```
   This will create a superuser with username `admin` and email address
   `admin_email` from `vars/secrets.yml`.  To log in, you'll need to request a
@@ -58,11 +59,16 @@ before use.
    needed.
 8. For subsequent builds/runs of the playbook (e.g. after changes to variables or code), run:
     ```
-    make all
+    make prod
     ```
   Other useful make targets:
-    * `make app`: Only run the tasks pertaining to the reunhangout application
+    * `make prodapp`: Only run the tasks pertaining to the reunhangout application
       (skipping the OS/user setup, firewall, webserver, letsencrypt, etc).
       Faster for rebuilding after code changes.
+    * `make prodcode`: Minimal set of tasks for a normal application code
+      update that doesn't touch configuration or dependencies.  Faster for
+      rebuilding after simple code changes.
     * `make reboot`: Reboot the server if it thinks it needs it (e.g. after kernel upgrades)
     * `make upgrades`: Run `apt-get update && apt-get upgrade`.
+
+If you have a staging server in addition to a production server, use the "stage" variants of the make targets to build that. (See `Makefile`).  Populate `vars/staging-secrets.yml` with any secrets that are different on the staging server (e.g. `uh_domain`, passwords, etc).

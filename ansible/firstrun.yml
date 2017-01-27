@@ -2,7 +2,7 @@
 # Install python2.7 and aptitude on the host first thing -- ansible won't be
 # fully functional until then.
 
-- hosts: reunhangout
+- hosts: all
   gather_facts: False
   tasks:
    - name: apt-get update

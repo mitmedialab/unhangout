@@ -8,28 +8,54 @@ endif
 ifdef tags
   TAGS = --tags $(tags)
 endif
+ifdef v
+	EXTRA = --extra-vars=django_repo_version=$(v)
+endif
 
-all:
-	ansible-playbook -i hosts.cfg app.yml $(VAULT) $(TAGS)
+APP_TAGS = --tags reunhangout,django
+USER = --user deploy
+ALL_HOSTS = -i hosts.cfg
+STAGE_HOSTS = -i hosts.cfg -l reunhangout-staging
+PROD_HOSTS = -i hosts.cfg -l reunhangout
 
-firstrun:
-	ansible-playbook -i hosts.cfg firstrun.yml --user root
-	ansible-playbook -i hosts.cfg app.yml $(VAULT) --user root
+prod:
+		ansible-playbook $(PROD_HOSTS) prod.yml $(VAULT) $(EXTRA) $(USER) $(TAGS)
 
-app:
-	ansible-playbook -i hosts.cfg app.yml $(VAULT) --tags reunhangout,django
+prodapp:
+		ansible-playbook $(PROD_HOSTS) prod.yml $(VAULT) $(EXTRA) $(USER) $(APP_TAGS)
 
-code:
-	ansible-playbook -i hosts.cfg app.yml $(VAULT) --tags djangocode
+prodcode:
+		ansible-playbook $(PROD_HOSTS) prod.yml $(VAULT) $(EXTRA) $(USER) --tags djangocode
+
+createsuperuserprod:
+		ansible-playbook $(PROD_HOSTS) createsuperuser.yml $(VAULT) $(EXTRA) $(USER) $(TAGS)
+
+stage:
+		ansible-playbook $(STAGE_HOSTS) stage.yml $(VAULT) $(EXTRA) $(USER) $(TAGS)
+
+stageapp:
+		ansible-playbook $(STAGE_HOSTS) stage.yml $(VAULT) $(EXTRA) $(USER) $(APP_TAGS)
+
+stagecode:
+		ansible-playbook $(STAGE_HOSTS) stage.yml $(VAULT) $(EXTRA) $(USER) --tags djangocode
 
 upgrades:
-	ansible-playbook -i hosts.cfg upgrades.yml $(VAULT)
+		ansible-playbook $(ALL_HOSTS) upgrades.yml $(VAULT) $(USER)
 
 reboot:
-	ansible-playbook -i hosts.cfg reboot.yml $(VAULT)
+		ansible-playbook $(ALL_HOSTS) reboot.yml $(VAULT) $(USER)
 
-createsuperuser:
-	ansible-playbook -i hosts.cfg createsuperuser.yml $(VAULT)
+prodbounce:
+		ansible-playbook $(PROD_HOSTS) bounce-prod.yml $(VAULT) $(USER)
 
-restart-workers:
-	ansible-playbook -i hosts.cfg restart-workers.yml $(VAULT)
+stagebounce:
+		ansible-playbook $(STAGE_HOSTS) bounce-stage.yml $(VAULT) $(USER)
+
+firstrunprod:
+		ansible-playbook $(PROD_HOSTS) firstrun.yml --user root
+		ansible-playbook $(PROD_HOSTS) prod.yml $(VAULT) $(EXTRA) --user root
+
+firstrunstage:
+		ansible-playbook $(STAGE_HOSTS) firstrun.yml --user root
+		ansible-playbook $(STAGE_HOSTS) stage.yml $(VAULT) $(EXTRA) --user root
+
