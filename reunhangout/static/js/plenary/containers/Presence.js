@@ -4,7 +4,7 @@ import {connect} from "react-redux";
 import * as style from "../../../scss/pages/plenary/_presencestyle.scss"
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
-import {Avatar, DEFAULT_AVATAR} from "./Avatar";
+import {Avatar} from "./Avatar";
 
 export const sortPresence = (presence, auth) => {
   // Sort self first, others second.
@@ -12,8 +12,7 @@ export const sortPresence = (presence, auth) => {
   for (let i = 0; i < presence.lurkers; i++) {
     members.push({
       username: `Anonymous ${i+1}`,
-      display_name: `Anonymous ${i+1}`,
-      image: DEFAULT_AVATAR
+      display_name: `Anonymous ${i+1}`
     });
   }
   return members;

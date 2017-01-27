@@ -4,8 +4,6 @@ import {connect} from "react-redux";
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
 
-export const DEFAULT_AVATAR = "../../../../media/assets/default_avatar.jpg";
-
 class RawAvatar extends React.Component {
   constructor(props) {
     super(props);
@@ -22,9 +20,10 @@ class RawAvatar extends React.Component {
       user = this.props.user;
     }
       
+    let defaultAvatar = `${this.props.settings.MEDIA_URL}${this.props.settings.BRANDING.default_avatar}`;
     let imgProps = {
       alt: user.display_name,
-      src: this.state.imageError ? DEFAULT_AVATAR : user.image,
+      src: (this.state.imageError || !user.image) ? defaultAvatar : user.image,
       onError: (event) => this.onError(event),
     }
     let u = encodeURIComponent(user.username).replace(/\%/g, '::');
@@ -72,6 +71,6 @@ RawAvatar.propTypes = {
 
 
 export const Avatar = connect(
-  state => ({users: state.users}),
+  state => ({users: state.users, settings: state.settings}),
   dispatch => ({})
 )(RawAvatar);

@@ -8,8 +8,6 @@ import * as youtube from "../youtube";
 import {SyncableVideo, isEmbedSyncable} from "../../videosync";
 import * as VIDEOSYNC_ACTIONS from "../../videosync/actions";
 
-const BROADCAST_IMAGE = '/media/assets/broadcast.png';
-
 const uniqueEmbeds = (embeds) => _.uniqBy(embeds, (e) => {
   return e.type === 'live' ? 'live' : e.props.src
 });
@@ -252,7 +250,7 @@ class Embed extends React.Component {
         embedDisplay.push({
           index: i,
           title: "Live Broadcast",
-          image: BROADCAST_IMAGE,
+          image: `${this.props.settings.MEDIA_URL}assets/broadcast.png`,
         });
       } else {
         let details = this.props.embedDetails[embed.props.src];

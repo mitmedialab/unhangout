@@ -78,6 +78,7 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
+                'django.template.context_processors.media',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -221,8 +222,11 @@ PUBLIC_API_KEYS = {
 }
 PLENARY_SERVER = "http://localhost:8000" # Override in settings.py
 BRANDING = {
-    'logo': 'assets/unhangout-logo-blue-full.png',
-    'navbar_logo': 'assets/nav-bar-logo-full.png',
+    'logo': 'assets/unhangout-logo-FULL.svg',
+    'short_logo_indigo': 'assets/unhangout-logo-UN-indigo.svg',
+    'short_logo_seafoam': 'assets/unhangout-logo-UN-seafoam.svg',
+    'logo_png': 'assets/unhangout-logo-FULL.png',
     'name': 'Unhangout',
+    'default_avatar': "assets/default_avatar.jpg",
 }
 

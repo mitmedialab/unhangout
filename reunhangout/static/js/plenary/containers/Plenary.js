@@ -73,6 +73,11 @@ class Plenary extends React.Component {
               presence={this.props.presence}
               auth={this.props.auth}
               muteOthers={!this.state.open ? this.props.plenary.admins : undefined}/>
+            <div className='logo-container'>
+              <a href="/" target="_blank">
+                <img src={`${this.props.settings.MEDIA_URL}${this.props.settings.BRANDING.logo}`} alt="Unhangout logo"></img>
+              </a>
+            </div>
           </div>
           <div className='column chat-col'>
             <Whiteboard />

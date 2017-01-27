@@ -2,17 +2,23 @@
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  margin-top: 20px;
 }
 .plenary-list-item {
-  padding: 1em;
-  border: 2px solid #dfdfdf;
-  border-radius: 1px;
+  padding: 10px;
+  margin: 5px;
+  border: 2px solid #9b9b9b;
+  border-radius: 7px;
   .image {
     width: 300px;
     height: 200px;
-    background-color: #ddd;
   }
   .name {
     font-size: 1.4em;
+    font-weight: 700;
+    max-width: 300px;
+    line-height: 1.2em;
+    margin-top: 5px;
+    margin-bottom: 5px;
   }
 }

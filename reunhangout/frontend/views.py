@@ -17,7 +17,7 @@ def index(request):
     return render(request, "frontend/index.html")
 
 def about(request):
-    return page_component_view(request, "about_page", "About")
+    return render(request, "frontend/about.html")
 
 def terms(request):
     return page_component_view(request, "terms_page", "Terms of Service")

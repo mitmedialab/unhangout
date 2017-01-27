@@ -1,23 +1,19 @@
 {% extends "base.html" %}
-{% load thumbnail %}
 {% load page_components %}
 
 {% block title %}{{ branding.name }}{% endblock %}
 
 {% block content %}
-<div class='container'>
+<div class='container homepage-container'>
   <div class='row'>
-    <div class='col-sm-7'>
-      <div class="videowrapper">
-        <iframe src="https://player.vimeo.com/video/90475288?title=0&amp;byline=0&amp;portrait=0" height="300" frameborder="0" webkitallowfullscreen="" mozallowfullscreen="" allowfullscreen="" style='width: 100%;'></iframe> 
+    <div class='col-sm-6 col-sm-offset-3'>
+      <img src='{{ MEDIA_URL }}{{ branding.logo }}' alt='{{ branding.name }}' class='img-responsive' />
+      <p class='front-page-blurb'>Unhangout is an open source platform for running large-scale, participant-driven events online.</p>
+      <div class='homepage-add-event-btn'>
+        <a class='btn btn-primary btn-large' href='{% url "plenary_add" %}'>
+          <i class='fa fa-plus'></i> Create an Unhangout
+        </a>
       </div>
-    </div>
-    <div class='col-sm-5'>
-      {% thumbnail branding.logo "x400" format="PNG" as thumb %}
-      <img src='{{thumb.url }}' alt='{{ branding.name }}' class='img-responsive' />
-      {% endthumbnail %}
-      {% page_component "front_page_blurb" default="<p>Unhangout is an open source platform for running large-scale, unconferences online. We use Google Hangouts to create as many small breakout sessions as needed, and help users find others with shared interests.</p>" %}
-
     </div>
   </div>
 </div>

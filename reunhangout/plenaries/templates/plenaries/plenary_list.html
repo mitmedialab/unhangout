@@ -5,7 +5,7 @@
 
 {% block content %}
   <div class='container'>
-    <a class='btn btn-primary btn-large pull-right' href='{% url "plenary_add" %}'>
+    <a class='btn btn-success btn-large pull-right' href='{% url "plenary_add" %}'>
       <i class='fa fa-plus'></i> Add a New Event
     </a>
     <h1>Upcoming Events</h1>
@@ -21,7 +21,7 @@
             {% endthumbnail %}
           {% else %}
               <a href='{{ plenary.get_absolute_url}}'>
-                <span style='display: inline-block; width: 300px; height: 200px;'></span>
+                <img src='{{ MEDIA_URL }}assets/unhangout-logo-UN-seafoam.svg' width='300' height='200' alt='' />
               </a>
           {% endif %}
         </div>
@@ -29,7 +29,7 @@
           <a href='{{plenary.get_absolute_url}}'>{{ plenary.name }}</a>
         </div>
         <div class='organizer'>
-          {{ plenary.organizer }}
+          hosted by {{ plenary.organizer }}
         </div>
         <div class='date'>
           <span class='start-date' data-date='{{plenary.start_date.isoformat}}'

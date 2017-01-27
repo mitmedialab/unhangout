@@ -136,11 +136,16 @@ class Breakout extends React.Component {
           { errorMessage ?
               ""
             :
-              <div>
+              <div className="breakout-sidebar-container">
                 <div className="breakout-title-container">
                   <span>{this.props.breakout.title}</span>
                 </div>
                 <Presence presence={this.props.presence} auth={this.props.auth} />
+                <div className='logo-container'>
+                  <a href="/" target="_blank">
+                    <img src={`${this.props.settings.MEDIA_URL}${this.props.settings.BRANDING.logo}`} alt="Unhangout logo"></img>
+                  </a>
+                </div>
               </div>
           }
           { this.props.breakoutMessages.length > 0 ?

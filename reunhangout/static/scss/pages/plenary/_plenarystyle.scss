@@ -28,4 +28,18 @@
       overflow: auto;
     }
   }
+  .logo-container{
+    height: 40px;
+    background-color: #3652d3;
+    > a{
+      img{
+        width: 100%;
+        padding: 5px;
+        height: 100%;
+        &:hover{
+          opacity: 0.8;
+        }
+      }
+    }
+  }
 }
