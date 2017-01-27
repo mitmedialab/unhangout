@@ -24,3 +24,6 @@ def terms(request):
 
 def privacy(request):
     return page_component_view(request, "privacy_page", "Privacy Policy")
+
+def permalinks_gone(request, slug):
+    return render(request, "frontend/permalinks_gone.html")
