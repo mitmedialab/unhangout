@@ -1,10 +1,4 @@
 ---
-- name: Sync auth providers
-  command: "{{django_venv_dir}}bin/python {{django_project_dir}}manage.py sync_auth_providers"
-  register: sync_auth_providers
-  changed_when: sync_auth_providers.stdout.find("changed") != -1
-  tags: ['reunhangout', 'reunhangout-post']
-
 - name: Build prod assets
   become: yes
   become_user: "{{main_user_name}}" 
@@ -13,6 +7,12 @@
   changed_when: build_prod_assets.stdout.find("Changed") != -1
   notify: restart {{django_init_name}}
   tags: ['reunhangout', 'reunhangout-post', 'djangocode']
+
+- name: Sync auth providers
+  command: "{{django_venv_dir}}bin/python {{django_project_dir}}manage.py sync_auth_providers"
+  register: sync_auth_providers
+  changed_when: sync_auth_providers.stdout.find("changed") != -1
+  tags: ['reunhangout', 'reunhangout-post']
 
 - name: Collect static again
   become: yes
