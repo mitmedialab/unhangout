@@ -1,0 +1,12 @@
+[Unit]
+Description=Reunhangout channels worker server (websockets)
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+ExecStart={{django_venv_dir}}bin/python {{django_project_dir}}/manage.py runworker --exclude-channels=http.*
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

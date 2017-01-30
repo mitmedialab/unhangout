@@ -1,0 +1,4 @@
+---
+- name: restart reunhangout-worker-websocket
+  service: name=reunhangout-worker-websocket state=restarted
+  listen: "restart {{django_init_name}}"

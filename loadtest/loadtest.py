@@ -21,7 +21,7 @@ parser.add_argument('plenary_slug', default='testy', help='Slug for plenary to t
 parser.add_argument('--user-range-min', default=0, type=int, help='Bottom of user index range')
 parser.add_argument('--user-range-max', default=10, type=int, help='Top of user index range')
 parser.add_argument('--password', default='password', help='Password to set/use for loadtest users')
-parser.add_argument('--username-template', default='loadtest%s', help='Template string for creation of loadtest users. Must contain a single "%s".')
+parser.add_argument('--username-template', default='loadtest%s', help='Template string for creation of loadtest users. Must contain a single "%%s".')
 parser.add_argument('--disable-chat', action='store_true', help='Disable chatting by loadtest users.')
 parser.add_argument('--disable-event-leaving', action='store_true', help='Disable loadtest users leaving and rejoining the plenary.')
 parser.add_argument('--disable-breakout-joining', action='store_true', help='Disable loadtest users joining breakout rooms.')
@@ -139,7 +139,7 @@ class Client:
             if op > 0.995 and not self.args.disable_event_leaving:
                 yield from self.disconnect_websocket()
                 self.info("disconnected websocket")
-            elif op > 0.99 and not self.args.disable_chat:
+            elif op > 0.9 and not self.args.disable_chat:
                 yield from self.send_json({
                     'type': 'chat',
                     'payload': {'message': random.choice(chat_messages)}

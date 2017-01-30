@@ -24,6 +24,8 @@
     uh_repo_dir: "/var/local/reunhangout/"
     postgresql_version: 9.5
     django_asgi: yes
+    django_asgi_worker_template: "roles/reunhangout/templates/reunhangout-worker-http.service"
+    django_asgi_interface_template: "roles/reunhangout/templates/reunhangout-interface.service"
     django_systemd: yes
     django_celery: yes
     django_celery_beat: yes

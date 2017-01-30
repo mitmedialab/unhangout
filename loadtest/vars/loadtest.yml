@@ -13,7 +13,7 @@ ec2_region: "us-east-1"
 
 # Secret vault keys
 loadtest_url: "{{vault_loadtest_url}}" 
-loadtest_slug: "test"
+loadtest_slug: "loadtest"
 loadtest_user_password: "{{vault_loadtest_user_password}}"
 ec2_security_group_id: "{{vault_ec2_security_group_id}}"
 ec2_key_name: "{{vault_ec2_key_name}}"

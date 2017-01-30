@@ -1,4 +1,28 @@
 ---
+- name: Increase open file descriptor limit for nginx
+  lineinfile:
+    name: /etc/nginx/nginx.conf
+    regexp: '^worker_rlimit_nofile'
+    line: 'worker_rlimit_nofile 65535;'
+    insertafter: '^worker_processes'
+    state: present
+  tags: ['reunhangout', 'reunhangout-post']
+
+- block:
+  - name: Copy websocket worker service template
+    template: >
+      src=reunhangout-worker-websocket.service
+      dest=/usr/lib/systemd/system/reunhangout-worker-websocket.service
+    notify: >
+      - systemctl daemon-reload
+      - restart reunhangout-worker-websocket
+
+  - name: Enable websocket worker
+    command: systemctl enable reunhangout-worker-websocket.service
+    register: systemd_enable
+    changed_when: systemd_enable.stdout.find("Created") != -1
+  tags: ['reunhangout', 'reunhangout-post']
+  
 - name: Build prod assets
   become: yes
   become_user: "{{main_user_name}}" 

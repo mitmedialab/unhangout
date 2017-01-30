@@ -10,3 +10,4 @@
    - service: name=reunhangout-celery state=restarted
    - service: name=reunhangout-celery-beat state=restarted
    - service: name=reunhangout-interface state=restarted
+   - service: name=reunhangout-worker-websocket state=restarted
