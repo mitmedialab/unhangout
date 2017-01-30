@@ -13,7 +13,7 @@
     template: >
       src=reunhangout-worker-websocket.service
       dest=/usr/lib/systemd/system/reunhangout-worker-websocket.service
-    notify: >
+    notify:
       - systemctl daemon-reload
       - restart reunhangout-worker-websocket
 
