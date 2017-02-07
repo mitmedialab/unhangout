@@ -17,3 +17,4 @@ reunhangout/media/*
 !reunhangout/media/assets
 logs/*
 !logs/.keepdir
+loadtest/cache.json

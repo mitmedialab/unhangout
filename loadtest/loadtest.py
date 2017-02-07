@@ -2,14 +2,17 @@
 
 import argparse
 import asyncio
+import datetime
 import functools
 import json
 import logging
+import os
 import random
 import re
 
 import requests
 import websockets
+import websockets.exceptions
 
 from howl import lines as chat_messages
 
@@ -26,6 +29,9 @@ parser.add_argument('--disable-chat', action='store_true', help='Disable chattin
 parser.add_argument('--disable-event-leaving', action='store_true', help='Disable loadtest users leaving and rejoining the plenary.')
 parser.add_argument('--disable-breakout-joining', action='store_true', help='Disable loadtest users joining breakout rooms.')
 parser.add_argument('--verbose', action='store_true')
+parser.add_argument('--cache-file', type=str, help='Path to a json file to cache client data in')
+parser.add_argument('--read-only-cache', action='store_true', help='Disable writing the cache file. Useful when sharing across processes to avoid corruption.')
+parser.add_argument('--chattiness', default=5, type=int, help='Level of chattiness, from 0 to 10. Higher is more chattier.')
 
 def main(args):
     loop = asyncio.get_event_loop()
@@ -38,8 +44,41 @@ def main(args):
         logging.basicConfig(level=logging.INFO)
 
     # See https://damienpontifex.github.io/asyncio-cancel-loop-task for how this works.
-    clients = [Client(args, i) for i in range(args.user_range_min, args.user_range_max)]
-    logger.info("Starting tasks")
+
+    #
+    # Setup
+    #
+
+    # Read cache
+    if args.cache_file:
+        if os.path.exists(args.cache_file):
+            with open(args.cache_file, 'r') as fh:
+                cache = json.load(fh)
+        else:
+            cache = {}
+
+    # Run setup
+    logger.info("Running setup")
+    clients = [Client(args, i, cache) for i in range(args.user_range_min, args.user_range_max)]
+    tasks = [loop.create_task(client.setup()) for client in clients]
+    future = asyncio.gather(*tasks)
+    loop.run_until_complete(future)
+
+    # Write cache
+    if args.cache_file and not args.read_only_cache:
+        url_cache = cache.get(args.url, {})
+        for client in clients:
+            url_cache[str(client.index)] = {
+                'cookies': {k: v for k, v in client.cookie_jar.items()},
+                'plenary_data': client.plenary_data
+            }
+        cache[args.url] = url_cache
+        with open(args.cache_file, 'w') as fh:
+            logger.info('Writing cache')
+            json.dump(cache, fh)
+
+    # Run
+    logger.info("Starting websockets")
     tasks = [loop.create_task(client.run()) for client in clients]
     future = asyncio.gather(*tasks)
     try:
@@ -57,21 +96,13 @@ def main(args):
         loop.run_until_complete(future)
         loop.close()
 
-def run(clients):
-    tasks = [asyncio.async(client.run()) for client in clients]
-    yield from asyncio.wait(tasks)
-
-def stop(clients):
-    tasks = [asyncio.async(client.dispose()) for client in clients]
-    yield from asyncio.wait(tasks)
-
-
 
 class AuthException(Exception):
     pass
 
+
 class Client:
-    def __init__(self, args, index):
+    def __init__(self, args, index, cache=None):
         self.args = args
         self.index = index
         self.username = self.args.username_template % index
@@ -80,21 +111,22 @@ class Client:
         self.breakout_websocket = None
         self.plenary_data = None
 
+        mycache = cache.get(args.url, {}).get(str(index), {})
+        for k, v in mycache.get('cookies', {}).items():
+            self.cookie_jar[k] = v
+        self.plenary_data = mycache.get('plenary_data', self.plenary_data)
+
     def is_logged_in(self):
         return bool(self.cookie_jar.get('sessionid'))
 
     def is_connected(self):
-        return self.websocket and self.websocket.open
+        return self.websocket and self.websocket.open and not self.failed
 
     def is_in_breakout(self):
         return self.breakout_websocket and self.breakout_websocket.open
 
     @asyncio.coroutine
-    def run(self):
-        '''
-        Register / log in a load test user, and begin sending traffic.
-        '''
-        self.running = True
+    def setup(self):
         try:
             if not self.is_logged_in():
                 try:
@@ -105,12 +137,26 @@ class Client:
                     yield from asyncio.async(self.login())
             if not self.plenary_data:
                 self.plenary_data = yield from asyncio.async(self.get_plenary_data())
+        except asyncio.CancelledError:
+            pass
 
+    @asyncio.coroutine
+    def run(self):
+        '''
+        Register / log in a load test user, and begin sending traffic.
+        '''
+        self.running = True
+        try:
             count = 0
+            yield from asyncio.sleep(random.uniform(0, 1) * 30)
+            self.last_heartbeat = datetime.datetime.now()
             while self.running:
                 count += 1
-                if count % 30 == 0:
+                diff = (datetime.datetime.now() - self.last_heartbeat).total_seconds()
+                if diff >= 25:
+                    self.info('heartbeat', diff)
                     yield from self.send_json("heartbeat")
+                    self.last_heartbeat = datetime.datetime.now()
                 yield from self.tick()
                 yield from asyncio.sleep(1)
         except asyncio.CancelledError:
@@ -125,12 +171,13 @@ class Client:
             return
 
         op = random.uniform(0, 1)
-        #self.debug("op: {}".format(op))
+        self.debug("op: {}".format(op))
+        chattiness = (self.args.chattiness / 10.) * 0.15 + 0.8
         if not self.is_connected():
-            if op > 0.7:
+            if op > 0.5:
                 yield from self.connect_websocket()
         else:
-            if op > 0.95:
+            if op > 0.95 and not self.args.disable_breakout_joining:
                 if self.is_in_breakout():
                     if op > 0.995:
                         yield from self.leave_breakout()
@@ -139,7 +186,7 @@ class Client:
             if op > 0.995 and not self.args.disable_event_leaving:
                 yield from self.disconnect_websocket()
                 self.info("disconnected websocket")
-            elif op > 0.91 and not self.args.disable_chat:
+            elif op > chattiness and not self.args.disable_chat:
                 yield from self.send_json({
                     'type': 'chat',
                     'payload': {'message': random.choice(chat_messages)}
@@ -173,17 +220,17 @@ class Client:
                 cookies=self.cookie_jar, allow_redirects=False)
         return res
 
-    def log(self, message, level="log"):
-        getattr(logger, level)("[%s] %s" % (self.username, message))
+    def log(self, *args, level="log"):
+        getattr(logger, level)("[%s] %s" % (self.username, " ".join("%s" % a for a in args)))
 
-    def debug(self, message):
-        self.log(message, "debug")
+    def debug(self, *args):
+        self.log(*args, level="debug")
 
-    def info(self, message):
-        self.log(message, "info")
+    def info(self, *args):
+        self.log(*args, level="info")
 
-    def warn(self, message):
-        self.log(message, "warn")
+    def warn(self, *args):
+        self.log(*args, level="warn")
 
     @asyncio.coroutine
     def login(self):
@@ -195,11 +242,9 @@ class Client:
         # Redirect means success.
         if res.status_code == 302:
             self.cookie_jar = res.cookies
-            self.debug("login succeeded: {}".format(
-                self.cookie_jar.get('sessionid')
-            ))
+            self.info("login succeeded: {}".format(self.cookie_jar.get('sessionid')))
         else:
-            self.debug("login failed")
+            self.info("login failed")
             raise AuthException("Login failed, status {}.".format(res.status_code))
         return res
 
@@ -254,21 +299,30 @@ class Client:
             'Cookie': 'sessionid=%s' % self.cookie_jar.get('sessionid'),
         }
         self.debug('headers: %s' % headers)
-        self.websocket = yield from websockets.connect(ws_url, extra_headers=headers)
-        self.info("websocket connected")
+        try:
+            self.websocket = yield from websockets.connect(ws_url, extra_headers=headers)
+        except (ConnectionResetError, websockets.exceptions.InvalidHandshake):
+            self.failed = True
+            self.websocket = None
+        else:
+            self.info("websocket connected")
+            self.failed = False
 
     @asyncio.coroutine
     def disconnect_websocket(self):
         try:
+            self.info("disconnecting websocket")
             yield from self.websocket.close()
         except websockets.ConnectionClosed:
             self.warn("Already closed websocket")
+        except Exception as e:
+            self.warn(str(e))
 
     @asyncio.coroutine
     def join_breakout(self):
         if self.plenary_data and not self.args.disable_breakout_joining:
             def usable_breakout(b):
-                return not b['is_proposal'] and not b['is_random'] and b['open']
+                return not b['is_proposal'] and not b['is_random'] and self.plenary_data['plenary']['breakouts_open']
             possible = [b for b in self.plenary_data['breakouts'] if usable_breakout(b)]
             breakout_url = ''.join((self.args.url, '/breakout/',
                 str(random.choice(possible)['id']), '/'))
@@ -287,10 +341,13 @@ class Client:
 
     @asyncio.coroutine
     def send_json(self, struct):
+        if not self.websocket:
+            return self.warn("Attempt to send message without connection")
         try:
             res = yield from self.websocket.send(json.dumps(struct))
-        except websockets.ConnectionClosed:
+        except (websockets.ConnectionClosed, ConnectionResetError):
             self.warn("Connection closed when attemting to send message.")
+            self.failed = True
             return None
         return res
 
@@ -302,8 +359,9 @@ class Client:
             yield from self.websocket.close()
         if self.breakout_websocket:
             yield from self.breakout_websocket.close()
-        yield from self.delete_account()
-        self.cookie_jar.clear()
+        #yield from self.delete_account()
+        #self.cookie_jar.clear()
+
 
 @asyncio.coroutine
 def _run_as_async(method, *args, **kwargs):
