@@ -1,7 +1,4 @@
-import json
-
 from django.conf import settings
-from django.utils.safestring import mark_safe
 
 def public_settings(request):
     return {

@@ -13,7 +13,6 @@ from django.db.models import F, Count, Q
 from django.db import transaction
 from django.utils.timezone import now
 
-from channels.sessions import enforce_ordering
 from channels.auth import channel_session_user, channel_session_user_from_http
 from channels_presence.models import Room
 from channels_presence.decorators import touch_presence, remove_presence
@@ -28,9 +27,9 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-@enforce_ordering(slight=True)
 @channel_session_user_from_http
 def ws_connect(message, slug):
+    message.reply_channel.send({"accept": True})
     try:
         plenary = Plenary.objects.get(slug=slug)
     except Plenary.DoesNotExist:
@@ -62,7 +61,6 @@ def ws_disconnect(message, slug=None):
                 handle_remove_live_participant(message, payload, plenary)
 
 @touch_presence
-@enforce_ordering(slight=True)
 @channel_session_user
 def ws_receive(message, slug):
     if not message.user.is_authenticated():
@@ -342,7 +340,6 @@ PLENARY_SANITIZED_KEYS = (
 )
 
 def update_plenary(plenary, payload):
-    #print(payload)
     for key in PLENARY_SIMPLE_UPDATE_KEYS + PLENARY_SANITIZED_KEYS:
         if key in payload:
             setattr(plenary, key, payload[key])

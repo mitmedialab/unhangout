@@ -149,7 +149,7 @@ def slug_check(request):
     slug = request.GET.get("slug")
     id_ = request.GET.get("id")
     if not slug:
-        raise HttpResponseBadRequest("Missing 'slug' or 'id' params")
+        return HttpResponseBadRequest("Missing 'slug' or 'id' params")
 
     # No case sensitive slugs for us.
     slug = slug.lower()

@@ -1,6 +1,5 @@
 import json
 
-from channels.sessions import enforce_ordering
 from channels.auth import channel_session_user, channel_session_user_from_http
 from channels import Channel
 
@@ -14,9 +13,9 @@ from reunhangout.channels_utils import (
 from reunhangout.utils import json_dumps
 from analytics.models import track
 
-@enforce_ordering(slight=True)
 @channel_session_user_from_http
 def ws_connect(message, breakout_id):
+    message.reply_channel.send({"accept": True})
     if not message.user.is_authenticated():
         return handle_error(message, "Authentication required")
     try:
@@ -56,7 +55,6 @@ def ws_disconnect(message, breakout_id=None):
         track("leave_breakout", message.user, breakout=breakout)
 
 @touch_presence
-@enforce_ordering(slight=True)
 @channel_session_user
 def ws_receive(message, breakout_id):
     try:

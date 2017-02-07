@@ -139,7 +139,7 @@ class Client:
             if op > 0.995 and not self.args.disable_event_leaving:
                 yield from self.disconnect_websocket()
                 self.info("disconnected websocket")
-            elif op > 0.9 and not self.args.disable_chat:
+            elif op > 0.91 and not self.args.disable_chat:
                 yield from self.send_json({
                     'type': 'chat',
                     'payload': {'message': random.choice(chat_messages)}
