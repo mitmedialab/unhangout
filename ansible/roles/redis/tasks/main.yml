@@ -1,5 +1,55 @@
 ---
+ # Disable transparent huge pages.
+ - block:
+   - name: Create /usr/lib/systemd
+     file: path=/usr/lib/systemd/system state=directory
+
+   - name: Copy disable-thp service template
+     template: src=disable-thp.service dest=/usr/lib/systemd/system/disable-thp.service
+     notify:
+      - systemctl daemon-reload
+      - restart disable-thp
+      - restart redis
+
+   - name: Enable disable-thp
+     systemd:
+       name: disable-thp.service
+       enabled: yes
+       daemon_reload: yes
+
+   tags: redis
+
  - name: Install redis
    apt: state=installed pkg={{item}}
    with_items:
     - "redis-server"
+   tags: redis
+
+ - name: Disable redis aof persistence
+   lineinfile:
+     dest: /etc/redis/redis.conf
+     regexp: '^appendonly .*'
+     line: 'appendonly no'
+   tags: redis
+   notify:
+    - restart redis
+
+ - name: Disable redis rdb persistence
+   replace:
+     dest: /etc/redis/redis.conf
+     regexp: 'save (.*)$'
+     replace: '#save \1'
+   tags: redis
+   notify:
+    - restart redis
+
+ - name: Allow overcommit_memory on boot
+   lineinfile:
+     dest: /etc/sysctl.conf
+     line: "vm.overcommit_memory = 1"
+   tags: redis
+ 
+ - name: Allow overcommit now
+   command: sysctl vm.overcommit_memory=1
+   changed_when: false
+   tags: redis

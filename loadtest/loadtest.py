@@ -302,6 +302,7 @@ class Client:
         try:
             self.websocket = yield from websockets.connect(ws_url, extra_headers=headers)
         except (ConnectionResetError, websockets.exceptions.InvalidHandshake):
+            self.warn('Websocket connection failed')
             self.failed = True
             self.websocket = None
         else:
