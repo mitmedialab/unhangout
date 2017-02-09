@@ -1,0 +1,4 @@
+# This is a target for controlling launching multiple reunhangout workers at once.
+
+[Install]
+WantedBy=multi-user.target

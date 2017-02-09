@@ -1,4 +1,9 @@
 ---
-- name: restart reunhangout-worker-websocket
-  service: name=reunhangout-worker-websocket state=restarted
-  listen: "restart {{django_init_name}}"
+- name: restart reunhangout services
+  shell: "systemctl {{item}}"
+  with_items:
+     - daemon-reload
+     - restart reunhangout-workers.target
+     - restart reunhangout-interface.service
+     - restart reunhangout-celery.service
+     - restart reunhangout-celery-beat.service

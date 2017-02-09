@@ -5,8 +5,7 @@
   vars_files:
    - vars/secrets.yml
   tasks:
-   - service: name=reunhangout state=restarted
+   - service: name=reunhangout-workers.target state=restarted
+   - service: name=reunhangout-interface state=restarted
    - service: name=reunhangout-celery state=restarted
    - service: name=reunhangout-celery-beat state=restarted
-   - service: name=reunhangout-interface state=restarted
-   - service: name=reunhangout-worker-websocket state=restarted

@@ -9,4 +9,4 @@ ExecStart={{django_venv_dir}}bin/python {{django_project_dir}}/manage.py runwork
 LimitNOFILE=65535
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=reunhangout-workers.target
