@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load escapejson %}
+{% load render_bundle from webpack_loader %}
+
+{% block title %}{{ plenary.name }}{% endblock %}
+{% block styles %}{% render_bundle 'main' 'css' %}{% endblock %}
+
+{% block content %}
+  <div class='over-capacity container'>
+    <h1>Over Capacity</h1>
+    <p>
+    We're sorry, but <b>{{plenary.name}}</b>
+    {% if plenary.organizer %} hosted by <b>{{plenary.organizer}}</b> {% endif %}
+    is over capacity! Please check back soon.
+    </p>
+  </div>
+{% endblock %}
+{% block scripts %}
+  <script type='text/javascript'>
+    window.NO_SOCKET = true;
+  </script>
+  {% render_bundle 'main' 'js' %}
+{% endblock %}

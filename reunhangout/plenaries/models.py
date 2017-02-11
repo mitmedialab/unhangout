@@ -30,6 +30,8 @@ class Plenary(models.Model):
     series = models.ForeignKey(Series, on_delete=models.CASCADE, blank=True, null=True)
     name = models.CharField(max_length=100)
     slug = models.SlugField(help_text=_("Short name for URL"), unique=True)
+    max_participants = models.PositiveIntegerField(default=200,
+            help_text="Maximum number of connections. Set to 0 for no limit.")
     organizer = models.CharField(max_length=100, default="", blank=True)
     image = models.ImageField(upload_to="plenaries", blank=True, null=True)
 

@@ -12,7 +12,7 @@ from django.db import transaction
 from django.utils.timezone import now
 from django.views.decorators.csrf import ensure_csrf_cookie
 
-from channels_presence.models import Room
+from channels_presence.models import Room, Presence
 from plenaries.models import Plenary, Series
 from plenaries.channels import update_plenary
 from videosync.models import VideoSync
@@ -37,6 +37,13 @@ def plenary_detail(request, id_or_slug):
     if plenary.open and not request.user.is_authenticated():
         messages.info(request, "You must be signed in to attend events.")
         return redirect('%s?next=%s' % (settings.LOGIN_URL, request.path))
+
+    if plenary.max_participants > 0 and not plenary.has_admin(request.user):
+        num_present = Presence.objects.filter(
+            room__channel_name=plenary.channel_group_name
+        ).count()
+        if (num_present + 1) > plenary.max_participants:
+            return render(request, "plenaries/over_capacity.html", {'plenary': plenary})
 
     breakouts = list(plenary.breakout_set.all())
 

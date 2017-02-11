@@ -14,7 +14,7 @@ from django.db import transaction
 from django.utils.timezone import now
 
 from channels.auth import channel_session_user, channel_session_user_from_http
-from channels_presence.models import Room
+from channels_presence.models import Room, Presence
 from channels_presence.decorators import touch_presence, remove_presence
 
 from plenaries.models import Plenary, ChatMessage
@@ -29,17 +29,23 @@ User = get_user_model()
 
 @channel_session_user_from_http
 def ws_connect(message, slug):
-    message.reply_channel.send({"accept": True})
     try:
         plenary = Plenary.objects.get(slug=slug)
     except Plenary.DoesNotExist:
         return handle_error(message,  'Plenary not found')
+
+    # Handle max connections
+    if plenary.max_participants > 0 and not plenary.has_admin(message.user):
+        num_present = Presence.objects.filter(
+            room__channel_name=plenary.channel_group_name
+        ).count()
+        if num_present > plenary.max_participants:
+            return message.reply_channel.send({"accept": False})
+
     if plenary.open and not message.user.is_authenticated():
         return handle_error(message, "Authentication required to connect to open plenaries")
 
-    # Here would be the place for enforcing a connection/user cap or other
-    # auth, if such were needed.
-
+    message.reply_channel.send({"accept": True})
     Room.objects.add(plenary.channel_group_name, message.reply_channel.name, message.user)
     track("join_plenary", message.user, plenary=plenary)
 

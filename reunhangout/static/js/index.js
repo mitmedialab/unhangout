@@ -4,7 +4,9 @@ import {loadPlenary, loadPlenaryAdd} from "./plenary";
 import {loadBreakout} from "./breakout";
 
 const store = configureStore(window.__INITIAL_STATE__);
-connectSocket(store);
+if (!window.NO_SOCKET) {
+  connectSocket(store);
+}
 loadPlenary(store);
 loadBreakout(store);
 loadPlenaryAdd(store);
