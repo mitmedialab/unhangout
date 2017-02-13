@@ -389,6 +389,7 @@ def update_plenary(plenary, payload):
             elif plenary.doors_close <= right_now:
                 # Doors already closed. Do nothing.
                 pass
+    plenary.full_clean()
 
 
 @require_payload_keys([])
