@@ -14,7 +14,7 @@
     - postgresql
     - nodesource.node
     - monitored
-    #- tarsnap
+    - tarsnap
     - redis
     - {role: django, tags: ['reunhangout']}
     - reunhangout
