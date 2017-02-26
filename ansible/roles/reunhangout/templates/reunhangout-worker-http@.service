@@ -1,5 +1,6 @@
 [Unit]
 Description=Reunhangout channels worker server (http only)
+PartOf=reunhangout-workers.target
 
 [Service]
 Type=simple
