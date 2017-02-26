@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from breakouts.models import Breakout
+from breakouts.models import Breakout, ErrorReport
 
 @admin.register(Breakout)
 class BreakoutAdmin(admin.ModelAdmin):
@@ -9,3 +9,9 @@ class BreakoutAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ['title']}
     search_fields = ['title', 'description']
     readonly_fields = ['activities', 'history']
+
+@admin.register(ErrorReport)
+class ErrorReportAdmin(admin.ModelAdmin):
+    list_display = ['created', 'user', 'breakout']
+    date_hierarchy = 'created'
+    search_fields = ['additional_info', 'collected_data']

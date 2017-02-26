@@ -118,3 +118,16 @@ class Breakout(models.Model):
 
     class Meta:
         ordering = ['created']
+
+class ErrorReport(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    breakout = models.ForeignKey(Breakout)
+    created = models.DateTimeField(default=timezone.now)
+    collected_data = models.TextField(blank=True, default="")
+    additional_info = models.TextField(blank=True, default="")
+
+    def __str__(self):
+        return "Error %s" % self.created
+
+    class Meta:
+        ordering = ['-created']

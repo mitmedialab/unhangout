@@ -1,17 +1,22 @@
 import json
+import logging
 
 from channels.auth import channel_session_user, channel_session_user_from_http
 from channels import Channel
+from django.contrib.sites.models import Site
+from django.core.mail import mail_admins
 
-from breakouts.models import Breakout
+from breakouts.models import Breakout, ErrorReport
 from channels_presence.models import Room, Presence
 from channels_presence.decorators import touch_presence, remove_presence
 from reunhangout.channels_utils import (
     send_over_capacity_error, send_already_connected_error, handle_error,
-    prepare_message
+    prepare_message, require_payload_keys
 )
 from reunhangout.utils import json_dumps
 from analytics.models import track
+
+logger = logging.getLogger('django.request')
 
 @channel_session_user_from_http
 def ws_connect(message, breakout_id):
@@ -76,6 +81,8 @@ def route_message(message, data, breakout):
         handle_error(message, "Missing type")
     elif data['type'] == "DISCONNECTING_OTHERS":
         handle_disconnecting_others(message, data, breakout)
+    elif data['type'] == "ERROR_REPORT":
+        handle_error_report(message, data, breakout)
     else:
         handle_error(message, "Type not understood")
 
@@ -103,3 +110,32 @@ def handle_disconnecting_others(message, data, breakout):
 
     connect_to_breakout(message, breakout)
 
+@require_payload_keys(['collected_data', 'additional_info'])
+def handle_error_report(message, data, breakout):
+    report = ErrorReport.objects.create(
+        user=message.user,
+        breakout=breakout,
+        collected_data=data['payload']['collected_data'],
+        additional_info=data['payload']['additional_info'],
+    )
+    msg = "\n".join(
+        """
+        {user} reported the following problem while connecting to {breakout}.
+        Details: https://{domain}/admin/breakout/{id}/change
+        ---
+        {additional_info}
+        ---
+        {collected_data}
+        """.format(
+            user=str(message.user),
+            breakout=str(breakout),
+            domain=Site.objects.get_current().domain,
+            id=report.id,
+            additional_info=report.additional_info,
+            collected_data=report.collected_data,
+        ).strip().split("\n" + (" " * 8))
+    )
+    try:
+        mail_admins("Breakout error report", msg, fail_silently=False)
+    except Exception as e:
+        logger.exception(e)
