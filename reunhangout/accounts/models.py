@@ -148,7 +148,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             return cached
         else:
             result = self.get_profile_image_nocache()
-            cache.set(cache_key, result, 60)
+            cache.set(cache_key, result, 60 * 60)
         return result
 
     def get_profile_image_nocache(self):
@@ -161,9 +161,13 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         if 'facebook' in socialaccounts:
             redirect = 'https://graph.facebook.com/{}/picture'.format(acct.uid)
-            res = requests.head(redirect)
-            if res.status_code == 302:
-                return res.headers['Location']
+            try:
+                res = requests.head(redirect)
+            except ConnectionError:
+                pass
+            else:
+                if res.status_code == 302:
+                    return res.headers['Location']
         if 'google' in socialaccounts:
             try:
                 return acct.extra_data['picture']

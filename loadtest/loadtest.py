@@ -3,6 +3,7 @@
 import argparse
 import asyncio
 import datetime
+import html
 import functools
 import json
 import logging
@@ -102,6 +103,9 @@ class AuthException(Exception):
 
 
 class Client:
+    CHAT_WARN = 10
+    CHAT_TIMEOUT = 60
+
     def __init__(self, args, index, cache=None):
         self.args = args
         self.index = index
@@ -110,8 +114,7 @@ class Client:
         self.websocket = None
         self.breakout_websocket = None
         self.plenary_data = None
-        self._chats_sent = 0
-        self._chats_received = 0
+        self.messages_received = []
 
         self.clients = [self] # override externally for room listening
 
@@ -202,46 +205,62 @@ class Client:
             elif op > chattiness and not self.args.disable_chat:
                 await self.chat()
 
-    async def chat(self):
-        message = random.choice(chat_messages)
-        futures = []
-        for client in self.clients:
-            if client.is_connected():
-                futures.append((client, client.receive_chat(message)))
-        await self.send_json({'type': 'chat', 'payload': {'message': message}})
-        self.info("chat", message[0:20])
-
-        await asyncio.wait_for(
-            asyncio.gather(
-                *[client.await_chat(future) for client, future in futures]),
-            timeout=10
-        )
-
-    async def await_chat(self, future):
-        self._chats_sent += 1
-        try:
-            await asyncio.wait_for(future, timeout=5)
-        except asyncio.TimeoutError:
-            self.warn(
-                "{} Message delivery timeout".format(self.index),
-                self._chats_received, "/", self._chats_sent
-            )
-
-    async def receive_chat(self, message):
-        while True:
-            recv = await self.websocket.recv()
-            dct = json.loads(recv)
-            satisfied = (
-                dct['type'] == 'chat' and
-                dct['payload']['message'] == message
-            )
-            if satisfied:
-                self._chats_received += 1
-                self.info(
-                    "{} SATISFIED!".format(self.index),
-                    self._chats_received, "/", self._chats_sent
-                )
+    async def receive(self):
+        while self.is_connected():
+            try:
+                recv = await self.websocket.recv()
+            except websockets.ConnectionClosed:
                 break
+            dct = json.loads(recv)
+            try:
+                self.messages_received.append({
+                    'timestamp': datetime.datetime.now(),
+                    'type': dct['type'],
+                    'payload': dct['payload'],
+                })
+            except KeyError:
+                self.warn("UNHANDLED MESSAGE", dct)
+
+    async def chat(self):
+        message_text = random.choice(chat_messages)
+
+        await self.send_json({'type': 'chat', 'payload': {'message': message_text}})
+        self.info("chat \"%s...\"" % message_text[0:20])
+        await asyncio.ensure_future(asyncio.gather(*[
+            client.seek_chat(message_text) for client in self.clients if client.is_connected()
+        ]))
+
+    async def seek_chat(self, message_text):
+        start = datetime.datetime.now()
+        escaped = html.escape(message_text, quote=False)
+
+        history_cutoff = datetime.timedelta(seconds=self.CHAT_TIMEOUT)
+        warn_cutoff = datetime.timedelta(seconds=self.CHAT_WARN)
+        chat_cutoff = datetime.timedelta(seconds=self.CHAT_TIMEOUT)
+
+        warned = False
+
+        while True:
+            now = datetime.datetime.now()
+            diff = now - start
+            for message in reversed(self.messages_received):
+                if start - message['timestamp'] > history_cutoff:
+                    break
+                elif not warned and diff > warn_cutoff:
+                    self.warn("MESSAGE DELIVERY DELAYED", '"%s..."' % message_text[0:20], diff.total_seconds())
+                    warned = True
+                elif diff > chat_cutoff:
+                    self.warn("MESSAGE DELIVERY FAILED", '"%s..."' % message_text[0:20], diff.total_seconds())
+                    return
+
+                match = (
+                    message['type'] == 'chat' and
+                    message['payload']['message'] == escaped
+                )
+                if match:
+                    self.info("SUCCESS", '"%s..."' % message_text[0:20], diff.total_seconds())
+                    return
+            await asyncio.sleep(0.5)
 
     async def _post(self, path, data=None):
         url = ''.join((self.args.url, path))
@@ -338,6 +357,7 @@ class Client:
         else:
             self.info("websocket connected")
             self.failed = False
+            asyncio.ensure_future(self.receive())
 
     async def disconnect_websocket(self):
         try:
