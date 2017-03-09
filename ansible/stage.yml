@@ -23,6 +23,8 @@
   vars:
     domain: "{{uh_domain}}"
     letsencrypt_domains: "{{ [uh_domain] + uh_domain_aliases }}"
+    swap_file_size_kb: 4000000 # 4GiB
+    swap_file_path: "/swapfile2"
     uh_repo_dir: "/var/local/reunhangout/"
     postgresql_version: 9.5
     reunhangout_worker_processes: 2 # number of worker processes for each of http/websocket
