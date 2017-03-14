@@ -123,34 +123,6 @@ class Plenary(models.Model):
     def get_absolute_url(self):
         return reverse("plenary_detail", kwargs={'id_or_slug': self.slug})
 
-    def serialize(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'slug': self.slug,
-            'url': self.get_absolute_url(),
-            'organizer': self.organizer,
-            'image': self.image.url if self.image else None,
-            'start_date': self.start_date.isoformat(),
-            'end_date': self.end_date.isoformat(),
-            'doors_open': self.doors_open.isoformat(),
-            'doors_close': self.doors_close.isoformat(),
-            'canceled': self.canceled,
-            'time_zone': str(self.time_zone),
-            'public': self.public,
-            'description': self.safe_description(),
-            'whiteboard': self.safe_whiteboard(),
-            'breakout_mode': self.breakout_mode,
-            'embeds': self.embeds,
-            'history': self.history,
-            'open': self.open,
-            'breakouts_open': self.breakouts_open,
-            'admins': list(self.admins.values_list('id', flat=True)),
-            'live_participants': list(self.live_participants.values_list('id', flat=True)),
-            'video_sync_id': self.channel_group_name,
-            'webrtc_id': self.webrtc_id,
-        }
-
     def has_admin(self, user):
         return user.is_superuser or self.admins.filter(pk=user.pk).exists()
 
@@ -185,7 +157,7 @@ class ChatMessage(models.Model):
             'message': self.safe_message(),
             'highlight': self.highlight,
             'archived': self.archived,
-            'mentions': list(self.mentions.values_list('id', flat=True))
+            'mentions': [m.id for m in self.mentions.all()]
         }
 
     class Meta:

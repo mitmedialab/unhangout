@@ -324,7 +324,6 @@ export default connect(
   // map state to props
   (state) => ({
     presence: state.presence,
-    plenary: state.plenary,
     breakout: state.breakout,
     breakoutMessages: state.breakoutMessages,
     auth: state.auth,

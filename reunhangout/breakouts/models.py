@@ -77,11 +77,11 @@ class Breakout(models.Model):
 
     def serialize(self):
         if self.is_proposal:
-            votes = list(self.votes.values_list('id', flat=True))
+            votes = [v.id for v in self.votes.all()]
         else:
             votes = []
         if self.is_random:
-            members = list(self.members.values_list('id', flat=True))
+            members = [m.id for m in self.members.all()]
         else:
             members = []
         if self.plenary_id:

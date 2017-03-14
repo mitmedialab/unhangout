@@ -12,8 +12,9 @@ from django.db import transaction
 from django.utils.timezone import now
 from django.views.decorators.csrf import ensure_csrf_cookie
 
+from breakouts.models import Breakout
 from channels_presence.models import Room, Presence
-from plenaries.models import Plenary, Series
+from plenaries.models import Plenary, Series, ChatMessage
 from plenaries.channels import update_plenary
 from videosync.models import VideoSync
 from accounts.utils import serialize_auth_state
@@ -26,9 +27,7 @@ def plenary_detail(request, id_or_slug):
     else:
         query = {'slug': id_or_slug}
     try:
-        plenary = Plenary.objects.select_related().prefetch_related(
-            'breakout_set', 'breakout_set__votes', 'admins'
-        ).get(**query)
+        plenary = Plenary.objects.all().get(**query)
     except Plenary.DoesNotExist:
         raise Http404
     if id_or_slug != plenary.slug:
@@ -45,40 +44,71 @@ def plenary_detail(request, id_or_slug):
         if (num_present + 1) > plenary.max_participants:
             return render(request, "plenaries/over_capacity.html", {'plenary': plenary})
 
-    breakouts = list(plenary.breakout_set.all())
-
-    # Most recent 100 messages, but presented in ascending order.
-    chat_messages = reversed(
-        plenary.chatmessage_set.filter(archived=False).order_by('-created')[0:100]
-    )
+    # Minimum fields to render the signed out plenary view.
     data = {
-        'plenary': plenary.serialize(),
-        'breakouts':  [breakout.serialize() for breakout in breakouts],
-        'chat_messages': [msg.serialize() for msg in chat_messages],
-        'users': {u.id: u.serialize_public() for u in plenary.associated_users()},
+        'plenary': {
+            'id': plenary.id,
+            'name': plenary.name,
+            'slug': plenary.slug,
+            'url': plenary.get_absolute_url(),
+            'organizer': plenary.organizer,
+            'image': plenary.image.url if plenary.image else None,
+            'start_date': plenary.start_date.isoformat(),
+            'end_date': plenary.end_date.isoformat(),
+            'doors_open': plenary.doors_open.isoformat(),
+            'doors_close': plenary.doors_close.isoformat(),
+            'canceled': plenary.canceled,
+            'time_zone': str(plenary.time_zone),
+            'public': plenary.public,
+            'description': plenary.safe_description(),
+            'open': plenary.open,
+            'breakouts_open': plenary.breakouts_open,
+        }
     }
-    data.update(serialize_auth_state(request.user, plenary))
 
-    try:
-        videosync = VideoSync.objects.get(sync_id=data['plenary']['video_sync_id'])
-    except VideoSync.DoesNotExist:
-        videosync = None
-        data['videosync'] = {}
-    else:
-        videosync_data = videosync.serialize()
-        videosync_data['synced'] = True
-        data['videosync'] = {videosync.sync_id: videosync_data}
+    # If authenticated, fetch full fields.
+    if request.user.is_authenticated():
+        data['plenary'].update({
+            'whiteboard': plenary.safe_whiteboard(),
+            'breakout_mode': plenary.breakout_mode,
+            'embeds': plenary.embeds,
+            'history': plenary.history,
+            'admins': list(plenary.admins.values_list('id', flat=True)),
+            'live_participants': list(plenary.live_participants.values_list('id', flat=True)),
+            'video_sync_id': plenary.channel_group_name,
+            'webrtc_id': plenary.webrtc_id
+        })
+        breakouts = Breakout.objects.filter(
+            plenary=plenary).select_related().prefetch_related('votes', 'members')
+        data['breakouts'] = [b.serialize() for b in plenary.breakout_set.all()]
 
-    data['breakout_presence'] = {}
-    for breakout in breakouts:
+        chat_messages = ChatMessage.objects.filter(
+            plenary=plenary
+        ).prefetch_related('mentions').order_by('-created')[0:100]
+        data['chat_messages'] = [c.serialize() for c in reversed(chat_messages)]
+        data['users'] = {u.id: u.serialize_public() for u in plenary.associated_users()}
+
         try:
-            room = Room.objects.get(channel_name=breakout.channel_group_name)
-        except Room.DoesNotExist:
-            data['breakout_presence'][breakout.id] = {}
+            videosync = VideoSync.objects.get(sync_id=data['plenary']['video_sync_id'])
+        except VideoSync.DoesNotExist:
+            videosync = None
+            data['videosync'] = {}
         else:
-            data['breakout_presence'][breakout.id] = serialize_room(room)
-            data['breakout_presence']['breakout_id'] = breakout.id
+            videosync_data = videosync.serialize()
+            videosync_data['synced'] = True
+            data['videosync'] = {videosync.sync_id: videosync_data}
 
+        data['breakout_presence'] = {}
+        for breakout in breakouts:
+            try:
+                room = Room.objects.get(channel_name=breakout.channel_group_name)
+            except Room.DoesNotExist:
+                data['breakout_presence'][breakout.id] = {}
+            else:
+                data['breakout_presence'][breakout.id] = serialize_room(room)
+                data['breakout_presence']['breakout_id'] = breakout.id
+
+    data.update(serialize_auth_state(request.user, plenary))
     return render(request, "plenaries/plenary.html", {
         'data': json_dumps(data),
         'plenary': plenary,

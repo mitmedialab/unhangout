@@ -27,7 +27,6 @@ def breakout_detail(request, breakout_id):
 
     data = {
         'breakout': breakout.serialize(),
-        'plenary': plenary.serialize() if plenary else None
     }
     data.update(serialize_auth_state(request.user, plenary))
 
