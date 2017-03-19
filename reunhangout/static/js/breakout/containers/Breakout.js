@@ -53,7 +53,7 @@ class JitsiVideo extends React.Component {
         SHOW_POWERED_BY: JSON.stringify(true),
         TOOLBAR_BUTTONS: JSON.stringify([
           "microphone","camera",
-          //"desktop", // May be able to enable; need more tests
+          "desktop",
           "chat", "etherpad", "filmstrip",
           "sharedvideo","settings",
           "recording" // As of 2016-11-27, jitsi fails if recording button isn't included
