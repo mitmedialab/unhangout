@@ -22,14 +22,14 @@ export const fetchVideoDetails = function(url, settings) {
   let ytid = getIdFromUrl(url);
 
   console.log(`Hit youtube API for ${url}`)
-  return fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${ytid}&fields=items(snippet(thumbnails/default/url,title))&key=${settings.PUBLIC_API_KEYS.youtube}`)
+  return fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${ytid}&fields=items(snippet(thumbnails/default/url,title,liveBroadcastContent))&key=${settings.PUBLIC_API_KEYS.youtube}`)
     .then(response => {
       return response.json()
     }).then(json => {
       try {
         return json.items[0].snippet;
       } catch (e) {
-        console.log("YouTube API error. Is api key defined in settings.py?", json);
+        console.log(`YouTube API error for id ${ytid}. Is api key defined in settings.py?`, json);
         return {'error': e}
       }
     });

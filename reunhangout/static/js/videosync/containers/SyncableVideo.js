@@ -17,7 +17,15 @@ class SyncableVideo extends React.Component {
   }
   render() {
     if (this.props.embed.type === "youtube") {
-      return <SyncableYoutubeVideo {...this.props} />
+      let embedDetails = _.get(this.props, [
+        "plenary", "embedDetails", this.props.embed.props.src
+      ]);
+      if (embedDetails && embedDetails.title) {
+        if (embedDetails.liveBroadcastContent === "live") {
+          return <LiveYoutubeVideo {...this.props} />
+        }
+        return <SyncableYoutubeVideo {...this.props} />
+      }
     }
     return null;
   }
@@ -25,6 +33,7 @@ class SyncableVideo extends React.Component {
 SyncableVideo.propTypes = {
   'sync_id': React.PropTypes.string.isRequired,
   'embed': React.PropTypes.object.isRequired,
+  'embedDetails': React.PropTypes.object,
 };
 
 class SyncableYoutubeVideo extends React.Component {
@@ -48,6 +57,7 @@ class SyncableYoutubeVideo extends React.Component {
   getCurSync() {
     return this.props.videosync[this.props.sync_id] || {};
   }
+
   isPlayingForAll() {
     return this.getCurSync().state === "playing";
   }
@@ -55,13 +65,18 @@ class SyncableYoutubeVideo extends React.Component {
   togglePlayForAll(event) {
     event && event.preventDefault();
     if (this.isPlayingForAll()) {
+      console.log("videosync pauseForAll");
       this.props.pauseForAll({syncId: this.props.sync_id});
     } else {
+      console.log("videosync playForAll");
       this.player.getCurrentTime().then((time) => {
+        console.log("videosync current time:", time);
         this.props.playForAll({
           sync_id: this.props.sync_id,
           time_index: time
         });
+      }).catch(e => {
+        console.error(e);
       });
     }
   }
@@ -101,8 +116,9 @@ class SyncableYoutubeVideo extends React.Component {
     this.player = YoutubePlayer(this.playerId(), {
       playerVars: {autoplay: 0, controls: 1}
     });
+    window.__SyncableYoutubeVideo = this;
     this.player.on('stateChange', (e) => this.onPlayerStateChange(e));
-    this.syncVideo(this.props, true);
+    this.syncVideo(this.props);
     // Set up an interval to advance our sync timer in between updates from the
     // server, and to trigger re-syncing.
     this.syncTimeInterval = setInterval(() => {
@@ -134,15 +150,24 @@ class SyncableYoutubeVideo extends React.Component {
     return `player-${this.props.sync_id}`;
   }
 
-  syncVideo(props, firstLoad) {
+  syncVideo(props) {
     props = props || this.props;
     let curSync = props.videosync[props.sync_id] || {};
     // Change out video if props have changed.
-    if (firstLoad || this.props.embed.props.src !== props.embed.props.src) {
+    if (!this._loaded || this.props.embed.props.src !== props.embed.props.src) {
+      console.log('videosync cueVideoById', props.embed.props.src);
       this.player.cueVideoById({
         videoId: youtube.getIdFromUrl(props.embed.props.src),
         startSeconds: this.state.syncTime,
       });
+      this._loaded = true;
+    }
+
+    console.log('videosync syncVideo');
+
+    if (curSync.synced === false) {
+      // No intent to sync. Carry on.
+      return;
     }
 
     Promise.all([
@@ -150,15 +175,17 @@ class SyncableYoutubeVideo extends React.Component {
       this.player.getCurrentTime(),
       this.player.getDuration(),
     ]).then(([state, time, duration]) => {
-      if (curSync.synced === false) {
-        // No intent to sync. Carry on.
-        return;
-      }
       let playerState = this.STATE_NAMES[state];
-      if (playerState === "ended" && Math.abs(duration - this.state.syncTime) < this.RESYNC_THRESHOLD) {
+      console.log("videosync syncVideo",
+        `desired: "${curSync.state}", current: "${playerState}" (${state})`);
+
+      let isPlayingOrBuffering = playerState === "playing" || playerState === "buffering";
+
+      if (playerState === "ended" &&
+          Math.abs(duration - this.state.syncTime) < this.RESYNC_THRESHOLD) {
         // Stop sync signal if the video has ended.
         this.videoEnded();
-      } else if (playerState === "playing" && curSync.state === "ended") {
+      } else if (curSync.state === "ended" && playerState === "playing") {
         if (Math.abs(duration - time) < this.RESYNC_THRESHOLD) {
           // Sync has ended, but let it play out.
           console.log("videosync LET IT PLAY OUT")
@@ -168,36 +195,35 @@ class SyncableYoutubeVideo extends React.Component {
           console.log("videosync ENED TOO FAR OUT OF BOUNDS, PAUSE")
           this.player.pauseVideo();
         }
-      } else if (playerState === "playing" && curSync.state !== "playing") {
+      } else if (curSync.state !== "playing" && isPlayingOrBuffering) {
         console.log("videosync SWITCH TO PAUSE")
         this.player.pauseVideo();
-      } else if (playerState !== "playing" && curSync.state === "playing") {
+      } else if (curSync.state === "playing" && !isPlayingOrBuffering) {
         console.log("videosync SWITCH TO PLAY", this.state.syncTime)
         this.player.playVideo();
         this.player.seekTo(this.state.syncTime);
-      } else if (curSync.state === "playing" && Math.abs(time - this.state.syncTime) > this.RESYNC_THRESHOLD) {
+      } else if (curSync.state === "playing" &&
+                 Math.abs(time - this.state.syncTime) > this.RESYNC_THRESHOLD) {
         console.log("videosync SEEK TO", this.state.syncTime)
         this.player.seekTo(this.state.syncTime);
       }
     });
   }
 
-  render() {
-    return <div>
-      <div id={this.playerId()}></div>
-
-      <div className='video-sync-controls'>
-        {this.renderSyncState()}
-        { this.props.showSyncControls ?
-            <BS.Button bsStyle='success' className="play-button"
-                onClick={(e) => this.togglePlayForAll(e)}>
-              { this.isPlayingForAll() ? <span><i className='fa fa-pause' /> Pause for All</span> : <span><i className='fa fa-play' /> Play for All</span> }
-            </BS.Button>
-          : "" }
-      </div>
-    </div>
+  formatTime(totalSeconds) {
+    if (totalSeconds === 0) {
+      return "";
+    }
+    let hours = parseInt(totalSeconds / (60*60));
+    let minutes = parseInt((totalSeconds % 3600) / 60);
+    let seconds = parseInt(totalSeconds % 60);
+    hours = (hours > 0 ? hours + ":" : "");
+    minutes = ((hours && (minutes < 10)) ? "0" : "") + minutes + ":";
+    seconds = (seconds < 10 ? "0" : "") + seconds;
+    return hours + minutes + seconds;
   }
-  renderSyncState() {
+
+  _syncStateForRender() {
     let curSync = this.getCurSync();
     let syncAvailable = curSync.state === "playing";
     let intendToSync = curSync.synced !== false;
@@ -208,6 +234,11 @@ class SyncableYoutubeVideo extends React.Component {
     if (curSync.state === "playing" && this.state.playerState !== "playing") {
       synced = false;
     }
+    return {syncAvailable, synced, intendToSync}
+  }
+
+  renderSyncState() {
+    let {syncAvailable, synced, intendToSync} = this._syncStateForRender();
 
     let classes = ['sync-indicator'];
     let message;
@@ -234,29 +265,112 @@ class SyncableYoutubeVideo extends React.Component {
       </BS.Button>
     </span>
   }
-  formatTime(totalSeconds) {
-    if (totalSeconds === 0) {
-      return "";
-    }
-    let hours = parseInt(totalSeconds / (60*60));
-    let minutes = parseInt((totalSeconds % 3600) / 60);
-    let seconds = parseInt(totalSeconds % 60);
-    hours = (hours > 0 ? hours + ":" : "");
-    minutes = ((hours && (minutes < 10)) ? "0" : "") + minutes + ":";
-    seconds = (seconds < 10 ? "0" : "") + seconds;
-    return hours + minutes + seconds;
+
+  render() {
+    return <div>
+      <div id={this.playerId()}></div>
+
+      <div className='video-sync-controls'>
+        {this.renderSyncState()}
+        { this.props.showSyncControls ?
+            <BS.Button bsStyle='success' className="play-button"
+                onClick={(e) => this.togglePlayForAll(e)}>
+              { this.isPlayingForAll() ? <span><i className='fa fa-pause' /> Pause for All</span> : <span><i className='fa fa-play' /> Play for All</span> }
+            </BS.Button>
+          : "" }
+      </div>
+    </div>
   }
 }
 
-class SyncState extends React.Component {
-  render() {
+class LiveYoutubeVideo extends SyncableYoutubeVideo {
+  /*
+   * For a live youtube video, only ever play at the tip of the current live
+   * broadcast, rather than at arbitrary points within the video. Thus, we
+   * disregard all "time" components of a sync signal, and focus only on
+  * "playing" state. 
+   */
+  componentDidMount() {
+    this.player = YoutubePlayer(this.playerId(), {
+      playerVars: {autoplay: 0, controls: 1}
+    });
+    window.__SyncableYoutubeVideo = this;
+    this.player.on('stateChange', (e) => this.onPlayerStateChange(e));
+  }
+
+  syncVideo(props) {
+    props = props || this.props;
+    let curSync = props.videosync[props.sync_id] || {};
+    // Change out video if props have changed.
+    if (!this._loaded || (this.props.embed.props.src !== props.embed.props.src)) {
+      console.log('videosync live cueVideoById', props.embed.props.src);
+      this.player.cueVideoById({
+        videoId: youtube.getIdFromUrl(props.embed.props.src),
+        startSeconds: this.state.syncTime,
+      });
+      this._loaded = true;
+    }
+
+    console.log('videosync syncVideo live');
+
+    if (curSync.synced === false) {
+      // No intent to sync. Carry on.
+      return;
+    }
+    
+    this.player.getPlayerState().then(state => {
+      let playerState = this.STATE_NAMES[state];
+      console.log("videosync syncVideo", "live",
+        `desired: "${curSync.state}", current: "${playerState}" (${state})`);
+
+      let isPlayingOrBuffering = playerState === "playing" || playerState === "buffering";
+
+      if (playerState === "ended") {
+        this.videoEnded();
+      } else if (playerState === "playing" && curSync.state === "ended") {
+        // Let it play out.
+        console.log("videosync live LET IT PLAY OUT");
+        return;
+      } else if (curSync.state !== "playing" && isPlayingOrBuffering) {
+        console.log("videosync live SWITCH TO PAUSE");
+        this.player.pauseVideo();
+      } else if ( curSync.state === "playing" && !isPlayingOrBuffering) {
+        console.log("videosync live SWITCH TO PLAY");
+        this.player.playVideo();
+      }
+    });
+  }
+
+  _syncStateForRender() {
+    let curSync = this.getCurSync();
+    let syncAvailable = curSync.state === "playing";
+    let intendToSync = curSync.synced !== false;
+    let synced = true;
+    if (curSync.state === "playing" && this.state.playerState !== "playing") {
+      synced = false;
+    }
+    return {syncAvailable, synced, intendToSync}
+  }
+  togglePlayForAll(event) {
+    event && event.preventDefault();
+    if (this.isPlayingForAll()) {
+      console.log("videosync live pauseForAll");
+      this.props.pauseForAll({syncId: this.props.sync_id});
+    } else {
+      console.log("videosync live playForAll");
+      this.props.playForAll({
+        sync_id: this.props.sync_id,
+        time_index: 0
+      });
+    }
   }
 }
 
 export default connect(
   // map state to props
   (state) => ({
-    videosync: state.videosync
+    videosync: state.videosync,
+    plenary: state.plenary,
   }),
   // map dispatch to props
   (dispatch, ownProps) => ({
