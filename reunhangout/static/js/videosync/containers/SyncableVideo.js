@@ -21,7 +21,8 @@ class SyncableVideo extends React.Component {
         "plenary", "embedDetails", this.props.embed.props.src
       ]);
       if (embedDetails && embedDetails.title) {
-        if (embedDetails.liveBroadcastContent === "live") {
+        if (embedDetails.liveBroadcastContent === "live" ||
+            embedDetails.liveBroadcastContent === "upcoming") {
           return <LiveYoutubeVideo {...this.props} />
         }
         return <SyncableYoutubeVideo {...this.props} />
