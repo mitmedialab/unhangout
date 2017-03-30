@@ -121,14 +121,14 @@ class Plenary(models.Model):
         }
 
     def associated_users(self):
-        from breakouts.models import Breakout
-        User = get_user_model()
-        breakout_ids = list(self.breakout_set.values_list('id', flat=True))
-        channels = [Breakout.channel_group_name_from_id(pk) for pk in breakout_ids]
-        channels.append(self.channel_group_name)
+        """
+        Get all users associated with the plenary. We need to take care in this
+        query as the performance can blow out of proportion.  This is the
+        original way we tried this, which builds a stack of LEFT OUTER JOIN's
+        and blew up into >40s query time:
 
         plenary_users = User.objects.filter(
-            models.Q(plenary=self) |
+            models.Q(plenary=self) | # admins
             models.Q(presence__room__channel_name__in=channels) |
             models.Q(mentioned_chats__plenary=self) |
             models.Q(chatmessage__plenary=self) |
@@ -136,8 +136,129 @@ class Plenary(models.Model):
             models.Q(member_of_breakouts__id__in=breakout_ids) |
             models.Q(voted_on_breakouts__id__in=breakout_ids) |
             models.Q(proposed_breakouts__id__in=breakout_ids)
-        ).order_by().distinct()
-        return plenary_users
+        ).order_by('id').distinct('id')
+
+        Corresponding SQL:
+
+        => SELECT DISTINCT (...)
+        -> FROM "accounts_user"
+        -> LEFT OUTER JOIN "plenaries_plenary_admins"
+        ->      ON ("accounts_user"."id" = "plenaries_plenary_admins"."user_id")
+        -> LEFT OUTER JOIN "channels_presence_presence"
+        ->      ON ("accounts_user"."id" = "channels_presence_presence"."user_id")
+        -> LEFT OUTER JOIN "channels_presence_room"
+        ->      ON ("channels_presence_presence"."room_id" = "channels_presence_room"."id")
+        -> LEFT OUTER JOIN "plenaries_chatmessage_mentions"
+        ->      ON ("accounts_user"."id" = "plenaries_chatmessage_mentions"."user_id")
+        -> LEFT OUTER JOIN "plenaries_chatmessage"
+        ->      ON ("plenaries_chatmessage_mentions"."chatmessage_id" =
+        ->        ->"plenaries_chatmessage"."id")
+        -> LEFT OUTER JOIN "plenaries_chatmessage" T9
+        ->      ON ("accounts_user"."id" = T9."user_id")
+        -> LEFT OUTER JOIN "plenaries_plenary_live_participants"
+        ->      ON ("accounts_user"."id" = "plenaries_plenary_live_participants"."user_id")
+        -> LEFT OUTER JOIN "breakouts_breakout_members"
+        ->      ON ("accounts_user"."id" = "breakouts_breakout_members"."user_id")
+        -> LEFT OUTER JOIN "breakouts_breakout_votes"
+        ->      ON ("accounts_user"."id" = "breakouts_breakout_votes"."user_id")
+        -> LEFT OUTER JOIN "breakouts_breakout" T17
+        ->      ON ("accounts_user"."id" = T17."proposed_by_id")
+        -> WHERE ("plenaries_plenary_admins"."plenary_id" = 1104 OR
+        ->   "channels_presence_room"."channel_name" IN (
+        ->       'breakout-198', 'breakout-199', 'breakout-200', 'breakout-201',
+        ->       'plenary-154'
+        ->   ) OR
+        ->   "plenaries_chatmessage"."plenary_id" = 154 OR
+        ->   T9."plenary_id" = 154 OR
+        ->   "plenaries_plenary_live_participants"."plenary_id" = 154 OR
+        ->   "breakouts_breakout_members"."breakout_id" IN (198, 199, 200, 201) OR
+        ->   "breakouts_breakout_votes"."breakout_id" IN (198, 199, 200, 201) OR
+        ->   T17."id" IN (198, 199, 200, 201))
+        -> ORDER BY "accounts_user"."id" ASC;
+
+
+        The present strategy is based on replacing all those joins with
+        subqueries, which is WAY more efficient in postgres. This is the target
+        SQL:
+
+        => SELECT DISTINCT ON ("accounts_user"."id")
+        ->   "accounts_user"."id"
+        -> FROM "accounts_user"
+        -> WHERE
+        ->   "accounts_user"."id" IN (
+        ->       SELECT "channels_presence_presence"."user_id"
+        ->       FROM "channels_presence_presence"
+        ->       INNER JOIN "channels_presence_room"
+        ->        ->ON ("channels_presence_presence"."room_id" =
+        ->        ->    "channels_presence_room"."id")
+        ->       WHERE "channels_presence_room"."channel_name" IN (
+        ->        ->'breakout-198', 'breakout-199', 'breakout-200',
+        ->        ->'breakout-201', 'plenary-154'
+        ->      )
+        ->   ) OR
+        ->   "accounts_user"."id" IN (
+        ->      SELECT "user_id" FROM "plenaries_plenary_admins"
+        ->      WHERE "plenaries_plenary_admins"."plenary_id" = 154) OR
+        ->   "accounts_user"."id" IN (
+        ->       SELECT "plenaries_chatmessage_mentions"."user_id"
+        ->       FROM "plenaries_chatmessage_mentions"
+        ->       INNER JOIN "plenaries_chatmessage"
+        ->        ->ON ("plenaries_chatmessage_mentions"."chatmessage_id" =
+        ->        ->    "plenaries_chatmessage"."id")
+        ->       WHERE "plenaries_chatmessage"."plenary_id" = 154
+        ->   ) OR
+        ->   "accounts_user"."id" IN (
+        ->       SELECT "plenaries_chatmessage"."user_id"
+        ->       FROM "plenaries_chatmessage"
+        ->       WHERE "plenaries_chatmessage"."plenary_id" = 154) OR
+        ->   "accounts_user"."id" IN (
+        ->       SELECT "user_id"
+        ->       FROM "plenaries_plenary_live_participants"
+        ->       WHERE "plenaries_plenary_live_participants"."plenary_id" = 154) OR
+        ->   "accounts_user"."id" IN (
+        ->       SELECT "user_id"
+        ->       FROM "breakouts_breakout_members"
+        ->       WHERE "breakouts_breakout_members"."breakout_id" IN (198, 199, 299, 291)) OR
+        ->   "accounts_user"."id" IN (
+        ->       SELECT "user_id"
+        ->       FROM "breakouts_breakout_votes"
+        ->       WHERE "breakouts_breakout_votes"."breakout_id" IN (198, 199, 299, 291)) OR
+        ->   "accounts_user"."id" IN (
+        ->       SELECT "proposed_by_id"
+        ->       FROM "breakouts_breakout"
+        ->       WHERE "breakouts_breakout"."id" IN (198, 199, 200, 201))
+        -> ORDER BY "accounts_user"."id" ASC;
+        """
+        from breakouts.models import Breakout
+        from channels_presence.models import Presence
+        User = get_user_model()
+        breakout_ids = list(self.breakout_set.values_list('id', flat=True))
+        channels = [Breakout.channel_group_name_from_id(pk) for pk in breakout_ids]
+        channels.append(self.channel_group_name)
+
+        subqueries = [
+            # Presence in plenary or breakouts
+            Presence.objects.filter(room__channel_name__in=channels).values_list('user_id'),
+            # Admins
+            self.admins.through.objects.filter(plenary=self).values_list('user_id'),
+            # Mentions
+            ChatMessage.mentions.through.objects.filter(
+                chatmessage__plenary=self).values_list('user_id'),
+            # Chat message authors
+            ChatMessage.objects.filter(plenary=self).values_list('user_id'),
+            # Live participants
+            self.live_participants.through.objects.filter(plenary=self).values_list('user_id'),
+            # Breakout members, voters, and proposers
+            Breakout.members.through.objects.filter(breakout_id__in=breakout_ids).values_list('user_id'),
+            Breakout.votes.through.objects.filter(breakout_id__in=breakout_ids).values_list('user_id'),
+            Breakout.objects.filter(id__in=breakout_ids).values_list('proposed_by_id'),
+        ]
+
+        q = models.Q()
+        for subquery in subqueries:
+            q = q | models.Q(id__in=subquery)
+        users = User.objects.filter(q).distinct()
+        return users
 
     @property
     def channel_group_name(self):
