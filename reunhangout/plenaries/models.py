@@ -121,16 +121,22 @@ class Plenary(models.Model):
         }
 
     def associated_users(self):
+        from breakouts.models import Breakout
         User = get_user_model()
+        breakout_ids = list(self.breakout_set.values_list('id', flat=True))
+        channels = [Breakout.channel_group_name_from_id(pk) for pk in breakout_ids]
+        channels.append(self.channel_group_name)
+
         plenary_users = User.objects.filter(
             models.Q(plenary=self) |
-            models.Q(presence__room__channel_name=self.channel_group_name) |
+            models.Q(presence__room__channel_name__in=channels) |
             models.Q(mentioned_chats__plenary=self) |
             models.Q(chatmessage__plenary=self) |
-            models.Q(plenaries_participating_live=self)
-        ).distinct()
-        for breakout in self.breakout_set.all():
-            plenary_users |= breakout.associated_users()
+            models.Q(plenaries_participating_live=self) |
+            models.Q(member_of_breakouts__id__in=breakout_ids) |
+            models.Q(voted_on_breakouts__id__in=breakout_ids) |
+            models.Q(proposed_breakouts__id__in=breakout_ids)
+        ).order_by().distinct()
         return plenary_users
 
     @property

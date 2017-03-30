@@ -53,12 +53,16 @@ class Breakout(models.Model):
 
     @property
     def channel_group_name(self):
-        return "".join((self.CHANNEL_GROUP_NAME_PREFIX, str(self.pk)))
+        return self.channel_group_name_from_id(self.pk)
 
     @classmethod
     def id_from_channel_group_name(cls, channel_group_name):
         if channel_group_name.startswith("breakout-"):
             return channel_group_name[len("breakout-"):]
+
+    @classmethod
+    def channel_group_name_from_id(cls, pk):
+        return "".join((cls.CHANNEL_GROUP_NAME_PREFIX, str(pk)))
 
     def associated_users(self):
         User = get_user_model()
