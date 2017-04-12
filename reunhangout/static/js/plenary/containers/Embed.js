@@ -67,7 +67,7 @@ class Embed extends React.Component {
           props: {src: v}
         }
       }
-    } else if (/^<iframe.*\/iframe>$/.test(v)) {
+    } else if (/^<iframe.*\/iframe>.*$/.test(v)) {
       // <iframe /> embed codes
       let frag = document.createElement('div');
       frag.innerHTML = v;

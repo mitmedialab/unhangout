@@ -16,6 +16,7 @@ django-debug-toolbar
 django-gravatar2
 django-webpack-loader
 pillow
+pylibmc
 requests
 sorl-thumbnail
 iso8601

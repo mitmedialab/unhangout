@@ -110,7 +110,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             return cached
         else:
             result = self.get_display_name_nocache()
-            cache.set(cache_key, result, 60)
+            cache.set(cache_key, result, 60 * 60)
         return result
 
     def get_display_name_nocache(self):

@@ -5,7 +5,11 @@
   vars_files:
    - vars/secrets.yml
   tasks:
-   - service: name=reunhangout-workers.target state=restarted
-   - service: name=reunhangout-interface state=restarted
-   - service: name=reunhangout-celery state=restarted
-   - service: name=reunhangout-celery-beat state=restarted
+   - name: Restart workers
+     service: name=reunhangout-workers.target state=restarted
+   - name: Restart interface
+     service: name=reunhangout-interface state=restarted
+   - name: Restart celery
+     service: name=reunhangout-celery state=restarted
+   - name: Restart celery beat
+     service: name=reunhangout-celery-beat state=restarted

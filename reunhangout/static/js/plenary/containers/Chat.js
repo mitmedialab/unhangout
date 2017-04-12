@@ -37,7 +37,7 @@ const ConnectedAtName = connect(
  */
 const atnamify = (text, users, msgId) => {
   // Match @Name, @Name-name, @Name.name, but leave trailing period out.
-  let parts = text.split(/(?:^|\s)@((?:[-_a-z0-9]|\.(?!$|\s))+)/gim);
+  let parts = text.split(/(?:^|\s)@((?:[^\s\.,]|\.(?!$|\s))+)/gim);
   return parts.map(function(part, i) {
     if (i % 2 === 1) {
       let normalized = normalizeDisplayName(part);
@@ -119,16 +119,18 @@ class Chat extends React.Component {
     }
   }
   onSubmit(event) {
-    event.preventDefault();
-    this.props.onSendMessage({
-    message: this.state.value,
-    highlight: this.state.highlight
-    });
-    this.setState({
-      value: "",
-      highlight: false,
-      focusOnUpdate: true,
-    });
+    event && event.preventDefault();
+    if (this.state.value.trim()) {
+      this.props.onSendMessage({
+        message: this.state.value,
+        highlight: this.state.highlight
+      });
+      this.setState({
+        value: "",
+        highlight: false,
+        focusOnUpdate: true,
+      });
+    }
   }
   render() {
     let is_admin = this.props.auth.is_admin

@@ -35,3 +35,12 @@ ALLAUTH_APP_KEYS['google']['secret'] = '{{ google_secret }}'
 for name, keys in ALLAUTH_APP_KEYS.items():
     if keys['client_id']:
         INSTALLED_APPS.append('allauth.socialaccount.providers.%s' % name)
+
+## Debugging
+#DEBUG = True
+#INSTALLED_APPS += ['debug_toolbar']
+#INTERNAL_IPS = ['127.0.0.1']
+#DEBUG_TOOLBAR_CONFIG = {
+#    'SHOW_TOOLBAR_CALLBACK': lambda request: not request.is_ajax() and request.META.get('HTTP_X_FORWARDED_FOR', None) in INTERNAL_IPS
+#}
+
