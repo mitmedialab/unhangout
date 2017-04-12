@@ -1,4 +1,5 @@
 {% load render_bundle from webpack_loader %}
+{% load thumbnail %}
 {% load static %}
 {% load escapejson %}
 <!DOCTYPE html>
@@ -6,12 +7,31 @@
 <head>
   <meta http-equiv="X-UA-Compatible" content="IE=EDGE">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel='icon' href='{% static "img/favicon.png" %}'>
   <title>{% block head_title %}{% endblock %}{% block title %}{% endblock %}{% block site_title %} - {{request.site.name}}{% endblock %}</title>
   {% block styles %}
     {% render_bundle 'frontend' 'css' %}
   {% endblock %}
   <script type='text/javascript'>window.__SETTINGS__ = {{public_settings|escapejson}};</script>
+
+  {# Favicon #}
+  {% with favicon="assets/unhangout-logo-UN-seafoam.png" %}
+    {% thumbnail favicon "64x64" format="PNG" as thumb %}
+      <link rel='icon' href='{{ thumb.url }}' />
+    {% endthumbnail %}
+    {% thumbnail favicon "60x60" format="PNG" as thumb %}
+      <link rel='apple-touch-icon' sizes="60x60" href='{{ thumb.url }}' />
+    {% endthumbnail %}
+    {% thumbnail favicon "72x72" format="PNG" as thumb %}
+      <link rel='apple-touch-icon' sizes="72x72" href='{{ thumb.url }}' />
+    {% endthumbnail %}
+    {% thumbnail favicon "120x120" format="PNG" as thumb %}
+      <link rel='apple-touch-icon' sizes="120x120" href='{{ thumb.url }}' />
+    {% endthumbnail %}
+    {% thumbnail favicon "152x152" format="PNG" as thumb %}
+      <link rel='apple-touch-icon' sizes="152x152" href='{{ thumb.url }}' />
+    {% endthumbnail %}
+  {% endwith %}
+
   {% block head %}{% endblock %}
 </head>
 <body>
