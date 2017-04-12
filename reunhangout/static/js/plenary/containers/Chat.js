@@ -119,16 +119,18 @@ class Chat extends React.Component {
     }
   }
   onSubmit(event) {
-    event.preventDefault();
-    this.props.onSendMessage({
-    message: this.state.value,
-    highlight: this.state.highlight
-    });
-    this.setState({
-      value: "",
-      highlight: false,
-      focusOnUpdate: true,
-    });
+    event && event.preventDefault();
+    if (this.state.value.trim()) {
+      this.props.onSendMessage({
+        message: this.state.value,
+        highlight: this.state.highlight
+      });
+      this.setState({
+        value: "",
+        highlight: false,
+        focusOnUpdate: true,
+      });
+    }
   }
   render() {
     let is_admin = this.props.auth.is_admin
