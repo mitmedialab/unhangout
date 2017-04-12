@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}My Events{% endblock %}
+
+{% block content %}
+  <div class='container'>
+    <a class='btn btn-success btn-large pull-right' href='{% url "plenary_add" %}'>
+      <i class='fa fa-plus'></i> Add a New Event
+    </a>
+    <h1>My Events</h1>
+    <h3>Upcoming</h3>
+    {% include "plenaries/_plenary_list.html" with plenaries=upcoming_plenaries %}
+    <h3>Past</h3>
+    {% include "plenaries/_plenary_list.html" with plenaries=past_plenaries %}
+  </div>
+{% endblock %}

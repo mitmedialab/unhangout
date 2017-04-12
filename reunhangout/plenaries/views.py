@@ -9,7 +9,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_slug
 from django.db import transaction
-from django.utils.timezone import now
+from django.utils import timezone
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 from breakouts.models import Breakout
@@ -116,7 +116,7 @@ def plenary_detail(request, id_or_slug):
 
 def plenary_list(request):
     plenaries = Plenary.objects.filter(
-        end_date__gte=now(),
+        end_date__gte=timezone.now(),
         public=True,
         canceled=False
     ).order_by('start_date')
@@ -217,3 +217,11 @@ def slug_check(request):
     })
 
 
+@login_required
+def my_events(request):
+    plenaries = request.user.plenary_set.order_by('-start_date')
+    now = timezone.now() 
+    return render(request, "plenaries/my_events.html", {
+        'upcoming_plenaries': list(plenaries.filter(end_date__gte=now)),
+        'past_plenaries': list(plenaries.filter(end_date__lt=now)),
+    })

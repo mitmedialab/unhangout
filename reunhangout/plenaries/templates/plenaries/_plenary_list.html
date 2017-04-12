@@ -1,0 +1,44 @@
+{% load thumbnail %}
+
+    <div class='plenary-list'>
+    {% for plenary in plenaries %}
+      <div class='plenary-list-item'>
+        <div class='image'>
+          {% if plenary.image %}
+            {% thumbnail plenary.image "300x200" padding=True as thumb %}
+              <a href='{{ plenary.get_absolute_url}}'>
+                <img src='{{ thumb.url }}' width='300' height='200' alt='' />
+              </a>
+            {% endthumbnail %}
+          {% else %}
+              <a href='{{ plenary.get_absolute_url}}'>
+                <img src='{{ MEDIA_URL }}assets/unhangout-logo-UN-seafoam.svg' width='300' height='200' alt='' />
+              </a>
+          {% endif %}
+        </div>
+        <div class='name'>
+          <a href='{{plenary.get_absolute_url}}'>{{ plenary.name }}</a>
+        </div>
+        <div class='organizer'>
+          hosted by {{ plenary.organizer }}
+        </div>
+        <div class='date'>
+          <span class='start-date' data-date='{{plenary.start_date.isoformat}}'
+                title='{{plenary.start_date.isoformat}}'>
+            {{ plenary.start_date|date:"M j, Y" }}
+          </span>
+          <span class='start-time' data-date='{{plenary.start_date.isoformat}}'
+                title='{{plenary.start_date.isoformat}}'>
+            {{ plenary.start_date|date:"H:i" }}
+          </span>
+          &mdash;
+          <span class='end-time' data-date='{{plenary.end_date.isoformat}}'
+                title='{{plenary.end_date.isoformat}}'>
+            {{ plenary.end_date|date:"H:i T" }}
+          </span>
+        </div>
+      </div>
+    {% empty %}
+      <em>Nothing scheduled yet.</em>
+    {% endfor %}
+    </div>

@@ -41,18 +41,16 @@
                 <li><a href='{% url "admin:index" %}'>Admin</a></li>
                 <li role='separator' class='divider'></li>
               {% endif %}
-              <!--
-              <li>
-                <a href='{% url "accounts_profile" %}'>
-                  <i class='fa fa-user'></i> Profile
-                </a>
-              </li>
-              -->
               <li>
                 <a href='{% url "accounts_settings" %}'>
                   <i class='fa fa-cog'></i> Settings
                 </a>
               </li>
+              {% if user.plenary_set.exists %}
+                <li>
+                  <a href='{% url "plenary_my_events" %}'>My Events</a>
+                </li>
+              {% endif %}
               <li role='separator' class='divider'></li>
               <li>
                 <form method='post' action='{% url "account_logout" %}'>{% csrf_token %}
