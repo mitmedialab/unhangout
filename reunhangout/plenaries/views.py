@@ -128,6 +128,8 @@ def plenary_list(request):
 @ensure_csrf_cookie
 def plenary_add(request):
     copyable = Plenary.objects.filter(admins=request.user)
+    if request.user.is_superuser and request.GET.get("copy_from_id"):
+        copyable = copyable | Plenary.objects.filter(pk=request.GET['copy_from_id'])
     copyable_fields = ('name', 'image', 'organizer', 'time_zone', 'doors_close',
             'public', 'description', 'whiteboard', 'slug')
     serialized_fields = ('id', 'start_date', 'end_date') + copyable_fields
