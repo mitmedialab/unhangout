@@ -68,6 +68,9 @@ class SyncableYoutubeVideo extends React.Component {
     if (this.isPlayingForAll()) {
       console.log("videosync pauseForAll");
       this.props.pauseForAll({syncId: this.props.sync_id});
+      if (!this.getCurSync().synced) {
+        this.player.pauseVideo();
+      }
     } else {
       console.log("videosync playForAll");
       this.player.getCurrentTime().then((time) => {
@@ -79,6 +82,10 @@ class SyncableYoutubeVideo extends React.Component {
       }).catch(e => {
         console.error(e);
       });
+    }
+    // play or pause for all indicates sync intent.
+    if (!this.getCurSync().synced) {
+      this.toggleSyncIntent();
     }
   }
 
