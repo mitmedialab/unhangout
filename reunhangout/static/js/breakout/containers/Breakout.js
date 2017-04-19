@@ -62,7 +62,7 @@ class JitsiVideo extends React.Component {
       // noSSL
       false
     );
-    this.api.executeCommand("displayName", props.auth.display_name);
+    this.api.executeCommand("displayName", [props.auth.display_name]);
     // Listen to everything.
     ["incomingMessage", "outgoingMessage", "displayNameChange",
       "participantJoined", "participantLeft", "videoConferenceJoined",
