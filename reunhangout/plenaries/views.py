@@ -288,6 +288,7 @@ def export_plenary_chat(request, plenary_id, format="csv"):
                 'created': msg.created.isoformat(),
                 'highlight': msg.highlight,
                 'archived': msg.archived,
+                'message': msg.message,
                 'mentions': [{
                     'id': m.id,
                     'display_name': m.get_display_name()
