@@ -135,6 +135,19 @@ export class UserMenu extends React.Component {
                     <i className='fa fa-archive'></i> Archive chat messages
                   </a>
                 </div>
+                <div className='menu-item inline'>
+                  <i className='fa fa-download'></i> Download messages 
+                  {' '}
+                  <span>
+                    <a href={`/event/${this.props.plenary.id}/chat-messages.json`} download>
+                      json
+                    </a>
+                    {', '}
+                    <a href={`/event/${this.props.plenary.id}/chat-messages.csv`} download>
+                      csv
+                    </a>
+                  </span>
+                </div>
               </div>
             : ""}
           </OverlayPassThrough>

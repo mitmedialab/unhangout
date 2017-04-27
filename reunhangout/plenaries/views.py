@@ -1,5 +1,7 @@
 import json
 import re
+import csv
+from io import StringIO
 
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render, redirect
@@ -227,3 +229,78 @@ def my_events(request):
         'upcoming_plenaries': list(plenaries.filter(end_date__gte=now)),
         'past_plenaries': list(plenaries.filter(end_date__lt=now)),
     })
+
+
+@login_required
+def export_plenary_chat(request, plenary_id, format="csv"):
+    try:
+        plenary = Plenary.objects.get(pk=plenary_id)
+    except Plenary.DoesNotExist:
+        raise Http404
+    if not plenary.has_admin(request.user):
+        raise PermissionDenied
+
+    chat_messages = ChatMessage.objects.select_related(
+        'user'
+    ).prefetch_related(
+        'mentions'
+    )
+
+    if format == "csv":
+        header = [
+            "chat_id", "user", "user_id", "created", "message", "highlight",
+            "archived", "mentions"
+        ]
+        sio = StringIO()
+        writer = csv.writer(sio)
+        writer.writerow(header)
+
+        for msg in chat_messages:
+            writer.writerow([
+                str(msg.id),
+                msg.user.get_display_name(),
+                str(msg.user.id),
+                msg.created.isoformat(),
+                msg.message,
+                "1" if msg.highlight else "",
+                "1" if msg.archived else "",
+                ",".join(str(u.id) for u in msg.mentions.all())
+            ])
+        content = sio.getvalue()
+        filename = "{}-chat.csv".format(plenary.slug)
+        content_type = "text/csv"
+    elif format == "json":
+        rows = []
+        output = {
+            'plenary': {
+                'id': plenary.id,
+                'slug': plenary.slug
+            },
+            'chat_messages': rows
+        }
+        for msg in chat_messages:
+            rows.append({
+                'id': msg.id,
+                'user': {
+                    'id': msg.user.id,
+                    'display_name': msg.user.get_display_name(),
+                },
+                'created': msg.created.isoformat(),
+                'highlight': msg.highlight,
+                'archived': msg.archived,
+                'mentions': [{
+                    'id': m.id,
+                    'display_name': m.get_display_name()
+                } for m in msg.mentions.all()]
+            })
+
+        content = json.dumps(output, indent=4)
+        filename = "{}-chat.json".format(plenary.slug)
+        content_type = 'application/json'
+    else:
+        return HttpResponseBadRequest("Unrecognized format {}".format(format))
+
+    response = HttpResponse(content)
+    response['Content-type'] = content_type
+    response['Content-Disposition'] = 'attatchment; filename={}'.format(filename)
+    return response
