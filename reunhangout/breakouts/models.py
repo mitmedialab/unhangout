@@ -15,7 +15,7 @@ class Breakout(models.Model):
     title = models.CharField(max_length=80, default="", blank=True)
     slug = models.SlugField(blank=True)
     description = models.TextField(blank=True, default="")
-    max_attendees = models.IntegerField(default=10, validators=[
+    max_attendees = models.IntegerField(default=6, validators=[
         MinValueValidator(2),
         MaxValueValidator(10),
     ])
