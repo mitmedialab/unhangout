@@ -161,8 +161,8 @@ class JitsiVideo extends React.Component {
     console.log(this.state);
     this.setState({showReportModal: false});
     this.props.errorReport({
-      collected_data: this.state.reportErrorJson,
-      additional_info: this.state.reportExtraInfo,
+      collected_data: this.state.reportErrorJson || "{}",
+      additional_info: this.state.reportExtraInfo || "",
     });
     alert("Thanks! Report submitted.");
   }
