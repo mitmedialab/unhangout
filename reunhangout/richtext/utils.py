@@ -57,11 +57,11 @@ valid_attrs['p'] = _p_attributes
 valid_attrs['span'] = _span_attributes
 
 def _add_noopener(attrs, new=False):
-    attrs['rel'] = "nofollow noopener noreferrer"
+    attrs[(None, 'rel')] = "nofollow noopener noreferrer"
     return attrs
 
 def _add_target_blank(attrs, new=False):
-    attrs['target'] = '_blank'
+    attrs[(None, 'target')] = '_blank'
     return attrs
 
 def sanitize(html, link=True, tags=None, attrs=valid_attrs, styles=None):
