@@ -30,6 +30,7 @@ module.exports = {
     publicPath: '/static/dist/'
   },
   plugins: [
+    new webpack.DefinePlugin({'process.env': { 'NODE_ENV': JSON.stringify('production') }}),
     new BundleTracker({
       path: path.join(root, 'static', 'tmp'),
       filename: 'webpack-stats.json'
