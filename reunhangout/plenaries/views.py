@@ -8,7 +8,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.conf import settings
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.core.validators import validate_slug
 from django.db import transaction
 from django.utils import timezone
@@ -240,7 +240,9 @@ def export_plenary_chat(request, plenary_id, format="csv"):
     if not plenary.has_admin(request.user):
         raise PermissionDenied
 
-    chat_messages = ChatMessage.objects.select_related(
+    chat_messages = ChatMessage.objects.filter(
+        plenary=plenary
+    ).select_related(
         'user'
     ).prefetch_related(
         'mentions'
