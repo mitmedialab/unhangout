@@ -150,7 +150,10 @@ class SyncableYoutubeVideo extends React.Component {
 
   componentWillReceiveProps(props) {
     let newSync = props.videosync[props.sync_id] || {};
-    this.setState({syncTime: newSync.current_time_index || 0});
+    let oldSync = (this.props.videosync || {})[this.props.sync_id] || {};
+    if (newSync.current_time_index != oldSync.current_time_index) {
+      this.setState({syncTime: newSync.current_time_index || 0});
+    }
     this.syncVideo(props);
   }
 
