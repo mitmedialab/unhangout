@@ -12,6 +12,8 @@ const uniqueEmbeds = (embeds) => _.uniqBy(embeds, (e) => {
   return e.type === 'live' ? 'live' : e.props.src
 });
 
+const VIMEO_LINK_RE = /^https?:\/\/vimeo\.com\/(\d+).*$/i
+
 class Embed extends React.Component {
   constructor(props) {
     super(props);
@@ -57,6 +59,15 @@ class Embed extends React.Component {
         }
       } else {
         throw new Error("Unrecognized youtube URL.");
+      }
+    } else if (VIMEO_LINK_RE.test(v)) {
+      // Vimeo: translate plain vimeo links to their embeddable endpoint.
+      let id = VIMEO_LINK_RE.exec(v)[1];
+      return {
+        type: 'url',
+        props: {
+          src: `https://player.vimeo.com/video/${id}`
+        }
       }
     } else if (/^https?:\/\//.test(v)) {
       // plain URLs
