@@ -64,7 +64,7 @@ export class ImageInput extends React.Component {
   }
 
   ingestFile(file) {
-    if (!file.type.match(/^image\/(png|jpeg|gif)$/)) {
+    if (!file.type.match(/^image\/(png|jpeg|gif)$/i)) {
       this.setState({
         error: "That doesn't seem to be an image file.",
         loading: false
@@ -79,38 +79,56 @@ export class ImageInput extends React.Component {
     let reader = new FileReader();
     reader.onload = (fileEvent) => {
       let resized = this.resizeImage(fileEvent.target.result, file.type);
-      if (resized) {
-        this.setState({
-          image: resized,
-          loading: false,
-        }, () => this.onChange());
-      }
+      this.resizeImage(fileEvent.target.result, file.type).then(resized => {
+        if (resized) {
+          this.setState({
+            image: resized,
+            loading: false,
+          }, () => this.onChange());
+        }
+      });
     }
     reader.readAsDataURL(file);
   }
 
   resizeImage(dataUrl, type) {
-    let img = document.createElement('img');
-    img.src = dataUrl;
-    let width = img.width;
-    let height = img.height;
-    if (!width || !height) {
-      this.setState({loading: false, error: "That doesn't seem to be a valid image."});
-      return null;
-    }
-    let scale = Math.min(1, this.props.maxHeight / height, this.props.maxWidth / width);
-    height *= scale;
-    width *= scale;
-    let canvas = document.createElement('canvas');
-    let ctx = canvas.getContext('2d');
-    canvas.width = width;
-    canvas.height = height;
-    ctx.drawImage(img, 0, 0, width, height);
-    try {
-      return canvas.toDataURL(type);
-    } catch (e) {
-      return canvas.toDataURL();
-    }
+    return new Promise((resolve, reject) => {
+      const img = document.createElement('img');
+      img.src = dataUrl;
+      const start = Date.now();
+      const waitAndScale = () => {
+        if (img.width && img.height) {
+          let height = img.height;
+          let width = img.width;
+          let scale = Math.min(
+            1,
+            this.props.maxHeight / height,
+            this.props.maxWidth / width
+          );
+          height *= scale;
+          width *= scale;
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          canvas.width = width;
+          canvas.height = height;
+          ctx.drawImage(img, 0, 0, width, height);
+          try {
+            resolve(canvas.toDataURL(type));
+          } catch (e) {
+            resolve(canvas.toDataURL());
+          }
+        } else if (Date.now() - start > 2000) {
+          this.setState({
+            loading: false,
+            error: "That doesn't seem to be a valid image."
+          });
+          reject(null);
+        } else {
+          setTimeout(waitAndScale, 100);
+        }
+      };
+      waitAndScale();
+    });
   }
 
   removeImage(event) {
