@@ -32,7 +32,10 @@ export const plenary = (state=null, action) => {
       return newstate
     case A.RECEIVE_EMBED_DETAILS:
       newstate = {...state}
-      newstate.embedDetails[action.payload.embed.props.src] = action.payload.details
+      newstate.embedDetails = {
+        ...state.embedDetails,
+        [action.payload.embed.props.src]: action.payload.details
+      }
       return newstate
     case A.ADMIN_PLENARY_DETAILS_SENDING:
       newstate = {...state, plenaryDetailsState: "sending"}

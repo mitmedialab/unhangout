@@ -16,20 +16,21 @@ class Embed extends React.Component {
   constructor(props) {
     super(props);
     this.state = {embedValue: ''};
-    this.updateEmbedDetails();
+    this.updateEmbedDetails(props);
   }
-  componentWillReceiveProps() {
-    this.updateEmbedDetails();
+  componentWillReceiveProps(newProps) {
+    this.updateEmbedDetails(newProps);
   }
 
   /**
    * Trigger a state update for the video embed details (title, thumbnail) for
    * any new embeds.
    */
-  updateEmbedDetails() {
-    this.props.embeds.embeds.map((embed, i) => {
-      if (embed.props && !this.props.embedDetails[embed.props.src]) {
-        this.props.fetchEmbedDetails(embed, this.props.settings);
+  updateEmbedDetails(props) {
+    props = props || this.props;
+    props.embeds.embeds.map((embed, i) => {
+      if (embed.props && !props.embedDetails[embed.props.src]) {
+        props.fetchEmbedDetails(embed, props.settings);
       }
     });
   }
