@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'channels',
     'channels_presence',
     'django_gravatar',
-    'djcelery',
+    'django_celery_beat',
+    'django_celery_results',
     'escapejson',
     'sorl.thumbnail',
     'webpack_loader',
@@ -53,16 +54,14 @@ INSTALLED_APPS = [
 ]
 MIGRATION_MODULES = {
     'thumbnail': 'frontend.sorl_migrations',
-    'djcelery': 'frontend.djcelery_migrations'
 }
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.contrib.sites.middleware.CurrentSiteMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -160,7 +159,7 @@ CHANNEL_LAYERS = {
 }
 
 # Celery
-CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
+CELERY_RESULT_BACKEND = 'django-db'
 CELERYBEAT_SCHEDULE = {
     'video-sync': {
         'task': 'videosync.tasks.tick',
@@ -175,7 +174,7 @@ CELERYBEAT_SCHEDULE = {
         'schedule': timedelta(seconds=600),
     },
 }
-CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 BROKER_URL = "redis://localhost:6379/0"
 
 SOCIALACCOUNT_PROVIDERS = {

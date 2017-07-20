@@ -35,7 +35,7 @@ def plenary_detail(request, id_or_slug):
     if id_or_slug != plenary.slug:
         return redirect(plenary.get_absolute_url())
 
-    if plenary.open and not request.user.is_authenticated():
+    if plenary.open and not request.user.is_authenticated:
         messages.info(request, "You must be signed in to attend events.")
         return redirect('%s?next=%s' % (settings.LOGIN_URL, request.path))
 
@@ -69,7 +69,7 @@ def plenary_detail(request, id_or_slug):
     }
 
     # If authenticated, fetch full fields.
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         data['plenary'].update({
             'whiteboard': plenary.safe_whiteboard(),
             'breakout_mode': plenary.breakout_mode,

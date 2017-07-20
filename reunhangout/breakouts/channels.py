@@ -21,7 +21,7 @@ logger = logging.getLogger('django.request')
 @channel_session_user_from_http
 def ws_connect(message, breakout_id):
     message.reply_channel.send({"accept": True})
-    if not message.user.is_authenticated():
+    if not message.user.is_authenticated:
         return handle_error(message, "Authentication required")
     try:
         breakout = Breakout.objects.get(pk=breakout_id)
@@ -38,7 +38,7 @@ def connect_to_breakout(message, breakout):
     if num_connections >= breakout.max_attendees:
         return send_over_capacity_error(message, breakout.channel_group_name)
 
-    elif message.user.is_authenticated() and Presence.objects.filter(
+    elif message.user.is_authenticated and Presence.objects.filter(
                 room__channel_name__startswith=Breakout.CHANNEL_GROUP_NAME_PREFIX,
                 user=message.user
             ).exists():
@@ -92,7 +92,7 @@ class MessageProxy(object):
         self.user = user
 
 def handle_disconnecting_others(message, data, breakout):
-    if not message.user.is_authenticated():
+    if not message.user.is_authenticated:
         handle_error(message, "Can't disconnect others when not authenticated")
         return
 

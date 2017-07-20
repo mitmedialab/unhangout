@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
@@ -124,8 +124,8 @@ class Breakout(models.Model):
         ordering = ['created']
 
 class ErrorReport(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
-    breakout = models.ForeignKey(Breakout)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    breakout = models.ForeignKey(Breakout, on_delete=models.CASCADE)
     created = models.DateTimeField(default=timezone.now)
     collected_data = models.TextField(blank=True, default="")
     additional_info = models.TextField(blank=True, default="")

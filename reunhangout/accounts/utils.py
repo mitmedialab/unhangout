@@ -1,7 +1,7 @@
 def serialize_auth_state(user, plenary=None):
     from accounts.models import User
 
-    if not user.is_authenticated():
+    if not user.is_authenticated:
         return {
             'auth': {
                 'is_authenticated': False,

@@ -89,6 +89,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return super(User, self).save(*args, **kwargs)
 
     def clean(self):
+        super().clean()
         if self.email:
             self.email = UserManager.normalize_email(self.email)
         if self.twitter_handle:

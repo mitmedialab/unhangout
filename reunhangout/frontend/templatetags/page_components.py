@@ -1,7 +1,7 @@
 from django import template
 from django.utils.safestring import mark_safe
 from django.template.defaultfilters import striptags, escapejs, truncatechars
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from frontend.models import PageComponent
 

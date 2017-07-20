@@ -1,5 +1,5 @@
 from django.views.generic.edit import FormView
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib import messages
 from django.shortcuts import redirect
 

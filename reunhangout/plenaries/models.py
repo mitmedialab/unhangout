@@ -4,7 +4,7 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
@@ -289,8 +289,8 @@ class Plenary(models.Model):
         verbose_name_plural = _("Plenaries")
 
 class ChatMessage(models.Model):
-    plenary = models.ForeignKey(Plenary)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    plenary = models.ForeignKey(Plenary, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
     message = models.TextField(default="", blank=True)
     highlight = models.BooleanField(default=False)

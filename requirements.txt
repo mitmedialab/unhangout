@@ -1,8 +1,9 @@
-django<1.10
+django<1.12
 channels
 asgi_redis
 celery[redis]
-django-celery
+django-celery-beat
+django-celery-results
 escapejson
 pytz
 jsonfield

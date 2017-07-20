@@ -42,7 +42,7 @@ def ws_connect(message, slug):
         if num_present > plenary.max_participants:
             return message.reply_channel.send({"accept": False})
 
-    if plenary.open and not message.user.is_authenticated():
+    if plenary.open and not message.user.is_authenticated:
         return handle_error(message, "Authentication required to connect to open plenaries")
 
     message.reply_channel.send({"accept": True})
@@ -69,7 +69,7 @@ def ws_disconnect(message, slug=None):
 @touch_presence
 @channel_session_user
 def ws_receive(message, slug):
-    if not message.user.is_authenticated():
+    if not message.user.is_authenticated:
         return handle_error(message, "Authentication required")
     try:
         data = json.loads(message.content['text'])
