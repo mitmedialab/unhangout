@@ -33,7 +33,7 @@
     django_python_version: "python3.5"
     django_domain: "{{uh_domain}}"
     django_project_name: "reunhangout"
-    django_repo_url: "https://gitlab.com/cdetar/reunhangout.git"
+    django_repo_url: "https://gitlab.com/unhangout/reunhangout.git"
     django_repo_dir: "{{uh_repo_dir}}"
     django_requirements_file: "{{uh_repo_dir}}shrinkwrap.txt"
     django_project_dir: "{{uh_repo_dir}}reunhangout/"
