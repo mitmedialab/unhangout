@@ -81,6 +81,7 @@ $breakout-left-col-width: 20%;
 
 .breakout-messages {
   position: absolute;
+  z-index: 10000000;
   max-width: 300px;
   top: 1em;
   left: 1em;
