@@ -5,4 +5,4 @@ It depends on `postis` from npm.  It is licensed as per LICENSE in this director
 
 Fetch with:
 
-curl -L https://raw.githubusercontent.com/jitsi/jitsi-meet/master/modules/API/external/external_api.js > external_api.js
+curl -L https://meet.jit.si/external_api.js > external_api.js

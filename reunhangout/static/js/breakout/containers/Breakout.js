@@ -5,7 +5,8 @@ import * as BS from "react-bootstrap";
 import {ConnectionStatus} from '../../transport';
 import * as A from '../actions';
 import * as PRESENCE_ACTIONS from '../../transport/actions';
-import {Presence} from '../../plenary/containers/Presence.js';
+import {sortPresence} from '../../plenary/containers/Presence.js';
+import {Avatar} from "../../plenary/containers/Avatar";
 import WebRTCStatus from '../../plenary/containers/WebRTCStatus';
 import JitsiMeetExternalAPI from "../../vendor/jitsi-meet/external_api";
 import * as style from "../../../scss/pages/breakout/_breakoutstyle.scss";
@@ -27,42 +28,37 @@ class JitsiVideo extends React.Component {
     this.api = new JitsiMeetExternalAPI(
       // domain
       props.breakout.jitsi_server,
-      // room_name
-      props.breakout.webrtc_id,
-      // width
-      undefined,
-      // height
-      undefined,
-      // parentNode
-      div,
-      // configOverwrite
       {
-        disableStats: JSON.stringify(true),
-        enableWelcomePage: JSON.stringify(false),
-        callStatsID: JSON.stringify(""),
-        callStatsSecret: JSON.stringify(""),
-        disableThirdPartyRequests: JSON.stringify(true),
-        logStats: JSON.stringify(false)
-      }, 
-      // interfaceConfigOvewrite
-      {
-        APP_NAME: JSON.stringify(props.settings.BRANDING.name),
-        SHOW_JITSI_WATERMARK: JSON.stringify(false),
-        DEFAULT_LOCAL_DISPLAY_NAME: JSON.stringify(props.auth.display_name),
-        DEFAULT_REMOTE_DISPLAY_NAME: JSON.stringify("Fellow breakouter"),
-        SHOW_POWERED_BY: JSON.stringify(true),
-        TOOLBAR_BUTTONS: JSON.stringify([
-          "microphone","camera",
-          "desktop",
-          "chat", "etherpad", "filmstrip",
-          "sharedvideo","settings",
-          "recording" // As of 2016-11-27, jitsi fails if recording button isn't included
-        ]),
+        width: "100%",
+        height: "100%",
+        parentNode: div,
+        roomName: props.breakout.webrtc_id,
+        configOverwrite: {
+          disableStats: true,
+          enableWelcomePage: false,
+          callStatsID: "",
+          callStatsSecret: "",
+          disableThirdPartyRequests: true,
+          logStats: false
+        }, 
+        interfaceConfigOverwrite: {
+          APP_NAME: props.settings.BRANDING.name,
+          SHOW_JITSI_WATERMARK: false,
+          SHOW_WATERMARK_FOR_GUESTS: false,
+          DEFAULT_LOCAL_DISPLAY_NAME: props.auth.display_name,
+          DEFAULT_REMOTE_DISPLAY_NAME: "Fellow breakouter",
+          SHOW_POWERED_BY: false,
+          TOOLBAR_BUTTONS: [
+            "microphone", "camera", "desktop",
+            "chat", "filmstrip",
+            "sharedvideo","settings",
+            "recording"
+          ],
+          MAIN_TOOLBAR_BUTTONS: ['microphone', 'camera', 'desktop'],
+        }
       },
-      // noSSL
-      false
     );
-    this.api.executeCommand("displayName", [props.auth.display_name]);
+    this.api.executeCommand("displayName", props.auth.display_name);
     // Listen to everything.
     ["incomingMessage", "outgoingMessage", "displayNameChange",
       "participantJoined", "participantLeft", "videoConferenceJoined",
@@ -158,7 +154,6 @@ class JitsiVideo extends React.Component {
 
   submitErrorReport(event) {
     event && event.preventDefault();
-    console.log(this.state);
     this.setState({showReportModal: false});
     this.props.errorReport({
       collected_data: this.state.reportErrorJson || "{}",
@@ -241,7 +236,62 @@ class JitsiVideo extends React.Component {
   }
 }
 
+class Etherpad extends React.Component {
+  static propTypes = {
+    server: React.PropTypes.string.isRequired,
+    id: React.PropTypes.string.isRequired,
+    auth: React.PropTypes.object.isRequired,
+  }
+
+  getUrl(props) {
+    return `https://${this.props.server}/p/${this.props.id}?userName=${this.props.auth.display_name}&showChat=false`;
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return this.getUrl(this.props) !== this.getUrl(nextProps); 
+  }
+  
+  render() {
+    return <div className='etherpad-holder'>
+      <iframe src={this.getUrl(this.props)} />
+    </div>
+  }
+}
+
+class Presence extends React.Component {
+  static propTypes = {
+    presence: React.PropTypes.object.isRequired,
+    auth: React.PropTypes.object.isRequired,
+  }
+
+  render() {
+    return (
+      <div className='breakout-presence'>
+        <span className='count'>
+          <i className='fa fa-child' />
+          {this.props.presence.members.length}
+        </span>
+        {
+          sortPresence(this.props.presence, this.props.auth).map((user => (
+            <div className='present' key={user.username}>
+              <Avatar user={user}
+                      detailView={false}
+                      idPart={`breakout-presence-${user.username}`} />
+              <span className='name'>{user.display_name}</span>
+            </div>
+          )))
+        }
+      </div>
+    );
+  }
+}
+
 class Breakout extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {showEtherpad: false}
+  }
+
   handleDisconnectOthers(event) {
     event && event.preventDefault();
     this.props.disconnectOthers();
@@ -272,36 +322,42 @@ class Breakout extends React.Component {
     return <div className='breakout-detail'>
       <ConnectionStatus />
       <WebRTCStatus />
-      <div className='breakout-columns'>
-        <div className={'breakout-left-col' + (errorMessage ? ' hide' : '')}>
-          { errorMessage ?
-              ""
-            :
-              <div className="breakout-sidebar-container">
-                <div className="breakout-title-container">
-                  <span>{this.props.breakout.title}</span>
-                </div>
-                <Presence presence={this.props.presence} auth={this.props.auth} />
-                <div className='logo-container'>
-                  <a href="/" target="_blank">
-                    <img src={`${this.props.settings.MEDIA_URL}${this.props.settings.BRANDING.logo}`} alt="Unhangout logo"></img>
-                  </a>
-                </div>
-              </div>
+      {this.props.breakoutMessages.length > 0 ?
+        <ul className='breakout-messages'>
+          {
+            this.props.breakoutMessages.map((message, i) => {
+              return <li key={`message-${i}`}>{message}</li>
+            })
           }
-          { this.props.breakoutMessages.length > 0 ?
-              <ul className='breakout-messages'>
-                {
-                  this.props.breakoutMessages.map((message, i) => {
-                    return <li key={`message-${i}`}>{message}</li>
-                  })
-                }
-              </ul>
-            : "" }
+        </ul>
+      : null }
+      <div className='breakout-layout'>
+        <div className='titlebar'>
+          <span className='title'><span>{this.props.breakout.title}</span></span>
+          <Presence presence={this.props.presence} auth={this.props.auth} />
+          <span className='logo'>
+            <a href="/" target="_blank">
+              <img src={`${this.props.settings.MEDIA_URL}${this.props.settings.BRANDING.logo}`} alt="Unhangout logo"></img>
+            </a>
+          </span>
+          <button className='btn btn-default'
+                  title='Show or hide shared document'
+                  onClick={(e) => this.setState({showEtherpad: !this.state.showEtherpad})}>
+            <i className='fa fa-file-text-o fa-2x' />
+          </button>
         </div>
-        <div className='breakout-right-col'>
-          { errorMessage ? <div className='container'>{errorMessage}</div> : "" }
-          <JitsiVideo {...this.props} hide={!!errorMessage} />
+        <div className='interaction'>
+          <div className='video'>
+            { errorMessage ? <div className='container'>{errorMessage}</div> : "" }
+            <JitsiVideo {...this.props} hide={!!errorMessage} />
+          </div>
+          {this.state.showEtherpad ?
+            <div className='etherpad'>
+              <Etherpad id={this.props.breakout.webrtc_id}
+                        server={this.props.settings.ETHERPAD_SERVER}
+                        auth={this.props.auth} />
+            </div>
+          : null}
         </div>
       </div>
     </div>;

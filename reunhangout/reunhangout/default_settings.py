@@ -231,4 +231,5 @@ JITSI_SERVERS = [
     'meet.jit.si',
     'jitsi.unhangout.io',
 ]
+ETHERPAD_SERVER = "etherpad.unhangout.io"
 
