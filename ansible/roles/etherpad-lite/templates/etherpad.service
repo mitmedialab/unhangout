@@ -1,0 +1,11 @@
+[Unit]
+Description="Etherpad-lite"
+
+[Service]
+Type=simple
+User=etherpad
+Group=etherpad
+ExecStart=/var/local/etherpad-lite/bin/run.sh
+
+[Install]
+WantedBy=multi-user.target

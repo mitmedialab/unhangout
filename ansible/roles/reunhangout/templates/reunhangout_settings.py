@@ -44,3 +44,4 @@ for name, keys in ALLAUTH_APP_KEYS.items():
 #    'SHOW_TOOLBAR_CALLBACK': lambda request: not request.is_ajax() and request.META.get('HTTP_X_FORWARDED_FOR', None) in INTERNAL_IPS
 #}
 
+ETHERPAD_SERVER = "{{etherpad_domain}}"

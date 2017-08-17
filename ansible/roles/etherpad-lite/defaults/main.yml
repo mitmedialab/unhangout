@@ -1,0 +1,6 @@
+---
+etherpad_port: 9001
+etherpad_db_name: "etherpad"
+etherpad_db_username: "etherpad"
+etherpad_db_password: "etherpad"
+etherpad_nginx_template: "etherpad_nginx.conf"

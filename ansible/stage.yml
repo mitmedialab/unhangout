@@ -14,15 +14,19 @@
     - letsencrypt-nginx
     - letsencrypt
     - postgresql
-    - nodesource.node
+    - role: nodesource.node
+      tags: ['node']
+      nodejs_version: "6"
+      debian_repo_version: "6.x"
     - monitored
     #- tarsnap
     - redis
     - {role: django, tags: ['reunhangout']}
     - reunhangout
+    - etherpad-lite
   vars:
     domain: "{{uh_domain}}"
-    letsencrypt_domains: "{{ [uh_domain] + uh_domain_aliases }}"
+    letsencrypt_domains: "{{ [uh_domain, uh_etherpad_domain] + uh_domain_aliases }}"
     swap_file_size_kb: 4000000 # 4GiB
     swap_file_path: "/swapfile2"
     uh_repo_dir: "/var/local/reunhangout/"
@@ -54,5 +58,8 @@
       - "{{django_media_dir}}"
     tarsnap_postgres_databases:
       - "{{uh_postgres_db}}"
-    nodejs_version: "4"
+    etherpad_domain: "{{uh_etherpad_domain}}"
+    etherpad_db_name: "{{uh_etherpad_db_name}}"
+    etherpad_db_username: "{{uh_etherpad_db_username}}"
+    etherpad_db_password: "{{uh_etherpad_db_password}}"
 

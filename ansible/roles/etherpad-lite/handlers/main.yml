@@ -1,0 +1,12 @@
+---
+- name: systemctl daemon-reload
+  command: systemctl daemon-reload
+
+- name: stop etherpad
+  systemd: name=etherpad.service state=stopped
+
+- name: start etherpad
+  systemd: name=etherpad.service state=started
+
+- name: restart etherpad
+  service: name=etherpad.service state=restarted

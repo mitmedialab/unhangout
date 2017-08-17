@@ -1,0 +1,106 @@
+---
+- block:
+  # Database
+  - name: Etherpad database
+    block:
+     - postgresql_user: name={{etherpad_db_username}} password={{etherpad_db_password}}
+     - postgresql_db: name={{etherpad_db_name}} owner={{etherpad_db_username}}
+    become: yes
+    become_user: postgres
+    vars: {ansible_ssh_pipelining: yes}
+
+  - name: Etherpad system user
+    user: name=etherpad
+
+  - name: Retrieve etherpad code
+    git: >
+      repo=https://github.com/ether/etherpad-lite.git
+      dest=/var/local/etherpad-lite/
+      version=master
+    notify: restart etherpad
+
+  - name: Set up node_modules perms
+    file:
+      path: "{{item}}"
+      state: directory
+      owner: etherpad
+      group: etherpad
+    with_items:
+      - /var/local/etherpad-lite
+      - /var/local/etherpad-lite/node_modules
+      - /var/local/etherpad-lite/src
+
+  - name: Install deps
+    vars:
+      ansible_ssh_pipelining: yes
+    become: yes
+    become_user: etherpad
+    command: /var/local/etherpad-lite/bin/installDeps.sh
+
+  - name: Var perms
+    treeperms:
+      paths:
+        - path: /var/local/etherpad-lite/var/
+          owner: etherpad
+          group: etherpad
+
+  - name: Create SESSIONKEY.txt
+    copy: >
+      dest=/var/local/etherpad-lite/SESSIONKEY.txt
+      content="{{etherpad_session_key}}"
+      owner=etherpad
+      group=etherpad
+
+  - name: Create APIKEY.txt file
+    copy: >
+      dest=/var/local/etherpad-lite/APIKEY.txt
+      content="{{etherpad_api_key}}"
+      owner=etherpad
+      group=etherpad
+
+  - name: Create .ep_initialized file
+    file: path=/var/local/etherpad-lite/src/.ep_initialized state=touch
+
+  - name: Configure etherpad
+    template: src=etherpad_settings.json dest=/var/local/etherpad-lite/settings.json
+    notify: restart etherpad
+
+  - block:
+    - name: Create services dir
+      file: path=/usr/lib/systemd/system state=directory
+
+    - name: Copy etherpad systemd config
+      template: >
+        src=etherpad.service dest=/usr/lib/systemd/system/etherpad.service
+      notify:
+       - systemctl daemon-reload
+       - restart etherpad
+
+    - name: Enable etherpad systemd
+      command: systemctl enable etherpad.service
+      register: systemd_enable
+      changed_when: systemd_enable.stdout.find("Created") != -1
+      notify:
+       - systemctl daemon-reload
+       - restart etherpad
+
+  - name: Enable proxy module
+    apache2_module: name={{item}} state=present
+    with_items:
+     - proxy
+     - proxy_http
+
+  - name: Add nginx conf
+    template:
+      src: "{{etherpad_nginx_template}}"
+      dest: /etc/apache2/sites-available/etherpad.conf
+    notify: restart nginx
+  
+  - name: Enable nginx conf
+    file:
+      src: /etc/nginx/sites-available/etherpad.conf
+      dest: /etc/nginx/sites-enabled/etherpad.conf
+      state: link
+    notify: restart nginx
+
+  tags: etherpad
