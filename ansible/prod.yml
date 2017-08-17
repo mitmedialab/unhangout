@@ -58,3 +58,6 @@
     etherpad_db_name: "{{uh_etherpad_db_name}}"
     etherpad_db_username: "{{uh_etherpad_db_username}}"
     etherpad_db_password: "{{uh_etherpad_db_password}}"
+    etherpad_session_key: "{{uh_etherpad_session_key}}"
+    etherpad_api_key: "{{uh_etherpad_api_key}}"
+

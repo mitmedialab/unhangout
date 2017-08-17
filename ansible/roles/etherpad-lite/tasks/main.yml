@@ -29,6 +29,7 @@
       - /var/local/etherpad-lite
       - /var/local/etherpad-lite/node_modules
       - /var/local/etherpad-lite/src
+      - /var/local/etherpad-lite/src/static/custom
 
   - name: Install deps
     vars:
@@ -84,16 +85,10 @@
        - systemctl daemon-reload
        - restart etherpad
 
-  - name: Enable proxy module
-    apache2_module: name={{item}} state=present
-    with_items:
-     - proxy
-     - proxy_http
-
   - name: Add nginx conf
     template:
       src: "{{etherpad_nginx_template}}"
-      dest: /etc/apache2/sites-available/etherpad.conf
+      dest: /etc/nginx/sites-available/etherpad.conf
     notify: restart nginx
   
   - name: Enable nginx conf
