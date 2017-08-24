@@ -1,8 +1,11 @@
 from django.contrib import admin
+from django.http import HttpResponse
 from django import forms
+from django.utils.timezone import now
 
 from plenaries.models import Plenary, Series, ChatMessage
 from richtext.utils import RichTextField
+from analytics.utils import plenary_analytics
 
 class PlenaryForm(forms.ModelForm):
     description = RichTextField(required=False)
@@ -17,6 +20,19 @@ class PlenaryAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ['name']}
     readonly_fields = ['embeds', 'history']
     filter_horizontal = ['admins']
+
+    actions = ['analytics_json']#'analytics_csv', 
+
+    def analytics_json(self, request, queryset):
+        response = HttpResponse()
+        response['Content-Type'] = 'application/json'
+        response['Content-Disposition'] = "attachment; filename={}".format(
+            now().strftime("analytics-%Y-%m-%d.json")
+        )
+        response.write(plenary_analytics(queryset, fmt='json'))
+        return response
+    analytics_json.short_description = "Analytics (JSON)"
+
 
 @admin.register(Series)
 class SeriesAdmin(admin.ModelAdmin):
