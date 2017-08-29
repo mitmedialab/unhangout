@@ -16,7 +16,7 @@ django-channels-presence
 django-debug-toolbar
 django-gravatar2
 django-webpack-loader
-pillow
+pillow<3.7
 pylibmc
 requests
 sorl-thumbnail
