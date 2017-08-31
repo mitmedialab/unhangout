@@ -6,7 +6,9 @@ from plenaries import views
 urlpatterns = [
     url(r'^event/(?P<id_or_slug>[-a-z0-9_]+)/$', views.plenary_detail, name='plenary_detail'),
     url(r'^event/(?P<plenary_id>\d+)/chat-messages\.(?P<format>json|csv)',
-        views.export_plenary_chat, name='plenary_export_chat'),
+        views.plenary_export_chat, name='plenary_export_chat'),
+    url(r'^event/(?P<plenary_id>\d+)/etherpads$',
+        views.plenary_export_etherpads, name='plenary_export_etherpads'),
     url(r'^events/$', views.plenary_list, name='plenary_list'),
     url(r'^events/add/$', views.plenary_add, name='plenary_add'),
     url(r'^events/my/$', views.my_events, name='plenary_my_events'),

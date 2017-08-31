@@ -18,6 +18,7 @@ from breakouts.models import Breakout
 from channels_presence.models import Room, Presence
 from plenaries.models import Plenary, Series, ChatMessage
 from plenaries.channels import update_plenary
+from plenaries import utils
 from videosync.models import VideoSync
 from accounts.utils import serialize_auth_state
 from reunhangout.utils import json_dumps
@@ -127,6 +128,19 @@ def plenary_list(request):
     })
 
 @login_required
+def plenary_export_etherpads(request, plenary_id):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+
+    try:
+        plenary = Plenary.objects.get(pk=plenary_id)
+    except Plenary.DoesNotExist:
+        raise Http404
+
+    return HttpResponse(utils.export_etherpads(plenary))
+
+
+@login_required
 @ensure_csrf_cookie
 def plenary_add(request):
     copyable = Plenary.objects.filter(admins=request.user)
@@ -232,7 +246,7 @@ def my_events(request):
 
 
 @login_required
-def export_plenary_chat(request, plenary_id, format="csv"):
+def plenary_export_chat(request, plenary_id, format="csv"):
     try:
         plenary = Plenary.objects.get(pk=plenary_id)
     except Plenary.DoesNotExist:

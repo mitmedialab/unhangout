@@ -148,6 +148,12 @@ export class UserMenu extends React.Component {
                     </a>
                   </span>
                 </div>
+                <div className='menu-item'>
+                  <a href={`/event/${this.props.plenary.id}/etherpads`}
+                     target='_blank' rel='noopener noreferrer'>
+                    <i className='fa fa-file-text-o' /> Export breakout etherpads
+                  </a>
+                </div>
               </div>
             : ""}
           </OverlayPassThrough>

@@ -1,11 +1,12 @@
 from django.contrib import admin
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django import forms
 from django.utils.timezone import now
 
 from plenaries.models import Plenary, Series, ChatMessage
 from richtext.utils import RichTextField
 from analytics.utils import plenary_analytics
+from plenaries.utils import zip_exported_etherpads
 
 class PlenaryForm(forms.ModelForm):
     description = RichTextField(required=False)
@@ -21,7 +22,20 @@ class PlenaryAdmin(admin.ModelAdmin):
     readonly_fields = ['embeds', 'history']
     filter_horizontal = ['admins']
 
-    actions = ['analytics_json']#'analytics_csv', 
+    actions = ['analytics_json', 'export_breakout_etherpads']
+
+    def export_breakout_etherpads(self, request, queryset):
+        zip_content = zip_exported_etherpads(queryset)
+        if zip_content is None:
+            raise Http404
+        
+        response = HttpResponse()
+        response['Content-Type'] = 'application/zip'
+        response['Content-Disposition'] = "attachment; filename={}".format(
+            now().strftime("etherpads-%Y-%m-%d.zip")
+        )
+        response.write(zip_content)
+        return response
 
     def analytics_json(self, request, queryset):
         response = HttpResponse()
