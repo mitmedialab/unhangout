@@ -90,7 +90,7 @@ class Plenary(models.Model):
                     setattr(self, key, iso8601.parse_date(date))
                 except iso8601.ParseError:
                     raise ValidationError("%s: date format not understood" % key)
-        if re.match('^[0-9]+$', self.slug):
+        if re.match('^[0-9]+$', self.slug) and int(self.slug) != self.id:
             raise ValidationError("Slug must contain at least one letter")
         if self.start_date >= self.end_date:
             raise ValidationError("End date must be after start date")

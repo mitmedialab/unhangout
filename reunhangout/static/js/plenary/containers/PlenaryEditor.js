@@ -371,7 +371,7 @@ PlenaryEditor.defaultProps = {
     start_date: moment().format(),
     end_date: moment().add(90, 'minutes').format(),
     doors_close: moment().add(120, 'minutes').format(),
-    "public": true,
+    "public": false,
   },
   loading: false
 }
