@@ -7,7 +7,7 @@
 
   .titlebar {
     display: none;
-    height: 6rem;
+    height: 8rem;
     display: flex;
     flex-direction: row;
     .title {
@@ -48,7 +48,7 @@
         display: inline-block;
         text-align: center;
         & + .present {
-          margin-left: 5px;
+          margin-left: 1rem;
         }
       }
       .user-avatar {
@@ -61,8 +61,9 @@
         display: block;
         font-size: 1rem;
         max-width: 64px;
-        white-space: nowrap;
-        text-overflow: ellipsis;
+        max-height: 28px;
+        overflow-wrap: break-word;
+        overflow: hidden;
       }
     }
   }
