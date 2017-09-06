@@ -4,6 +4,14 @@ from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 from django.utils.translation import ugettext_lazy as _
 
 from accounts.models import User
+from plenaries.models import Plenary
+
+class PlenaryInline(admin.TabularInline):
+    model = Plenary.admins.through
+    raw_id_fields = ['plenary']
+    extra = 1
+    verbose_name = "Plenaries this user admins"
+    verbose_name_plural = verbose_name
 
 class CustomUserChangeForm(UserChangeForm):
     class Meta(UserChangeForm.Meta):
@@ -39,3 +47,4 @@ class CustomuserAdmin(UserAdmin):
     )
     search_fields = ['username', 'display_name', 'email']
     ordering = ['date_joined']
+    inlines = [PlenaryInline]

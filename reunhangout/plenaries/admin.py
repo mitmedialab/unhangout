@@ -12,6 +12,13 @@ class PlenaryForm(forms.ModelForm):
     description = RichTextField(required=False)
     whiteboard = RichTextField(required=False)
 
+class AdminInline(admin.TabularInline):
+    model = Plenary.admins.through
+    raw_id_fields = ['user']
+    extra = 1
+    verbose_name = "Admins"
+    verbose_name_plural = verbose_name
+
 # Register your models here.
 @admin.register(Plenary)
 class PlenaryAdmin(admin.ModelAdmin):
@@ -20,7 +27,10 @@ class PlenaryAdmin(admin.ModelAdmin):
     search_fields = ['name', 'organizer', 'description']
     prepopulated_fields = {'slug': ['name']}
     readonly_fields = ['embeds', 'history']
-    filter_horizontal = ['admins']
+    raw_id_fields = ['live_participants']
+    exclude = ['admins']
+
+    inlines = [AdminInline]
 
     actions = ['analytics_json', 'export_breakout_etherpads']
 
