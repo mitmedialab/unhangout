@@ -289,12 +289,34 @@ class Presence extends React.Component {
 class Breakout extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {showEtherpad: props.breakout.etherpad_start_open}
+    this.state = {
+      showEtherpad: props.breakout.etherpad_start_open,
+      splitBasis: "50%",
+      handleWidth: "20px",
+      dragging: false,
+    }
   }
 
   handleDisconnectOthers(event) {
     event && event.preventDefault();
     this.props.disconnectOthers();
+  }
+
+  resizeOnMouseDown(event) {
+    this.setState({dragging: true});
+  }
+
+  resizeOnMouseMove(event) {
+    if (!this.state.dragging) {
+      return;
+    }
+    this.setState({
+      splitBasis: ((event.clientX / this.interactionDiv.offsetWidth) * 100) + "%"
+    });
+  }
+
+  resizeOnMouseUp(event) {
+    this.setState({dragging: false});
   }
 
   render() {
@@ -318,8 +340,33 @@ class Breakout extends React.Component {
         </BS.Button>
       </div>;
     }
+    const handleStyle = {width: "5px"};
+    const videoStyle = {
+      width: (
+        this.state.showEtherpad ?
+           `calc(${this.state.splitBasis} - ${handleStyle.width} / 2)`
+        : "100%"
+      )
+    };
+    const etherpadStyle = {
+      width: `calc(100% - ${this.state.splitBasis} - ${handleStyle.width} / 2)`
+    };
 
-    return <div className='breakout-detail'>
+    return <div className='breakout-detail' onMouseMove={this.resizeOnMouseMove.bind(this)}>
+      {/* Utility div to capture drag events when we're over iframes. */}
+      <div onMouseMove={this.resizeOnMouseMove.bind(this)}
+           onMouseUp={this.resizeOnMouseUp.bind(this)}
+           style={{
+             backgroundColor: 'transparent',
+             position: 'absolute',
+             width: '100vw',
+             height: '100vh',
+             left: '0',
+             top: '0',
+             cursor: 'ew-resize',
+             zIndex: this.state.dragging ? 100000 : -1,
+           }} />
+
       <ConnectionStatus />
       <WebRTCStatus />
       {this.props.breakoutMessages.length > 0 ?
@@ -346,18 +393,23 @@ class Breakout extends React.Component {
             <i className='fa fa-file-text-o fa-2x' />
           </button>
         </div>
-        <div className='interaction'>
-          <div className='video'>
+        <div className='interaction' ref={(el) => this.interactionDiv = el}>
+          <div className='video' style={videoStyle}>
             { errorMessage ? <div className='container'>{errorMessage}</div> : "" }
             <JitsiVideo {...this.props} hide={!!errorMessage} />
           </div>
-          {this.state.showEtherpad ?
-            <div className='etherpad'>
+          {this.state.showEtherpad ? [
+            <div className='handle' key='1' style={handleStyle}
+                 onMouseDown={this.resizeOnMouseDown.bind(this)}
+                 onMouseUp={this.resizeOnMouseUp.bind(this)}
+                 onMouseMove={this.resizeOnMouseMove.bind(this)}
+            />,
+            <div className='etherpad' key='2' style={etherpadStyle}>
               <Etherpad id={this.props.breakout.etherpad_id}
                         server={this.props.settings.ETHERPAD_SERVER}
                         auth={this.props.auth} />
             </div>
-          : null}
+          ] : null}
         </div>
       </div>
     </div>;

@@ -1,4 +1,3 @@
-$breakout-left-col-width: 20%;
 .breakout-layout {
   width: 100vw;
   height: 100vh;
@@ -69,13 +68,16 @@ $breakout-left-col-width: 20%;
   }
 
   .interaction {
-    outline: 1px solid green;
     flex-grow: 1;
     width: 100vw;
     display: flex;
     flex-direction: row;
+    position: relative;
     & > div {
-      flex-grow: 1;
+      flex-grow: 0;
+    }
+    .handle {
+      cursor: ew-resize;
     }
   }
   .etherpad-holder {
