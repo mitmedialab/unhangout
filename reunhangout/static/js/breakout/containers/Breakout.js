@@ -297,6 +297,18 @@ class Breakout extends React.Component {
     }
   }
 
+  componentDidMount() {
+    this.boundResizeOnMouseUp = this.resizeOnMouseUp.bind(this);
+    this.boundResizeOnMouseMove = this.resizeOnMouseMove.bind(this);
+    document.addEventListener('mouseup', this.boundResizeOnMouseUp, false);
+    document.addEventListener('mousemove', this.boundResizeOnMouseMove, false);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('mouseup', this.boundResizeOnMouseUp, false);
+    document.removeEventListener('mousemove', this.boundResizeOnMouseMove, false);
+  }
+
   handleDisconnectOthers(event) {
     event && event.preventDefault();
     this.props.disconnectOthers();
@@ -304,6 +316,8 @@ class Breakout extends React.Component {
 
   resizeOnMouseDown(event) {
     this.setState({dragging: true});
+    this.videoDiv.style.pointerEvents = 'none';
+    this.etherpadDiv.style.pointerEvents = 'none';
   }
 
   resizeOnMouseMove(event) {
@@ -317,6 +331,8 @@ class Breakout extends React.Component {
 
   resizeOnMouseUp(event) {
     this.setState({dragging: false});
+    this.videoDiv.style.pointerEvents = 'auto';
+    this.etherpadDiv.style.pointerEvents = 'auto';
   }
 
   render() {
@@ -354,19 +370,6 @@ class Breakout extends React.Component {
 
     return <div className='breakout-detail' onMouseMove={this.resizeOnMouseMove.bind(this)}>
       {/* Utility div to capture drag events when we're over iframes. */}
-      <div onMouseMove={this.resizeOnMouseMove.bind(this)}
-           onMouseUp={this.resizeOnMouseUp.bind(this)}
-           style={{
-             backgroundColor: 'transparent',
-             position: 'absolute',
-             width: '100vw',
-             height: '100vh',
-             left: '0',
-             top: '0',
-             cursor: 'ew-resize',
-             zIndex: this.state.dragging ? 100000 : -1,
-           }} />
-
       <ConnectionStatus />
       <WebRTCStatus />
       {this.props.breakoutMessages.length > 0 ?
@@ -394,17 +397,16 @@ class Breakout extends React.Component {
           </button>
         </div>
         <div className='interaction' ref={(el) => this.interactionDiv = el}>
-          <div className='video' style={videoStyle}>
+          <div className='video' style={videoStyle} ref={(el) => this.videoDiv = el}>
             { errorMessage ? <div className='container'>{errorMessage}</div> : "" }
             <JitsiVideo {...this.props} hide={!!errorMessage} />
           </div>
           {this.state.showEtherpad ? [
             <div className='handle' key='1' style={handleStyle}
                  onMouseDown={this.resizeOnMouseDown.bind(this)}
-                 onMouseUp={this.resizeOnMouseUp.bind(this)}
-                 onMouseMove={this.resizeOnMouseMove.bind(this)}
             />,
-            <div className='etherpad' key='2' style={etherpadStyle}>
+            <div className='etherpad' key='2' style={etherpadStyle}
+                 ref={(el) => this.etherpadDiv = el}>
               <Etherpad id={this.props.breakout.etherpad_id}
                         server={this.props.settings.ETHERPAD_SERVER}
                         auth={this.props.auth} />
