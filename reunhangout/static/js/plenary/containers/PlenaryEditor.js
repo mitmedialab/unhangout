@@ -8,12 +8,30 @@ import {RelativeTime} from './RelativeTime';
 import {ImageInput} from './ImageInput';
 
 export class PlenaryEditor extends React.Component {
+  static propTypes = {
+    plenary: React.PropTypes.object,
+    settings: React.PropTypes.object,
+    onChange: React.PropTypes.func.isRequired,
+    loading: React.PropTypes.bool,
+  }
+  static defaultProps = {
+    plenary: {
+      doors_open: moment().subtract(30, 'minutes').format(),
+      start_date: moment().format(),
+      end_date: moment().add(90, 'minutes').format(),
+      doors_close: moment().add(120, 'minutes').format(),
+      "public": false,
+    },
+    loading: false
+  }
+
   constructor(props) {
     super(props);
     this.plenarySettingsFields = [
       'name', 'organizer', 'start_date', 'end_date', 'doors_open',
       'doors_close', 'description', 'slug', 'public', 'image',
-      'canceled', 'copy_from_id', 'jitsi_server', 'wrapup_emails'
+      'canceled', 'copy_from_id', 'jitsi_server', 'wrapup_emails',
+      'etherpad_initial_text',
     ];
     this.plenarySettingsFieldsRequired = ['name', 'slug'];
   }
@@ -37,6 +55,11 @@ export class PlenaryEditor extends React.Component {
   plenaryPropsToState(props) {
     let update = {};
     this.plenarySettingsFields.forEach((f) => update[f] = props.plenary[f]);
+    if (!this.props.plenary.id && !this.props.plenary.etherpad_initial_text) {
+      // can't put this in defaultProps because it depends on settings, which
+      // is a non-default prop
+      update.etherpad_initial_text = this.props.settings.ETHERPAD_DEFAULT_TEXT;
+    }
     this.setState(update);
     if (props.copyFromId) {
       this.setCopyFrom({target: {value: props.copyFromId}});
@@ -64,6 +87,17 @@ export class PlenaryEditor extends React.Component {
         { type === "text" ?
             <BS.FormControl
               type={type}
+              value={this.state[stateName] || ""}
+              onChange={(e) => this.setState({
+                [stateName]: e.target.value,
+                [`${stateName}-error`]: ''
+              })}
+              {...props} />
+
+          : type === "textarea" ?
+
+            <BS.FormControl
+              componentClass='textarea'
               value={this.state[stateName] || ""}
               onChange={(e) => this.setState({
                 [stateName]: e.target.value,
@@ -337,6 +371,9 @@ export class PlenaryEditor extends React.Component {
                                 {help: "List event on the public events calendar"})}
             {this.renderControl("URL", "slug", "slug")}
             {this.renderControl("Breakout server", "jitsi_server", "jitsi_server")}
+            {this.renderControl("Initial etherpad text", "etherpad_initial_text",
+              "textarea", {help: "Default text for etherpads in breakouts."})}
+
             {this.props.plenary.id ?
               this.renderControl("Cancel event", "canceled", "checkbox",
                                  {help: "Mark event as canceled?"})
@@ -357,21 +394,4 @@ export class PlenaryEditor extends React.Component {
       </BS.Form>
     )
   }
-}
-
-PlenaryEditor.propTypes = {
-  plenary: React.PropTypes.object,
-  settings: React.PropTypes.object,
-  onChange: React.PropTypes.func.isRequired,
-  loading: React.PropTypes.bool,
-}
-PlenaryEditor.defaultProps = {
-  plenary: {
-    doors_open: moment().subtract(30, 'minutes').format(),
-    start_date: moment().format(),
-    end_date: moment().add(90, 'minutes').format(),
-    doors_close: moment().add(120, 'minutes').format(),
-    "public": false,
-  },
-  loading: false
 }

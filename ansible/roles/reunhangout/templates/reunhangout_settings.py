@@ -45,3 +45,4 @@ for name, keys in ALLAUTH_APP_KEYS.items():
 #}
 
 ETHERPAD_SERVER = "{{etherpad_domain}}"
+ETHERPAD_API_KEY = "{{etherpad_api_key}}"

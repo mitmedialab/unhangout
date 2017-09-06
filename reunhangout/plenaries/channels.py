@@ -234,9 +234,14 @@ def handle_breakout(message, data, plenary):
             return admin_required_error()
         if 'title' not in payload:
             return handle_error(message, "Missing 'title'")
+        if is_admin:
+            etherpad_initial_text = payload.get('etherpad_initial_text', '')
+        else:
+            etherpad_initial_text = None
         breakout = Breakout(
             plenary=plenary,
             title=payload['title'],
+            etherpad_initial_text=etherpad_initial_text,
             max_attendees=payload.get('max_attendees') or 10,
             is_proposal=(not is_admin or payload.get('is_proposal', False)),
             proposed_by=message.user
@@ -342,7 +347,7 @@ def _b64_image_to_uploaded_file(b64data):
 PLENARY_SIMPLE_UPDATE_KEYS = (
     'random_max_attendees', 'breakout_mode', 'name', 'organizer', 'start_date',
     'end_date', 'doors_open', 'doors_close', 'breakouts_open', 'canceled',
-    'slug', 'public', 'jitsi_server', 'wrapup_emails',
+    'slug', 'public', 'jitsi_server', 'wrapup_emails', 'etherpad_initial_text'
 )
 PLENARY_SANITIZED_KEYS = (
     'whiteboard', 'description'

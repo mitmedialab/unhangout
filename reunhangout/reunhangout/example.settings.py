@@ -23,3 +23,7 @@ ALLAUTH_APP_KEYS['google']['secret'] = ''
 for name, keys in ALLAUTH_APP_KEYS.items():
     if keys['client_id']:
         INSTALLED_APPS.append('allauth.socialaccount.providers.%s' % name)
+
+ETHERPAD_SERVER = "etherpad.unhangout.io"
+ETHERPAD_API_KEY = "... override me ..."
+ETHERPAD_DEFAULT_TEXT = "Welcome to the breakout! Use this space for notes or ideas."

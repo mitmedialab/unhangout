@@ -1,3 +1,6 @@
+import logging
+import requests
+
 from django.db import models
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -11,6 +14,8 @@ from jsonfield import JSONField
 from richtext.utils import sanitize
 from reunhangout.utils import random_webrtc_id
 
+logger = logging.getLogger('request')
+
 class Breakout(models.Model):
     title = models.CharField(max_length=80, default="", blank=True)
     slug = models.SlugField(blank=True)
@@ -21,6 +26,8 @@ class Breakout(models.Model):
     ])
     activities = JSONField(blank=True, null=True)
     history = JSONField(blank=True, null=True)
+
+    etherpad_initial_text = models.TextField(default=None, blank=True, null=True)
 
     plenary = models.ForeignKey('plenaries.Plenary',
             on_delete=models.CASCADE,
@@ -55,6 +62,10 @@ class Breakout(models.Model):
     def channel_group_name(self):
         return self.channel_group_name_from_id(self.pk)
 
+    @property
+    def etherpad_id(self):
+        return self.webrtc_id
+
     @classmethod
     def id_from_channel_group_name(cls, channel_group_name):
         if channel_group_name.startswith("breakout-"):
@@ -79,6 +90,30 @@ class Breakout(models.Model):
     def get_absolute_url(self):
         return reverse("breakout_detail", args=[self.pk])
 
+    def get_initial_etherpad_text(self):
+        if self.etherpad_initial_text is not None:
+            return self.etherpad_initial_text
+        if self.plenary and self.plenary.etherpad_initial_text is not None:
+            return self.plenary.etherpad_initial_text
+        return settings.ETHERPAD_DEFAULT_TEXT
+
+    def create_etherpad(self):
+        data = {
+            'apikey': settings.ETHERPAD_API_KEY,
+            'padID': self.etherpad_id,
+            'text': self.get_initial_etherpad_text()
+        }
+        url = "https://{server}/api/1/createPad".format(
+            server=settings.ETHERPAD_SERVER,
+        )
+        res = requests.get(url, data)
+        if res.status_code != 200:
+            logger.error("{} status {}: {}".format(
+                url,
+                res.status_code,
+                res.text
+            ))
+
     def serialize(self):
         if self.is_proposal:
             votes = [v.id for v in self.votes.all()]
@@ -93,11 +128,20 @@ class Breakout(models.Model):
         else:
             jitsi_server = settings.JITSI_SERVERS[0]
 
+        etherpad_initial_text = self.get_initial_etherpad_text()
+        etherpad_start_open = (
+            etherpad_initial_text and
+            etherpad_initial_text != settings.ETHERPAD_DEFAULT_TEXT
+        )
+
         return {
             'id': self.id,
             'title': self.title,
             'slug': self.slug,
             'webrtc_id': self.webrtc_id,
+            'etherpad_id': self.etherpad_id,
+            'etherpad_initial_text': etherpad_initial_text,
+            'etherpad_start_open': etherpad_start_open,
             'url': self.get_absolute_url(),
             'description': self.safe_description(),
             'max_attendees': self.max_attendees,
@@ -113,9 +157,14 @@ class Breakout(models.Model):
         }
 
     def save(self, *args, **kwargs):
+        is_new = not self.pk
+
         if not self.slug:
             self.slug = '{}-{}'.format(slugify(self.title), self.pk)
         super(Breakout, self).save(*args, **kwargs)
+
+        if is_new:
+            self.create_etherpad()
 
     def __str__(self):
         return self.title

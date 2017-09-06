@@ -25,6 +25,9 @@ class Series(models.Model):
         verbose_name = _("Series")
         verbose_name_plural = _("Series")
 
+def get_etherpad_default_text():
+    return settings.ETHERPAD_DEFAULT_TEXT
+
 # Create your models here.
 class Plenary(models.Model):
     series = models.ForeignKey(Series, on_delete=models.CASCADE, blank=True, null=True)
@@ -51,9 +54,15 @@ class Plenary(models.Model):
     public = models.BooleanField(default=False,
         help_text=_("Check to display this plenary on the public events list"))
     description = models.TextField(default="", blank=True,)
+
     whiteboard = models.TextField(
         default="Welcome to our unhangout! Say hi 👋 in the chat.",
         blank=True)
+
+    etherpad_initial_text = models.TextField(
+        default=get_etherpad_default_text,
+        blank=True, null=True)
+
     breakout_mode = models.CharField(max_length=20, choices=(
         ("admin", _("Admin controlled")),
         ("user", _("Participant proposed")),
@@ -101,30 +110,31 @@ class Plenary(models.Model):
 
     def serialize(self):
         return {
-            'id': self.id,
-            'name': self.name,
-            'slug': self.slug,
-            'url': self.get_absolute_url(),
-            'organizer': self.organizer,
-            'image': self.image.url if self.image else None,
-            'start_date': self.start_date.isoformat(),
-            'end_date': self.end_date.isoformat(),
-            'doors_open': self.doors_open.isoformat(),
-            'doors_close': self.doors_close.isoformat(),
-            'canceled': self.canceled,
-            'time_zone': str(self.time_zone),
-            'public': self.public,
-            'description': self.safe_description(),
-            'whiteboard': self.safe_whiteboard(),
-            'breakout_mode': self.breakout_mode,
-            'embeds': self.embeds,
-            'history': self.history,
-            'open': self.open,
-            'breakouts_open': self.breakouts_open,
             'admins': list(self.admins.values_list('id', flat=True)),
+            'breakout_mode': self.breakout_mode,
+            'breakouts_open': self.breakouts_open,
+            'canceled': self.canceled,
+            'description': self.safe_description(),
+            'doors_close': self.doors_close.isoformat(),
+            'doors_open': self.doors_open.isoformat(),
+            'embeds': self.embeds,
+            'end_date': self.end_date.isoformat(),
+            'etherpad_initial_text': self.etherpad_initial_text,
+            'history': self.history,
+            'id': self.id,
+            'image': self.image.url if self.image else None,
             'live_participants': list(self.live_participants.values_list('id', flat=True)),
+            'name': self.name,
+            'open': self.open,
+            'organizer': self.organizer,
+            'public': self.public,
+            'slug': self.slug,
+            'start_date': self.start_date.isoformat(),
+            'time_zone': str(self.time_zone),
+            'url': self.get_absolute_url(),
             'video_sync_id': self.channel_group_name,
             'webrtc_id': self.webrtc_id,
+            'whiteboard': self.safe_whiteboard(),
             'wrapup_emails': self.wrapup_emails,
         }
 

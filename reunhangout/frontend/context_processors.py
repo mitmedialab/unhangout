@@ -15,6 +15,7 @@ def public_settings(request):
             'MEDIA_URL': settings.MEDIA_URL,
             'JITSI_SERVERS': settings.JITSI_SERVERS,
             'ETHERPAD_SERVER': settings.ETHERPAD_SERVER,
+            'ETHERPAD_DEFAULT_TEXT': settings.ETHERPAD_DEFAULT_TEXT,
         },
         # available as context processor for Django templates. (not duplicate)
         'branding': settings.BRANDING,

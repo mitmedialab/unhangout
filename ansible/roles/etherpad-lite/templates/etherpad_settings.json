@@ -67,7 +67,7 @@
     "rtl": false,
     "alwaysShowChat": false,
     "chatAndUsers": false,
-    "lang": "en-gb"
+    "lang": "en-us"
   },
 
   /* Should we suppress errors from being visible in the default Pad Text? */
@@ -77,7 +77,7 @@
   "requireSession" : false,
 
   /* Users may edit pads but not create new ones. Pad creation is only via the API. This applies both to group pads and regular pads. */
-  "editOnly" : false,
+  "editOnly" : true,
 
   /* Users, who have a valid session, automatically get granted access to password protected pads */
   "sessionNoPassword" : false,

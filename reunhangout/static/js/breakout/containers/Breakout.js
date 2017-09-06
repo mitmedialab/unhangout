@@ -289,7 +289,7 @@ class Presence extends React.Component {
 class Breakout extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {showEtherpad: false}
+    this.state = {showEtherpad: props.breakout.etherpad_start_open}
   }
 
   handleDisconnectOthers(event) {
@@ -353,7 +353,7 @@ class Breakout extends React.Component {
           </div>
           {this.state.showEtherpad ?
             <div className='etherpad'>
-              <Etherpad id={this.props.breakout.webrtc_id}
+              <Etherpad id={this.props.breakout.etherpad_id}
                         server={this.props.settings.ETHERPAD_SERVER}
                         auth={this.props.auth} />
             </div>

@@ -16,10 +16,14 @@ class BreakoutList extends React.Component {
       "breakout_mode": this.props.plenary.breakout_mode,
       "max_attendees": 6,
       "random_max_attendees": this.props.plenary.random_max_attendees || 10,
+      "etherpad_initial_text": this.props.plenary.etherpad_initial_text,
     }
   }
-  componentWillReceiveNewProps(newProps) {
-    this.setState({"breakout_mode": newProps.plenary.breakout_mode})
+  componentWillReceiveProps(newProps) {
+    this.setState({
+      "breakout_mode": newProps.plenary.breakout_mode,
+      "etherpad_initial_text": newProps.plenary.etherpad_initial_text,
+    })
   }
   handleCreateBreakout(event, isProposal) {
     event.preventDefault();
@@ -43,6 +47,7 @@ class BreakoutList extends React.Component {
       action: "create",
       title: this.state.title,
       max_attendees: this.state.max_attendees,
+      etherpad_initial_text: this.state.etherpad_initial_text,
       is_proposal: isProposal,
     });
     this.setState({
@@ -263,6 +268,22 @@ class BreakoutList extends React.Component {
                   : "Minimum 2, Maximum 10" }
               </BS.HelpBlock>
             </BS.FormGroup>
+            {this.props.auth.is_admin ?
+              <BS.FormGroup
+                className='non-margined'
+                controlId='etherpad-initial-text'
+                validationState={
+                  this.state['etherpad_initial_text-error'] ? 'error' : undefined
+                }
+              >
+                <BS.ControlLabel>Etherpad initial text</BS.ControlLabel>
+                <BS.FormControl
+                  componentClass='textarea'
+                  rows={6}
+                  value={this.state.etherpad_initial_text}
+                  onChange={(e) => this.setState({etherpad_initial_text: e.target.value})} />
+              </BS.FormGroup>
+            : null}
           </div>,
           breakout_mode === "user" ? "Propose Breakout" : "Create Breakout",
           (e) => this.handleCreateBreakout(e, breakout_mode === "user")

@@ -47,9 +47,10 @@ def plenary_detail(request, id_or_slug):
         if (num_present + 1) > plenary.max_participants:
             return render(request, "plenaries/over_capacity.html", {'plenary': plenary})
 
-    # Minimum fields to render the signed out plenary view.
-    data = {
-        'plenary': {
+    data = {}
+    if not request.user.is_authenticated:
+        # Minimum fields to render the signed out plenary view.
+        data['plenary'] = {
             'id': plenary.id,
             'name': plenary.name,
             'slug': plenary.slug,
@@ -67,21 +68,9 @@ def plenary_detail(request, id_or_slug):
             'open': plenary.open,
             'breakouts_open': plenary.breakouts_open,
         }
-    }
-
-    # If authenticated, fetch full fields.
-    if request.user.is_authenticated:
-        data['plenary'].update({
-            'whiteboard': plenary.safe_whiteboard(),
-            'breakout_mode': plenary.breakout_mode,
-            'embeds': plenary.embeds,
-            'history': plenary.history,
-            'admins': list(plenary.admins.values_list('id', flat=True)),
-            'live_participants': list(plenary.live_participants.values_list('id', flat=True)),
-            'video_sync_id': plenary.channel_group_name,
-            'webrtc_id': plenary.webrtc_id,
-            'wrapup_emails': plenary.wrapup_emails,
-        })
+    else:
+        # If authenticated, fetch full fields.
+        data['plenary'] = plenary.serialize()
         breakouts = Breakout.objects.filter(
             plenary=plenary).select_related().prefetch_related('votes', 'members')
         data['breakouts'] = [b.serialize() for b in plenary.breakout_set.all()]

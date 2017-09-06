@@ -232,4 +232,5 @@ JITSI_SERVERS = [
     'jitsi.unhangout.io',
 ]
 ETHERPAD_SERVER = "etherpad.unhangout.io"
-
+ETHERPAD_API_KEY = "... override me ..."
+ETHERPAD_DEFAULT_TEXT = "Welcome to the breakout! Use this space for notes or ideas."
