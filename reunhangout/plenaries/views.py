@@ -79,7 +79,8 @@ def plenary_detail(request, id_or_slug):
             'admins': list(plenary.admins.values_list('id', flat=True)),
             'live_participants': list(plenary.live_participants.values_list('id', flat=True)),
             'video_sync_id': plenary.channel_group_name,
-            'webrtc_id': plenary.webrtc_id
+            'webrtc_id': plenary.webrtc_id,
+            'wrapup_emails': plenary.wrapup_emails,
         })
         breakouts = Breakout.objects.filter(
             plenary=plenary).select_related().prefetch_related('votes', 'members')

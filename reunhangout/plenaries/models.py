@@ -39,6 +39,11 @@ class Plenary(models.Model):
     doors_open  = models.DateTimeField(help_text=_("When should the lobby be opened, allowing participants to chat before the event?"))
     end_date    = models.DateTimeField(help_text=_("When will the event end?"))
     doors_close = models.DateTimeField(help_text=_("When should the lobby be closed, ending chat?"))
+    wrapup_emails = models.BooleanField(default=False, help_text=_(
+        "Enable wrap-up emails? Enabling will require participants "
+        "to set their contact preferences. Wrap-up emails can only "
+        "be initiated by Unhangout staff."
+    ))
     canceled = models.BooleanField(default=False)
 
     time_zone = TimeZoneField(default='America/New_York',
@@ -120,7 +125,9 @@ class Plenary(models.Model):
             'live_participants': list(self.live_participants.values_list('id', flat=True)),
             'video_sync_id': self.channel_group_name,
             'webrtc_id': self.webrtc_id,
+            'wrapup_emails': self.wrapup_emails,
         }
+
 
     def associated_users(self):
         """

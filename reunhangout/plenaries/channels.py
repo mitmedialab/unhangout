@@ -20,10 +20,13 @@ from channels_presence.decorators import touch_presence, remove_presence
 from plenaries.models import Plenary, ChatMessage
 from breakouts.models import Breakout
 from videosync.models import VideoSync
-from reunhangout.channels_utils import broadcast, handle_error, require_payload_keys
+from reunhangout.channels_utils import (
+    broadcast, handle_error, require_payload_keys, prepare_message
+)
 from reunhangout.utils import json_dumps
 from analytics.models import track
 from django.contrib.auth import get_user_model
+from accounts.utils import serialize_auth_state
 
 User = get_user_model()
 
@@ -94,8 +97,8 @@ def route_message(message, data, plenary):
         handle_breakout(message, data, plenary)
     elif data['type'] == "plenary":
         handle_plenary(message, data, plenary)
-    elif data['type'] == "auth":
-        handle_auth(message, data, plenary)
+    elif data['type'] == "contact_card":
+        handle_contact_card(message, data, plenary)
     elif data['type'] == 'videosync':
         handle_video_sync(message, data, plenary)
     elif data['type'] == "message_breakouts":
@@ -339,7 +342,7 @@ def _b64_image_to_uploaded_file(b64data):
 PLENARY_SIMPLE_UPDATE_KEYS = (
     'random_max_attendees', 'breakout_mode', 'name', 'organizer', 'start_date',
     'end_date', 'doors_open', 'doors_close', 'breakouts_open', 'canceled',
-    'slug', 'public', 'jitsi_server',
+    'slug', 'public', 'jitsi_server', 'wrapup_emails',
 )
 PLENARY_SANITIZED_KEYS = (
     'whiteboard', 'description'
@@ -493,11 +496,15 @@ def handle_remove_live_participant(message, data, plenary):
 
 
 @require_payload_keys([])
-def handle_auth(message, data, plenary):
+def handle_contact_card(message, data, plenary):
     payload = data['payload']
 
     user = message.user
-    for key in ['email', 'twitter_handle', 'linkedin_profile', 'share_info']:
+    keys = [
+        'receive_wrapup_emails', 'email', 'contact_card_email',
+        'contact_card_twitter',
+    ]
+    for key in keys:
         if key in payload:
             setattr(user, key, payload[key])
 
@@ -505,9 +512,23 @@ def handle_auth(message, data, plenary):
         user.full_clean()
     except ValidationError as e:
         return handle_error(message, json_dumps(e.message_dict))
-
     user.save()
-    track("change_auth", message.user, plenary=plenary)
+
+    track("change_contact_card", message.user, plenary=plenary)
+
+    message.reply_channel.send(prepare_message(
+        type="auth",
+        payload=serialize_auth_state(user, plenary)
+    ))
+
+    for room in Room.objects.filter(
+            presence__user__id=user.id).distinct():
+        broadcast(
+            room.channel_name,
+            type="users",
+            payload={user.id: user.serialize_public()}
+        )
+
 
 @require_payload_keys(['action'])
 def handle_video_sync(message, data, plenary):

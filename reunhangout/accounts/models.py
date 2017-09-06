@@ -40,6 +40,8 @@ def serialize_public(user):
             'username': user.username,
             'display_name': user.get_display_name(),
             'image': user.get_profile_image(),
+            'contact_card_twitter': user.contact_card_twitter,
+            'contact_card_email': user.contact_card_email,
         }
 
 def user_display(user):
@@ -56,13 +58,16 @@ class User(AbstractBaseUser, PermissionsMixin):
     profile_image = models.ImageField(upload_to="profile_images",
             blank=True, null=True)
 
-    # TODO: Do something else with these
-    twitter_handle = models.CharField(max_length=100, blank=True, null=True,
-            unique=True, default=None)
-    linkedin_profile = models.CharField(max_length=100, blank=True, null=True,
-            unique=True, default=None)
-    share_info = models.BooleanField(default=True)
+    # Wrap up email details
+    receive_wrapup_emails = models.NullBooleanField(null=True,
+            help_text=_("Receive wrap-up emails after events?"))
+    contact_card_email = models.EmailField(blank=True, null=True,
+            help_text=_("Shared with co-participants in events"))
+    contact_card_twitter = models.CharField(max_length=100, blank=True, null=True,
+            unique=True, default=None,
+            help_text=_("Shared with co-participants in events"))
 
+    # Account management
     is_staff = models.BooleanField(
         _('staff status'),
         default=False,
@@ -92,8 +97,14 @@ class User(AbstractBaseUser, PermissionsMixin):
         super().clean()
         if self.email:
             self.email = UserManager.normalize_email(self.email)
-        if self.twitter_handle:
-            self.twitter_handle = self.twitter_handle.lower()
+        if self.contact_card_email:
+            self.contact_card_email = UserManager.normalize_email(
+                    self.contact_card_email)
+        if self.contact_card_twitter:
+            handle = self.contact_card_twitter.lower()
+            if not handle.startswith('@'):
+                handle = '@' + handle
+            self.contact_card_twitter = handle
 
     def serialize_public(self):
         return serialize_public(self)

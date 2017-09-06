@@ -21,21 +21,16 @@ class Plenary extends React.Component {
     super()
     this.state = {
       alertVisible: true,
-      contactInfoModalOpen: false,
     }
   }
   handleAlertDismiss() {
     this.setState({alertVisible: false})
   }
-  handleSubmitContact(event) {
-    event.preventDefault();
-    this.props.onSendAuthDetails({
-      email: this.state.email,
-      twitter_handle: this.state.twitter_handle,
-      linkedin_profile: this.state.linkedin_profile,
-      share_info: this.state.share_info,
-    });
-    this.setState({contactInfoModalOpen: false})
+  showContactInfoModal() {
+    return (
+      this.props.plenary.wrapup_emails &&
+      this.props.auth.receive_wrapup_emails === null
+    )
   }
   isOpen() {
     let now = moment();
@@ -62,6 +57,10 @@ class Plenary extends React.Component {
         document.location.href = `/accounts/login/?next=${encodeURIComponent(document.location.pathname)}`;
       }
       return <div className='plenary open'>
+        <ContactInfoModal auth={this.props.auth}
+                          show={this.showContactInfoModal()}
+                          onChange={this.props.updateContactCard.bind(this)} />
+
         <WebRTCStatus />
         <ConnectionStatus />
         <div className='plenary-grid'>
@@ -172,6 +171,182 @@ class Plenary extends React.Component {
   }
 }
 
+class ContactInfoModal extends React.Component {
+  static propTypes = {
+    onChange: React.PropTypes.func.isRequired,
+    auth: React.PropTypes.object.isRequired,
+  }
+  constructor(props) {
+    super(props);
+    this.contactInfoFields = [
+      'email', 'receive_wrapup_emails', 'contact_card_email',
+      'contact_card_twitter'
+    ];
+    this.state = {
+      errors: {}
+    }
+    this.contactInfoFields.forEach(field => (
+      this.state[field] = this.props.auth[field]
+    ));
+    if (this.state.receive_wrapup_emails === null) {
+      this.state.receive_wrapup_emails = true;
+    }
+    if (!this.state.contact_card_email && this.props.auth.email) {
+      this.state.contact_card_email = this.props.auth.email;
+    }
+  }
+
+  errors(state) {
+    state = state || this.state;
+    const errors = {};
+    if (state.receive_wrapup_emails && !state.email) {
+      errors.email = "Email is required if you want to receive one.";
+    } else if (state.email && !/^.+@.+$/.test(state.email)) {
+      errors.email = "Hmm, that doesn't look like an email address.";
+    } else if (state.contact_card_email && !/^.+@.+$/.test(state.contact_card_email)) {
+      errors.contact_card_email = "Hmm, that doesn't look like an email address.";
+    } else if (state.contact_card_twitter && !/^@?\S+$/.test(state.contact_card_twitter)) {
+      errors.contact_card_twitter = "Hmmm, that doesn't look like a twitter handle.";
+    }
+    if (_.size(errors) === 0) {
+      return false;
+    }
+    return errors;
+  }
+
+  onSubmit(event) {
+    event && event.preventDefault();
+    const errors = this.errors();
+    if (errors) {
+      this.setState(errors);
+    } else {
+      this.setState({loading: true});
+      const update = {};
+      this.contactInfoFields.forEach(
+        field => update[field] = this.state[field]
+      )
+      this.props.onChange(update);
+    }
+  }
+
+  setValue(key, val) {
+    const update = {
+      [key]: val,
+    };
+    update.errors = this.errors({...this.state, ...update});
+    this.setState(update);
+  }
+
+  renderFormControl(key, type, label, help) {
+    let value = this.state[key];
+    return (
+      <BS.FormGroup controlId={`contact-info-${key}`}
+        validationState={this.state.errors[key] ? 'error' : undefined}>
+        {type !== "checkbox" && label ?
+          <BS.ControlLabel>{label}</BS.ControlLabel>
+        : null}
+        {type === "text" || type === "email" ?
+          <BS.FormControl
+            type={type}
+            label={label || undefined}
+            placeholder={label}
+            value={value || ""}
+            onChange={(e) => this.setValue(key, e.target.value)} />
+        : type === "checkbox" ?
+          <BS.Checkbox
+              checked={!!value}
+              onChange={(e) => this.setValue(key, e.target.checked)}>
+            {label}
+          </BS.Checkbox>
+        : `Unhandled type ${type}`}
+
+        {this.state.errors[key] ?
+          <BS.HelpBlock>{this.state.errors[key]}</BS.HelpBlock>
+        : null}
+        {help ?
+          <BS.HelpBlock>{help}</BS.HelpBlock>
+        : null}
+      </BS.FormGroup>
+    )
+  }
+
+  render() {
+    return (
+      <BS.Modal show={this.props.show} backdrop="static">
+        <form onSubmit={this.onSubmit.bind(this)}>
+          <BS.Modal.Header>
+            <BS.Modal.Title>Contact Info</BS.Modal.Title>
+          </BS.Modal.Header>
+          <BS.Modal.Body>
+            <p>
+              <b>
+                The moderators of this event would like to introduce you to
+                other participants when the event is over.
+              </b>
+            </p>
+            {this.renderFormControl(
+              "receive_wrapup_emails",
+              "checkbox",
+              <span>
+                Receive wrap-up emails for unhangout events.{' '}
+                {this.props.auth.email ?
+                  <span>
+                    Emails will be sent to {this.props.auth.email}.{' '}
+                    (<a href='/accounts/settings/email'>change</a>)
+                  </span>
+                : null}
+              </span>,
+              null,
+              true
+            )}
+            {!this.props.auth.email ?
+              this.renderFormControl(
+                "email",
+                "email",
+                "Account email",
+                "Email address for account management. Not shared with other participants."
+              )
+            : null}
+
+            <div className='contact-card-form'>
+              <h3>Contact Card</h3>
+              <p>This contact info will be shared with other participants.</p>
+              <p>
+                Name:{' '}
+                <b>{this.props.auth.display_name}</b>{' '}
+                (<a href='/accounts/settings/account'>change</a>)
+              </p>
+              {this.renderFormControl(
+                "contact_card_email",
+                "email",
+                "Email",
+                "Optional. Shared with co-participants in unhangouts."
+              )}
+              {this.renderFormControl(
+                "contact_card_twitter",
+                "text",
+                "Twitter",
+                "Optional. Shared with co-participants in unhangouts.",
+              )}
+            </div>
+          </BS.Modal.Body>
+          <BS.Modal.Footer>
+            <BS.Button bsStyle='primary' type='submit'
+                disabled={!!this.errors() || this.state.loading}>
+              { this.state.loading ?
+                <i className='fa fa-spinner fa-spin' />
+              :
+                "Save"
+              }
+            </BS.Button>
+          </BS.Modal.Footer>
+        </form>
+      </BS.Modal>
+    )
+  }
+}
+
+
 export default connect(
   // map state to props
   (state) => ({
@@ -182,7 +357,7 @@ export default connect(
   }),
   // map dispatch to props
   (dispatch, ownProps) => ({
-    onSendAuthDetails: (payload) => dispatch(A.sendAuthDetails(payload)),
+    updateContactCard: (payload) => dispatch(A.updateContactCard(payload)),
 
   })
 )(Plenary);

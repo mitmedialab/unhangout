@@ -86,13 +86,19 @@ export class SocketClient {
       case "breakout_presence":
         this.store.dispatch(PLENARY_ACTIONS.setBreakoutPresence(data.payload));
         break;
+      case "live_participants":
+        this.store.dispatch(PLENARY_ACTIONS.setLiveParticipants(data.payload));
+        break;
+      case "users":
+        this.store.dispatch(PLENARY_ACTIONS.setUsers(data.payload));
+        break;
+      case "auth":
+        this.store.dispatch(PLENARY_ACTIONS.setAuth(data.payload));
+        break;
       case "error":
         let error = data.error ? data.error : data;
         alert(`Server error: ${error}`);
         console.error(error);
-        break;
-      case "live_participants":
-        this.store.dispatch(PLENARY_ACTIONS.setLiveParticipants(data.payload));
         break;
       default:
         console.log("transport.js: Unhandled message:", data);

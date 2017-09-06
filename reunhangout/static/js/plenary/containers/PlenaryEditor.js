@@ -13,7 +13,7 @@ export class PlenaryEditor extends React.Component {
     this.plenarySettingsFields = [
       'name', 'organizer', 'start_date', 'end_date', 'doors_open',
       'doors_close', 'description', 'slug', 'public', 'image',
-      'canceled', 'copy_from_id', 'jitsi_server'
+      'canceled', 'copy_from_id', 'jitsi_server', 'wrapup_emails'
     ];
     this.plenarySettingsFieldsRequired = ['name', 'slug'];
   }
@@ -327,6 +327,11 @@ export class PlenaryEditor extends React.Component {
             {this.renderControl("Doors open", "doors_open", "before_start_date")}
             {this.renderControl("Event duration", "end_date", "after_start_date")}
             {this.renderControl("Doors close", "doors_close", "after_end_date")}
+            {this.renderControl("Wrapup emails", "wrapup_emails", "checkbox", {
+              help: "Enable wrap-up emails? Enabling will require participants " +
+                "to set contact preferences. Emails can only be sent by " +
+                "Unhangout staff."
+            })}
             {this.renderControl("Description", "description", "richtext")}
             {this.renderControl("Public calendar", "public", "checkbox",
                                 {help: "List event on the public events calendar"})}

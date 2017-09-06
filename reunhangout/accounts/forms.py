@@ -21,35 +21,17 @@ class AccountSettingsForm(forms.ModelForm):
         def render_profile_image(self, name, value, attrs=None):
             template = (
                 '<a href="%(initial_url)s" target="_blank" rel="noopener noreferrer">'
-                  '%(initial)s'
+                  '<img src="%(initial_url)s" alt="Profile image"'
+                      ' style="width: 64px" />'
                 '</a> '
-                '%(clear_template)s<br />%(input_text)s: %(input)s'
+                '<br />'
+                '%(input)s'
             )
 
             context = {
-                'input_text': self.input_text,
-                'clear_template': '',
-                'clear_checkbox_label': self.clear_checkbox_label,
                 'input': forms.widgets.Input.render(self, name, value, attrs),
-                'initial_url': current_image,
-                'initial': '<img src="%s" alt="Profile image" style="width: 64px" />' % (
-                    escape(current_image),
-                )
+                'initial_url': escape(current_image),
             }
-
-            # Image is not clearable unless it is explicitly set (social image
-            # is always used if not explicitly set).
-            if value and hasattr(value, "url"):
-                checkbox_name = self.clear_checkbox_name(name)
-                checkbox_id = self.clear_checkbox_id(checkbox_name)
-                context.update({
-                    'clear_checkbox_name': conditional_escape(name),
-                    'clear_checkbox_id': conditional_escape(checkbox_name),
-                    'clear': forms.widgets.CheckboxInput().render(
-                        checkbox_name, False, attrs={'id': checkbox_id}
-                    ),
-                })
-                context['clear_template'] = self.template_with_clear % context
 
             return mark_safe(template % context)
 
@@ -68,4 +50,7 @@ class AccountSettingsForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ['username', 'display_name', 'profile_image']
+        fields = [
+                'username', 'display_name', 'profile_image',
+                'receive_wrapup_emails', 'contact_card_email', 'contact_card_twitter',
+        ]

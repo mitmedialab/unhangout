@@ -178,19 +178,26 @@ export const adminArchiveChatMessages = (payload) => {
 }
 
 // Auth details
-export const AUTH_DETAILS_SENDING = 'AUTH_DETAILS_SENDING';
-export const AUTH_DETAILS_SENT = 'AUTH_DETAILS_SENT';
-export const AUTH_DETAILS_ERROR = 'AUTH_DETAILS_ERROR';
-export const sendAuthDetails = (payload) => {
+export const CONTACT_CARD_SENDING = 'CONTACT_CARD_SENDING';
+export const CONTACT_CARD_SENT = 'CONTACT_CARD_SENT';
+export const CONTACT_CARD_ERROR = 'CONTACT_CARD_ERROR';
+export const updateContactCard = (payload) => {
   return (dispatch) => {
-    dispatch({type: AUTH_DETAILS_SENDING, payload});
-    sendSocketMessage({type: "auth", payload})
+    dispatch({type: CONTACT_CARD_SENDING, payload});
+    sendSocketMessage({type: "contact_card", payload})
       .then(() => {
-        dispatch({type: AUTH_DETAILS_SENT, payload});
+        dispatch({type: CONTACT_CARD_SENT, payload});
       })
       .catch((err) => {
-        dispatch({type: AUTH_DETAILS_ERROR, payload});
+        dispatch({type: CONTACT_CARD_ERROR, payload});
       });
   };
 };
-
+export const SET_AUTH = 'SET_AUTH';
+export const setAuth = (payload) => {
+  return {type: SET_AUTH, payload};
+}
+export const SET_USERS = 'SET_USERS';
+export const setUsers = (payload) => {
+  return {type: SET_USERS, payload}
+}

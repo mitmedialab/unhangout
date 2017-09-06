@@ -23,6 +23,7 @@ class Action(models.Model):
         "start_play_for_all",
         "stop_play_for_all",
         "change_auth",
+        "change_contact_card",
         "message_breakouts",
         # breakout actions from plenary
         "propose_breakout",

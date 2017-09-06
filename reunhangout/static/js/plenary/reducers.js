@@ -122,5 +122,9 @@ export const users = (state=null, action) => {
 };
 
 export const auth = (state=null, action) => {
+  switch (action.type) {
+    case A.SET_AUTH:
+      return action.payload.auth;
+  }
   return state;
 };
