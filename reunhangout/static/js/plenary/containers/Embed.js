@@ -181,12 +181,6 @@ class Embed extends React.Component {
     return this.props.plenary.live_participants.indexOf(this.props.auth.id) != -1;
   }
 
-  hasLive() {
-    return this.props.plenary.embeds && this.props.plenary.embeds.embeds.filter(
-      (e) => e.type === "live"
-    ).length > 0;
-  }
-
   isCurrentLive() {
     let current = this.getCurrentEmbed();
     return (!!current) && current.type === "live";
@@ -259,11 +253,7 @@ class Embed extends React.Component {
       if (i === this.props.embeds.current) {
         return;
       } else if (embed.type === "live") {
-        embedDisplay.push({
-          index: i,
-          title: "Live Broadcast",
-          image: `${this.props.settings.MEDIA_URL}assets/broadcast.png`,
-        });
+        return;
       } else {
         let details = this.props.embedDetails[embed.props.src];
         embedDisplay.push({
@@ -339,18 +329,18 @@ class Embed extends React.Component {
           <div className='alert alert-error'><i className='fa fa-exclamation-triangle' />{this.props.embedsSending.error}</div>
           : "" }
         <div className="button-flex-container">
-          { this.hasLive() ? "" :
+          {!chosen || chosen.type !== "live" ?
             <BS.Button className="add-live-video-button"
                        onClick={(e) => this.addLiveVideo(e)}>
               <i className='fa fa-video-camera'></i> Add Live Video
             </BS.Button>
-          }
-          { chosen ?
+          : null}
+          {chosen ?
             <BS.Button bsStyle='danger' className="remove-button"
                 onClick={(e) => this.removeEmbed(e, null)}>
               <i className='fa fa-eject' /> Un-Embed
             </BS.Button>
-          : "" }
+          : null}
         </div>
       </form>
     </div>
