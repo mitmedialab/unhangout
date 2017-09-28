@@ -3,8 +3,11 @@
 from __future__ import unicode_literals
 
 import datetime
+import pytz
 from django.conf import settings
 from django.db import migrations, models
+
+TZ = pytz.timezone(settings.TIME_ZONE)
 
 
 class Migration(migrations.Migration):
@@ -26,13 +29,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='plenary',
             name='doors_close',
-            field=models.DateTimeField(default=datetime.datetime(2017, 1, 1, 0, 0), help_text='When should the lobby be closed, ending chat?'),
+            field=models.DateTimeField(default=TZ.localize(datetime.datetime(2017, 1, 1, 0, 0)), help_text='When should the lobby be closed, ending chat?'),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='plenary',
             name='doors_open',
-            field=models.DateTimeField(default=datetime.datetime(2015, 1, 1, 0, 0), help_text='When should the lobby be opened, allowing participants to chat before the event?'),
+            field=models.DateTimeField(default=TZ.localize(datetime.datetime(2015, 1, 1, 0, 0)), help_text='When should the lobby be opened, allowing participants to chat before the event?'),
             preserve_default=False,
         ),
         migrations.AlterField(

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Email Previews{% endblock %}
+
+{% block content %}
+  <h1>Email previews</h1>
+  <ul>
+    {% for slug, title in slugs %}
+    <li><a href='{% url "email_preview" %}?slug={{slug}}'>{{ title }}</a>
+    {% endfor %}
+  </ul>
+
+{% endblock %}

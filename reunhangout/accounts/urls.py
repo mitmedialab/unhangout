@@ -10,5 +10,6 @@ urlpatterns = [
     # Hijack allauth routes that we use as settings panels.
     url('social/connections/$', lambda r: redirect("accounts_settings", "connections")),
     url('email/$', lambda r: redirect('accounts_settings', 'email')),
+    url("email-preview", views.email_preview, name='email_preview'),
     url("", include('allauth.urls')),
 ]

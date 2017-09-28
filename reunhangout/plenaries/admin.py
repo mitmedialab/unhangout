@@ -7,6 +7,7 @@ from plenaries.models import Plenary, Series, ChatMessage
 from richtext.utils import RichTextField
 from analytics.utils import plenary_analytics
 from plenaries.utils import zip_exported_etherpads
+from plenaries import tasks
 
 class PlenaryForm(forms.ModelForm):
     description = RichTextField(required=False)
@@ -32,7 +33,7 @@ class PlenaryAdmin(admin.ModelAdmin):
 
     inlines = [AdminInline]
 
-    actions = ['analytics_json', 'export_breakout_etherpads']
+    actions = ['analytics_json', 'export_breakout_etherpads', 'send_wrapup_emails']
 
     def export_breakout_etherpads(self, request, queryset):
         zip_content = zip_exported_etherpads(queryset)
@@ -56,6 +57,11 @@ class PlenaryAdmin(admin.ModelAdmin):
         response.write(plenary_analytics(queryset, fmt='json'))
         return response
     analytics_json.short_description = "Analytics (JSON)"
+
+    def send_wrapup_emails(self, request, queryset):
+        tasks.wrapup_emails.delay(
+            list(queryset.values_list('id', flat=True))
+        )
 
 
 @admin.register(Series)

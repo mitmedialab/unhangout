@@ -1,0 +1,96 @@
+{% extends "emails/base.html" %}
+{% load email_tags %}
+{% load thumbnail %}
+
+{% block headline %}
+{% filter dollars_entities %}
+  {{plenary.name}}
+{% endfilter %}
+{% endblock %}
+
+{% block body %}
+{% filter dollars_entities %}
+<mj-text>
+  <p>
+  Thanks for attending our {{plenary.name}} Unhangout. We hope you had a good
+  experience and met some new members of this community!
+  </p>
+
+  <p>
+  Below you'll find the names of the folks you chatted with during the event,
+  as well as their preferred methods of contact. Why not continue the
+  conversation?
+  </p>
+</mj-text>
+
+<mj-text>
+  {% if user_rows %}
+  <div style="width: 100%; background-color: #b4ffe1; padding: 20px; padding-top: 10px; border: 2px solid black;">
+    <table style="width: 100%">
+      {% for user_row in user_rows %}
+        <tr>
+          {% for u in user_row %}
+            <td>
+              <table>
+                <tr>
+                  <td align='middle' style='padding-top: 10px;'>
+                    <img width="48" src="{{user.get_profile_image|absolutify}}" />
+                  </td>
+                  <td align='middle' style='text-align: left; padding-top: 10px; padding-left: 10px; line-height: 1.1; font-size: 12px;'>
+                    <div>
+                      {{u.get_display_name}}
+                    </div>
+                    {% if u.contact_card_twitter %}
+                      <div>
+                      {% thumbnail "assets/Twitter_Logo_Black.png" "24" format='PNG' as thumb %}
+                        <a href='https://twitter.com/{{u.contact_card_twitter|atless}}'
+                           style='color: black; text-decoration: none;'
+                          ><img width="24"
+                               src="{{thumb.url|absolutify}}"
+                               style='vertical-align: middle;'
+                               />{{u.contact_card_twitter|atfull}}</a>
+                      {% endthumbnail %}
+                      </div>
+                    {% endif %}
+                    {% if u.contact_card_email %}
+                      <div>
+                      {% thumbnail "assets/envelope.png" "24" format="PNG" as thumb %}
+                        <a href='mailto:{{u.contact_card_email}}'
+                           style='color: black; text-decoration: none;'
+                           ><img width="24"
+                                 src="{{thumb.url|absolutify}}"
+                                 style="vertical-align: middle;"
+                                 />{{u.contact_card_email}}</a>
+                      {% endthumbnail %}
+                      </div>
+                    {% endif %}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </table>
+  </div>
+  {% endif %}
+</mj-text>
+
+<mj-text>
+  {{plenary.wrapup_email_text}}
+</mj-text>
+
+<mj-text>
+  <p>Your participation in this event helped make it a success, so thanks for
+  that :-) We hope to see you again soon!</p>
+
+  <p>Cheers,<br>
+     {% if plenary.organizer %}
+       {{plenary.organizer}} &amp; the Unhangout Team
+     {% else %}
+       The Unhangout Team
+     {% endif %}
+  </p>
+</mj-text>
+{% endfilter %}
+{% endblock %}

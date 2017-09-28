@@ -1,0 +1,48 @@
+{% load mjml %}
+{% load thumbnail %}
+{% load email_tags %}
+{% mjml %}
+<mjml>
+  <mj-head>
+    <mj-attributes>
+      <mj-text padding="0" />
+      <mj-all font-family="Arial" font-size="16px" align="left" />
+    </mj-attributes>
+    <mj-style>
+      {% block style %}
+      {% endblock %}
+    </mj-style>
+  </mj-head>
+  <mj-body>
+    <mj-container>
+      <mj-section>
+        <mj-column>
+          <mj-image
+            align='center'
+            src="{% thumbnail logo "400" format="PNG" as masthead %}{{masthead.url|absolutify}}{% endthumbnail %}"
+            width="399"
+            padding="0"></mj-image>
+        </mj-column>
+      </mj-section>
+      {% block main %}
+      <mj-section padding-left="40" padding-right="40">
+        <mj-column>
+          <mj-text font-size="30px"
+                   line-height="34px"
+                   font-weight="bold"
+                   align="center"
+                   padding-left="10"
+                   padding-right="10"
+                   padding-bottom="40">
+            {% block headline %}{% endblock %}
+          </mj-text>
+
+          {% block body %}{% endblock %}
+
+        </mj-column>
+      </mj-section>
+      {% endblock %}
+    </mj-container>
+  </mj-body>
+</mjml>
+{% endmjml %}

@@ -4,6 +4,7 @@ dump.rdb
 *.pyc
 *.retry
 .agignore
+.cache
 venv
 node_modules
 settings.py

@@ -1,15 +1,24 @@
+import json
+import logging
+
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin, AnonymousUser
 from django.contrib.sites.models import Site
 from django.core.cache import cache
-from django.db import models
+from django.core.mail import EmailMultiAlternatives
+from django.db import models, transaction
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 
+from accounts import email_handlers
+
 from django_gravatar.helpers import get_gravatar_url
 from sorl.thumbnail import get_thumbnail
+from jsonfield import JSONField
 import requests
+
+logger = logging.getLogger()
 
 class UserManager(BaseUserManager):
     def create_user(self, username, password=None, **kwargs):
@@ -207,3 +216,96 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.get_display_name()
+
+class EmailNotificationManager(models.Manager):
+    def wrapup_email(self, user, plenary, copresence=None, silent=True):
+        handler = email_handlers.WrapupEmail(
+            user, copresence=copresence, plenary=plenary)
+        return self._send(handler, silent)
+
+    def _send(self, handler, silent):
+        event_key = handler.get_event_key()
+        try:
+            return EmailNotification.objects.get(user=handler.user,
+                    event_key=event_key)
+        except EmailNotification.DoesNotExist:
+            pass
+
+        try:
+            subject = handler.get_subject()
+            assert bool(subject), "Email missing subject"
+            with transaction.atomic():
+                en = EmailNotification.objects.create(
+                    user=handler.user,
+                    event_key=event_key,
+                    type=handler.type,
+                    from_email=handler.get_from_email(),
+                    to_email=", ".join(handler.get_to_emails()),
+                    subject=subject,
+                    body_txt=handler.get_body_txt() or "",
+                    body_html=handler.get_body_html() or "",
+                )
+                en.send(fail_silently=False)
+        except Exception:
+            logger.exception("Error sending from {}".format(handler))
+            if not silent:
+                raise
+
+class EmailNotification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    event_key = models.CharField(max_length=255)
+    type = models.CharField(max_length=50, choices=(
+        ('wrapup_email', 'Wrapup Email'),
+    ))
+    from_email = models.EmailField()
+    to_email = models.CharField(max_length=255,
+        help_text="Comma separated list of email addresses")
+    subject = models.TextField()
+    body_txt = models.TextField()
+    body_html = models.TextField()
+    created = models.DateTimeField(default=timezone.now)
+
+    # Tracking
+    sent = models.BooleanField(default=False)
+    delivered = models.NullBooleanField(default=None)
+    opens = JSONField(default=list)
+    clicks = JSONField(default=list)
+    deliveries = JSONField(default=list)
+    failures = JSONField(default=list)
+
+    objects = EmailNotificationManager()
+
+    def send(self, fail_silently=False, allow_resend=False):
+        assert bool(self.id), "Can't send unsaved EmailNotification"
+        if not allow_resend:
+            assert not self.sent, "EmailNotification has already been sent"
+        track_clicks_opens = "yes" if bool(self.body_html) else "no"
+
+        # Like 'send_email' wrapper, but with our custom headers
+        mail = EmailMultiAlternatives(
+            subject=self.subject,
+            body=self.body_txt,
+            from_email=self.from_email,
+            to=self.to_email.split(", "),
+            headers={
+                "X-Mailgun-Variables": json.dumps({
+                    "email_notification_id": self.id
+                }),
+                "X-Mailgun-Track": "yes",
+                "X-Mailgun-Track-Clicks": track_clicks_opens,
+                "X-Mailgun-Track-Opens": track_clicks_opens,
+            }
+        )
+        if self.body_html:
+            mail.attach_alternative(self.body_html, "text/html")
+
+        mail.send(fail_silently=fail_silently)
+        self.sent = True
+        self.save()
+
+    class Meta:
+        unique_together = [('user', 'event_key')]
+
+    def __str__(self):
+        return "%s: %s, %s" % (self.type, self.to_email, self.created)
+

@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from django.db import models
 from django.utils.timezone import now
 from django.conf import settings
@@ -7,6 +9,60 @@ from plenaries.models import Plenary
 from breakouts.models import Breakout
 
 from jsonfield import JSONField
+
+def spans_overlap(spans1, spans2):
+    """
+    Return true if any of the (start, end) spans in spans1 and spans2 overlap.
+    """
+    for start, end in spans1:
+        for start2, end2 in spans2:
+            if start <= end2 and start2 <= end:
+                return True
+    return False
+
+class ActionManager(models.Manager):
+    def breakout_copresence(self, plenary):
+        """
+        Return a mapping of {user_id: {breakout_id: [user_id,...]}}
+        representing the copresence of all users who attended breakouts
+        together in the given plenary.
+        """
+        # Get join/leave actions for all users for these breakouts.
+        actions = Action.objects.filter(
+            plenary=plenary,
+            action__in=('join_breakout', 'leave_breakout')
+        ).values_list('breakout__id', 'user__id', 'timestamp', 'action')
+        actions_by_user = defaultdict(lambda: defaultdict(list))
+        for breakout_id, user_id, timestamp, action in actions:
+            actions_by_user[user_id][breakout_id].append((timestamp, action))
+
+        # Assemble join/leave actions into spans.
+        spans_by_breakout = defaultdict(lambda: defaultdict(list))
+        for user_id, breakout_actions in actions_by_user.items():
+            for breakout_id, action_list in breakout_actions.items():
+                joined = None
+                for timestamp, action in action_list:
+                    if action == "join_breakout":
+                        joined = timestamp
+                    elif joined and action == "leave_breakout":
+                        spans_by_breakout[breakout_id][user_id].append(
+                            (joined, timestamp)
+                        )
+                        joined = None
+
+        # Calculate temporal overlaps
+        overlaps = defaultdict(lambda: defaultdict(set))
+        for breakout_id, user_spans in spans_by_breakout.items():
+            for user_id, spans in user_spans.items():
+                for user_id2, spans2 in user_spans.items():
+                    if user_id == user_id2:
+                        continue
+                    if spans_overlap(spans, spans2):
+                        overlaps[user_id][breakout_id].add(user_id2)
+
+        # Convert to normal dict.
+        overlaps = {k: dict(d) for k,d in overlaps.items()}
+        return overlaps
 
 class Action(models.Model):
     TYPES = [
@@ -44,6 +100,8 @@ class Action(models.Model):
     breakout = models.ForeignKey(Breakout, blank=True, null=True,
             on_delete=models.SET_NULL)
     data = JSONField(blank=True, null=True)
+
+    objects = ActionManager()
 
     def __str__(self):
         return "{} {} {}".format(self.user, self.action, self.timestamp)
