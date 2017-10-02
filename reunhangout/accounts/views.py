@@ -1,18 +1,26 @@
 import re
+import hashlib
+import hmac
+import logging
+
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import logout
 from django.contrib import messages
 from django.db import transaction
-from django.urls import reverse_lazy
+from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render, redirect
-from django.http import Http404
+from django.urls import reverse_lazy
 from django.utils.translation import ugettext_lazy as _
+from django.views.decorators.csrf import csrf_exempt
 
 from accounts import settings_panel, email_handlers
 from accounts.forms import AccountSettingsForm
-from accounts.models import User
+from accounts.models import User, EmailNotification
 from allauth.account.views import EmailView as AllauthEmailView
 from allauth.socialaccount.views import ConnectionsView as AllauthConnectionsView
+
+logger = logging.getLogger('django.request')
 
 @login_required
 def profile(request):
@@ -122,3 +130,70 @@ def email_preview(request):
     except CancelTransaction:
         pass
     return response
+
+
+def _verify_mailgun_hmac(request):
+    token = request.POST.get('token', '')
+    timestamp = request.POST.get('timestamp', '')
+    signature = request.POST.get('signature', '')
+    hmac_digest = hmac.new(
+        key=settings.MAILGUN_ACTIVE_API_KEY.encode('utf-8'),
+        msg='{}{}'.format(timestamp, token).encode('utf-8'),
+        digestmod=hashlib.sha256).hexdigest()
+    return hmac.compare_digest(str(signature), str(hmac_digest))
+
+class MailgunRefusalResponse(HttpResponse):
+    # Instructs mailgun not to retry the request.
+    status_code = 406
+
+
+@csrf_exempt
+def mailgun_webhook(request):
+    if request.method != "POST":
+        return HttpResponseBadRequest()
+    if not _verify_mailgun_hmac(request):
+        logger.error("Invalid mailgun hmac. {}".format(dict(request.POST)))
+        return HttpResponseBadRequest()
+
+    email_notification_id = request.POST.get("email_notification_id")
+    try:
+        en = EmailNotification.objects.get(pk=email_notification_id)
+    except EmailNotification.DoesNotExist:
+        return MailgunRefusalResponse()
+
+    event = request.POST.get('event')
+    ua_params = [
+        "country",
+        "region",
+        "city",
+        "user-agent",
+        "device-type",
+        "client-name",
+        "client-os",
+        "timestamp",
+    ]
+    if event == 'opened':
+        en.opens.append({k: request.POST.get(k) for k in ua_params})
+        en.delivered = True
+    elif event == "clicked":
+        en.clicks.append({k: request.POST.get(k) for k in ua_params + ["url"]})
+        en.delivered = True
+    elif event == "dropped":
+        en.failures.append({k: request.POST.get(k) for k in [
+            'event', 'reason', 'code', 'description', 'timestamp'
+        ]})
+        en.delivered = False
+    elif event == "bounced":
+        en.failures.append({k: request.POST.get(k) for k in [
+            'event', 'code', 'error', 'notification', 'timestamp'
+        ]})
+        en.delivered = False
+    elif event == "delivered":
+        en.deliveries.append({k: request.POST.get(k) for k in ['timestamp']})
+        en.delivered = True
+    else:
+        # ignore others
+        return HttpResponse()
+
+    en.save()
+    return HttpResponse()

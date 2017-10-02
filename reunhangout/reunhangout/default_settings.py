@@ -237,3 +237,5 @@ ETHERPAD_API_KEY = "... override me ..."
 ETHERPAD_DEFAULT_TEXT = "Welcome to the breakout! Use this space for notes or ideas."
 
 MJML_EXEC_CMD = os.path.join(BASE_DIR, "node_modules", ".bin", "mjml")
+
+MAILGUN_ACTIVE_API_KEY = "..."

@@ -11,5 +11,7 @@ urlpatterns = [
     url('social/connections/$', lambda r: redirect("accounts_settings", "connections")),
     url('email/$', lambda r: redirect('accounts_settings', 'email')),
     url("email-preview", views.email_preview, name='email_preview'),
+    url("mailgun$", views.mailgun_webhook),
+
     url("", include('allauth.urls')),
 ]

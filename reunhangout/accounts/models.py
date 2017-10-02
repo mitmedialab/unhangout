@@ -250,6 +250,7 @@ class EmailNotificationManager(models.Manager):
             logger.exception("Error sending from {}".format(handler))
             if not silent:
                 raise
+        return en
 
 class EmailNotification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
