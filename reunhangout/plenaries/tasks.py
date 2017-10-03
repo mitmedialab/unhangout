@@ -23,6 +23,8 @@ def wrapup_emails(plenary_ids):
         ).distinct()
 
         for user in recipients:
+            if not copresence.get(user.id):
+                continue
             try:
                 EmailNotification.objects.wrapup_email(
                     user,
