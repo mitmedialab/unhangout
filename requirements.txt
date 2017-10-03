@@ -24,6 +24,7 @@ pytest-xdist
 lxml
 pillow<3.7
 pylibmc
+psycopg2
 requests
 selenium>3
 sorl-thumbnail

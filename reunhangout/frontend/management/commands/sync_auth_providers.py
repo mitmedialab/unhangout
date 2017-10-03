@@ -27,7 +27,7 @@ class Command(BaseCommand):
                 app = SocialApp.objects.get(**lookup)
             except SocialApp.DoesNotExist:
                 changed = True
-                SocialApp.objects.create(
+                app = SocialApp.objects.create(
                     **dict(list(lookup.items()) + list(keys.items()))
                 )
                 app.sites.add(site)

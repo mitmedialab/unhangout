@@ -28,7 +28,7 @@ class ActionManager(models.Manager):
         together in the given plenary.
         """
         # Get join/leave actions for all users for these breakouts.
-        actions = Action.objects.filter(
+        actions = Action.objects.order_by('timestamp').filter(
             plenary=plenary,
             action__in=('join_breakout', 'leave_breakout')
         ).values_list('breakout__id', 'user__id', 'timestamp', 'action')
