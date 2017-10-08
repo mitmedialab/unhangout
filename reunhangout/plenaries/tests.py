@@ -53,11 +53,10 @@ def attended_plenary():
             email='u3@example.com',
             receive_wrapup_emails=True,
             contact_card_email='user3@example.com')
-    u4 = User.objects.create(username='u4', contact_card_twitter='user4',
+    u4 = User.objects.create(username='u4',
             email='u4@example.com',
             receive_wrapup_emails=True,
-            display_name='Alexander Supertramp',
-            contact_card_email='user4@example.com')
+            display_name='Alexander Supertramp')
     u5 = User.objects.create(username='u5',
             email='u5@example.com')
 
@@ -166,19 +165,21 @@ def test_breakout_copresence(attended_plenary):
 
 @pytest.mark.django_db
 def test_wrapup_email(attended_plenary, mail):
-    plenary, b1, b2, b3, u1, u2, u3, u4, u5 = attended_plenary
-    u6 = User.objects.create(username='u6') # not attended
-    assert len(mail.outbox) == 0
-    tasks.wrapup_emails([plenary.id])
+    with monkeypatch(Breakout, 'get_etherpad_readonly',
+            lambda self: 'https://...'):
+        plenary, b1, b2, b3, u1, u2, u3, u4, u5 = attended_plenary
+        u6 = User.objects.create(username='u6') # not attended
+        assert len(mail.outbox) == 0
+        tasks.wrapup_emails([plenary.id])
 
-    assert len(mail.outbox) == 4
-    assert set([m.subject for m in mail.outbox]) == set([
-        'Continue the conversation from Unhangout: Test Plenary'
-    ])
-    assert set([m.to[0] for m in mail.outbox]) == set([
-        u1.email, u2.email, u3.email, u4.email
-    ])
-    mail.outbox = []
-    tasks.wrapup_emails([plenary.id])
-    assert len(mail.outbox) == 0
+        assert len(mail.outbox) == 4
+        assert set([m.subject for m in mail.outbox]) == set([
+            'Continue the conversation from Unhangout: Test Plenary'
+        ])
+        assert set([m.to[0] for m in mail.outbox]) == set([
+            u1.email, u2.email, u3.email, u4.email
+        ])
+        mail.outbox = []
+        tasks.wrapup_emails([plenary.id])
+        assert len(mail.outbox) == 0
 

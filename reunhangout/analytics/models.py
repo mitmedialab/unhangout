@@ -25,14 +25,18 @@ class ActionManager(models.Manager):
         """
         Return a mapping of {user_id: {breakout_id: [user_id,...]}}
         representing the copresence of all users who attended breakouts
-        together in the given plenary.
+        together in the given plenary.  If `public_only` is True (default),
+        only users who have a defined public contact method are included.
         """
         # Get join/leave actions for all users for these breakouts.
         actions = Action.objects.order_by('timestamp').filter(
             plenary=plenary,
             action__in=('join_breakout', 'leave_breakout')
-        ).values_list('breakout__id', 'user__id', 'timestamp', 'action')
+        ).values_list(
+            'breakout__id', 'user__id', 'timestamp', 'action'
+        )
         actions_by_user = defaultdict(lambda: defaultdict(list))
+
         for breakout_id, user_id, timestamp, action in actions:
             actions_by_user[user_id][breakout_id].append((timestamp, action))
 

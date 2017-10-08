@@ -34,7 +34,7 @@
               <table>
                 <tr>
                   <td align='middle' style='padding-top: 10px;'>
-                    <img width="48" src="{{user.get_profile_image|absolutify}}" />
+                    <img width="48" src="{{u.get_profile_image|absolutify}}" />
                   </td>
                   <td align='middle' style='text-align: left; padding-top: 10px; padding-left: 10px; line-height: 1.1; font-size: 12px;'>
                     <div>
@@ -77,6 +77,21 @@
 </mj-text>
 
 <mj-text>
+  {% if breakouts %}
+    <p>
+      If you took notes in the shared pad in your breakout sessions, you can
+      find them here:
+    </p>
+    <ul>
+    {% for breakout in breakouts %}
+      <li><a href='{{breakout.etherpad_url}}'>{{breakout.title}}</a></li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+</mj-text>
+     
+
+<mj-text>
   {{plenary.wrapup_email_text}}
 </mj-text>
 
@@ -84,13 +99,7 @@
   <p>Your participation in this event helped make it a success, so thanks for
   that :-) We hope to see you again soon!</p>
 
-  <p>Cheers,<br>
-     {% if plenary.organizer %}
-       {{plenary.organizer}} &amp; the Unhangout Team
-     {% else %}
-       The Unhangout Team
-     {% endif %}
-  </p>
+  <p>Cheers,<br>The Unhangout Team</p>
 </mj-text>
 {% endfilter %}
 {% endblock %}

@@ -105,16 +105,19 @@ def email_preview(request):
             emails = []
 
             if slug == "wrapup-email":
-                from plenaries.tests import attended_plenary
-                plenary, b1, b2, b3, u1, u2, u3, u4, u5 = attended_plenary()
-                emails.append({
-                    'title': "Wrapup Email",
-                    'variant': '',
-                    'handler': email_handlers.WrapupEmail(
-                        user=u1,
-                        plenary=plenary
-                    )
-                })
+                from plenaries.tests import attended_plenary, monkeypatch
+                from breakouts.models import Breakout
+                with monkeypatch(Breakout, "get_etherpad_readonly",
+                        lambda self: "https://test/p/r.%s" % self.id):
+                    plenary, b1, b2, b3, u1, u2, u3, u4, u5 = attended_plenary()
+                    emails.append({
+                        'title': "Wrapup Email",
+                        'variant': '',
+                        'handler': email_handlers.WrapupEmail(
+                            user=u1,
+                            plenary=plenary
+                        )
+                    })
 
             for i, email in enumerate(emails):
                 email['index'] = str(i)

@@ -114,6 +114,26 @@ class Breakout(models.Model):
                 res.text
             ))
 
+    def get_etherpad_readonly(self):
+        data = {
+            'apikey': settings.ETHERPAD_API_KEY,
+            'padID': self.etherpad_id,
+        }
+        url = "https://{server}/api/1/getReadOnlyID?".format(
+            server=settings.ETHERPAD_SERVER,
+        )
+        res = requests.get(url, data)
+        if res.status_code != 200:
+            logger.error("{} status {}: {}".format(
+                url,
+                res.status_code,
+                res.text
+            ))
+        return "https://{server}/p/{readOnlyID}".format(
+            server=settings.ETHERPAD_SERVER,
+            readOnlyID=res.json()['data']['readOnlyID']
+        )
+
     def serialize(self):
         if self.is_proposal:
             votes = [v.id for v in self.votes.all()]

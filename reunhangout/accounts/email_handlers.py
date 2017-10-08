@@ -2,6 +2,7 @@ from django.template import TemplateSyntaxError
 from django.template.loader import render_to_string
 from django.contrib.sites.models import Site
 from django.conf import settings
+from django.db.models import Q
 
 from analytics.models import Action
 from breakouts.models import Breakout
@@ -67,6 +68,9 @@ class EmailHandler:
             key = "ERROR"
         return ", ".join((self.type, email, key))
 
+def _nonempty_q(field):
+    return Q(**{field + "__isnull": False}) & ~Q(**{field: ''})
+
 class WrapupEmail(EmailHandler):
     subject_template = "emails/wrapup_subject.txt"
     #body_template_txt = "emails/wrapup_body.txt"
@@ -83,6 +87,13 @@ class WrapupEmail(EmailHandler):
         copresence = self.context.get('copresence')
         if not copresence:
             copresence = Action.objects.breakout_copresence(plenary)
+
+        etherpad_urls = self.context.get('etherpad_urls')
+        if not etherpad_urls:
+            etherpad_urls = {
+                b.id: b.get_etherpad_readonly()
+                for b in plenary.breakout_set.all()
+            }
 
         #
         # Set additional context for participant mentions/breakouts
@@ -108,15 +119,23 @@ class WrapupEmail(EmailHandler):
             User.objects.filter(id__in=mentioned_user) |
             User.objects.filter(id__in=user_mentioned) |
             User.objects.filter(id__in=copresent_user_ids)
+        ).filter(
+            _nonempty_q('contact_card_email') |
+            _nonempty_q('contact_card_twitter')
         ).exclude(
             id=user.id
-        ).exclude(
-            contact_card_email='',
-            contact_card_twitter='',
         ).distinct())
         self.context['user_rows'] = []
         for i in range(0, len(users), 2):
             self.context['user_rows'].append(users[i:i+2])
+
+        self.context['breakouts'] = []
+        for breakout_id, title in Breakout.objects.filter(
+                id__in=breakout_dict.keys()).values_list('id', 'title'):
+            self.context['breakouts'].append({
+                'title': title,
+                'etherpad_url': etherpad_urls[breakout_id]
+            })
 
     def get_event_key(self):
         return "wrapup-{}".format(self.context['plenary'].id)
