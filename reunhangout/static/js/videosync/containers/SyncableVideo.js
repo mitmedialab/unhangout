@@ -122,7 +122,12 @@ class SyncableYoutubeVideo extends React.Component {
 
   componentDidMount() {
     this.player = YoutubePlayer(this.playerId(), {
-      playerVars: {autoplay: 0, controls: 1}
+      playerVars: {
+        autoplay: 0,
+        controls: 1,
+        modestbranding: 1,
+        rel: 0,
+      }
     });
     window.__SyncableYoutubeVideo = this;
     this.player.on('stateChange', (e) => this.onPlayerStateChange(e));
@@ -303,7 +308,12 @@ class LiveYoutubeVideo extends SyncableYoutubeVideo {
    */
   componentDidMount() {
     this.player = YoutubePlayer(this.playerId(), {
-      playerVars: {autoplay: 0, controls: 1}
+      playerVars: {
+        autoplay: 0,
+        controls: 1,
+        modestbranding: 1,
+        rel: 0,
+      }
     });
     window.__SyncableYoutubeVideo = this;
     this.player.on('stateChange', (e) => this.onPlayerStateChange(e));
