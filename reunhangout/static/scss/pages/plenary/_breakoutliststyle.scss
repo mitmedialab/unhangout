@@ -53,6 +53,7 @@
   padding: 10px;
   display: flex;
   flex-direction: column;
+  width: 100%;
 
   .breakout-list-item{
     background-color: #f5f5f5;
@@ -61,10 +62,13 @@
 
     .breakout-list-item-row{
       display: flex;
-      flex-direction:row;
+      flex-direction: row;
+      max-width: 100%;
 
       .breakout-list-item-left-col{
         flex-grow: 1;
+        min-width: 0px; // https://css-tricks.com/flexbox-truncated-text/
+        overflow-wrap: break-word;
         border-top: 2px solid #9b9b9b;
         border-bottom: 2px solid #9b9b9b;
         border-left: 2px solid #9b9b9b;

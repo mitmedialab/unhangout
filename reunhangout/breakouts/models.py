@@ -18,7 +18,8 @@ logger = logging.getLogger('request')
 
 class Breakout(models.Model):
     title = models.CharField(max_length=80, default="", blank=True)
-    slug = models.SlugField(blank=True)
+    # Slug field should be as long as the title with the ID appended.
+    slug = models.SlugField(blank=True, max_length=90)
     description = models.TextField(blank=True, default="")
     max_attendees = models.IntegerField(default=6, validators=[
         MinValueValidator(2),
