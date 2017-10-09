@@ -1,11 +1,12 @@
 from collections import defaultdict, OrderedDict
 from datetime import timedelta, datetime
-from django.db.models import Count
+from django.db.models import Prefetch
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 
 from analytics.models import Action 
 from accounts.models import User
+from plenaries.models import ChatMessage
 
 def _join_leave_to_duration(joinleave):
     total = timedelta(seconds=0)
@@ -34,6 +35,12 @@ def json_datetime_serializer(obj):
         return obj.isoformat()
     raise TypeError("Type %s is not serializable" % type(obj))
 
+class JSONEncoder(DjangoJSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, (set, frozenset)):
+            return tuple(obj)
+        return super().default(obj)
+
 def plenary_analytics(plenary_queryset, fmt='python'):
     # What users were there?
     # How long was each user in the lobby?
@@ -48,31 +55,59 @@ def plenary_analytics(plenary_queryset, fmt='python'):
     breakout_actions = ("join_breakout", "leave_breakout", "propose_breakout",
             "change_breakout_vote")
 
-    actions = list(Action.objects.select_related('user', 'breakout').filter(
-        action__in=plenary_actions + breakout_actions,
-        plenary__in=plenary_queryset,
-        user__isnull=False,
-    ).order_by('plenary', 'user', 'timestamp'))
+    actions = list(
+        Action.objects.select_related(
+            'user', 'breakout', 'plenary'
+        ).prefetch_related(
+            Prefetch(
+                'plenary__chatmessage_set',
+                ChatMessage.objects.prefetch_related(
+                    Prefetch(
+                        'mentions',
+                        User.objects.all(),
+                        to_attr='_mentions_prefetch'
+                    )
+                ),
+                to_attr='_chat_messages_prefetch'
+            )
+        ).filter(
+            action__in=plenary_actions + breakout_actions,
+            plenary__in=plenary_queryset,
+            user__isnull=False,
+        ).order_by('plenary', 'user', 'timestamp')
+    )
 
-    plenary_users = defaultdict(lambda: defaultdict(lambda: {
-        'user': None,
-        'event_presence': [],
-        'breakout_presence': defaultdict(list),
-        'breakout_votes': [],
-        'breakout_proposals': [],
-        'chat_message_count': 0,
-        'chat_message_with_mentions_count': 0,
-        'first_action_timestamp': None,
-        'last_action_timestamp': None,
-    }))
+    plenary_data = defaultdict(lambda: {
+        "users": defaultdict(lambda: {
+            'user': None,
+            'event_presence': [],
+            'breakout_presence': defaultdict(list),
+            'breakout_votes': [],
+            'breakout_proposals': [],
+            'chat_message_count': 0,
+            'chat_message_with_mentions_count': 0,
+            'chat_messages': [],
+            'chat_messages_mentioned': [],
+            'first_action_timestamp': None,
+            'last_action_timestamp': None,
+            'breakout_copresence': {}
+        }),
+        "breakouts": defaultdict(lambda: {
+            'id': None,
+            'title': '',
+            'copresence': set()
+        }),
+    })
     all_plenaries = {}
 
     for action in actions:
         all_plenaries[action.plenary_id] = action.plenary
-        log = plenary_users[action.plenary_id][action.user.id]
+        
+        log = plenary_data[action.plenary_id]['users'][action.user.id]
         log['user'] = {
             'id': action.user.id,
-            'display_name': action.user.get_display_name()
+            'display_name': action.user.get_display_name(),
+            "email": action.user.email,
         }
         if log['first_action_timestamp'] is None:
             log['first_action_timestamp'] = action.timestamp
@@ -93,6 +128,12 @@ def plenary_analytics(plenary_queryset, fmt='python'):
             )
             if not breakout_id:
                 continue
+            if action.breakout_id:
+                plenary_data[action.plenary_id]['breakouts'][
+                        action.breakout_id].update({
+                    'id': action.breakout.id,
+                    'title': action.breakout.title,
+                })
 
             if action.action == "join_breakout":
                 log['breakout_presence'][breakout_id].append({
@@ -109,22 +150,36 @@ def plenary_analytics(plenary_queryset, fmt='python'):
                 log['breakout_votes'].append(breakout_id)
 
     for plenary_id, plenary in all_plenaries.items():
-        users = [log['user'] for id_, log in plenary_users[plenary.id].items()]
-        qs = plenary.chatmessage_set.annotate(
-            mentions_count=Count('mentions')
-        ).values_list(
-            'user_id', 'mentions'
-        )
-        for user_id, mentions_count in qs:
-            log = plenary_users[plenary.id][user_id]
+        for msg in plenary._chat_messages_prefetch:
+            log = plenary_data[plenary.id]['users'][msg.user.id]
             log['chat_message_count'] += 1
-            if mentions_count is not None and mentions_count > 0:
+            if len(msg._mentions_prefetch) > 0:
                 log['chat_message_with_mentions_count'] += 1
+            log['chat_messages'].append({
+                'id': msg.id,
+                'timestamp': msg.created,
+                'message': msg.message,
+                'highlight': msg.highlight,
+                'archived': msg.archived,
+                'mentions': [m.id for m in msg._mentions_prefetch],
+            })
+
+        copresence = Action.objects.breakout_copresence(plenary)
+        by_breakout = {}
+        for user_id, breakout_copresence in copresence.items():
+            for breakout_id, user_ids in breakout_copresence.items():
+                plenary_data[plenary_id]['users'][user_id][
+                        'breakout_copresence'] = breakout_copresence
+                plenary_data[plenary_id]['breakouts'][breakout_id][
+                        'copresence'].add(frozenset(
+                            set(user_ids) | set([user_id])
+                        ))
+
 
     output = OrderedDict()
-    for plenary_id, userdict in sorted(plenary_users.items()):
+    for plenary_id, datadict in sorted(plenary_data.items()):
         # Convert start/leave times to durations.
-        for user_id, log in userdict.items():
+        for user_id, log in datadict['users'].items():
             log['event_presence_seconds'] = _join_leave_to_duration(
                 log['event_presence']
             )
@@ -134,17 +189,25 @@ def plenary_analytics(plenary_queryset, fmt='python'):
                 log['breakout_presence_seconds'][breakout_id] = dur
 
         # Sort by first action
-        output[plenary_id] = OrderedDict(
-            sorted(
-                [(k, OrderedDict(sorted(v.items()))) for k,v in userdict.items()],
-                key=lambda o: o[1]['first_action_timestamp']
-            )
-        )
+        output[plenary_id] = {
+            'users': OrderedDict(
+                sorted(
+                    [(k, OrderedDict(sorted(v.items())))
+                    for k,v in datadict['users'].items()],
+                    key=lambda o: o[1]['first_action_timestamp']
+                )
+            ),
+            'breakouts': OrderedDict(
+                sorted([(k, OrderedDict(sorted(v.items())))
+                    for k,v in datadict['breakouts'].items()])
+            ),
+        }
+    output = {'plenaries': output}
             
     if fmt == 'python':
         return output
     elif fmt == 'json':
-        return json.dumps(output, cls=DjangoJSONEncoder, indent=2)
+        return json.dumps(output, cls=JSONEncoder, indent=2)
     else:
         raise ValueError("Format {} not understood.".format(fmt))
 
