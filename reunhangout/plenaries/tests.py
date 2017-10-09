@@ -8,6 +8,7 @@ from django.core import mail as django_mail
 
 from plenaries.models import Plenary
 from plenaries import tasks
+from plenaries.utils import find_atnames
 from breakouts.models import Breakout
 from accounts.models import User
 from analytics.models import Action
@@ -183,3 +184,26 @@ def test_wrapup_email(attended_plenary, mail):
         tasks.wrapup_emails([plenary.id])
         assert len(mail.outbox) == 0
 
+def test_atnamify():
+    assert find_atnames("blah di blah") == []
+    assert find_atnames("Something @ somethingelse") == []
+    assert find_atnames("Hey @this") == ["this"]
+    assert find_atnames("Hey @ThIs.ThAt") == ["this.that"]
+    assert find_atnames("@now and @then") == ["now", "then"]
+    assert find_atnames("Whatever @man.") == ["man"]
+    assert find_atnames("Whatever @man!") == ["man"]
+    assert find_atnames("Whatever @man!") == ["man"]
+    assert find_atnames("Whatever @man?") == ["man"]
+    assert find_atnames("Whatever @man.freddy") == ["man.freddy"]
+    assert find_atnames("Whatever @man-freddy") == ["man-freddy"]
+    assert find_atnames("Whatever @man_freddy") == ["man_freddy"]
+    assert find_atnames("Whatever @man?freddy") == ["man?freddy"]
+    assert find_atnames("Whatever @man!freddy") == ["man!freddy"]
+    assert find_atnames("This and @Füße") == ["füße"]
+    assert find_atnames("Whatever @....") == ["..."]
+    assert find_atnames("@@") == []
+    assert find_atnames("@@.") == ["@"]
+    assert find_atnames("@now") == ["now"]
+    assert find_atnames("@now.") == ["now"]
+    assert find_atnames("@now. fun") == ["now"]
+    assert find_atnames("@now...") == ["now.."]

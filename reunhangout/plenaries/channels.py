@@ -27,6 +27,7 @@ from reunhangout.utils import json_dumps
 from analytics.models import track
 from django.contrib.auth import get_user_model
 from accounts.utils import serialize_auth_state
+from plenaries.utils import find_atnames
 
 User = get_user_model()
 
@@ -110,6 +111,7 @@ def route_message(message, data, plenary):
     else:
         handle_error(message, "Type not understood")
 
+
 @require_payload_keys(['message'])
 def handle_chat(message, data, plenary):
     highlight = (
@@ -123,9 +125,7 @@ def handle_chat(message, data, plenary):
             message=data['payload']['message'],
             highlight=highlight or False
         )
-        at_split = re.split(r"(?:^|\s)@((?:[-_A-Za-z0-9]|\.(?!$|\s))+)",
-                data['payload']['message'])
-        at_names = [a.lower() for a in at_split[1::2]]
+        at_names = find_atnames(data['payload']['message'])
         mentions = []
         if at_names:
             # We're searching for a display name that contains a concatenated

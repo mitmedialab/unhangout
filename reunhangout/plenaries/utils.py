@@ -1,3 +1,4 @@
+import re
 from io import StringIO, BytesIO
 import zipfile
 import requests
@@ -71,3 +72,7 @@ def zip_exported_etherpads(plenary_queryset):
         return None
     else:
         return fh.getvalue()
+
+def find_atnames(msg):
+    split = re.split(r"(?:^|\s)@((?:\w|[^\s\w](?!$|\s))+)", msg, flags=re.I)
+    return [a.lower() for a in split[1::2]]
