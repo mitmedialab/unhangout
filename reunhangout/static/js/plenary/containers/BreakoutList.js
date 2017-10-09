@@ -14,7 +14,7 @@ class BreakoutList extends React.Component {
       "message-breakouts-dialog": false,
       "breakout-mode-dialog": false,
       "breakout_mode": this.props.plenary.breakout_mode,
-      "max_attendees": 6,
+      "max_attendees": 10,
       "random_max_attendees": this.props.plenary.random_max_attendees || 10,
       "etherpad_initial_text": this.props.plenary.etherpad_initial_text,
     }
@@ -246,28 +246,30 @@ class BreakoutList extends React.Component {
                   onChange={(e) => this.setState({title: e.target.value})} />
               { this.state['title-error'] ?
                   <BS.HelpBlock>{this.state['title-error']}</BS.HelpBlock>
-                : "" }
+              : null }
             </BS.FormGroup>
-            <BS.FormGroup
-              className='non-margined'
-              controlId="participant-limit"
-              validationState={
-                this.state['max_attendees-error'] ? 'error' : undefined
-              }
-            >
-              <BS.ControlLabel>Participant Limit</BS.ControlLabel>
-              <BS.FormControl type="text"
-                placeholder="Max 10, Min 2"
-                min={2}
-                max={10}
-                value={this.state.max_attendees || ""}
-                onChange={(e) => this.setState({max_attendees: e.target.value})} />
-              <BS.HelpBlock>
-                { this.state['max_attendees-error'] ?
-                    this.state['max_attendees-error']
-                  : "Minimum 2, Maximum 10" }
-              </BS.HelpBlock>
-            </BS.FormGroup>
+            {this.props.auth.is_admin ?
+              <BS.FormGroup
+                className='non-margined'
+                controlId="participant-limit"
+                validationState={
+                  this.state['max_attendees-error'] ? 'error' : undefined
+                }
+              >
+                <BS.ControlLabel>Participant Limit</BS.ControlLabel>
+                <BS.FormControl type="text"
+                  placeholder="Max 10, Min 2"
+                  min={2}
+                  max={10}
+                  value={this.state.max_attendees || ""}
+                  onChange={(e) => this.setState({max_attendees: e.target.value})} />
+                <BS.HelpBlock>
+                  { this.state['max_attendees-error'] ?
+                      this.state['max_attendees-error']
+                    : "Minimum 2, Maximum 10" }
+                </BS.HelpBlock>
+              </BS.FormGroup>
+            : null}
             {this.props.auth.is_admin ?
               <BS.FormGroup
                 className='non-margined'
