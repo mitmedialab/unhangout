@@ -9,7 +9,7 @@ var autoprefixer = require('autoprefixer')
 var root = path.join(__dirname, '..', '..')
 
 module.exports = {
-  devtool: 'eval',
+  devtool: 'cheap-module-source-map',
   entry: {
     'main': [
       path.join(root, 'static', 'scss', 'index.scss'),
@@ -31,6 +31,7 @@ module.exports = {
   },
   plugins: [
     new webpack.DefinePlugin({'process.env': { 'NODE_ENV': JSON.stringify('production') }}),
+    new webpack.optimize.UglifyJsPlugin({compress: { warnings: true }}),
     new BundleTracker({
       path: path.join(root, 'static', 'tmp'),
       filename: 'webpack-stats.json'
