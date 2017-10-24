@@ -55,10 +55,16 @@ class JitsiVideo extends React.Component {
             "recording"
           ],
           MAIN_TOOLBAR_BUTTONS: ['microphone', 'camera', 'desktop'],
+          INVITE_OPTIONS: ['dialout'],
         }
       },
     );
-    this.api.executeCommand("displayName", props.auth.display_name);
+
+    // Delay this in case it fails so we don't error hard.
+    setTimeout(function() {
+      this.api.executeCommand("displayName", props.auth.display_name);
+    }, 10000);
+
     // Listen to everything.
     ["incomingMessage", "outgoingMessage", "displayNameChange",
       "participantJoined", "participantLeft", "videoConferenceJoined",
