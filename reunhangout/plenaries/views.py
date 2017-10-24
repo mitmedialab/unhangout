@@ -149,7 +149,7 @@ def plenary_add(request):
         copy_from = None
         if payload.get('copy_from_id'):
             try:
-                copy_from = copyable.get(id=payload.get('copy_from_id'))
+                copy_from = copyable.distinct().get(id=payload.get('copy_from_id'))
             except Plenary.DoesNotExist:
                 return HttpResponseBadRequest("copy_from_id plenary not found")
 
