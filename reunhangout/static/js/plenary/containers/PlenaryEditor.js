@@ -370,7 +370,7 @@ export class PlenaryEditor extends React.Component {
             {this.renderControl("Public calendar", "public", "checkbox",
                                 {help: "List event on the public events calendar"})}
             {this.renderControl("URL", "slug", "slug")}
-            {this.renderControl("Breakout server", "jitsi_server", "jitsi_server")}
+            {/*this.renderControl("Breakout server", "jitsi_server", "jitsi_server")*/}
             {this.renderControl("Initial etherpad text", "etherpad_initial_text",
               "textarea", {help: "Default text for etherpads in breakouts."})}
 

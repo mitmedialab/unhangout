@@ -55,7 +55,7 @@ class JitsiVideo extends React.Component {
             "recording"
           ],
           MAIN_TOOLBAR_BUTTONS: ['microphone', 'camera', 'desktop'],
-          INVITE_OPTIONS: ['dialout'],
+          INVITE_OPTIONS: [],
         }
       },
     );
@@ -176,12 +176,8 @@ class JitsiVideo extends React.Component {
         <p>Hmmm, it appears that the breakout conference is having trouble loading.</p>
         <ul>
           <li>
-            Do you have 3rd party cookies disabled?  Third party cookies
-            are required for the video conferencing to work.
-          </li>
-          <li>
             Are you using a recent version of Firefox or Chrome?  Video
-            conferencing is currently not available in Safari, Internet
+            conferencing is currently <b>not available in Safari</b>, Internet
             Explorer, iPads or iPhones.
           </li>
           <li>
