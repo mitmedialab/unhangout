@@ -119,13 +119,13 @@ def plenary_list(request):
 
 @login_required
 def plenary_export_etherpads(request, plenary_id):
-    if not request.user.is_superuser:
-        raise PermissionDenied
-
     try:
         plenary = Plenary.objects.get(pk=plenary_id)
     except Plenary.DoesNotExist:
         raise Http404
+
+    if not plenary.has_admin(request.user):
+        raise PermissionDenied
 
     return HttpResponse(utils.export_etherpads(plenary))
 
