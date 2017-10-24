@@ -323,7 +323,9 @@ class Breakout extends React.Component {
   resizeOnMouseDown(event) {
     this.setState({dragging: true});
     this.videoDiv.style.pointerEvents = 'none';
-    this.etherpadDiv && this.etherpadDiv.style.pointerEvents = 'none';
+    if (this.etherpadDiv) {
+      this.etherpadDiv.style.pointerEvents = 'none';
+    }
   }
 
   resizeOnMouseMove(event) {
@@ -338,7 +340,9 @@ class Breakout extends React.Component {
   resizeOnMouseUp(event) {
     this.setState({dragging: false});
     this.videoDiv.style.pointerEvents = 'auto';
-    this.etherpadDiv && this.etherpadDiv.style.pointerEvents = 'auto';
+    if (this.etherpadDiv) {
+      this.etherpadDiv.style.pointerEvents = 'auto';
+    }
   }
 
   render() {
