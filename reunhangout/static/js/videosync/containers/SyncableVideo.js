@@ -54,6 +54,7 @@ class SyncableYoutubeVideo extends React.Component {
       3: 'buffering',
       5: 'video cued'
     };
+    this.isLive = false;
   }
   getCurSync() {
     return this.props.videosync[this.props.sync_id] || {};
@@ -277,7 +278,9 @@ class SyncableYoutubeVideo extends React.Component {
       <BS.Button className='sync-intent' bsSize='xsmall' onClick={(e) => this.toggleSyncIntent(e)}>
         <i className={'fa fa-' + (intendToSync ? 'lock' : 'unlock')}></i>
         {' '}
-        <span className='time-indicator'>{this.formatTime(this.state.syncTime)}</span>
+        {!this.isLive ?
+          <span className='time-indicator'>{this.formatTime(this.state.syncTime)}</span>
+        : null}
       </BS.Button>
     </span>
   }
@@ -300,6 +303,11 @@ class SyncableYoutubeVideo extends React.Component {
 }
 
 class LiveYoutubeVideo extends SyncableYoutubeVideo {
+  constructor(props) {
+    super(props);
+    this.isLive = true;
+  }
+
   /*
    * For a live youtube video, only ever play at the tip of the current live
    * broadcast, rather than at arbitrary points within the video. Thus, we

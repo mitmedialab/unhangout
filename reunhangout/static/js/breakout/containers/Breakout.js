@@ -55,7 +55,6 @@ class JitsiVideo extends React.Component {
             "recording"
           ],
           MAIN_TOOLBAR_BUTTONS: ['microphone', 'camera', 'desktop'],
-          INVITE_OPTIONS: [],
         }
       },
     );
