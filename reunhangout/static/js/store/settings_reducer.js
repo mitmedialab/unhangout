@@ -1,1 +1,1 @@
-export const settings = (state, action) => window.__SETTINGS__;
+export const settings = (state, action) => window.__SETTINGS__ || {};

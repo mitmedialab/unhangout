@@ -124,6 +124,7 @@ class Plenary(models.Model):
             'id': self.id,
             'image': self.image.url if self.image else None,
             'live_participants': list(self.live_participants.values_list('id', flat=True)),
+            'max_participants': self.max_participants,
             'name': self.name,
             'open': self.open,
             'organizer': self.organizer,

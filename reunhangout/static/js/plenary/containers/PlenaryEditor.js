@@ -31,7 +31,7 @@ export class PlenaryEditor extends React.Component {
       'name', 'organizer', 'start_date', 'end_date', 'doors_open',
       'doors_close', 'description', 'slug', 'public', 'image',
       'canceled', 'copy_from_id', 'jitsi_server', 'wrapup_emails',
-      'etherpad_initial_text',
+      'etherpad_initial_text', 'max_participants'
     ];
     this.plenarySettingsFieldsRequired = ['name', 'slug'];
   }
@@ -248,9 +248,10 @@ export class PlenaryEditor extends React.Component {
     let update = {copy_from_id: copyFromId};
     if (copyFromId) {
       let copyFrom = this.props.copyablePlenaries[copyFromId];
+      console.log(copyFrom);
       [
         "name", "image", "organizer", "time_zone", "public",
-        "description", "whiteboard"
+        "description", "whiteboard", "etherpad_initial_text",
       ].forEach(key => {
         update[key] = copyFrom[key];
       });
