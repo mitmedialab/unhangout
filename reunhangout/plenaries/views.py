@@ -71,9 +71,9 @@ def plenary_detail(request, id_or_slug):
     else:
         # If authenticated, fetch full fields.
         data['plenary'] = plenary.serialize()
-        breakouts = Breakout.objects.filter(
+        breakouts = Breakout.objects.active().filter(
             plenary=plenary).select_related().prefetch_related('votes', 'members')
-        data['breakouts'] = [b.serialize() for b in plenary.breakout_set.all()]
+        data['breakouts'] = [b.serialize() for b in plenary.breakout_set.active()]
 
         chat_messages = ChatMessage.objects.filter(
             plenary=plenary

@@ -12,7 +12,8 @@ from reunhangout.utils import json_dumps
 @login_required
 def breakout_detail(request, breakout_id):
     try:
-        breakout = Breakout.objects.select_related().get(pk=breakout_id)
+        breakout = Breakout.objects.active().select_related().get(
+                pk=breakout_id)
     except Breakout.DoesNotExist:
         raise Http404
 

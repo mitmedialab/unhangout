@@ -92,7 +92,7 @@ class WrapupEmail(EmailHandler):
         if not etherpad_urls:
             etherpad_urls = {
                 b.id: b.get_etherpad_readonly()
-                for b in plenary.breakout_set.all()
+                for b in plenary.breakout_set.all() # includes inactive
             }
 
         #

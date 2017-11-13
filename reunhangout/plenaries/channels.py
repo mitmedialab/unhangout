@@ -225,7 +225,7 @@ def handle_breakout(message, data, plenary):
         # breakouts from a new database query.  We can optimize this later if
         # needed.
         broadcast(plenary.channel_group_name, type='breakout_receive',
-            payload=[b.serialize() for b in plenary.breakout_set.all()])
+            payload=[b.serialize() for b in plenary.breakout_set.active()])
 
     # Handle actions
 
@@ -263,7 +263,7 @@ def handle_breakout(message, data, plenary):
             blacklist.add(breakout.id)
 
         # Place in an existing breakout, if available
-        available_random_breakouts = plenary.breakout_set.exclude(
+        available_random_breakouts = plenary.breakout_set.active().exclude(
             id__in=blacklist
         ).annotate(
             member_count=Count('members')
@@ -286,14 +286,15 @@ def handle_breakout(message, data, plenary):
     # id of the breakout to operate on.
 
     try:
-        breakout = plenary.breakout_set.get(id=payload['id'])
+        breakout = plenary.breakout_set.active().get(id=payload['id'])
     except (Breakout.DoesNotExist, KeyError):
         return handle_error(message, "Breakout not found.")
 
     if action == 'delete':
         if not is_admin:
             return admin_required_error()
-        breakout.delete()
+        breakout.active = False
+        breakout.save()
         return respond_with_breakouts()
 
     elif action == 'modify':
@@ -420,10 +421,12 @@ def handle_plenary(message, data, plenary):
             plenary.full_clean()
             plenary.save()
             if 'random_max_attendees' in payload:
-                # Not using queryset.update here, because we want to be able to rely on
-                # signals for eventual use of django-channels data binding:
+                # Not using queryset.update here, because we want to be able to
+                # rely on signals for eventual use of django-channels data
+                # binding:
                 # http://channels.readthedocs.io/en/latest/binding.html
-                for breakout in plenary.breakout_set.filter(is_random=True):
+                for breakout in plenary.breakout_set.active().filter(
+                        is_random=True):
                     if breakout.max_attendees != plenary.random_max_attendees:
                         breakout.max_attendees = plenary.random_max_attendees
                         breakout.full_clean()
@@ -439,7 +442,9 @@ def handle_plenary(message, data, plenary):
     broadcast(plenary.channel_group_name, type='plenary', payload={'plenary': update})
 
     if breakouts_changed:
-        breakouts_serialized = [(b, b.serialize()) for b in plenary.breakout_set.all()]
+        breakouts_serialized = [
+            (b, b.serialize()) for b in plenary.breakout_set.active()
+        ]
 
         # Broadcast new breakouts to plenary
         broadcast(plenary.channel_group_name, type='breakout_receive',
@@ -571,7 +576,7 @@ def handle_message_breakouts(message, data, plenary):
         return handle_error(message, "Must be an admin to message breakouts")
 
     msg_text = data['payload']['message']
-    for breakout in plenary.breakout_set.all():
+    for breakout in plenary.breakout_set.active():
         broadcast(breakout.channel_group_name, type='message_breakouts',
                 payload={'message': msg_text})
     track("message_breakouts", message.user, {'message': msg_text}, plenary=plenary)

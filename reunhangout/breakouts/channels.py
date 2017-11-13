@@ -24,7 +24,7 @@ def ws_connect(message, breakout_id):
     if not message.user.is_authenticated:
         return handle_error(message, "Authentication required")
     try:
-        breakout = Breakout.objects.get(pk=breakout_id)
+        breakout = Breakout.objects.active().get(pk=breakout_id)
     except Breakout.DoesNotExist:
         return handle_error(message,  'Breakout not found')
 

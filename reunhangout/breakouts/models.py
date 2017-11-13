@@ -16,6 +16,10 @@ from reunhangout.utils import random_webrtc_id
 
 logger = logging.getLogger('request')
 
+class BreakoutManager(models.Manager):
+    def active(self):
+        return self.filter(active=True)
+
 class Breakout(models.Model):
     title = models.CharField(max_length=80, default="", blank=True)
     # Slug field should be as long as the title with the ID appended.
@@ -56,6 +60,11 @@ class Breakout(models.Model):
             editable=False, unique=True)
 
     created = models.DateTimeField(default=timezone.now)
+
+    active = models.BooleanField(default=True,
+            help_text="Hidden and joinable if unchecked")
+
+    objects = BreakoutManager()
 
     CHANNEL_GROUP_NAME_PREFIX = "breakout-"
 

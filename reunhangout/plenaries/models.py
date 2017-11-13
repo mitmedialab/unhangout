@@ -251,7 +251,8 @@ class Plenary(models.Model):
         from breakouts.models import Breakout
         from channels_presence.models import Presence
         User = get_user_model()
-        breakout_ids = list(self.breakout_set.values_list('id', flat=True))
+        breakout_ids = list(self.breakout_set.active().values_list(
+            'id', flat=True))
         channels = [Breakout.channel_group_name_from_id(pk) for pk in breakout_ids]
         channels.append(self.channel_group_name)
 
@@ -270,7 +271,9 @@ class Plenary(models.Model):
             # Breakout members, voters, and proposers
             Breakout.members.through.objects.filter(breakout_id__in=breakout_ids).values_list('user_id'),
             Breakout.votes.through.objects.filter(breakout_id__in=breakout_ids).values_list('user_id'),
-            Breakout.objects.filter(id__in=breakout_ids).values_list('proposed_by_id'),
+            Breakout.objects.active().filter(
+                id__in=breakout_ids
+            ).values_list('proposed_by_id'),
         ]
 
         q = models.Q()
