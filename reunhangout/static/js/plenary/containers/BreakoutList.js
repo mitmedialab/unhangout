@@ -110,20 +110,20 @@ class BreakoutList extends React.Component {
     return <div className={name}>
       <BS.Modal show={this.state[name]}
                 onHide={() => this.setState({[name]: false})}>
-        <BS.Modal.Header closeButton>
-          <BS.Modal.Title>{title}</BS.Modal.Title>
-        </BS.Modal.Header>
         <BS.Form onSubmit={handler}>
+          <BS.Modal.Header closeButton>
+            <BS.Modal.Title>{title}</BS.Modal.Title>
+          </BS.Modal.Header>
           <BS.Modal.Body className='form-horizontal'>
             {body}
           </BS.Modal.Body>
+          <BS.Modal.Footer>
+            <BS.Button onClick={() => this.setState({[name]: false})}>
+              Close
+            </BS.Button>
+            <BS.Button bsStyle='primary' type='submit'>{actionName}</BS.Button>
+          </BS.Modal.Footer>
         </BS.Form>
-        <BS.Modal.Footer>
-          <BS.Button onClick={() => this.setState({[name]: false})}>
-            Close
-          </BS.Button>
-          <BS.Button bsStyle='primary' onClick={handler}>{actionName}</BS.Button>
-        </BS.Modal.Footer>
       </BS.Modal>
     </div>
   }
@@ -243,7 +243,8 @@ class BreakoutList extends React.Component {
               <BS.FormControl type="text"
                   placeholder="Breakout Name"
                   title={(this.state && this.state.title) || ""}
-                  onChange={(e) => this.setState({title: e.target.value})} />
+                  onChange={(e) => this.setState({title: e.target.value})}
+                  autoFocus={true} />
               { this.state['title-error'] ?
                   <BS.HelpBlock>{this.state['title-error']}</BS.HelpBlock>
               : null }
