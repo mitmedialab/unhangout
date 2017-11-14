@@ -1,0 +1,35 @@
+.mounted-rich-text-editor {
+  display: inline-block;
+  a, a:visited, a:active {
+    color: #0081ff;
+  }
+}
+
+// Undo list styles from Django admin
+form .aligned ul.public-DraftStyleDefault-ul {
+  margin-left: 1.5em;
+  padding-left: 0px;
+}
+
+form .aligned ul li.public-DraftStyleDefault-unorderedListItem {
+  list-style-type: disc;
+}
+.module .public-DraftEditor-content {
+  h1 {
+    color: #333;
+    font-weight: bold;
+  }
+  h2 {
+    background: transparent;
+    color: #333;
+    font-weight: bold;
+    font-size: 16px;
+    padding-left: 0;
+  }
+
+  h3 {
+    padding-left: 0;
+    color: #333;
+  }
+
+}

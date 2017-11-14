@@ -16,8 +16,8 @@ module.exports = {
       path.join(root, 'static', 'js', 'index.js'),
     ],
     'editor': [
-      path.join(root, 'static', 'scss', 'editor.scss'),
-      path.join(root, 'static', 'js', 'editor/index.js')
+      path.join(root, 'richtext', 'static', 'richtext', 'editor.scss'),
+      path.join(root, 'richtext', 'static', 'richtext', 'editor.js')
     ],
     'frontend': [
       path.join(root, 'static', 'scss', 'frontend.scss'),

@@ -4,14 +4,14 @@ from django import forms
 from django.utils.timezone import now
 
 from plenaries.models import Plenary, Series, ChatMessage
-from richtext.utils import RichTextField
+from richtext.forms import RichTextFormField
 from analytics.utils import plenary_analytics
 from plenaries.utils import zip_exported_etherpads
 from plenaries import tasks
 
 class PlenaryForm(forms.ModelForm):
-    description = RichTextField(required=False)
-    whiteboard = RichTextField(required=False)
+    description = RichTextFormField(required=False)
+    whiteboard = RichTextFormField(required=False)
 
 class AdminInline(admin.TabularInline):
     model = Plenary.admins.through

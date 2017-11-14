@@ -20,8 +20,8 @@ module.exports = {
     'editor': [
       'webpack-dev-server/client?http://localhost:3000',
       'webpack/hot/only-dev-server',
-      path.join(root, 'static', 'scss', 'editor.scss'),
-      path.join(root, 'static', 'js', 'editor/index.js')
+      path.join(root, 'richtext', 'static', 'richtext', 'editor.scss'),
+      path.join(root, 'richtext', 'static', 'richtext', 'editor.js')
     ],
     'frontend': [
       path.join(root, 'static', 'scss', 'frontend.scss'),

@@ -2,11 +2,10 @@ from django.contrib import admin
 from django import forms
 
 from frontend.models import PageComponent
-
-from richtext.utils import RichTextField
+from richtext.forms import RichTextFormField
 
 class PageComponentForm(forms.ModelForm):
-    html = RichTextField()
+    html = RichTextFormField()
     class Meta:
         model = PageComponent
         fields = ['key', 'title', 'html']

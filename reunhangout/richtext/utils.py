@@ -1,49 +1,9 @@
-from django import forms
-from django.utils.safestring import mark_safe
-from webpack_loader.templatetags.webpack_loader import get_files
-from webpack_loader.exceptions import WebpackError
+import re
 import bleach
 from bleach_whitelist.bleach_whitelist import markdown_tags, markdown_attrs
-
-def maybe_get_files(arg_sets):
-    """
-    Allow assets to be missing without raising an exception. This is needed to
-    allow e.g. collectstatic to run before assets have been built for the first
-    time.
-    """
-    out = []
-    for args in arg_sets:
-        try:
-            out += get_files(*args)
-        except (OSError, WebpackError):
-            print("Missing assets for {}".format(args))
-    return out
-
-class RichTextMedia:
-    class Media:
-        js = [f['publicPath'] for f in maybe_get_files((("main", "js"), ("editor", "js")))]
-        css = {'all': [
-            f['publicPath'] for f in maybe_get_files((("main", "css"), ("editor", "css")))
-        ]}
-
-class RichTextWidget(forms.Textarea, RichTextMedia):
-    def __init__(self, attrs=None):
-        default_attrs = {'class': 'js-rich-text-editor'}
-        if attrs:
-            default_attrs.update(attrs)
-        super(RichTextWidget, self).__init__(default_attrs)
-
-class RichTextField(forms.CharField):
-    widget = RichTextWidget
-
-class RichTextualizeForm(forms.Form, RichTextMedia):
-    def __init__(self, *args, **kwargs):
-        super(RichTextualizeForm, self).__init__(*args, **kwargs)
-        for name,field in self.fields.items():
-            if isinstance(field.widget, forms.Textarea):
-                field.widget.attrs['class'] = " ".join((
-                    field.widget.attrs.get('class', ''), "js-rich-text-editor"
-                )).strip()
+from django.utils.safestring import mark_safe
+from django.conf import settings
+from urllib.parse import urlparse, urlunparse
 
 def _p_attributes(name, value):
     return name == "class" and value in ("dropcap", "smallcap")
@@ -56,6 +16,9 @@ valid_attrs.update(markdown_attrs)
 valid_attrs['p'] = _p_attributes
 valid_attrs['span'] = _span_attributes
 
+valid_tags = markdown_tags + ['ins']
+valid_styles = None
+
 def _add_noopener(attrs, new=False):
     attrs[(None, 'rel')] = "nofollow noopener noreferrer"
     return attrs
@@ -64,11 +27,38 @@ def _add_target_blank(attrs, new=False):
     attrs[(None, 'target')] = '_blank'
     return attrs
 
-def sanitize(html, link=True, tags=None, attrs=valid_attrs, styles=None):
-    if tags is None:
-        tags = markdown_tags + ['ins']
+def _maybe_target_blank(attrs, new=False):
+    href = attrs.get('href')
+    if href:
+        url = urlparse(href)
+        exempt = getattr(settings, 'NOOPENER_EXEMPT_HOSTS', settings.ALLOWED_HOSTS)
+        is_local = url.hostname in exempt or (
+            url.hostname is None and url.netloc == ''
+        )
+
+        if not is_local:
+            # Make all non-local links target blank.
+            attrs['target'] = '_blank'
+            attrs['rel'] = "noopener noreferrer"
+        elif url.scheme == 'http':
+            # Make all local absolute links https.
+            parts = list(url)
+            parts[0] = "https"
+            attrs['href'] = urlunparse(parts)
+
+    return attrs
+
+def sanitize(html, link=True, tags=valid_tags, attrs=valid_attrs, styles=valid_styles):
+    # Trap the sort of empty output the rich text editor creates.
+    if not html:
+        return ""
+    if re.match("^(\s*<p>\s*(<br>|&nbsp;|\xa0)*\s*</p>\s*)*$", html):
+        return ""
+
     clean = bleach.clean(html, tags, attrs, styles or [])
     if link:
         clean = bleach.linkify(clean, [_add_noopener, _add_target_blank])
-    return mark_safe(clean)
+    safe = mark_safe(clean)
+    setattr(safe, "unsafe", html)
+    return safe
 
