@@ -61,7 +61,7 @@ module.exports = {
       {
         test: /\.css$/,
         exclude: /react-selectize\/themes\/index.css$/,
-        loader: 'style-loader!css-loader!postcss-loader'
+        loader: 'style-loader!css-loader?modules!postcss-loader'
       },
       {
         test: /\.json$/,
