@@ -174,13 +174,14 @@ def plenary_analytics(plenary_queryset, fmt='python'):
         by_breakout = {}
         for user_id, breakout_copresence in copresence.items():
             for breakout_id, user_ids in breakout_copresence.items():
+                if breakout_id not in plenary_data[plenary_id]['breakouts']:
+                    continue
                 plenary_data[plenary_id]['users'][user_id][
                         'breakout_copresence'] = breakout_copresence
                 plenary_data[plenary_id]['breakouts'][breakout_id][
                         'copresence'].add(frozenset(
                             set(user_ids) | set([user_id])
                         ))
-
 
     output = OrderedDict()
     for plenary_id, datadict in sorted(plenary_data.items()):
