@@ -14,6 +14,7 @@ from django.contrib.sites.models import *
 from channels_presence.models import *
 
 from accounts.models import *
+from analytics.models import *
 from breakouts.models import *
 from frontend.models import *
 from plenaries.models import *

@@ -122,18 +122,24 @@ def plenary_analytics(plenary_queryset, fmt='python'):
         elif action.action == "leave_plenary":
             _fit_to_joinleave(action.timestamp, log['event_presence'])
         elif action.action in breakout_actions:
-            breakout_id = (
-                action.data.get('breakout', {}).get('id') or
-                action.breakout_id
-            )
-            if not breakout_id:
-                continue
             if action.breakout_id:
-                plenary_data[action.plenary_id]['breakouts'][
-                        action.breakout_id].update({
-                    'id': action.breakout.id,
-                    'title': action.breakout.title,
-                })
+                breakout_id = action.breakout_id
+                breakout_detail = {
+                    'id': breakout_id,
+                    'title': action.breakout.title
+                }
+            else:
+                breakout_id = action.data.get('breakout', {}).get('id')
+                if not breakout_id:
+                    continue
+                breakout_detail = {
+                    'id': breakout_id,
+                    'title': '<Unknown>'
+                }
+
+            plenary_data[action.plenary_id]['breakouts'][breakout_id].update(
+                breakout_detail
+            )
 
             if action.action == "join_breakout":
                 log['breakout_presence'][breakout_id].append({
