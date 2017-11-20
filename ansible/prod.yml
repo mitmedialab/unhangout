@@ -55,6 +55,7 @@
     tarsnap_postgres_databases:
       - "{{uh_postgres_db}}"
     etherpad_domain: "{{uh_etherpad_domain}}"
+    etherpad_path: "{{uh_etherpad_path}}"
     etherpad_db_name: "{{uh_etherpad_db_name}}"
     etherpad_db_username: "{{uh_etherpad_db_username}}"
     etherpad_db_password: "{{uh_etherpad_db_password}}"
