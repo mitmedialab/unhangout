@@ -44,7 +44,7 @@ for name, keys in ALLAUTH_APP_KEYS.items():
 #    'SHOW_TOOLBAR_CALLBACK': lambda request: not request.is_ajax() and request.META.get('HTTP_X_FORWARDED_FOR', None) in INTERNAL_IPS
 #}
 
-ETHERPAD_SERVER = "{{etherpad_domain}}"
+ETHERPAD_SERVER = "{{etherpad_domain}}{{etherpad_path}}"
 ETHERPAD_API_KEY = "{{etherpad_api_key}}"
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"

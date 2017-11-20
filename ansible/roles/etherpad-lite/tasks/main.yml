@@ -90,6 +90,7 @@
       src: "{{etherpad_nginx_template}}"
       dest: /etc/nginx/sites-available/etherpad.conf
     notify: restart nginx
+    when: etherpad_path == ""
   
   - name: Enable nginx conf
     file:
@@ -97,5 +98,15 @@
       dest: /etc/nginx/sites-enabled/etherpad.conf
       state: link
     notify: restart nginx
+    when: etherpad_path == ""
+
+  - name: Disable nginx conf if running from subpath
+    file:
+      path: "{{item}}"
+      state: absent
+    with_items:
+      - /etc/nginx/sites-enabled/etherpad.conf
+      - /etc/nginx/sites-available/etherpad.conf
+    when: etherpad_path != ""
 
   tags: etherpad
