@@ -1,5 +1,5 @@
 import React from "react";
-import RichTextEditor from 'react-rte/lib/RichTextEditor';
+import RichTextEditor from 'react-rte';
 
 import * as style from "../../../scss/partials/_inPlaceEditor.scss";
 

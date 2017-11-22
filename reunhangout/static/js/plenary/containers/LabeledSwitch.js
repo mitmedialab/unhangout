@@ -1,7 +1,7 @@
 import React from "react";
 import Switch from 'react-toggle-switch';
-import * as switchStyle from "react-toggle-switch/dist/css/switch.min.css";
 import * as style from '../../../scss/partials/_labeledSwitch.scss';
+import "react-toggle-switch/dist/css/switch.min.css";
 
 export class LabeledSwitch extends React.Component {
   constructor(props) {

@@ -50,7 +50,7 @@
     "react-rte": "^0.15.0",
     "react-selectize": "^2.0.3",
     "react-spinkit": "^1.1.11",
-    "react-toggle-switch": "^2.1.2",
+    "react-toggle-switch": "^3.0.3",
     "redux": "^3.5.2",
     "redux-thunk": "^2.1.0",
     "rimraf": "^2.5.2",
