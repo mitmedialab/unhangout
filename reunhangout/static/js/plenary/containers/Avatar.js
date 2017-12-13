@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import _ from "lodash";
 import {connect} from "react-redux";
 import * as BS from "react-bootstrap";
@@ -57,16 +58,16 @@ class RawAvatar extends React.Component {
   }
 }
 RawAvatar.propTypes = {
-  user: React.PropTypes.oneOfType([
-    React.PropTypes.number,
-    React.PropTypes.shape({
-      id: React.PropTypes.number,
-      username: React.PropTypes.string.isRequired,
-      display_name: React.PropTypes.string.isRequired,
-      image: React.PropTypes.string.isRequired,
+  user: PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.shape({
+      id: PropTypes.number,
+      username: PropTypes.string.isRequired,
+      display_name: PropTypes.string.isRequired,
+      image: PropTypes.string.isRequired,
     })
   ]),
-  idPart: React.PropTypes.string.isRequired,
+  idPart: PropTypes.string.isRequired,
 }
 
 

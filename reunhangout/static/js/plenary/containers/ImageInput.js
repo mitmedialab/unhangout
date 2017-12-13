@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import "../../../scss/partials/_imageInput.scss";
 
 export class ImageInput extends React.Component {
@@ -176,10 +177,10 @@ export class ImageInput extends React.Component {
   }
 }
 ImageInput.propTypes = {
-  value: React.PropTypes.string,
-  onChange: React.PropTypes.func,
-  maxWidth: React.PropTypes.number,
-  maxHeight: React.PropTypes.number,
+  value: PropTypes.string,
+  onChange: PropTypes.func,
+  maxWidth: PropTypes.number,
+  maxHeight: PropTypes.number,
 }
 ImageInput.defaultProps = {
   maxWidth: 800,

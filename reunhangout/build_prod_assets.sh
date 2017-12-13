@@ -9,7 +9,7 @@ set -e
 
 SRC="static/tmp/"
 DEST="static/dist/"
-CONFIG="reunhangout/webpack/config.prod.js"
+CONFIG="webpack/config.prod.js"
 
 DIR=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
 cd $DIR

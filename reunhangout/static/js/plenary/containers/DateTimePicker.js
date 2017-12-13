@@ -1,8 +1,6 @@
 import React from "react";
-import Pikaday from 'react-pikaday';
-import 'pikaday/css/pikaday.css';
-import {SimpleSelect} from 'react-selectize';
-import 'react-selectize/themes/index.css';
+import Select from 'react-select';
+import 'react-select/dist/react-select.css';
 import moment from 'moment-timezone';
 
 export class DateTimePicker extends React.Component {
@@ -35,7 +33,8 @@ export class DateTimePicker extends React.Component {
     });
   }
   onDateChange(v) {
-    this.setState({date: v}, () => this.sendOnChange())
+    let date = moment(v).toDate();
+    this.setState({date: date}, () => this.sendOnChange())
   }
   onTimeChange(v) {
     let match = /^(\d+)(?::(\d+))?\s*(am?|pm?)?$/i.exec(v.trim());
@@ -85,7 +84,11 @@ export class DateTimePicker extends React.Component {
   render() {
     let selectProps = {
       placeholder: "Time zone",
-      onValueChange: (v) => this.onZoneChange(v)
+      value: this.state.zone,
+      onChange: (opt) => this.setState({zone: opt.value}),
+      options: moment.tz.names().map((name, i) => ({
+        value: name, label: name
+      }))
     };
     if (this.state.zone) {
       selectProps.value = {label: this.state.zone, value: this.state.zone};
@@ -93,9 +96,10 @@ export class DateTimePicker extends React.Component {
     return (
       <div className='control-group'>
         <div className='form-inline'>
-          <Pikaday value={this.state.date}
-                 className='form-control'
-                 onChange={(v) => this.onDateChange(v)} />
+          <input className='form-control'
+                 type='date'
+                 value={moment(this.state.date).format('YYYY-MM-DD')}
+                 onChange={(e) => this.onDateChange(e.target.value)} />
           <span className={this.state['time-error'] ? 'has-error' : ''}>
             <input type='text' value={this.state.time}
                    className='form-control'
@@ -103,11 +107,16 @@ export class DateTimePicker extends React.Component {
           </span>
         </div>
         <div>
-          Timezone: <SimpleSelect {...selectProps}>
-            { moment.tz.names().map((name, i) => {
-              return <option value={name} key={i}>{name}</option>
-            })}
-          </SimpleSelect>
+          Timezone:
+          <Select
+            placeholder="Time zone"
+            value={this.state.zone}
+            onChange={(opt) => this.setState({zone: opt ? opt.value : null})}
+            options={moment.tz.names().map(n => ({
+              value: n,
+              label: n.replace(/_/g, ' ')
+            }))}
+          />
         </div>
         <div className='help-block'>
           {this.interpretStateAsDate().format('LLLL z (Z)')}

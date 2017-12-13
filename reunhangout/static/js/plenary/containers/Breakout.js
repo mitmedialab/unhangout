@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import {connect} from "react-redux";
 import * as style from "../../../scss/pages/plenary/_breakoutliststyle.scss";
 import * as BS from "react-bootstrap";
@@ -193,10 +194,10 @@ export default class Breakout extends React.Component {
   }
 }
 Breakout.propTypes = {
-  'breakout': React.PropTypes.object.isRequired,
-  'presence': React.PropTypes.object.isRequired,
-  'auth': React.PropTypes.object.isRequired,
-  'onChangeBreakouts': React.PropTypes.func.isRequired
+  'breakout': PropTypes.object.isRequired,
+  'presence': PropTypes.object.isRequired,
+  'auth': PropTypes.object.isRequired,
+  'onChangeBreakouts': PropTypes.func.isRequired
 }
 
 class BreakoutPresence extends React.Component {
@@ -222,8 +223,8 @@ class BreakoutPresence extends React.Component {
   }
 }
 BreakoutPresence.propTypes = {
-  'breakout': React.PropTypes.object.isRequired,
-  'presence': React.PropTypes.object.isRequired,
-  'auth': React.PropTypes.object.isRequired,
+  'breakout': PropTypes.object.isRequired,
+  'presence': PropTypes.object.isRequired,
+  'auth': PropTypes.object.isRequired,
 }
 

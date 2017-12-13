@@ -3,5 +3,13 @@
     "react",
     "es2015",
     "stage-2"
-  ]
+  ],
+  "plugins": [
+    "transform-decorators-legacy"
+  ],
+  "env": {
+    "production": {
+      "plugins": ["transform-react-remove-prop-types"]
+    }
+  }
 }

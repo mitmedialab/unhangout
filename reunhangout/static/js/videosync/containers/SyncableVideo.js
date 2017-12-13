@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import _ from "lodash";
 import {connect} from "react-redux";
 import * as BS from 'react-bootstrap';
@@ -32,9 +33,9 @@ class SyncableVideo extends React.Component {
   }
 }
 SyncableVideo.propTypes = {
-  'sync_id': React.PropTypes.string.isRequired,
-  'embed': React.PropTypes.object.isRequired,
-  'embedDetails': React.PropTypes.object,
+  'sync_id': PropTypes.string.isRequired,
+  'embed': PropTypes.object.isRequired,
+  'embedDetails': PropTypes.object,
 };
 
 class SyncableYoutubeVideo extends React.Component {

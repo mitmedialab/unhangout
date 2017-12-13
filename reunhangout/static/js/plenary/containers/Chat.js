@@ -6,6 +6,11 @@ import * as A from "../actions";
 import * as style from "../../../scss/pages/plenary/_chatstyle.scss"
 import {Avatar} from './Avatar';
 
+@connect(
+  (state, ownProps) => ({
+    auth: state.auth
+  }),
+)
 class AtName extends React.Component {
   render() {
     let classes = ['atname'];
@@ -23,13 +28,6 @@ class AtName extends React.Component {
     </span>
   }
 }
-const ConnectedAtName = connect(
-  (state) => ({
-    auth: state.auth
-  }),
-  (dispatch, ownProps) => ({
-  })
-)(AtName);
 
 /**
  * Split 'text' into an array of react components or strings, where at-names
@@ -47,9 +45,9 @@ const atnamify = (text, users, msgId) => {
       if (mentioned) {
         return <span>
           {' '}
-          <ConnectedAtName text={`@${part}`}
-                           mentioned={mentioned}
-                           id={`atname-${msgId}-${i}`}/>
+          <AtName text={`@${part}`}
+                  mentioned={mentioned}
+                  id={`atname-${msgId}-${i}`}/>
         </span>
       } else {
         return ` @${part}`;
@@ -60,7 +58,12 @@ const atnamify = (text, users, msgId) => {
 }
 const normalizeDisplayName = (name) => name.replace(/\s/g, "").toLowerCase();
 
-class RawChatMessage extends React.Component {
+@connect(
+  (state, ownProps) => ({
+    users: state.users
+  })
+)
+class ChatMessage extends React.Component {
   render() {
     let firstMsg = this.props.messages[0];
     let user = this.props.users[firstMsg.user];
@@ -91,7 +94,6 @@ class RawChatMessage extends React.Component {
     return markedUp;
   }
 };
-const ChatMessage = connect(state => ({users: state.users}))(RawChatMessage)
 
 class Chat extends React.Component {
   constructor(props) {

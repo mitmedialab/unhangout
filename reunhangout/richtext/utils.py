@@ -5,15 +5,13 @@ from django.utils.safestring import mark_safe
 from django.conf import settings
 from urllib.parse import urlparse, urlunparse
 
-def _p_attributes(name, value):
-    return name == "class" and value in ("dropcap", "smallcap")
-
 def _span_attributes(name, value):
-    return name == "class" and value in ("smallcaps",)
+    if name == "data-mention" and re.match('^\d+$', value):
+        return True
+    return False
 
 valid_attrs = {}
 valid_attrs.update(markdown_attrs)
-valid_attrs['p'] = _p_attributes
 valid_attrs['span'] = _span_attributes
 
 valid_tags = markdown_tags + ['ins']

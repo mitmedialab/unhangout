@@ -48,7 +48,7 @@ def main():
             ),
             # webpack devserver
             subprocess.Popen(
-                ["node", os.path.join(BASE, "reunhangout", "webpack", "devserver.js")],
+                ["node", os.path.join(BASE, "webpack", "devserver.js")],
                 cwd=BASE, env={'PATH': PATH}
             ),
 

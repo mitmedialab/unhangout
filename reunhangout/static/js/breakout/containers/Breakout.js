@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import {connect} from "react-redux";
 import _ from 'lodash';
 import * as BS from "react-bootstrap";
@@ -239,9 +240,9 @@ class JitsiVideo extends React.Component {
 
 class Etherpad extends React.Component {
   static propTypes = {
-    server: React.PropTypes.string.isRequired,
-    id: React.PropTypes.string.isRequired,
-    auth: React.PropTypes.object.isRequired,
+    server: PropTypes.string.isRequired,
+    id: PropTypes.string.isRequired,
+    auth: PropTypes.object.isRequired,
   }
 
   getUrl(props) {
@@ -261,8 +262,8 @@ class Etherpad extends React.Component {
 
 class Presence extends React.Component {
   static propTypes = {
-    presence: React.PropTypes.object.isRequired,
-    auth: React.PropTypes.object.isRequired,
+    presence: PropTypes.object.isRequired,
+    auth: PropTypes.object.isRequired,
   }
 
   render() {

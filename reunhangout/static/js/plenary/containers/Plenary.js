@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import {connect} from "react-redux";
 import moment from 'moment-timezone';
 import * as style from "../../../scss/pages/plenary/_plenarystyle.scss"
@@ -51,130 +52,139 @@ class Plenary extends React.Component {
   componentWillUnmount() {
     this.openClockInterval && this.clearInterval(this.openClock);
   }
-  render() {
-    if (this.state.open || this.props.auth.is_admin) {
-      if (!this.props.auth.is_authenticated) {
-        document.location.href = `/accounts/login/?next=${encodeURIComponent(document.location.pathname)}`;
-      }
-      return <div className='plenary open'>
-        <ContactInfoModal auth={this.props.auth}
-                          show={this.showContactInfoModal()}
-                          onChange={this.props.updateContactCard.bind(this)} />
 
-        <WebRTCStatus />
-        <ConnectionStatus />
-        <div className='plenary-grid'>
-          <div className='column users-col'>
-            { this.props.auth.is_admin ? <PlenaryStatusAlert /> : "" }
-            <PlenaryInfo plenary={this.props.plenary} />
-            <UserMenu />
-            <Presence
-              presence={this.props.presence}
-              auth={this.props.auth}
-              muteOthers={!this.state.open ? this.props.plenary.admins : undefined}/>
-            <div className='logo-container'>
-              <a href="/" target="_blank">
-                <img src={`${this.props.settings.MEDIA_URL}${this.props.settings.BRANDING.logo}`} alt="Unhangout logo"></img>
-              </a>
-            </div>
-          </div>
-          <div className='column chat-col'>
-            <Whiteboard />
-            <Chat />
-          </div>
-          <div className='column breakout-col'>
-            <Embed />
-            <BreakoutList />
+  renderOpen() {
+    if (!this.props.auth.is_authenticated) {
+      document.location.href = `/accounts/login/?next=${encodeURIComponent(document.location.pathname)}`;
+    }
+    return <div className='plenary open'>
+      <ContactInfoModal auth={this.props.auth}
+                        show={this.showContactInfoModal()}
+                        onChange={this.props.updateContactCard.bind(this)} />
+
+      <WebRTCStatus />
+      <ConnectionStatus />
+      <div className='plenary-grid'>
+        <div className='column users-col'>
+          { this.props.auth.is_admin ? <PlenaryStatusAlert /> : null }
+          <PlenaryInfo plenary={this.props.plenary} />
+          <UserMenu />
+          <Presence
+            presence={this.props.presence}
+            auth={this.props.auth}
+            muteOthers={!this.state.open ? this.props.plenary.admins : undefined}/>
+          <div className='logo-container'>
+            <a href="/" target="_blank">
+              <img src={`${this.props.settings.MEDIA_URL}${this.props.settings.BRANDING.logo}`} alt="Unhangout logo"></img>
+            </a>
           </div>
         </div>
+        <div className='column chat-col'>
+          <Whiteboard />
+          <Chat />
+        </div>
+        <div className='column breakout-col'>
+          <Embed />
+          <BreakoutList />
+        </div>
       </div>
-    } else {
-      let startDate = moment(this.props.plenary.start_date).tz(moment.tz.guess());
-      let endDate = moment(this.props.plenary.end_date).tz(moment.tz.guess());
-      let doorsOpen = moment(this.props.plenary.doors_open).tz(moment.tz.guess());
-      let doorsClose = moment(this.props.plenary.doors_close).tz(moment.tz.guess());
-      let now = moment();
-      let upcoming = !this.props.plenary.canceled && doorsOpen > now;
-      return <div className="plenary closed">
-        <WebRTCStatus />
-        <BS.Grid fluid>
-          <BS.Row>
-            <BS.Col xs={3} className="column">
-              <PlenaryInfo plenary={this.props.plenary} />
-              <UserMenu />
-              { this.props.plenary.image ?
-                  <img src={this.props.plenary.image} alt='' className='img-responsive' />
+    </div>
+  }
+
+  renderClosed() {
+    let startDate = moment(this.props.plenary.start_date).tz(moment.tz.guess());
+    let endDate = moment(this.props.plenary.end_date).tz(moment.tz.guess());
+    let doorsOpen = moment(this.props.plenary.doors_open).tz(moment.tz.guess());
+    let doorsClose = moment(this.props.plenary.doors_close).tz(moment.tz.guess());
+    let now = moment();
+    let upcoming = !this.props.plenary.canceled && doorsOpen > now;
+    return <div className="plenary closed">
+      <WebRTCStatus />
+      <BS.Grid fluid>
+        <BS.Row>
+          <BS.Col xs={3} className="column">
+            <PlenaryInfo plenary={this.props.plenary} />
+            <UserMenu />
+            { this.props.plenary.image ?
+                <img src={this.props.plenary.image} alt='' className='img-responsive' />
+              : "" }
+          </BS.Col>
+          <BS.Col xs={8}>
+            <div className="details">
+              <h1>{this.props.plenary.name}</h1>
+              { this.props.plenary.organizer ?
+                  <p>hosted by <em>{this.props.plenary.organizer}</em></p>
                 : "" }
-            </BS.Col>
-            <BS.Col xs={8}>
-              <div className="details">
-                <h1>{this.props.plenary.name}</h1>
-                { this.props.plenary.organizer ?
-                    <p>hosted by <em>{this.props.plenary.organizer}</em></p>
-                  : "" }
-                { this.props.plenary.canceled ?
-                  <p><b>CANCELED</b>. This event has been canceled by the organizer.</p>
-                :
-                  <p><b>{startDate.format('dddd LL, LT')} to {endDate.format('LT')}</b></p>
-                }
-                { upcoming ?
-                  <p>Doors open at {doorsOpen.format('LT')}</p>
-                : this.props.plenary.canceled ?
-                  ""
-                :
-                  <p><em>This event has ended.</em></p>
-                }
-                <div dangerouslySetInnerHTML={{__html: this.props.plenary.description}} />
-                { upcoming ? 
-                  <div>
-                    <h3>Get Ready for the Event:</h3>
-                    <ul>
-                      {
-                        this.props.auth.is_authenticated ? "" :
-                          <li>
-                            <div className='alert alert-success'>
-                              <a href='/accounts/login'>Login</a> or{' '}
-                              <a href='/accounts/signup'>sign up</a>. You must be
-                              signed in to attend this event.
-                            </div>
-                          </li>
-                      }
-                      <li>
+              { this.props.plenary.canceled ?
+                <p><b>CANCELED</b>. This event has been canceled by the organizer.</p>
+              :
+                <p><b>{startDate.format('dddd LL, LT')} to {endDate.format('LT')}</b></p>
+              }
+              { upcoming ?
+                <p>Doors open at {doorsOpen.format('LT')}</p>
+              : this.props.plenary.canceled ?
+                ""
+              :
+                <p><em>This event has ended.</em></p>
+              }
+              <div dangerouslySetInnerHTML={{__html: this.props.plenary.description}} />
+              { upcoming ? 
+                <div>
+                  <h3>Get Ready for the Event:</h3>
+                  <ul>
+                    {
+                      this.props.auth.is_authenticated ? "" :
+                        <li>
+                          <div className='alert alert-success'>
+                            <a href='/accounts/login'>Login</a> or{' '}
+                            <a href='/accounts/signup'>sign up</a>. You must be
+                            signed in to attend this event.
+                          </div>
+                        </li>
+                    }
+                    <li>
+                      <p>
+                      Make sure you have a recent version of Firefox or Chrome.
+                      </p>
+                      <div className='text-muted'>
                         <p>
-                        Make sure you have a recent version of Firefox or Chrome.
+                        (We're sorry, but breakout sessions don't work with
+                        Safari, Internet Explorer/Edge, or on iOS yet. You can
+                        still watch the event with those browsers.)
                         </p>
-                        <div className='text-muted'>
-                          <p>
-                          (We're sorry, but breakout sessions don't work with
-                          Safari, Internet Explorer/Edge, or on iOS yet. You can
-                          still watch the event with those browsers.)
-                          </p>
-                        </div>
-                      </li>
-                      <li>
-                        <p>
-                          Check your <a href='/accounts/settings/account/'>account settings</a> and
-                          update your profile image
-                          (<img src={this.props.auth.image} width={24} height={24} alt='' />)
-                          or display name (<em>{this.props.auth.display_name}</em>).
-                        </p>
-                      </li>
-                    </ul>
-                  </div>
-                : ""}
-              </div>
-            </BS.Col>
-          </BS.Row>
-        </BS.Grid>
-      </div>
+                      </div>
+                    </li>
+                    <li>
+                      <p>
+                        Check your <a href='/accounts/settings/account/'>account settings</a> and
+                        update your profile image
+                        (<img src={this.props.auth.image} width={24} height={24} alt='' />)
+                        or display name (<em>{this.props.auth.display_name}</em>).
+                      </p>
+                    </li>
+                  </ul>
+                </div>
+              : ""}
+            </div>
+          </BS.Col>
+        </BS.Row>
+      </BS.Grid>
+    </div>
+  }
+
+  render() {
+    if (this.state.open || this.props.auth.is_admin) {
+      return renderClosed();
+    } else {
+      return renderOpen();
     }
   }
 }
 
 class ContactInfoModal extends React.Component {
   static propTypes = {
-    onChange: React.PropTypes.func.isRequired,
-    auth: React.PropTypes.object.isRequired,
+    onChange: PropTypes.func.isRequired,
+    auth: PropTypes.object.isRequired,
   }
   constructor(props) {
     super(props);

@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import * as BS from "react-bootstrap";
 import moment from 'moment-timezone';
 import _ from 'lodash';
@@ -9,10 +10,10 @@ import {ImageInput} from './ImageInput';
 
 export class PlenaryEditor extends React.Component {
   static propTypes = {
-    plenary: React.PropTypes.object,
-    settings: React.PropTypes.object,
-    onChange: React.PropTypes.func.isRequired,
-    loading: React.PropTypes.bool,
+    plenary: PropTypes.object,
+    settings: PropTypes.object,
+    onChange: PropTypes.func.isRequired,
+    loading: PropTypes.bool,
   }
   static defaultProps = {
     plenary: {

@@ -1,7 +1,5 @@
 import React from "react";
-import Pikaday from 'react-pikaday';
-import 'pikaday/css/pikaday.css';
-import 'react-selectize/themes/index.css';
+import PropTypes from 'prop-types';
 import moment from 'moment-timezone';
 
 export class RelativeTime extends React.Component {
@@ -102,12 +100,12 @@ export class RelativeTime extends React.Component {
   }
 }
 RelativeTime.propTypes = {
-  reference: React.PropTypes.string.isRequired,
-  referenceName: React.PropTypes.string.isRequired,
-  defaultDeltaMinutes: React.PropTypes.number,
-  value: React.PropTypes.string,
-  onChange: React.PropTypes.func,
-  after: React.PropTypes.bool,
+  reference: PropTypes.string.isRequired,
+  referenceName: PropTypes.string.isRequired,
+  defaultDeltaMinutes: PropTypes.number,
+  value: PropTypes.string,
+  onChange: PropTypes.func,
+  after: PropTypes.bool,
 }
 RelativeTime.defaultProps = {
   defaultDeltaMinutes: 0,
