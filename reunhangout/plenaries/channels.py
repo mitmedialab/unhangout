@@ -125,24 +125,12 @@ def handle_chat(message, data, plenary):
             message=data['payload']['message'],
             highlight=highlight or False
         )
-        at_names = find_atnames(data['payload']['message'])
-        mentions = []
-        if at_names:
-            # We're searching for a display name that contains a concatenated
-            # version of the username (e.g. with spaces removed). The username
-            # can also come from a variety of sources (e.g. twitter, facebook,
-            # manual). So just (expensively) grab the whole lot via python.
-            pool = []
-            for user in plenary.associated_users():
-                pool.append((
-                    re.sub("[^a-zA-Z0-9_.-]", "", user.get_display_name()).lower(),
-                    user
-                ))
-            for at_name in at_names:
-                for norm_name, user in pool:
-                    if norm_name.startswith(at_name.lower()):
-                        mentions.append(user)
-                        break
+        # He comes. https://stackoverflow.com/a/1732454
+        user_ids = re.findall(
+            r'''<span [^>]*(?<= )data-mention-user-id=['"](\d+)['"][^>]*>''', 
+            data['payload']['message']
+        )
+        mentions = plenary.associated_users().filter(id__in=user_ids)
         chat_message.mentions.set(mentions)
 
         data = chat_message.serialize()

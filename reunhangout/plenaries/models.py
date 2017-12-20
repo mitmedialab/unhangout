@@ -322,7 +322,7 @@ class ChatMessage(models.Model):
             related_name="mentioned_chats")
 
     def safe_message(self):
-        return sanitize(self.message, tags=['b', 'i'])
+        return sanitize(self.message, tags=['b', 'i', 'span', 'p', 'br'])
 
     def __str__(self):
         return "%s: %s" % (self.user, self.message)

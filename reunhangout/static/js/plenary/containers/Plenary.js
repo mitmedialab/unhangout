@@ -50,7 +50,7 @@ class Plenary extends React.Component {
     this.setState({open: this.isOpen()});
   }
   componentWillUnmount() {
-    this.openClockInterval && this.clearInterval(this.openClock);
+    this.openClockInterval && clearInterval(this.openClock);
   }
 
   renderOpen() {
@@ -174,9 +174,9 @@ class Plenary extends React.Component {
 
   render() {
     if (this.state.open || this.props.auth.is_admin) {
-      return renderClosed();
+      return this.renderOpen();
     } else {
-      return renderOpen();
+      return this.renderClosed();
     }
   }
 }

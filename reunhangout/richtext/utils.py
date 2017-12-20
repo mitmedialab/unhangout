@@ -5,8 +5,8 @@ from django.utils.safestring import mark_safe
 from django.conf import settings
 from urllib.parse import urlparse, urlunparse
 
-def _span_attributes(name, value):
-    if name == "data-mention" and re.match('^\d+$', value):
+def _span_attributes(tag, attr, value):
+    if attr == "data-mention-user-id" and re.match('^\d+$', value):
         return True
     return False
 
