@@ -48,9 +48,7 @@ module.exports.buildConfig = (isProd) => ({
     filename: '[name]-[hash].js',
     sourceMapFilename: '[name]-[hash].js.map',
     publicPath: (
-      isProd ?
-        'https://bpdb-dev.tirl.org/static/dist/'
-      : 'http://localhost:3000/static/dev/'
+      isProd ?  '/static/dist/' : 'http://localhost:3000/static/dev/'
     )
   },
   plugins: clearNulls([
