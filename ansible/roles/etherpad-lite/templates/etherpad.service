@@ -5,7 +5,6 @@ Description="Etherpad-lite"
 Type=simple
 User=etherpad
 Group=etherpad
-ExecStart=/var/local/etherpad-lite/bin/run.sh
-
+ExecStart=/bin/bash -lc "source {{etherpad_nvm_root}}/nvm.sh ; /var/local/etherpad-lite/bin/run.sh"
 [Install]
 WantedBy=multi-user.target

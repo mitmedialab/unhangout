@@ -1,5 +1,26 @@
 ---
 - block:
+  - name: Install base dependencies
+    apt: pkg={{item}} state=installed
+    with_items:
+      - build-essential
+      - libssl-dev
+
+  - name: Checkout {{etherpad_nvm_repo}}
+    git: >
+      repo={{etherpad_nvm_repo}}
+      dest={{etherpad_nvm_root}}
+      version={{etherpad_nvm_version}}
+      accept_hostkey=true
+
+  - name: Install node versions
+    shell: bash -lc "source {{etherpad_nvm_root}}/nvm.sh ; nvm install {{etherpad_nvm_node_version}}"
+    register: output
+    changed_when: "'already installed.' not in output.stderr"
+  tags: etherpad-nvm
+
+
+- block:
   # Database
   - name: Etherpad database
     block:
@@ -36,7 +57,7 @@
       ansible_ssh_pipelining: yes
     become: yes
     become_user: etherpad
-    command: /var/local/etherpad-lite/bin/installDeps.sh
+    shell: bash -lc "source {{etherpad_nvm_root}}/nvm.sh ; /var/local/etherpad-lite/bin/installDeps.sh"
 
   - name: Var perms
     treeperms:

@@ -14,8 +14,8 @@
     - postgresql
     - role: nodesource.node
       tags: ['node']
-      nodejs_version: "6"
-      debian_repo_version: "6.x"
+      nodejs_version: "8"
+      debian_repo_version: "8.x"
     - monitored
     - tarsnap
     - redis
