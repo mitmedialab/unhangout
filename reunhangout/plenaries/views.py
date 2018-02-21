@@ -376,6 +376,8 @@ def plenary_create_youtube_livestream(request, plenary_id):
     redirect_uri = request.build_absolute_uri(
         reverse('plenary_livestream_oauth2_callback')
     )
+    if not settings.DEBUG:
+        redirect_uri = redirect_uri.replace("http://", "https://")
     flow = youtube_live.get_flow_from_settings(
         redirect_uri,
         state=plenary.id,
@@ -404,10 +406,13 @@ def plenary_livestream_oauth2_callback(request):
         messages.error(request, "Authorization request cancelled.")
         return redirect(plenary_detail_url)
 
+    redirect_uri = request.build_absolute_uri(
+        reverse('plenary_livestream_oauth2_callback')
+    )
+    if not settings.DEBUG:
+        redirect_uri = redirect_uri.replace("http://", "https://")
     flow = youtube_live.get_flow_from_settings(
-        request.build_absolute_uri(
-            reverse('plenary_livestream_oauth2_callback')
-        ),
+        redirect_uri,
         state=plenary_id
     )
     try:
