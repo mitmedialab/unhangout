@@ -16,6 +16,11 @@ DATABASES = {
     }
 }
 
+GOOGLE_CLIENT_SECRET = {
+    'client_id': "{{ google_client_id }}",
+    'client_secret': "{{ google_secret }}",
+}
+
 # Instructions for obtaining the youtube api key:
 # https://developers.google.com/youtube/v3/getting-started
 # Enable "YouTube Data API v3".

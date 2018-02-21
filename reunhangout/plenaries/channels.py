@@ -162,6 +162,7 @@ def handle_embeds(message, data, plenary):
     error = None
     next_embeds = []
     next_current_index = None
+    next_current_embed = None
     for i,embed in enumerate(data.get('payload', {}).get('embeds', [])):
         if not isinstance(embed, dict):
             error = "Malformed embed"
@@ -183,17 +184,15 @@ def handle_embeds(message, data, plenary):
         if error:
             return handle_error(message, error)
         else:
-            next_embeds.append({
+            next_current_embed = {
                 'props': {'src': embed['props']['src']},
                 'type': embed['type']
-            })
+            }
+            if 'broadcast' in embed:
+                next_current_embed['broadcast'] = embed['broadcast']
+            next_embeds.append(next_current_embed)
             if i == data['payload']['current']:
                 next_current_index = len(next_embeds) - 1
-    if next_current_index is not None:
-        next_current_embed = next_embeds[next_current_index]
-    else:
-        next_current_embed = None
-
 
     # Are we transitioning from a current live broadcast to something else? If
     # so, end the live broadcast.
@@ -223,7 +222,7 @@ def handle_embeds(message, data, plenary):
         # Change the embed type to plain youtube, since it can no longer be
         # broadcasted to.
         for embed in next_embeds:
-            if embed.get('props', {}).get('src') == current_embed['props']['src']:
+            if embed['props']['src'] == current_embed['props']['src']:
                 embed['type'] = 'youtube'
                 embed.pop('broadcast', None)
         # TODO: Remove live participants.
