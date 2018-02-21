@@ -376,10 +376,6 @@ def plenary_create_youtube_livestream(request, plenary_id):
     redirect_uri = request.build_absolute_uri(
         reverse('plenary_livestream_oauth2_callback')
     )
-    # uwsgi proxy may not communicate https-ness to us, so ensure we get an
-    # https URL in production.
-    if not settings.DEBUG and redirect_uri.startswith('http://'):
-        redirect_uri = redirect_uri.replace("http://", "https://")
     flow = youtube_live.get_flow_from_settings(
         redirect_uri,
         state=plenary.id,

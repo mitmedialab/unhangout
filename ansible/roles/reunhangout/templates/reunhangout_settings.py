@@ -57,3 +57,5 @@ EMAIL_HOST = "{{mailgun_smtp_hostname}}"
 EMAIL_HOST_USER = "{{mailgun_smtp_login}}"
 EMAIL_HOST_PASSWORD = "{{mailgun_smtp_password}}"
 MAILGUN_ACTIVE_API_KEY = "{{mailgun_active_api_key}}"
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
