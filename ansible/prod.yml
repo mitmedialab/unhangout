@@ -61,4 +61,5 @@
     etherpad_db_password: "{{uh_etherpad_db_password}}"
     etherpad_session_key: "{{uh_etherpad_session_key}}"
     etherpad_api_key: "{{uh_etherpad_api_key}}"
+    plenary_server: "{{uh_plenary_server}}"
 

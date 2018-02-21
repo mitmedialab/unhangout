@@ -5,7 +5,7 @@ ALLOWED_HOSTS = ['{{ django_domain }}']
 DEFAULT_FROM_EMAIL = SERVER_EMAIL = "Unhangout Team <noreply@{{ django_domain }}>"
 ADMINS = MANAGERS = [("Charlie DeTar", "cfd@media.mit.edu")]
 
-PLENARY_SERVER = 'https://plenary.unhangout.io'
+PLENARY_SERVER = '{{plenary_server}}'
 
 DATABASES = {
     'default': {
