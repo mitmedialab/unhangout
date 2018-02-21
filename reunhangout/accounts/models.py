@@ -67,6 +67,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     profile_image = models.ImageField(upload_to="profile_images",
             blank=True, null=True)
 
+    # Youtube livestreaming
+    youtube_credentials = JSONField(blank=True, null=True)
+
     # Wrap up email details
     receive_wrapup_emails = models.NullBooleanField(null=True,
             help_text=_("Receive wrap-up emails after events?"))

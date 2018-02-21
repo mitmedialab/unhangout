@@ -1,7 +1,9 @@
-import json
-import re
 import csv
 from io import StringIO
+import logging
+import json
+import re
+import urllib.parse
 
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render, redirect
@@ -13,16 +15,21 @@ from django.core.validators import validate_slug
 from django.db import transaction
 from django.utils import timezone
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.urls import reverse
 
+from accounts.utils import serialize_auth_state
+from analytics.models import track
 from breakouts.models import Breakout
 from channels_presence.models import Room, Presence
 from plenaries.models import Plenary, Series, ChatMessage
 from plenaries.channels import update_plenary
 from plenaries import utils
-from videosync.models import VideoSync
-from accounts.utils import serialize_auth_state
+from plenaries import youtube_live
 from reunhangout.utils import json_dumps
-from reunhangout.channels_utils import serialize_room
+from reunhangout.channels_utils import serialize_room, broadcast
+from videosync.models import VideoSync
+
+logger = logging.getLogger('django.request')
 
 def plenary_detail(request, id_or_slug):
     if re.match('^\d+$', id_or_slug):
@@ -312,3 +319,104 @@ def plenary_export_chat(request, plenary_id, format="csv"):
     response['Content-type'] = content_type
     response['Content-Disposition'] = 'attatchment; filename={}'.format(filename)
     return response
+
+
+@login_required
+def plenary_create_youtube_livestream(request, plenary_id):
+    try:
+        plenary = Plenary.objects.get(id=plenary_id)
+    except Plenary.DoesNotExist:
+        raise Http404
+
+    if not plenary.has_admin(request.user):
+        raise PermissionDenied
+
+    if youtube_live.has_credentials(request.user):
+        # Create youtube
+        youtube, credentials = youtube_live.get_authenticated_youtube_service(
+            request.user
+        )
+        try:
+            livestream = youtube_live.create_livestream(
+                plenary.name, youtube
+            )
+        except youtube_live.YoutubeLiveError:
+            pass
+        else:
+            plenary.embeds = plenary.embeds or {'embeds': [], 'current': None}
+            plenary.embeds['embeds'].append({
+                'props': {
+                    'src': 'https://www.youtube.com/embed/{}'.format(
+                        livestream['broadcast_id']
+                    ),
+                },
+                'broadcast': {
+                    'participate': '{}/participate/{}?rtmp={}'.format(
+                        settings.PLENARY_SERVER,
+                        livestream['key'],
+                        urllib.parse.quote(livestream['rtmp']),
+                    ),
+                    'id': livestream['broadcast_id'],
+                    'owner': request.user.id
+                },
+                'type': 'live',
+            })
+            plenary.embeds['current'] = len(plenary.embeds['embeds']) - 1
+            plenary.save()
+            broadcast(
+                plenary.channel_group_name,
+                type='embeds',
+                payload=plenary.embeds
+            )
+            track("change_embeds", request.user, plenary.embeds, plenary=plenary)
+            return redirect(
+                reverse("plenary_detail", kwargs={'id_or_slug': plenary.slug})
+            )
+
+    flow = youtube_live.get_flow_from_settings(
+        request.build_absolute_uri(
+            reverse('plenary_livestream_oauth2_callback')
+        ),
+        state=plenary.id,
+        prompt='consent'
+    )
+    auth_url = flow.step1_get_authorize_url()
+    return redirect(auth_url)
+
+
+@login_required
+def plenary_livestream_oauth2_callback(request):
+    plenary_id = request.GET.get("state")
+    authorization_code = request.GET.get("code")
+
+    try:
+        plenary = Plenary.objects.get(pk=plenary_id)
+    except Plenary.DoesNotExist:
+        raise Http404
+
+    plenary_detail_url = reverse(
+        "plenary_detail", kwargs={'id_or_slug': plenary.slug})
+    create_livestream_url = reverse(
+        "plenary_create_youtube_livestream", args=[plenary.id])
+
+    if request.GET.get("error"):
+        messages.error(request, "Authorization request cancelled.")
+        return redirect(plenary_detail_url)
+
+    flow = youtube_live.get_flow_from_settings(
+        request.build_absolute_uri(
+            reverse('plenary_livestream_oauth2_callback')
+        ),
+        state=plenary_id
+    )
+    try:
+        credentials = flow.step2_exchange(authorization_code)
+    except youtube_live.FlowExchangeError as e:
+        logger.exception(e)
+        messages.error(request, "Authorization error.")
+        return redirect(plenary_detail_url)
+
+    print(credentials.refresh_token)
+
+    youtube_live.persist_credentials(request.user, credentials)
+    return redirect(create_livestream_url)

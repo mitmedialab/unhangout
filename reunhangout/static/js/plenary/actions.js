@@ -69,7 +69,7 @@ function receiveEmbedDetails(embed, details) {
 export function fetchEmbedDetails(embed, settings) {
   return dispatch => {
     dispatch(requestEmbedDetails(embed));
-    if (embed.type === "youtube") {
+    if (embed.type === "youtube" || embed.type === "live") {
       youtube.fetchVideoDetails(embed.props.src, settings)
         .then(details => dispatch(receiveEmbedDetails(embed, details)));
     }

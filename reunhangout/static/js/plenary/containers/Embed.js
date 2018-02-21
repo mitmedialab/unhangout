@@ -5,16 +5,44 @@ import * as style from "../../../scss/pages/plenary/_embedstyle.scss"
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
 import * as youtube from "../youtube";
-import {SyncableVideo, isEmbedSyncable} from "../../videosync";
-import * as VIDEOSYNC_ACTIONS from "../../videosync/actions";
+import SyncableVideo from "../../videosync/containers/SyncableVideo";
+import * as VA from "../../videosync/actions";
 
-const uniqueEmbeds = (embeds) => _.uniqBy(embeds, (e) => {
-  return e.type === 'live' ? 'live' : e.props.src
-});
+const uniqueEmbeds = (embeds) => _.uniqBy(embeds, (e) => e.props.src);
 
 const VIMEO_LINK_RE = /^https?:\/\/vimeo\.com\/(\d+).*$/i
 
-class Embed extends React.Component {
+@connect(
+  // map state to props
+  (state) => ({
+    plenary: state.plenary,
+    embeds: state.plenary.embeds || {embeds: [], current: null},
+    embedDetails: state.plenary.embedDetails || {},
+    embedsSending: state.plenary.embedsSending || {},
+    auth: state.auth,
+    videosync: state.videosync,
+    settings: state.settings,
+  }),
+  // map dispatch to props
+  (dispatch, ownProps) => ({
+    // admin -- youtube only
+    onAdminSendEmbeds: (payload) => dispatch(A.adminSendEmbeds(payload)),
+    onAdminEmbedsError: (payload) => dispatch(A.adminEmbedsError(payload)),
+    onAdminJoinLiveBroadcast: (payload) => dispatch(A.adminJoinLiveBroadcast(payload)),
+
+    // user
+    fetchEmbedDetails: (embed, settings) => dispatch(A.fetchEmbedDetails(embed, settings)),
+    onLeaveLiveBroadcast: (payload) => dispatch(A.leaveLiveBroadcast(payload)),
+
+    // Video sync
+    playForAll: (payload) => dispatch(VA.playForAll(payload)),
+    pauseForAll: (payload) => dispatch(VA.pauseForAll(payload)),
+    endSync: (payload) => dispatch(VA.endSync(payload)),
+    syncPlayback: (payload) => dispatch(VA.syncPlayback(payload)),
+    breakSyncPlayback: (payload) => dispatch(VA.breakSyncPlayback(payload)),
+  })
+)
+export default class Embed extends React.Component {
   constructor(props) {
     super(props);
     this.state = {embedValue: ''};
@@ -161,15 +189,6 @@ class Embed extends React.Component {
     }
   }
 
-  addLiveVideo(event) {
-    let live = {type: 'live'};
-    let embeds = uniqueEmbeds([...this.props.embeds.embeds, live]);
-    this.props.onAdminSendEmbeds({
-      embeds: embeds,
-      current: embeds.length - 1
-    });
-  }
-
   setCurrent(event, index) {
     this.props.onAdminSendEmbeds({
       embeds: this.props.embeds.embeds,
@@ -204,24 +223,26 @@ class Embed extends React.Component {
   render() {
     let chosen = this.getCurrentEmbed();
 
-    // "Live" type is special, since we need to choose between the participate
-    // and listen endpoints depending on the user's status.
-    if (chosen && chosen.type === 'live') {
-      let url = [
-        this.props.settings.PLENARY_SERVER,
-        this.isLiveParticipant() ? "participate" : "listen",
-        this.props.plenary.webrtc_id,
-      ].join('/');
-      chosen = {...chosen, props: {src: url}}
-    }
     return <div className='plenary-embed'>
       { chosen ?
         (
-          isEmbedSyncable(chosen) ? 
-            <SyncableVideo embed={chosen}
+          SyncableVideo.isSyncable(chosen) ? 
+            <SyncableVideo
+              videosync={this.props.videosync}
+              embed={chosen}
+              embedDetails={this.props.embedDetails[chosen.props.src]}
               sync_id={this.props.plenary.video_sync_id}
               showSyncControls={this.props.auth.is_admin}
-              className='plenary-embed' />
+              isLiveParticipant={this.isCurrentLive() && this.isLiveParticipant()}
+              className='plenary-embed'
+
+              playForAll={this.props.playForAll}
+              pauseForAll={this.props.pauseForAll}
+              endSync={this.props.endSync}
+              syncPlayback={this.props.syncPlayback}
+              breakSyncPlayback={this.props.breakSyncPlayback}
+              
+            />
           :
             <iframe {...chosen.props} />
         )
@@ -251,8 +272,6 @@ class Embed extends React.Component {
     let embedDisplay = [];
     this.props.embeds.embeds.forEach((embed, i) => {
       if (i === this.props.embeds.current) {
-        return;
-      } else if (embed.type === "live") {
         return;
       } else {
         let details = this.props.embedDetails[embed.props.src];
@@ -287,7 +306,7 @@ class Embed extends React.Component {
                                    width={64}
                                    height={48}
                                    alt='' />
-                            : ""
+                            : null
                           }
 
                           <span className='previous-embed-list-item-title'>
@@ -331,7 +350,7 @@ class Embed extends React.Component {
         <div className="button-flex-container">
           {!chosen || chosen.type !== "live" ?
             <BS.Button className="add-live-video-button"
-                       onClick={(e) => this.addLiveVideo(e)}>
+                       href={`/create-youtube-livestream/${this.props.plenary.id}`}>
               <i className='fa fa-video-camera'></i> Add Live Video
             </BS.Button>
           : null}
@@ -346,29 +365,4 @@ class Embed extends React.Component {
     </div>
   }
 }
-
-export default connect(
-  // map state to props
-  (state) => ({
-    plenary: state.plenary,
-    embeds: state.plenary.embeds || {embeds: [], current: null},
-    embedDetails: state.plenary.embedDetails || {},
-    embedsSending: state.plenary.embedsSending || {},
-    auth: state.auth,
-    videosync: state.videosync,
-    settings: state.settings,
-  }),
-  // map dispatch to props
-  (dispatch, ownProps) => ({
-    // admin -- youtube only
-    onAdminSendEmbeds: (payload) => dispatch(A.adminSendEmbeds(payload)),
-    onAdminEmbedsError: (payload) => dispatch(A.adminEmbedsError(payload)),
-    onAdminJoinLiveBroadcast: (payload) => dispatch(A.adminJoinLiveBroadcast(payload)),
-
-    // user
-    fetchEmbedDetails: (embed, settings) => dispatch(A.fetchEmbedDetails(embed, settings)),
-    onLeaveLiveBroadcast: (payload) => dispatch(A.leaveLiveBroadcast(payload)),
-  })
-)(Embed);
-
 

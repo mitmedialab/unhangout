@@ -13,4 +13,12 @@ urlpatterns = [
     url(r'^events/add/$', views.plenary_add, name='plenary_add'),
     url(r'^events/my/$', views.my_events, name='plenary_my_events'),
     url(r'^slug-check$', views.slug_check, name='plenary_slug_check'),
+
+    url(r'^create-youtube-livestream/(?P<plenary_id>\d+)$',
+        views.plenary_create_youtube_livestream,
+        name='plenary_create_youtube_livestream'),
+    url(r'^youtube-livestream-oauth2-callback$',
+        views.plenary_livestream_oauth2_callback,
+        name='plenary_livestream_oauth2_callback'),
+
 ]
