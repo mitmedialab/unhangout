@@ -30,6 +30,7 @@ from accounts.utils import serialize_auth_state
 from plenaries.utils import find_atnames
 from plenaries import youtube_live
 
+
 User = get_user_model()
 
 @channel_session_user_from_http
@@ -184,15 +185,16 @@ def handle_embeds(message, data, plenary):
         if error:
             return handle_error(message, error)
         else:
-            next_current_embed = {
+            clean_embed = {
                 'props': {'src': embed['props']['src']},
                 'type': embed['type']
             }
             if 'broadcast' in embed:
-                next_current_embed['broadcast'] = embed['broadcast']
-            next_embeds.append(next_current_embed)
+                clean_embed['broadcast'] = embed['broadcast']
+            next_embeds.append(clean_embed)
             if i == data['payload']['current']:
                 next_current_index = len(next_embeds) - 1
+                next_current_embed = clean_embed
 
     # Are we transitioning from a current live broadcast to something else? If
     # so, end the live broadcast.
