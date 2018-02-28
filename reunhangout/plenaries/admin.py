@@ -51,8 +51,10 @@ class PlenaryAdmin(admin.ModelAdmin):
     def analytics_json(self, request, queryset):
         response = HttpResponse()
         response['Content-Type'] = 'application/json'
-        response['Content-Disposition'] = "attachment; filename={}".format(
-            now().strftime("analytics-%Y-%m-%d.json")
+        response['Content-Disposition'] = 'attachment; filename="{}-{}-{}.json"'.format(
+            "analytics",
+            ",".join([str(i) for i in sorted(queryset.values_list('id', flat=True))]),
+            now().strftime("%Y-%m-%d".format(queryset.values_list)),
         )
         response.write(plenary_analytics(queryset, fmt='json'))
         return response
