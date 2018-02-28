@@ -17,7 +17,6 @@ django-debug-toolbar
 django-gravatar2
 django-mjml
 django-webpack-loader
-google-api-python-client
 pytest
 pytest-selenium
 pytest-django

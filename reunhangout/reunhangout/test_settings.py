@@ -2,7 +2,7 @@ from .dev_settings import *
 
 INTERNAL_IPS = ['127.0.0.1']
 
-PLENARY_SERVER = "https://plenary-dev.unhangout.io"
+PLENARY_SERVER = "https://plenary.unhangout.io"
 
 for name in ('twitter', 'facebook', 'google'):
     if ALLAUTH_APP_KEYS[name]['client_id']:

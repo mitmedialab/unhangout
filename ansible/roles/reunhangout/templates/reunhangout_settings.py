@@ -5,7 +5,7 @@ ALLOWED_HOSTS = ['{{ django_domain }}']
 DEFAULT_FROM_EMAIL = SERVER_EMAIL = "Unhangout Team <noreply@{{ django_domain }}>"
 ADMINS = MANAGERS = [("Charlie DeTar", "cfd@media.mit.edu")]
 
-PLENARY_SERVER = '{{plenary_server}}'
+PLENARY_SERVER = 'https://plenary.unhangout.io'
 
 DATABASES = {
     'default': {
@@ -14,11 +14,6 @@ DATABASES = {
         'USER': '{{ django_postgres_user }}',
         'PASSWORD': '{{ django_postgres_password }}'
     }
-}
-
-GOOGLE_CLIENT_SECRET = {
-    'client_id': "{{ google_client_id }}",
-    'client_secret': "{{ google_secret }}",
 }
 
 # Instructions for obtaining the youtube api key:
@@ -57,5 +52,3 @@ EMAIL_HOST = "{{mailgun_smtp_hostname}}"
 EMAIL_HOST_USER = "{{mailgun_smtp_login}}"
 EMAIL_HOST_PASSWORD = "{{mailgun_smtp_password}}"
 MAILGUN_ACTIVE_API_KEY = "{{mailgun_active_api_key}}"
-
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

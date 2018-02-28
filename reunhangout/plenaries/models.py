@@ -30,27 +30,18 @@ def get_etherpad_default_text():
 
 # Create your models here.
 class Plenary(models.Model):
-    series = models.ForeignKey(
-        Series,
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True)
+    series = models.ForeignKey(Series, on_delete=models.CASCADE, blank=True, null=True)
     name = models.CharField(max_length=100)
     slug = models.SlugField(help_text=_("Short name for URL"), unique=True)
-    max_participants = models.PositiveIntegerField(
-        default=100,
-        help_text="Maximum number of connections. Set to 0 for no limit.")
+    max_participants = models.PositiveIntegerField(default=100,
+            help_text="Maximum number of connections. Set to 0 for no limit.")
     organizer = models.CharField(max_length=100, default="", blank=True)
     image = models.ImageField(upload_to="plenaries", blank=True, null=True)
-    start_date  = models.DateTimeField(help_text=_(
-        "When will the event start?"))
-    doors_open  = models.DateTimeField(help_text=_(
-        "When should the lobby be opened, allowing participants to chat "
-        "before the event?"))
-    end_date    = models.DateTimeField(
-        help_text=_("When will the event end?"))
-    doors_close = models.DateTimeField(
-        help_text=_("When should the lobby be closed, ending chat?"))
+
+    start_date  = models.DateTimeField(help_text=_("When will the event start?"))
+    doors_open  = models.DateTimeField(help_text=_("When should the lobby be opened, allowing participants to chat before the event?"))
+    end_date    = models.DateTimeField(help_text=_("When will the event end?"))
+    doors_close = models.DateTimeField(help_text=_("When should the lobby be closed, ending chat?"))
     wrapup_emails = models.BooleanField(default=False, help_text=_(
         "Enable wrap-up emails? Enabling will require participants "
         "to set their contact preferences. Wrap-up emails can only "
@@ -88,19 +79,15 @@ class Plenary(models.Model):
     breakouts_open = models.BooleanField(default=False, help_text=_(
         "Check to allow people to join breakouts associated with this plenary"))
 
-    webrtc_id = models.CharField(
-        max_length=100,
-        default=random_webrtc_id,
-        editable=False,
-        unique=True)
-    live_participants = models.ManyToManyField(
-        settings.AUTH_USER_MODEL,
-        related_name='plenaries_participating_live', blank=True)
+    webrtc_id = models.CharField(max_length=100, default=random_webrtc_id,
+            editable=False, unique=True)
+
+    live_participants = models.ManyToManyField(settings.AUTH_USER_MODEL,
+            related_name='plenaries_participating_live', blank=True)
     admins = models.ManyToManyField(settings.AUTH_USER_MODEL)
-    jitsi_server = models.CharField(
-        max_length=255,
-        choices=([(a,a) for a in settings.JITSI_SERVERS]),
-        default=settings.JITSI_SERVERS[0])
+    jitsi_server = models.CharField(max_length=255, choices=(
+        [(a,a) for a in settings.JITSI_SERVERS]
+    ), default=settings.JITSI_SERVERS[0])
 
     def clean(self):
         if self.slug:

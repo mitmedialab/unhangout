@@ -28,8 +28,6 @@ from analytics.models import track
 from django.contrib.auth import get_user_model
 from accounts.utils import serialize_auth_state
 from plenaries.utils import find_atnames
-from plenaries import youtube_live
-
 
 User = get_user_model()
 
@@ -155,27 +153,16 @@ def handle_embeds(message, data, plenary):
     if not plenary.has_admin(message.user):
         return handle_error(message, "Must be an admin to set embeds")
 
-    try:
-        current_embed = plenary.embeds['embeds'][plenary.embeds['current']]
-    except (KeyError, IndexError, TypeError):
-        current_embed = None
-
     error = None
-    next_embeds = []
-    next_current_index = None
-    next_current_embed = None
-    for i,embed in enumerate(data.get('payload', {}).get('embeds', [])):
+    clean = []
+    for embed in data.get('payload', {}).get('embeds', []):
         if not isinstance(embed, dict):
             error = "Malformed embed"
+        elif embed['type'] == 'live':
+            clean.append({'type': 'live'})
+            continue
         elif not isinstance(embed.get('props'), dict):
             error = "Malformed embed: missing props"
-        elif embed['type'] == 'live':
-            # Silently strip invalid live type.
-            try:
-                assert embed['props']['src']
-                assert embed['broadcast']['participate']
-            except (AssertionError, KeyError, TypeError):
-                continue
         elif embed.get('type') not in ("youtube", "url"):
             error = "Invalid type: {}".format(embed['type'])
         else:
@@ -185,61 +172,23 @@ def handle_embeds(message, data, plenary):
         if error:
             return handle_error(message, error)
         else:
-            clean_embed = {
+            clean.append({
                 'props': {'src': embed['props']['src']},
                 'type': embed['type']
-            }
-            if 'broadcast' in embed:
-                clean_embed['broadcast'] = embed['broadcast']
-            next_embeds.append(clean_embed)
-            if i == data['payload']['current']:
-                next_current_index = len(next_embeds) - 1
-                next_current_embed = clean_embed
-
-    # Are we transitioning from a current live broadcast to something else? If
-    # so, end the live broadcast.
-    try:
-        current_live_broadcast_id = (
-            current_embed['type'] == 'live' and
-            current_embed['broadcast']['id']
-        )
-    except (KeyError, TypeError):
-        current_live_broadcast_id = None
-    try:
-        next_live_broadcast_id = (
-            next_current_embed['type'] == 'live' and
-            next_current_embed['broadcast']['id']
-        )
-    except (KeyError, TypeError):
-        next_live_broadcast_id = None
-
-    if current_live_broadcast_id and \
-            current_live_broadcast_id != next_live_broadcast_id:
-        owner = User.objects.get(id=current_embed['broadcast']['owner'])
-        youtube, creds = youtube_live.get_authenticated_youtube_service(owner)
-        try:
-            youtube_live.end_broadcast(youtube, current_embed['broadcast']['id'])
-        except youtube_live.HttpError:
-            pass
-        # Change the embed type to plain youtube, since it can no longer be
-        # broadcasted to.
-        for embed in next_embeds:
-            if embed['props']['src'] == current_embed['props']['src']:
-                embed['type'] = 'youtube'
-                embed.pop('broadcast', None)
-        # TODO: Remove live participants.
+            })
+    current = data['payload'].get('current', None)
+    if current is not None and not isinstance(current, int):
+        return handle_error(message, "Invalid 'current' type")
+    if isinstance(current, int) and (current < 0  or current > len(clean)):
+        return handle_error(message, "Invalid 'current' value")
 
     # Stop any current video sync if we're changing the current embed.
-    try:
-        same_src = current_embed['props']['src'] == next_current_embed['props']['src']
-    except (KeyError, TypeError):
-        same_src = False
-    if not same_src:
+    if plenary.embeds and plenary.embeds['current'] != current:
         VideoSync.objects.pause_for_all(plenary.channel_group_name)
 
     plenary.embeds = {
-        'embeds': next_embeds,
-        'current': next_current_index
+        'embeds': clean,
+        'current': current
     }
     plenary.full_clean()
     plenary.save()
