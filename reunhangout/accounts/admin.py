@@ -28,7 +28,7 @@ class CustomUserCreationForm(UserCreationForm):
 
 @admin.register(User)
 class CustomuserAdmin(UserAdmin):
-    list_display = ['username', 'display_name', 'email', 'is_staff']
+    list_display = ['username', 'display_name', 'email', 'is_staff', 'date_joined']
     fieldsets = (
         (None, {
             'fields': (
