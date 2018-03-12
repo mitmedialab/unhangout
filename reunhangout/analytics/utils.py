@@ -161,14 +161,19 @@ def plenary_analytics(plenary_queryset, fmt='python'):
             log['chat_message_count'] += 1
             if len(msg._mentions_prefetch) > 0:
                 log['chat_message_with_mentions_count'] += 1
+            mentions = [m.id for m in msg._mentions_prefetch]
             log['chat_messages'].append({
                 'id': msg.id,
                 'timestamp': msg.created,
                 'message': msg.message,
                 'highlight': msg.highlight,
                 'archived': msg.archived,
-                'mentions': [m.id for m in msg._mentions_prefetch],
+                'mentions': mentions,
             })
+            for mention in mentions:
+                plenary_data[plenary.id]['users'][mention][
+                    'chat_messages_mentioned'
+                ].append(msg.id)
 
         copresence = Action.objects.breakout_copresence(plenary)
         by_breakout = {}
