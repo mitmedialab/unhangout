@@ -110,7 +110,7 @@ class Plenary(models.Model):
 
     def serialize(self):
         return {
-            'admins': list(self.admins.values_list('id', flat=True)),
+            'admins': [a.serialize_public() for a in self.admins.all()],
             'breakout_mode': self.breakout_mode,
             'breakouts_open': self.breakouts_open,
             'canceled': self.canceled,

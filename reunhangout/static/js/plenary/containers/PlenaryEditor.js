@@ -7,6 +7,127 @@ import {InPlaceRichTextEditor} from './InPlaceRichTextEditor';
 import {DateTimePicker} from './DateTimePicker';
 import {RelativeTime} from './RelativeTime';
 import {ImageInput} from './ImageInput';
+import {Avatar} from './Avatar';
+
+import '../../../scss/partials/_adminListEditor.scss';
+
+class AdminListEditor extends React.Component {
+  static propTypes = {
+    value: PropTypes.array.isRequired,
+  }
+
+  state = {
+    searchInput: '',
+    searchUser: null,
+    loading: false
+  }
+
+  constructor(props) {
+    super(props);
+    this._debouncedFetchMatchingUser = _.debounce(
+      this.fetchMatchingUser, 200
+    );
+  }
+
+  removeAdmin(event, admin) {
+    event && event.preventDefault();
+    this.props.onChange(_.filter(this.props.value, a => a.id !== admin.id));
+  }
+
+  addSearchUser = (event) => {
+    event && event.preventDefault();
+    if (this.state.searchUser) {
+      if (_.find(this.props.admins, a => a.id === this.state.searchUser.id)) {
+        return;
+      }
+      this.props.onChange(this.props.value.concat([this.state.searchUser]));
+      this.setState({
+        searchUser: null,
+        searchInput: '',
+      });
+    }
+  }
+
+  fetchMatchingUser = () => {
+    if (this.state.searchInput) {
+      this.setState({loading: true});
+      const options = {credentials: 'include'}
+      const url = `/fetch-user?name=${encodeURIComponent(this.state.searchInput)}`;
+      fetch(url, options)
+      .then(res => res.ok ? res.json() : Promise.reject(res.statusText))
+      .then(json => this.setState({searchUser: json.user, loading: false}))
+      .catch(err => {
+        console.log(err);
+        alert(err);
+      });
+    } else {
+      this.setState({searchUser: null});
+    }
+  }
+
+  searchAdmins = (event) => {
+    this.setState({
+      searchInput: event.target.value,
+      loading: false
+    });
+    this._debouncedFetchMatchingUser();
+  }
+
+  onKeyDown = (event) => {
+    if (event.keyCode === 13 || event.keyCode === 10) {
+      this.addSearchUser(event);
+    }
+  }
+
+  render() {
+    return (
+      <div className='non-margined form-group admin-list-editor'>
+        <div className='current-admins'>
+          {this.props.value.map(admin => (
+            <div className='admin-row' key={admin.id}>
+              <Avatar user={admin} idPart={`admin-${admin.id}`}
+                      detailView={true} />
+              <span className='remove-btn'
+                    onClick={(e) => this.removeAdmin(e, admin)}>
+                <i className='fa fa-minus-circle' /> remove
+              </span>
+            </div>
+          ))}
+        </div>
+        <input type='text'
+               className='form-control'
+               value={this.state.searchInput}
+               onKeyDown={this.onKeyDown}
+               onChange={this.searchAdmins}
+               />
+        {
+          this.state.loading ?
+            <div className='add-detail'>
+              <i className='fa fa-spinner fa-spin' />
+            </div>
+          : this.state.searchUser ?
+            <div className='add-detail'>
+              <Avatar user={this.state.searchUser} detailView={true}
+                      idPart='searchUser' />
+              { _.find(this.props.admins, a => a.id === this.state.searchUser.id) ?
+                <em><b>Already an admin.</b></em>
+              :
+                <button className='btn btn-primary'
+                        onClick={this.addSearchUser}>
+                  Add
+                </button>
+              }
+            </div>
+          : this.state.searchInput ?
+            <div className='add-detail'>
+              <em>No user found. Use email or login name.</em>
+            </div>
+          : null
+        }
+      </div>
+    );
+  }
+}
 
 export class PlenaryEditor extends React.Component {
   static propTypes = {
@@ -22,17 +143,19 @@ export class PlenaryEditor extends React.Component {
       end_date: moment().add(90, 'minutes').format(),
       doors_close: moment().add(120, 'minutes').format(),
       "public": false,
+      admins: [],
     },
     loading: false
   }
 
   constructor(props) {
     super(props);
+    console.log(props);
     this.plenarySettingsFields = [
       'name', 'organizer', 'start_date', 'end_date', 'doors_open',
       'doors_close', 'description', 'slug', 'public', 'image',
       'canceled', 'copy_from_id', 'jitsi_server', 'wrapup_emails',
-      'etherpad_initial_text', 'max_participants'
+      'etherpad_initial_text', 'max_participants', 'admins'
     ];
     this.plenarySettingsFieldsRequired = ['name', 'slug'];
   }
@@ -225,6 +348,12 @@ export class PlenaryEditor extends React.Component {
               ))}
             </BS.FormControl>
 
+          : type == "admins" ?
+            <AdminListEditor
+                value={this.state[stateName]}
+                onChange={(admins) => this.setState({[stateName]: admins})}
+                admins={this.state[stateName]} />
+
           : ""
         }
         { this.state[`${stateName}-error`] ?
@@ -359,6 +488,7 @@ export class PlenaryEditor extends React.Component {
             {this.renderControl("Host", "organizer", "text",
                                 {placeholder: "Tell your attendees who's organizing this event",
                                  maxLength: 100})}
+            {this.renderControl("Admins", "admins", "admins")}
             {this.renderControl("Start time", "start_date", "datetime")}
             {this.renderControl("Doors open", "doors_open", "before_start_date")}
             {this.renderControl("Event duration", "end_date", "after_start_date")}

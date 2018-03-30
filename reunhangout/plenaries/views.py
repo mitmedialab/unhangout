@@ -20,6 +20,7 @@ from plenaries.models import Plenary, Series, ChatMessage
 from plenaries.channels import update_plenary
 from plenaries import utils
 from videosync.models import VideoSync
+from accounts.models import User
 from accounts.utils import serialize_auth_state
 from reunhangout.utils import json_dumps
 from reunhangout.channels_utils import serialize_room
@@ -223,6 +224,27 @@ def slug_check(request):
     return JsonResponse({
         "slug": slug,
         "available": available
+    })
+
+
+def fetch_user(request):
+    if not request.user.is_authenticated:
+        return HttpResponseBadRequest("Must be signed in")
+    name = request.GET.get("name")
+    if not name:
+        return HttpResponseBadRequest("Need 'name' value")
+    
+    try:
+        user = User.objects.get(email__iexact=name.lower())
+    except User.DoesNotExist:
+        try:
+            user = User.objects.get(username__iexact=name.lower())
+        except User.DoesNotExist:
+            user = None
+
+    return JsonResponse({
+        'user': user.serialize_public() if user else None,
+        'name': name,
     })
 
 

@@ -13,4 +13,5 @@ urlpatterns = [
     url(r'^events/add/$', views.plenary_add, name='plenary_add'),
     url(r'^events/my/$', views.my_events, name='plenary_my_events'),
     url(r'^slug-check$', views.slug_check, name='plenary_slug_check'),
+    url(r'^fetch-user$', views.fetch_user, name='plenary_fetch_user'),
 ]

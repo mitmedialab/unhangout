@@ -5,14 +5,32 @@ import {connect} from "react-redux";
 import * as BS from "react-bootstrap";
 import * as A from "../actions";
 
-class RawAvatar extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {'imageError': false};
+
+
+@connect(
+  state => ({users: state.users, settings: state.settings}),
+  dispatch => ({})
+)
+export class Avatar extends React.Component {
+  static propTypes = {
+    user: PropTypes.oneOfType([
+      PropTypes.number,
+      PropTypes.shape({
+        id: PropTypes.number,
+        username: PropTypes.string.isRequired,
+        display_name: PropTypes.string.isRequired,
+        image: PropTypes.string.isRequired,
+      })
+    ]),
+    idPart: PropTypes.string.isRequired,
   }
+
+  state = {'imageError': false};
+
   onError(event) {
     this.setState({'imageError': true});
   }
+
   render() {
     let user;
     if (_.isNumber(this.props.user)) {
@@ -57,21 +75,3 @@ class RawAvatar extends React.Component {
     }
   }
 }
-RawAvatar.propTypes = {
-  user: PropTypes.oneOfType([
-    PropTypes.number,
-    PropTypes.shape({
-      id: PropTypes.number,
-      username: PropTypes.string.isRequired,
-      display_name: PropTypes.string.isRequired,
-      image: PropTypes.string.isRequired,
-    })
-  ]),
-  idPart: PropTypes.string.isRequired,
-}
-
-
-export const Avatar = connect(
-  state => ({users: state.users, settings: state.settings}),
-  dispatch => ({})
-)(RawAvatar);

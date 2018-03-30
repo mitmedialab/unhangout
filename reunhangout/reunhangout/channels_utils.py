@@ -1,7 +1,7 @@
 import functools
 import json
 
-from channels import Group
+from channels import Group, Channel
 from analytics.models import track
 from reunhangout.utils import json_dumps
 
@@ -17,6 +17,9 @@ def prepare_message(payload=None, error=None, type=None):
 
 def broadcast(group_name, **kwargs):
     Group(group_name).send(prepare_message(**kwargs))
+
+def send_to_channel(channel_name, **kwargs):
+    Channel(channel_name).send(prepare_message(**kwargs))
 
 def handle_error(message, error):
     data = prepare_message(type='error', error=error)

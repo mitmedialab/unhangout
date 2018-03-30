@@ -21,7 +21,8 @@ from plenaries.models import Plenary, ChatMessage
 from breakouts.models import Breakout
 from videosync.models import VideoSync
 from reunhangout.channels_utils import (
-    broadcast, handle_error, require_payload_keys, prepare_message
+    broadcast, handle_error, require_payload_keys, prepare_message,
+    send_to_channel
 )
 from reunhangout.utils import json_dumps
 from analytics.models import track
@@ -358,6 +359,13 @@ def update_plenary(plenary, payload):
     elif payload.get('image', False) is None:
         plenary.image = None
 
+    # Handle admins
+    if payload.get('admins'):
+        admins = payload['admins']
+        users = list(User.objects.filter(id__in=[a['id'] for a in admins]))
+        if len(users) > 0:
+            plenary.admins.set(users)
+
     # Handle date arithmetic for boolean "open" nudging.
     change_open = payload.get('open')
     if change_open is not None:
@@ -395,6 +403,7 @@ def handle_plenary(message, data, plenary):
         return handle_error(message, "Must be an admin to do that.")
 
     old_jitsi_server = plenary.jitsi_server
+    old_admins = list(plenary.admins.all())
     payload = data['payload']
     try:
         update_plenary(plenary, payload)
@@ -425,9 +434,23 @@ def handle_plenary(message, data, plenary):
 
     update = {key: getattr(plenary, key) for key in PLENARY_SIMPLE_UPDATE_KEYS}
     update.update({key: getattr(plenary, "safe_" + key)() for key in PLENARY_SANITIZED_KEYS})
+    admins = list(plenary.admins.all())
+    update['admins'] = [u.serialize_public() for u in admins]
     update['open'] = plenary.open
     update['image'] = plenary.image.url if plenary.image else None
     broadcast(plenary.channel_group_name, type='plenary', payload={'plenary': update})
+
+    admin_change = {u.id: u for u in set(old_admins) ^ set(admins)}
+    for presence in Presence.objects.filter(
+            room__channel_name=plenary.channel_group_name,
+            user__id__in=admin_change.keys()):
+        send_to_channel(
+            presence.channel_name,
+            type='auth',
+            payload=serialize_auth_state(
+                admin_change[presence.user_id], plenary
+            )
+        )
 
     if breakouts_changed:
         breakouts_serialized = [
