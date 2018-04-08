@@ -14,6 +14,9 @@ import '../../../scss/partials/_adminListEditor.scss';
 class AdminListEditor extends React.Component {
   static propTypes = {
     value: PropTypes.array.isRequired,
+    onChange: PropTypes.func.isRequired,
+    admins: PropTypes.array.isRequired,
+    placeholder: PropTypes.string,
   }
 
   state = {
@@ -96,6 +99,7 @@ class AdminListEditor extends React.Component {
         </div>
         <input type='text'
                className='form-control'
+               placeholder={this.props.placeholder}
                value={this.state.searchInput}
                onKeyDown={this.onKeyDown}
                onChange={this.searchAdmins}
@@ -120,7 +124,7 @@ class AdminListEditor extends React.Component {
             </div>
           : this.state.searchInput ?
             <div className='add-detail'>
-              <em>No user found. Use email or login name.</em>
+              <em>No user found. Use email or username.</em>
             </div>
           : null
         }
@@ -150,7 +154,6 @@ export class PlenaryEditor extends React.Component {
 
   constructor(props) {
     super(props);
-    console.log(props);
     this.plenarySettingsFields = [
       'name', 'organizer', 'start_date', 'end_date', 'doors_open',
       'doors_close', 'description', 'slug', 'public', 'image',
@@ -352,6 +355,7 @@ export class PlenaryEditor extends React.Component {
             <AdminListEditor
                 value={this.state[stateName]}
                 onChange={(admins) => this.setState({[stateName]: admins})}
+                placeholder={props.placeholder}
                 admins={this.state[stateName]} />
 
           : ""
@@ -378,7 +382,6 @@ export class PlenaryEditor extends React.Component {
     let update = {copy_from_id: copyFromId};
     if (copyFromId) {
       let copyFrom = this.props.copyablePlenaries[copyFromId];
-      console.log(copyFrom);
       [
         "name", "image", "organizer", "time_zone", "public",
         "description", "whiteboard", "etherpad_initial_text",
@@ -485,10 +488,11 @@ export class PlenaryEditor extends React.Component {
                                 {placeholder: "Give your event a catchy title",
                                  maxLength: 100})}
             {this.renderControl("Image", "image", "image")}
-            {this.renderControl("Host", "organizer", "text",
+            {this.renderControl("Hosted by", "organizer", "text",
                                 {placeholder: "Tell your attendees who's organizing this event",
                                  maxLength: 100})}
-            {this.renderControl("Admins", "admins", "admins")}
+            {this.renderControl("Host Accounts", "admins", "admins",
+                                {placeholder: "Add others who need access to host controls"})}
             {this.renderControl("Start time", "start_date", "datetime")}
             {this.renderControl("Doors open", "doors_open", "before_start_date")}
             {this.renderControl("Event duration", "end_date", "after_start_date")}
