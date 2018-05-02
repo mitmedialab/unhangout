@@ -287,7 +287,11 @@ class Chat extends React.Component {
   }
   onSubmit = (event) => {
     event && event.preventDefault();
-    if (this.state.value.trim()) {
+    const empty = (
+      /^<p>(&nbsp;|<br>)*<\/p>$/.test(this.state.value.trim()) ||
+      !this.state.value.trim()
+    );
+    if (!empty) {
       this.props.onSendMessage({
         message: this.state.value,
         highlight: this.state.highlight

@@ -61,8 +61,12 @@ class JitsiVideo extends React.Component {
     );
 
     // Delay this in case it fails so we don't error hard.
-    setTimeout(function() {
-      this.api.executeCommand("displayName", props.auth.display_name);
+    setTimeout(() => {
+      try {
+        this.api.executeCommand("displayName", props.auth.display_name);
+      } catch (e) {
+        console.error(e);
+      }
     }, 10000);
 
     // Listen to everything.
