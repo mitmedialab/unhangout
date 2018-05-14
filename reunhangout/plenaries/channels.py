@@ -343,6 +343,7 @@ PLENARY_SANITIZED_KEYS = (
     'whiteboard', 'description'
 )
 
+
 def update_plenary(plenary, payload):
     for key in PLENARY_SIMPLE_UPDATE_KEYS + PLENARY_SANITIZED_KEYS:
         if key in payload:
@@ -358,13 +359,6 @@ def update_plenary(plenary, payload):
             raise ValidationError("Invalid image")
     elif payload.get('image', False) is None:
         plenary.image = None
-
-    # Handle admins
-    if payload.get('admins'):
-        admins = payload['admins']
-        users = list(User.objects.filter(id__in=[a['id'] for a in admins]))
-        if len(users) > 0:
-            plenary.admins.set(users)
 
     # Handle date arithmetic for boolean "open" nudging.
     change_open = payload.get('open')
@@ -397,6 +391,15 @@ def update_plenary(plenary, payload):
     plenary.full_clean()
 
 
+def update_plenary_admins(plenary, payload):
+    # Handle admins
+    if payload.get('admins'):
+        admins = payload['admins']
+        users = list(User.objects.filter(id__in=[a['id'] for a in admins]))
+        if len(users) > 0:
+            plenary.admins.set(users)
+
+
 @require_payload_keys([])
 def handle_plenary(message, data, plenary):
     if not plenary.has_admin(message.user):
@@ -407,6 +410,7 @@ def handle_plenary(message, data, plenary):
     payload = data['payload']
     try:
         update_plenary(plenary, payload)
+        update_plenary_admins(plenary, payload)
     except ValidationError as e:
         handle_error(message, json_dumps(e.message_dict))
 
@@ -415,7 +419,6 @@ def handle_plenary(message, data, plenary):
         breakouts_changed = True
     try:
         with transaction.atomic():
-            plenary.full_clean()
             plenary.save()
             if 'random_max_attendees' in payload:
                 # Not using queryset.update here, because we want to be able to

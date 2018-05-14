@@ -17,7 +17,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from breakouts.models import Breakout
 from channels_presence.models import Room, Presence
 from plenaries.models import Plenary, Series, ChatMessage
-from plenaries.channels import update_plenary
+from plenaries.channels import update_plenary, update_plenary_admins
 from plenaries import utils
 from videosync.models import VideoSync
 from accounts.models import User
@@ -173,6 +173,7 @@ def plenary_add(request):
                 plenary = Plenary()
                 update_plenary(plenary, payload)
                 plenary.save()
+                update_plenary_admins(plenary, payload)
                 plenary.admins.add(request.user)
                 if copy_from:
                     for admin in copy_from.admins.all():
