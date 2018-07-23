@@ -51,7 +51,7 @@
     django_settings_template: "roles/reunhangout/templates/reunhangout_settings.py"
     django_nginx_template: "roles/reunhangout/templates/reunhangout_nginx.conf"
     tarsnap_dirs:
-      - "{{django_media_dir}}"
+      - "{{django_media_dir | regex_replace('^/', '')}}"
     tarsnap_postgres_databases:
       - "{{uh_postgres_db}}"
     etherpad_domain: "{{uh_etherpad_domain}}"
