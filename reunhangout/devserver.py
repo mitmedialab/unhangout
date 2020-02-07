@@ -12,6 +12,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--flamegraph', action='store_true')
 parser.add_argument("--flamegraph-output", type=str,
         default=os.path.join(BASE, "..", "logs", "perf.log"))
+parser.add_argument('--addrport', default='127.0.0.1:8000')
 
 
 def venv_bin(arg):
@@ -32,9 +33,11 @@ def main():
             print()
             runserver = [venv_bin("python"), "-m", "flamegraph",
                 "-o", args.flamegraph_output,
-                os.path.join(BASE, "manage.py"), "runserver"]
+                os.path.join(BASE, "manage.py"), "runserver",
+                args.addrport]
     else:
-        runserver = [venv_bin("python"), os.path.join(BASE, "manage.py"), "runserver"]
+        runserver = [venv_bin("python"), os.path.join(BASE, "manage.py"),
+                     "runserver", args.addrport]
 
     try:
         procs = [
