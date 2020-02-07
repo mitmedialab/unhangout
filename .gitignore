@@ -19,3 +19,4 @@ reunhangout/media/*
 logs/*
 !logs/.keepdir
 loadtest/cache.json
+.vagrant/
