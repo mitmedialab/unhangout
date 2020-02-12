@@ -18,7 +18,11 @@ class JitsiVideo extends React.Component {
     super(props);
     this.state = {
       jitsiTimeout: false,
-      showReportModal: false
+      showReportModal: false,
+      participantIDMapping: {}, // we assume that all users joining the Jitsi call have display names
+      speakerStats: {}, // in milliseconds
+      lastDominantSpeaker: null,
+      startTimeLastSpeaker: null
     };
   }
 
@@ -71,7 +75,7 @@ class JitsiVideo extends React.Component {
 
     // Listen to everything.
     ["incomingMessage", "outgoingMessage", "displayNameChange",
-      "participantJoined", "participantLeft", "videoConferenceJoined",
+      "participantJoined", "participantLeft", "videoConferenceJoined", "dominantSpeakerChanged",
       "videoConferenceLeft", "readyToClose"].forEach(evt => {
       this.api.addEventListener(evt, (obj) => this.jitsiEvent(evt, obj))
     });
@@ -86,10 +90,46 @@ class JitsiVideo extends React.Component {
   }
   jitsiEvent(eventType, object) {
     console.log("JITSI-EVENT", eventType, object);
+    console.log("JITSI-EVENT", this.state.participantIDMapping)
+    console.log("JITSI-EVENT", this.state.speakerStats)
+    console.log("JITSI-EVENT", this.state.lastDominantSpeaker)
+    console.log("JITSI-EVENT", this.state.startTimeLastSpeaker)
     if (this.jitsiLoadTimeout) {
       clearTimeout(this.jitsiLoadTimeout);
       this.setState({jitsiTimeout: false});
     }
+    if (eventType === 'participantJoined' 
+        || eventType === 'videoConferenceJoined' 
+        || eventType === 'displayNameChanged') {
+      this.setState(prevState => {
+        let participantIDMapping = Object.assign({}, prevState.participantIDMapping);  
+        participantIDMapping[object.id] = object.displayName; 
+        let speakerStats = Object.assign({}, prevState.speakerStats)    
+        speakerStats[object.displayName] = 0;                             
+        return { participantIDMapping, speakerStats };                                 
+      })
+    }
+    if (eventType === 'dominantSpeakerChanged') {
+      this.setState(prevState => {
+        if (prevState.lastDominantSpeaker === null) {
+          let newLastDominantSpeaker = object.displayName;
+          let newStartTimeLastSpeaker = Date.now()
+          return { lastDominantSpeaker: newLastDominantSpeaker, startTimeLastSpeaker: newStartTimeLastSpeaker }
+        }            
+        // Add the elapsed time to speakerStats for lastDominantSpeaker
+        let speakingTime = Date.now() - prevState.startTimeLastSpeaker
+        let speakerStats = Object.assign({}, prevState.speakerStats)    
+        speakerStats[prevState.participantIDMapping[object.id]] = speakingTime;                   
+        
+        // Update lastDominantSpeaker and startTimeLastSpeaker
+        let newLastDominantSpeaker = object.displayName;
+        let newStartTimeLastSpeaker = Date.now()
+        return { lastDominantSpeaker: newLastDominantSpeaker, 
+                 startTimeLastSpeaker: newStartTimeLastSpeaker,
+                 speakerStats }
+      })
+    }
+
     this.props.jitsiEvent && this.props.jitsiEvent(eventType, object);
   }
   componentDidMount() {
