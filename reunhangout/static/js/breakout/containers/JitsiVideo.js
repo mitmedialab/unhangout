@@ -1,19 +1,12 @@
 import React from "react";
-import PropTypes from 'prop-types';
 import {connect} from "react-redux";
 import _ from 'lodash';
 import * as BS from "react-bootstrap";
-import {ConnectionStatus} from '../../transport';
-import * as A from '../actions';
 import * as PRESENCE_ACTIONS from '../../transport/actions';
-import {sortPresence} from '../../plenary/containers/Presence.js';
-import {Avatar} from "../../plenary/containers/Avatar";
-import WebRTCStatus from '../../plenary/containers/WebRTCStatus';
 import JitsiMeetExternalAPI from "../../vendor/jitsi-meet/external_api";
-import * as style from "../../../scss/pages/breakout/_breakoutstyle.scss";
 import {getErrorData} from '../../utils';
 
-export class JitsiVideo extends React.Component {
+class JitsiVideo extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -74,7 +67,7 @@ export class JitsiVideo extends React.Component {
     }, 10000);
 
     // Listen to everything.
-    ["incomingMessage", "outgoingMessage", "displayNameChange",
+    ["incomingMessage", "outgoingMessage", "displayNameChange", "audioMuteStatus",
       "participantJoined", "participantLeft", "videoConferenceJoined", "dominantSpeakerChanged",
       "videoConferenceLeft", "readyToClose"].forEach(evt => {
       this.api.addEventListener(evt, (obj) => this.jitsiEvent(evt, obj))
@@ -108,6 +101,7 @@ export class JitsiVideo extends React.Component {
         speakerStats[object.displayName] = 0;                             
         return { participantIDMapping, speakerStats };                                 
       })
+      this.props.updateSpeakerStats({speakerStats: this.state.speakerStats});
     }
     if (eventType === 'dominantSpeakerChanged') {
       this.setState(prevState => {
@@ -128,6 +122,7 @@ export class JitsiVideo extends React.Component {
                  startTimeLastSpeaker: newStartTimeLastSpeaker,
                  speakerStats }
       })
+      this.props.updateSpeakerStats({speakerStats: this.state.speakerStats});
     }
 
     this.props.jitsiEvent && this.props.jitsiEvent(eventType, object);
@@ -281,3 +276,14 @@ export class JitsiVideo extends React.Component {
     </div>
   }
 }
+
+export default connect(
+  // map state to props
+  (state) => ({
+    speakerStats: state.speakerStats,
+  }),
+  // map dispatch to props
+  (dispatch) => ({
+    updateSpeakerStats: (payload) => dispatch(PRESENCE_ACTIONS.updateSpeakerStats(payload))
+  })
+)(JitsiVideo);

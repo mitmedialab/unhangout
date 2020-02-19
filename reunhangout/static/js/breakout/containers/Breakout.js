@@ -8,7 +8,7 @@ import * as A from '../actions';
 import * as PRESENCE_ACTIONS from '../../transport/actions';
 import {sortPresence} from '../../plenary/containers/Presence.js';
 import {Avatar} from "../../plenary/containers/Avatar";
-import {JitsiVideo} from "./JitsiVideo"
+import JitsiVideo from "./JitsiVideo";
 import WebRTCStatus from '../../plenary/containers/WebRTCStatus';
 import JitsiMeetExternalAPI from "../../vendor/jitsi-meet/external_api";
 import * as style from "../../../scss/pages/breakout/_breakoutstyle.scss";
@@ -115,6 +115,7 @@ class Breakout extends React.Component {
     if (this.etherpadDiv) {
       this.etherpadDiv.style.pointerEvents = 'auto';
     }
+    console.log(this.props.speakerStats);
   }
 
   render() {
@@ -220,6 +221,7 @@ export default connect(
     breakoutMessages: state.breakoutMessages,
     auth: state.auth,
     settings: state.settings,
+    speakerStats: state.speakerStats,
   }),
   // map dispatch to props
   (dispatch, ownProps) => ({
