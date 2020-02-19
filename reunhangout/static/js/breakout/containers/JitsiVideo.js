@@ -67,9 +67,9 @@ class JitsiVideo extends React.Component {
     }, 10000);
 
     // Listen to everything.
-    ["incomingMessage", "outgoingMessage", "displayNameChange", "audioMuteStatus",
-      "participantJoined", "participantLeft", "videoConferenceJoined", "dominantSpeakerChanged",
-      "videoConferenceLeft", "readyToClose"].forEach(evt => {
+    ["incomingMessage", "outgoingMessage", "displayNameChange", 
+      "participantJoined", "participantLeft", "videoConferenceJoined", 
+      "dominantSpeakerChanged", "videoConferenceLeft", "readyToClose"].forEach(evt => {
       this.api.addEventListener(evt, (obj) => this.jitsiEvent(evt, obj))
     });
     window.__jitsiApi = this.api;
@@ -94,35 +94,45 @@ class JitsiVideo extends React.Component {
     if (eventType === 'participantJoined' 
         || eventType === 'videoConferenceJoined' 
         || eventType === 'displayNameChanged') {
-      this.setState(prevState => {
-        let participantIDMapping = Object.assign({}, prevState.participantIDMapping);  
-        participantIDMapping[object.id] = object.displayName; 
-        let speakerStats = Object.assign({}, prevState.speakerStats)    
-        speakerStats[object.displayName] = 0;                             
-        return { participantIDMapping, speakerStats };                                 
-      })
-      this.props.updateSpeakerStats({speakerStats: this.state.speakerStats});
+      if (typeof(object.displayName) !== 'undefined') {
+        this.setState(prevState => {
+          let participantIDMapping = Object.assign({}, prevState.participantIDMapping);  
+          participantIDMapping[object.id] = object.displayName; 
+          let speakerStats = Object.assign({}, prevState.speakerStats)    
+          speakerStats[object.displayName] = 0;                             
+          return { participantIDMapping, speakerStats };                                 
+        })
+        this.props.updateSpeakerStats({speakerStats: this.state.speakerStats});
+      }
     }
     if (eventType === 'dominantSpeakerChanged') {
-      this.setState(prevState => {
-        if (prevState.lastDominantSpeaker === null) {
+      if (typeof(object.displayName) !== 'undefined') {
+        this.setState(prevState => {
+          if (prevState.lastDominantSpeaker === null) {
+            let newLastDominantSpeaker = object.displayName;
+            let newStartTimeLastSpeaker = Date.now()
+            return { lastDominantSpeaker: newLastDominantSpeaker, 
+                     startTimeLastSpeaker: newStartTimeLastSpeaker }
+          }            
+          // Add the elapsed time to speakerStats for lastDominantSpeaker
+          let speakingTime = Date.now() - prevState.startTimeLastSpeaker
+          let speakerStats = Object.assign({}, prevState.speakerStats)    
+          speakerStats[prevState.participantIDMapping[object.id]] = speakingTime;                   
+          
+          // Update lastDominantSpeaker and startTimeLastSpeaker
           let newLastDominantSpeaker = object.displayName;
           let newStartTimeLastSpeaker = Date.now()
-          return { lastDominantSpeaker: newLastDominantSpeaker, startTimeLastSpeaker: newStartTimeLastSpeaker }
-        }            
-        // Add the elapsed time to speakerStats for lastDominantSpeaker
-        let speakingTime = Date.now() - prevState.startTimeLastSpeaker
-        let speakerStats = Object.assign({}, prevState.speakerStats)    
-        speakerStats[prevState.participantIDMapping[object.id]] = speakingTime;                   
-        
-        // Update lastDominantSpeaker and startTimeLastSpeaker
-        let newLastDominantSpeaker = object.displayName;
-        let newStartTimeLastSpeaker = Date.now()
-        return { lastDominantSpeaker: newLastDominantSpeaker, 
-                 startTimeLastSpeaker: newStartTimeLastSpeaker,
-                 speakerStats }
-      })
-      this.props.updateSpeakerStats({speakerStats: this.state.speakerStats});
+          return { lastDominantSpeaker: newLastDominantSpeaker, 
+                   startTimeLastSpeaker: newStartTimeLastSpeaker,
+                   speakerStats }
+        })
+        this.props.updateSpeakerStats({speakerStats: this.state.speakerStats});
+      } else {
+        // We don't track the speaking time of anyone accessing Jitsi Meet outside of Unhangout
+        this.setState(prevState => {
+          return { lastDominantSpeaker: null }
+        })
+      }
     }
 
     this.props.jitsiEvent && this.props.jitsiEvent(eventType, object);
