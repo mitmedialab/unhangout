@@ -83,10 +83,6 @@ class JitsiVideo extends React.Component {
   }
   jitsiEvent(eventType, object) {
     console.log("JITSI-EVENT", eventType, object);
-    console.log("JITSI-EVENT", this.state.participantIDMapping)
-    console.log("JITSI-EVENT", this.state.speakerStats)
-    console.log("JITSI-EVENT", this.state.lastDominantSpeaker)
-    console.log("JITSI-EVENT", this.state.startTimeLastSpeaker)
     if (this.jitsiLoadTimeout) {
       clearTimeout(this.jitsiLoadTimeout);
       this.setState({jitsiTimeout: false});
