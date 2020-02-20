@@ -97,6 +97,10 @@ class JitsiVideo extends React.Component {
       if (typeof(object.displayName) !== 'undefined') {
         this.setState(prevState => {
           let participantIDMapping = Object.assign({}, prevState.participantIDMapping);  
+          let previousJitsiID = Object.keys(participantIDMapping).find(key => prevState.participantIDMapping[key] === object.displayName);
+          if (previousJitsiID !== 'undefined') {
+            delete participantIDMapping[previousJitsiID];
+          }
           participantIDMapping[object.id] = object.displayName; 
           let speakerStats = Object.assign({}, prevState.speakerStats)    
           speakerStats[object.displayName] = 0;                             
