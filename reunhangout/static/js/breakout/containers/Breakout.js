@@ -115,7 +115,6 @@ class Breakout extends React.Component {
     if (this.etherpadDiv) {
       this.etherpadDiv.style.pointerEvents = 'auto';
     }
-    console.log(this.props.speakerStats);
   }
 
   render() {
@@ -221,7 +220,6 @@ export default connect(
     breakoutMessages: state.breakoutMessages,
     auth: state.auth,
     settings: state.settings,
-    speakerStats: state.speakerStats,
   }),
   // map dispatch to props
   (dispatch, ownProps) => ({
