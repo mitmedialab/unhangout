@@ -28,3 +28,17 @@ export const updateSpeakerStats = (payload) => {
     dispatch({type: UPDATE_SPEAKER_STATS, payload});
   }
 };
+
+// tells the clients to save speaker stats to the backend
+export const REQUEST_SPEAKER_STATS = 'REQUEST_SPEAKER_STATS';
+export const requestSpeakerStats = (payload) => {
+  return (dispatch) => {
+    dispatch({type: REQUEST_SPEAKER_STATS, payload});
+  }
+}  
+
+export const recordSpeakerStats = (payload) => {
+  return (dispatch) => {
+    sendSocketMessage({type: "record_speaker_stats", payload});
+  }
+}

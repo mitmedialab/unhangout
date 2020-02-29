@@ -42,6 +42,18 @@ export const speakerStats = (state=null, action) => {
     case A.UPDATE_SPEAKER_STATS:
       state['speaker_stats'] = action.payload;
       return state;
+    default:
+      return state;
   }
-  return state;
+}
+
+export const requestSpeakerStats = (state=null, action) => {
+  state = state || false
+  switch (action.type) {
+    case A.REQUEST_SPEAKER_STATS:
+      state = action.payload.requestSpeakerStats;
+      return state;
+    default:
+      return state;
+  }
 }
