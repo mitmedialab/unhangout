@@ -67,7 +67,7 @@ class JitsiVideo extends React.Component {
     }, 10000);
 
     // Listen to everything.
-    ["incomingMessage", "outgoingMessage", "displayNameChange", 
+    ["incomingMessage", "outgoingMessage", "displayNameChange",
       "participantJoined", "participantLeft", "videoConferenceJoined", 
       "dominantSpeakerChanged", "videoConferenceLeft", "readyToClose"].forEach(evt => {
       this.api.addEventListener(evt, (obj) => this.jitsiEvent(evt, obj))
@@ -173,8 +173,14 @@ class JitsiVideo extends React.Component {
 
   /**
    * Only auto-render based on changes in props/state if jitsi load times out.
+   * If requestSpeakerStats props have changed to true, then dispatch the speakerStats.
    */
   shouldComponentUpdate(nextProps, nextState) {
+    if (nextProps.requestSpeakerStats !== this.props.requestSpeakerStats 
+        && nextProps.requestSpeakerStats === true) {
+      this.props.recordSpeakerStats({speakerStats: this.state.speakerStats});
+    }
+
     return (
       !!nextState.jitsiTimeout !== !!this.state.jitsiTimeout ||
       !!nextState.showReportModal !== !!this.state.showReportModal
@@ -291,9 +297,11 @@ export default connect(
   // map state to props
   (state) => ({
     speakerStats: state.speakerStats,
+    requestSpeakerStats: state.requestSpeakerStats,
   }),
   // map dispatch to props
   (dispatch) => ({
-    updateSpeakerStats: (payload) => dispatch(PRESENCE_ACTIONS.updateSpeakerStats(payload))
+    updateSpeakerStats: (payload) => dispatch(PRESENCE_ACTIONS.updateSpeakerStats(payload)),
+    recordSpeakerStats: (payload) => dispatch(PRESENCE_ACTIONS.recordSpeakerStats(payload))
   })
 )(JitsiVideo);

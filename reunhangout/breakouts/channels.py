@@ -83,6 +83,8 @@ def route_message(message, data, breakout):
         handle_disconnecting_others(message, data, breakout)
     elif data['type'] == "ERROR_REPORT":
         handle_error_report(message, data, breakout)
+    elif data['type'] == "record_speaker_stats":
+        handle_record_speaker_stats(message, data, breakout)
     else:
         handle_error(message, "Type not understood")
 
@@ -139,3 +141,10 @@ def handle_error_report(message, data, breakout):
         mail_admins("Breakout error report", msg, fail_silently=False)
     except Exception as e:
         logger.exception(e)
+
+@require_payload_keys(['speakerStats'])
+def handle_record_speaker_stats(message, data, breakout):
+    import pdb
+    pdb.set_trace()
+    
+    track("record_speaker_stats", message.user, {'speakerStats': data['payload']['speakerStats']}, breakout=breakout)

@@ -80,6 +80,9 @@ export class SocketClient {
       case "message_breakouts":
         this.store.dispatch(BREAKOUT_ACTIONS.message(data.payload));
         break;
+      case "request_speaker_stats":
+        this.store.dispatch(A.requestSpeakerStats(data.payload));
+        break;
       case "breakout":
         this.store.dispatch(BREAKOUT_ACTIONS.setBreakout(data.payload));
         break;
