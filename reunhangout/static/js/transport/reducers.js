@@ -35,3 +35,13 @@ export const presence = (state=null, action) => {
   }
   return state;
 }
+
+export const speakerStats = (state=null, action) => {
+  state = state || {}
+  switch (action.type) {
+    case A.UPDATE_SPEAKER_STATS:
+      state['speaker_stats'] = action.payload;
+      return state;
+  }
+  return state;
+}
