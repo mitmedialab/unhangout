@@ -144,7 +144,4 @@ def handle_error_report(message, data, breakout):
 
 @require_payload_keys(['speakerStats'])
 def handle_record_speaker_stats(message, data, breakout):
-    import pdb
-    pdb.set_trace()
-    
-    track("record_speaker_stats", message.user, {'speakerStats': data['payload']['speakerStats']}, breakout=breakout)
+    track("record_speaker_stats", message.user, {'speakerStats': data['payload']['speakerStats']}, breakout=breakout) 

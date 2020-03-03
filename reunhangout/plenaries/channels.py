@@ -605,4 +605,3 @@ def handle_request_speaker_stats(message, data, plenary):
     for breakout in plenary.breakout_set.active():
         broadcast(breakout.channel_group_name, type='request_speaker_stats',
                 payload=data['payload'])
-                
