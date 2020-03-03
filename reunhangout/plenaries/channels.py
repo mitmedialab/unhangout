@@ -109,6 +109,8 @@ def route_message(message, data, plenary):
         handle_add_live_participant(message, data, plenary)
     elif data['type'] == "remove_live_participant":
         handle_remove_live_participant(message, data, plenary)
+    elif data['type'] == "request_speaker_stats":
+        handle_request_speaker_stats(message, data, plenary)
     else:
         handle_error(message, "Type not understood")
 
@@ -594,3 +596,12 @@ def handle_message_breakouts(message, data, plenary):
         broadcast(breakout.channel_group_name, type='message_breakouts',
                 payload={'message': msg_text})
     track("message_breakouts", message.user, {'message': msg_text}, plenary=plenary)
+
+@require_payload_keys(['requestSpeakerStats'])
+def handle_request_speaker_stats(message, data, plenary):
+    if not plenary.has_admin(message.user):
+        return handle_error(message, "Must be an admin to request speaker stats")
+
+    for breakout in plenary.breakout_set.active():
+        broadcast(breakout.channel_group_name, type='request_speaker_stats',
+                payload=data['payload'])

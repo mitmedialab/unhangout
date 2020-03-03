@@ -90,6 +90,7 @@ class Action(models.Model):
         "change_breakout_vote",
         "join_breakout",
         "leave_breakout",
+        "record_speaker_stats",
     ]
 
     action = models.CharField(
