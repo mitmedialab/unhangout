@@ -87,40 +87,71 @@ class JitsiVideo extends React.Component {
       clearTimeout(this.jitsiLoadTimeout);
       this.setState({jitsiTimeout: false});
     }
-    if (eventType === 'participantJoined' 
-        || eventType === 'videoConferenceJoined' 
-        || eventType === 'displayNameChanged') {
-      if (typeof(object.displayName) !== 'undefined') {
-        this.setState(prevState => {
-          let participantIDMapping = Object.assign({}, prevState.participantIDMapping);  
-          let previousJitsiID = Object.keys(participantIDMapping).find(key => prevState.participantIDMapping[key] === object.displayName);
-          if (previousJitsiID !== 'undefined') {
-            delete participantIDMapping[previousJitsiID];
+    if (eventType === 'participantJoined'
+        || eventType === 'videoConferenceJoined') {
+      var displayName = object.displayName;
+      if (typeof(displayName) === 'undefined') {
+        displayName = object.formattedDisplayName;
+      } 
+      if (typeof(displayName) === 'undefined') {
+        return;
+      } 
+      this.setState(prevState => {
+        // user previously joined with SAME displayName but different JitsiID
+        let participantIDMapping = Object.assign({}, prevState.participantIDMapping);  
+        let previousJitsiID = Object.keys(participantIDMapping).find(key => participantIDMapping[key] === displayName);
+        if (typeof(previousJitsiID) !== 'undefined') {
+          delete participantIDMapping[previousJitsiID];
+        }
+        participantIDMapping[object.id] = displayName; 
+        let speakerStats = Object.assign({}, prevState.speakerStats)
+        if (typeof(speakerStats[displayName]) === 'undefined') {
+          speakerStats[displayName] = 0; 
+        }                            
+        return { participantIDMapping, speakerStats };                                 
+      })
+      this.props.updateSpeakerStats({speakerStats: this.state.speakerStats});
+    }
+    if (eventType === 'displayNameChange') {
+      var displayName = object.displayname || object.formattedDisplayName
+      this.setState(prevState => {
+        // user has the SAME JitsiID but different displayName
+        let speakerStats = Object.assign({}, prevState.speakerStats)
+        let participantIDMapping = Object.assign({}, prevState.participantIDMapping);
+        let oldDisplayName = participantIDMapping[object.id];
+        if (displayName !== oldDisplayName) {
+          participantIDMapping[object.id] = displayName; 
+  
+          if (typeof(speakerStats[oldDisplayName]) === 'undefined') {
+            speakerStats[displayName] = 0; 
+          } else {     
+            speakerStats[displayName] = speakerStats[oldDisplayName]
+            delete speakerStats[oldDisplayName]       
+          }     
+          if (prevState.lastDominantSpeaker === oldDisplayName) {
+            return { lastDominantSpeaker: displayName,  participantIDMapping, speakerStats}
           }
-          participantIDMapping[object.id] = object.displayName; 
-          let speakerStats = Object.assign({}, prevState.speakerStats)    
-          speakerStats[object.displayName] = 0;                             
-          return { participantIDMapping, speakerStats };                                 
-        })
-        this.props.updateSpeakerStats({speakerStats: this.state.speakerStats});
-      }
+        }
+        return { participantIDMapping, speakerStats };                                 
+      })
+      this.props.updateSpeakerStats({speakerStats: this.state.speakerStats});
     }
     if (eventType === 'dominantSpeakerChanged') {
-      if (typeof(object.displayName) !== 'undefined') {
+      if (typeof(this.state.participantIDMapping[object.id]) !== 'undefined') {
         this.setState(prevState => {
           if (prevState.lastDominantSpeaker === null) {
-            let newLastDominantSpeaker = object.displayName;
+            let newLastDominantSpeaker = prevState.participantIDMapping[object.id];
             let newStartTimeLastSpeaker = Date.now()
             return { lastDominantSpeaker: newLastDominantSpeaker, 
                      startTimeLastSpeaker: newStartTimeLastSpeaker }
           }            
           // Add the elapsed time to speakerStats for lastDominantSpeaker
-          let speakingTime = Date.now() - prevState.startTimeLastSpeaker
-          let speakerStats = Object.assign({}, prevState.speakerStats)    
-          speakerStats[prevState.participantIDMapping[object.id]] = speakingTime;                   
+          let speakingTime = Date.now() - prevState.startTimeLastSpeaker;
+          let speakerStats = Object.assign({}, prevState.speakerStats); 
+          speakerStats[prevState.lastDominantSpeaker] += speakingTime;  
           
           // Update lastDominantSpeaker and startTimeLastSpeaker
-          let newLastDominantSpeaker = object.displayName;
+          let newLastDominantSpeaker = this.state.participantIDMapping[object.id];
           let newStartTimeLastSpeaker = Date.now()
           return { lastDominantSpeaker: newLastDominantSpeaker, 
                    startTimeLastSpeaker: newStartTimeLastSpeaker,
