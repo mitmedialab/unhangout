@@ -37,11 +37,10 @@ export const presence = (state=null, action) => {
 }
 
 export const speakerStats = (state=null, action) => {
-  state = state || {}
+  state = state || {speaker_stats: {}}
   switch (action.type) {
     case A.UPDATE_SPEAKER_STATS:
-      state['speaker_stats'] = action.payload;
-      return state;
+      return {...state, speaker_stats: action.payload.speakerStats};
     default:
       return state;
   }

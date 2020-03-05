@@ -61,7 +61,8 @@ export class Presence extends React.Component {
                              detailView={this.state.detailView}
                              className={className}
                              key={`presence-${user.username}`}
-                             idPart={`presence-${user.username}`} />
+                             idPart={`presence-${user.username}`} 
+                             breakoutView={false}/>
             })
           }
         </div>

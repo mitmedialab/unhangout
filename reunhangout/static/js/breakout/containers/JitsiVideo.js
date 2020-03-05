@@ -119,7 +119,7 @@ class JitsiVideo extends React.Component {
       let speakerStats = Object.assign({}, prevState.speakerStats)
       if (typeof(speakerStats[displayName]) === 'undefined') {
         speakerStats[displayName] = 0; 
-      }                            
+      }
       return { participantIDMapping, speakerStats };                                 
     })
     this.props.updateSpeakerStats({speakerStats: this.state.speakerStats});
@@ -339,7 +339,6 @@ class JitsiVideo extends React.Component {
 export default connect(
   // map state to props
   (state) => ({
-    speakerStats: state.speakerStats,
     requestSpeakerStats: state.requestSpeakerStats,
   }),
   // map dispatch to props
