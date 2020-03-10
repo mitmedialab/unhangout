@@ -162,7 +162,7 @@ class JitsiVideo extends React.Component {
         // Add the elapsed time to speakerStats for lastDominantSpeaker
         let speakingTime = Date.now() - prevState.startTimeLastSpeaker;
         let speakerStats = Object.assign({}, prevState.speakerStats); 
-        speakerStats[prevState.lastDominantSpeaker] += speakingTime;  
+        speakerStats[prevState.lastDominantSpeaker] += speakingTime / 1000; // convert to seconds  
         
         // Update lastDominantSpeaker and startTimeLastSpeaker
         let newLastDominantSpeaker = this.state.participantIDMapping[object.id];
@@ -222,6 +222,7 @@ class JitsiVideo extends React.Component {
     if (nextProps.requestSpeakerStats !== this.props.requestSpeakerStats 
         && nextProps.requestSpeakerStats === true) {
       this.props.recordSpeakerStats({speakerStats: this.state.speakerStats});
+      this.props.onRequestSpeakerStats({requestSpeakerStats: false})
     }
 
     return (
@@ -344,6 +345,7 @@ export default connect(
   // map dispatch to props
   (dispatch) => ({
     updateSpeakerStats: (payload) => dispatch(PRESENCE_ACTIONS.updateSpeakerStats(payload)),
-    recordSpeakerStats: (payload) => dispatch(PRESENCE_ACTIONS.recordSpeakerStats(payload))
+    recordSpeakerStats: (payload) => dispatch(PRESENCE_ACTIONS.recordSpeakerStats(payload)),
+    onRequestSpeakerStats: (payload) => dispatch(A.requestSpeakerStats(payload)),
   })
 )(JitsiVideo);
