@@ -347,6 +347,6 @@ export default connect(
   (dispatch) => ({
     updateSpeakerStats: (payload) => dispatch(PRESENCE_ACTIONS.updateSpeakerStats(payload)),
     recordSpeakerStats: (payload) => dispatch(PRESENCE_ACTIONS.recordSpeakerStats(payload)),
-    onRequestSpeakerStats: (payload) => dispatch(A.requestSpeakerStats(payload)),
+    onRequestSpeakerStats: (payload) => dispatch(PRESENCE_ACTIONS.requestSpeakerStats(payload)),
   })
 )(JitsiVideo);
