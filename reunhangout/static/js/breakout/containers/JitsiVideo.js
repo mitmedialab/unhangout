@@ -12,8 +12,9 @@ class JitsiVideo extends React.Component {
     this.state = {
       jitsiTimeout: false,
       showReportModal: false,
-      participantIDMapping: {}, // we assume that all users joining the Jitsi call have display names
-      speakerStats: {}, // in milliseconds
+      // we assume that all users joining the Jitsi call have unique display names
+      participantIDMapping: {}, 
+      speakerStats: {}, // in seconds
       lastDominantSpeaker: null,
       startTimeLastSpeaker: null
     };
