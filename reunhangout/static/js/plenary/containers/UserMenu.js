@@ -61,7 +61,7 @@ export class UserMenu extends React.Component {
       <div style={{'position': 'relative', 'width': '100%'}}>
         <div ref='target' className='user-button' onClick={(e) => this.toggle(e)}>
           <div className='user'>
-            <Avatar idPart={'user-button'} user={this.props.auth} />
+            <Avatar idPart={'user-button'} user={this.props.auth} breakoutView={false}/>
             {this.props.auth.display_name} <i className='fa fa-angle-down' />
           </div>
         </div>

@@ -54,7 +54,8 @@ class Presence extends React.Component {
             <div className='present' key={user.username}>
               <Avatar user={user}
                       detailView={false}
-                      idPart={`breakout-presence-${user.username}`} />
+                      idPart={`breakout-presence-${user.username}`}
+                      breakoutView={true} />
               <span className='name'>{user.display_name}</span>
             </div>
           )))

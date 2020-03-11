@@ -8,7 +8,7 @@ import * as A from "../actions";
 
 
 @connect(
-  state => ({users: state.users, settings: state.settings}),
+  state => ({users: state.users, settings: state.settings, speakerStats: state.speakerStats.speaker_stats}),
   dispatch => ({})
 )
 export class Avatar extends React.Component {
@@ -23,12 +23,51 @@ export class Avatar extends React.Component {
       })
     ]),
     idPart: PropTypes.string.isRequired,
+    breakoutView: PropTypes.bool
   }
 
   state = {'imageError': false};
 
   onError(event) {
     this.setState({'imageError': true});
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    if (this.props.breakoutView && !_.isEqual(nextProps.speakerStats, this.props.speakerStats)) {
+      let user;
+      if (_.isNumber(this.props.user)) {
+        user = this.props.users[this.props.user];
+      } else {
+        user = this.props.user;
+      }
+      var speaking_time = -1;
+      for (const display_name in nextProps.speakerStats) {
+        if (display_name === user.display_name) {
+          speaking_time = nextProps.speakerStats[user.display_name];
+          break;
+        }
+      }
+      if (speaking_time < 0) {
+        console.log("User not found in speaking stats object");
+        return false;
+      }
+
+      let total_speaking_time = _.reduce(Object.values(nextProps.speakerStats), (memo, num) => (memo + num), 0);
+      if (total_speaking_time === 0) {
+        return false;
+      }
+
+      let new_opacity = speaking_time / total_speaking_time
+
+      var element = document.getElementById(`breakout-user-avatar-${user.display_name}`);
+      if (element === null) {
+        console.log("Element got by id was null for user", user.display_name);
+        return false;
+      }
+      element.style.opacity = Math.min(new_opacity, .2);
+      return false;
+    } 
+    return true;
   }
 
   render() {
@@ -47,6 +86,7 @@ export class Avatar extends React.Component {
     }
     let u = encodeURIComponent(user.username).replace(/\%/g, '::');
     let popoverId = `avatar-${u}-${this.props.idPart}`;
+    let breakout_avatar_id = `breakout-user-avatar-${user.display_name}`;
     let classes = [];
     if (this.props.className) {
       classes.push(this.props.className);
@@ -62,6 +102,11 @@ export class Avatar extends React.Component {
           {user.display_name}
         </div>
       )
+    } else if (this.props.breakoutView) {
+      classes.push("user-avatar");
+      return <span className={classes.join(" ")} id={breakout_avatar_id}>
+          <img {...imgProps} />
+      </span>
     } else {
       let popover = <BS.Popover id={popoverId}>
         {user.display_name}
