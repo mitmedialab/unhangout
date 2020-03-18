@@ -51,7 +51,7 @@ class JitsiVideo extends React.Component {
             "microphone", "camera", "desktop",
             "chat", "filmstrip",
             "sharedvideo","settings",
-            "recording"
+            "recording", "raisehand",
           ],
           MAIN_TOOLBAR_BUTTONS: ['microphone', 'camera', 'desktop'],
         }
