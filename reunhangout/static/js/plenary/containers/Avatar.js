@@ -47,12 +47,14 @@ export class Avatar extends React.Component {
           break;
         }
       }
-      if (speaking_time < 0) {
-        console.log("User not found in speaking stats object");
-        return false;
-      }
 
-      let total_speaking_time = _.reduce(Object.values(nextProps.speakerStats), (memo, num) => (memo + num), 0);
+      let total_speaking_time = 0;
+      for (var key of Object.keys(nextProps.users)) {
+        let user = nextProps.users[key]
+        if (nextProps.speakerStats.hasOwnProperty(user.display_name)) {
+          total_speaking_time += nextProps.speakerStats[user.display_name];
+        }
+      }
       if (total_speaking_time === 0) {
         return false;
       }
@@ -64,7 +66,12 @@ export class Avatar extends React.Component {
         console.log("Element got by id was null for user", user.display_name);
         return false;
       }
-      element.style.opacity = Math.min(new_opacity, .2);
+      if (new_opacity < 0) {
+        console.log("User not found in speaking stats object - assume speaking time is 0", user.display_name);
+        element.style.opacity = .2
+        return false;
+      }
+      element.style.opacity = Math.max(new_opacity, .2);
       return false;
     } 
     return true;
