@@ -24,7 +24,6 @@ export const disconnectOthers = (payload) => {
 export const UPDATE_SPEAKER_STATS = 'UPDATE_SPEAKER_STATS';
 export const updateSpeakerStats = (payload) => {
   return (dispatch) => {
-    console.log("Action to dispatch update speaker stats being called")
     dispatch({type: UPDATE_SPEAKER_STATS, payload});
   }
 };
