@@ -12,7 +12,6 @@ class JitsiVideo extends React.Component {
     this.state = {
       jitsiTimeout: false,
       showReportModal: false,
-      // we assume that all users joining the Jitsi call have unique display names
       speakerStats: {}, // in seconds
       lastDominantSpeaker: null,
       startTimeLastSpeaker: null
@@ -43,7 +42,7 @@ class JitsiVideo extends React.Component {
           APP_NAME: props.settings.BRANDING.name,
           SHOW_JITSI_WATERMARK: false,
           SHOW_WATERMARK_FOR_GUESTS: false,
-          DEFAULT_LOCAL_DISPLAY_NAME: props.auth.display_name,
+          DEFAULT_LOCAL_DISPLAY_NAME: props.auth.username,
           DEFAULT_REMOTE_DISPLAY_NAME: "Fellow breakouter",
           SHOW_POWERED_BY: false,
           TOOLBAR_BUTTONS: [
@@ -60,7 +59,7 @@ class JitsiVideo extends React.Component {
     // Delay this in case it fails so we don't error hard.
     setTimeout(() => {
       try {
-        this.api.executeCommand("displayName", props.auth.display_name);
+        this.api.executeCommand("displayName", props.auth.username);
       } catch (e) {
         console.error(e);
       }
@@ -94,13 +93,13 @@ class JitsiVideo extends React.Component {
   }
 
   handleDominantSpeakerChange(object) {
-    let userDisplayNames = Object.keys(this.props.users).map(key => this.props.users[key].display_name);
-    const newDominantSpeakerDisplayName = this.api.getDisplayName(object.id);
+    let userNames = Object.keys(this.props.users).map(key => this.props.users[key].username);
+    const newDominantSpeakerUsername = this.api.getDisplayName(object.id);
 
-    if (userDisplayNames.includes(newDominantSpeakerDisplayName)) {
+    if (userNames.includes(newDominantSpeakerUsername)) {
       this.setState(prevState => {
         if (prevState.lastDominantSpeaker === null) {
-          return { lastDominantSpeaker: newDominantSpeakerDisplayName, 
+          return { lastDominantSpeaker: newDominantSpeakerUsername, 
                     startTimeLastSpeaker: Date.now() }
         }            
         // Add the elapsed time to speakerStats for lastDominantSpeaker
@@ -112,14 +111,14 @@ class JitsiVideo extends React.Component {
           speakerStats[prevState.lastDominantSpeaker] = speakingTime 
         }
         
-        return { lastDominantSpeaker: newDominantSpeakerDisplayName, 
+        return { lastDominantSpeaker: newDominantSpeakerUsername, 
                   startTimeLastSpeaker: Date.now(),
                   speakerStats }
       })
       this.props.updateSpeakerStats({speakerStats: this.state.speakerStats});
     } else {
       // We don't track the speaking time of anyone accessing Jitsi Meet outside of Unhangout
-      console.log("JITSI-EVENT user NOT present newDomSpeakerName:", newDominantSpeakerDisplayName);
+      console.log("JITSI-EVENT user NOT present newDomSpeakerName:", newDominantSpeakerUsername);
       this.setState(prevState => {
         return { lastDominantSpeaker: null }
       })

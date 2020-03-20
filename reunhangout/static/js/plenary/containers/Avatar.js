@@ -41,9 +41,9 @@ export class Avatar extends React.Component {
         user = this.props.user;
       }
       var speaking_time = -1;
-      for (const display_name in nextProps.speakerStats) {
-        if (display_name === user.display_name) {
-          speaking_time = nextProps.speakerStats[user.display_name];
+      for (const username in nextProps.speakerStats) {
+        if (username === user.username) {
+          speaking_time = nextProps.speakerStats[user.username];
           break;
         }
       }
@@ -51,8 +51,8 @@ export class Avatar extends React.Component {
       let total_speaking_time = 0;
       for (var key of Object.keys(nextProps.users)) {
         let user = nextProps.users[key]
-        if (nextProps.speakerStats.hasOwnProperty(user.display_name)) {
-          total_speaking_time += nextProps.speakerStats[user.display_name];
+        if (nextProps.speakerStats.hasOwnProperty(user.username)) {
+          total_speaking_time += nextProps.speakerStats[user.username];
         }
       }
       if (total_speaking_time === 0) {
@@ -61,13 +61,13 @@ export class Avatar extends React.Component {
 
       let new_opacity = speaking_time / total_speaking_time
 
-      var element = document.getElementById(`breakout-user-avatar-${user.display_name}`);
+      var element = document.getElementById(`breakout-user-avatar-${user.username}`);
       if (element === null) {
-        console.log("Element got by id was null for user", user.display_name);
+        console.log("Element got by id was null for user", user.username);
         return false;
       }
       if (new_opacity < 0) {
-        console.log("User not found in speaking stats object - assume speaking time is 0", user.display_name);
+        console.log("User not found in speaking stats object - assume speaking time is 0", user.username);
         element.style.opacity = .2
         return false;
       }
