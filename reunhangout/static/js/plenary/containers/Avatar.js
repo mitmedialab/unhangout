@@ -93,7 +93,7 @@ export class Avatar extends React.Component {
     }
     let u = encodeURIComponent(user.username).replace(/\%/g, '::');
     let popoverId = `avatar-${u}-${this.props.idPart}`;
-    let breakout_avatar_id = `breakout-user-avatar-${user.display_name}`;
+    let breakout_avatar_id = `breakout-user-avatar-${user.username}`;
     let classes = [];
     if (this.props.className) {
       classes.push(this.props.className);
