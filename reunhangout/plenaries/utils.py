@@ -11,7 +11,6 @@ def export_etherpads(plenary):
     exports = []
     for breakout in plenary.breakout_set.all():
         url = "".join((
-            "https://",
             settings.ETHERPAD_SERVER,
             "/p/",
             breakout.webrtc_id,
