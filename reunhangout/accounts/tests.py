@@ -3,10 +3,36 @@ import hmac
 import pytest
 import time
 
+from django.test import TestCase
+from django.test import Client
+from django.core import mail
 from django.conf import settings
+
 from accounts.models import EmailNotification, User
 from plenaries.models import Plenary
 from plenaries.tests import dt
+
+
+class TestAccountViews(TestCase):
+
+    def setUp(self):
+        pass
+
+    def test_registration(self):
+        c = Client()
+        data = {
+            "username": "user",
+            "email": "ThIsNoTaGoOd@EmAil.CoM",
+            "password1": "password",
+            "password2": "password",
+        }
+        resp = c.post('/accounts/signup/', data)
+        self.assertRedirects(resp, '/events/')
+        users = User.objects.filter(username__iexact='user')
+        self.assertEqual(users.count(), 1)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('Please Confirm Your E-mail Address', mail.outbox[0].subject)
+
 
 @pytest.mark.django_db
 def test_mailgun_webhooks(client):
