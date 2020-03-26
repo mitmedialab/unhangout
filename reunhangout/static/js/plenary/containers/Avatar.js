@@ -59,7 +59,7 @@ export class Avatar extends React.Component {
         return false;
       }
 
-      let new_opacity = speaking_time / total_speaking_time
+      let new_opacity = 1 - speaking_time / total_speaking_time
 
       var element = document.getElementById(`breakout-user-avatar-${user.username}`);
       if (element === null) {
@@ -68,7 +68,7 @@ export class Avatar extends React.Component {
       }
       if (new_opacity < 0) {
         console.log("User not found in speaking stats object - assume speaking time is 0", user.username);
-        element.style.opacity = .2
+        element.style.opacity = 1
         return false;
       }
       element.style.opacity = Math.max(new_opacity, .2);
