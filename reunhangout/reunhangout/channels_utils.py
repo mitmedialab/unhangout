@@ -1,10 +1,14 @@
 import functools
 import json
 
-from channels import Group, Channel
+#from channels import Group, Channel
 from analytics.models import track
 from reunhangout.utils import json_dumps
 
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
+# TODO: messages broadcasted to the group always need to have 'type' defined
 def prepare_message(payload=None, error=None, type=None):
     obj = {}
     if payload is not None:
@@ -13,13 +17,14 @@ def prepare_message(payload=None, error=None, type=None):
         obj['error'] = error
     if type:
         obj['type'] = type
-    return {'text': json_dumps(obj)}
+    return {'type': type, 'text': json_dumps(obj)}
 
 def broadcast(group_name, **kwargs):
-    Group(group_name).send(prepare_message(**kwargs))
+    async_to_sync(get_channel_layer().group_send)(group_name, prepare_message(**kwargs))
 
 def send_to_channel(channel_name, **kwargs):
-    Channel(channel_name).send(prepare_message(**kwargs))
+    raise Exception('Need to port to channels v 2.x')
+    #Channel(channel_name).send(prepare_message(**kwargs))
 
 def handle_error(message, error):
     data = prepare_message(type='error', error=error)
