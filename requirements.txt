@@ -1,5 +1,5 @@
-django<1.12
-channels
+django<3.0
+channels<2.0
 asgi_redis
 celery[redis]
 django-celery-beat
@@ -7,10 +7,10 @@ django-celery-results
 django-timezone-field
 escapejson
 pytz
-jsonfield
+jsonfield<2.1.0
 bleach
 bleach-whitelist
-django-allauth
+django-allauth<0.41.0
 django-bootstrap-form
 django-channels-presence
 django-debug-toolbar
