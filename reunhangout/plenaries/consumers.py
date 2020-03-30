@@ -35,8 +35,8 @@ class PlenaryConsumer(WebsocketConsumer):
 
     def handle_error(self, error):
         data = prepare_message(type='error', error=error)
-        self.send(text_data=data['text'])
         track("error", self.scope['user'], data)
+        self.send(text_data=data['text'])
 
     def connect(self):
         self.slug = self.scope['url_route']['kwargs']['slug']

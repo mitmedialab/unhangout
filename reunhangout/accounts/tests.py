@@ -2,6 +2,8 @@ import hashlib
 import hmac
 import pytest
 import time
+import datetime
+import pytz
 
 from django.test import TestCase
 from django.test import Client
@@ -10,8 +12,10 @@ from django.conf import settings
 
 from accounts.models import EmailNotification, User
 from plenaries.models import Plenary
-from plenaries.tests import dt
 
+def dt(*args):
+    naive = datetime.datetime(*args)
+    return pytz.timezone(settings.TIME_ZONE).localize(naive)
 
 class TestAccountViews(TestCase):
 
