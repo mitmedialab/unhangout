@@ -9,7 +9,7 @@ from channels_presence.models import Room, Presence
 from channels_presence.decorators import touch_presence, remove_presence
 
 from reunhangout.channels_utils import (
-    broadcast, handle_error, require_payload_keys, prepare_message,
+    broadcast, prepare_message,
     send_to_channel
 )
 from plenaries.models import Plenary, ChatMessage
@@ -36,7 +36,6 @@ class PlenaryConsumer(WebsocketConsumer):
         self.slug = self.scope['url_route']['kwargs']['slug']
         try:
             plenary = Plenary.objects.get(slug=self.slug)
-            self.plenary = plenary
         except Plenary.DoesNotExist:
             return self.handle_error('Plenary not found')
 
@@ -58,7 +57,11 @@ class PlenaryConsumer(WebsocketConsumer):
 
     @remove_presence
     def disconnect(self, close_code):
-        track("leave_plenary", self.scope['user'], plenary=self.plenary)
+        try:
+            plenary = Plenary.objects.get(slug=self.slug)
+        except Plenary.DoesNotExist:
+            return self.handle_error('Plenary not found')
+        track("leave_plenary", self.scope['user'], plenary=plenary)
 
         # TODO - remove live participant code if only related to live video button
         # Remove live participant record if any, so that participants who close
@@ -71,31 +74,35 @@ class PlenaryConsumer(WebsocketConsumer):
     @touch_presence
     def receive(self, text_data):
         print(text_data)
+        try:
+            plenary = Plenary.objects.get(slug=self.slug)
+        except Plenary.DoesNotExist:
+            return self.handle_error('Plenary not found')
         data = json.loads(text_data)
         if 'type' not in data:
             self.handle_error("Missing type")
         elif data['type'] == "chat":
-            self.handle_chat(data)
+            self.handle_chat(data, plenary)
         elif data['type'] == "archive_chat":
-            self.handle_archive_chat(data)
+            self.handle_archive_chat(data, plenary)
         elif data['type'] == "embeds":
-            self.handle_embeds(data)
+            self.handle_embeds(data, plenary)
         elif data['type'] == "breakout":
-            self.handle_breakout(data)
+            self.handle_breakout(data, plenary)
         elif data['type'] == "plenary":
-            self.handle_plenary(data)
+            self.handle_plenary(data, plenary)
         elif data['type'] == "contact_card":
-            self.handle_contact_card(data)
+            self.handle_contact_card(data, plenary)
         elif data['type'] == 'videosync':
-            self.handle_video_sync(data)
+            self.handle_video_sync(data, plenary)
         elif data['type'] == "message_breakouts":
-            self.handle_message_breakouts(data)
+            self.handle_message_breakouts(data, plenary)
         #elif data['type'] == "add_live_participant":
         #    handle_add_live_participant(message, data, plenary)
         #elif data['type'] == "remove_live_participant":
         #    handle_remove_live_participant(message, data, plenary)
         elif data['type'] == "request_speaker_stats":
-            self.handle_request_speaker_stats(data)
+            self.handle_request_speaker_stats(data, plenary)
         else:
             self.handle_error(f"Type {data['type']} not understood")
 
@@ -103,14 +110,14 @@ class PlenaryConsumer(WebsocketConsumer):
         print(event)
         self.send(text_data=event['text'])
 
-    def handle_chat(self, data):
+    def handle_chat(self, data, plenary):
         highlight = (
             data['payload'].get('highlight') and \
             (self.scope['user'].is_superuser or plenary.has_admin(self.scope['user']))
         )
         with transaction.atomic():
             chat_message = ChatMessage.objects.create(
-                plenary=self.plenary,
+                plenary=plenary,
                 user=self.scope['user'],
                 message=data['payload']['message'],
                 highlight=highlight or False
@@ -120,16 +127,15 @@ class PlenaryConsumer(WebsocketConsumer):
                 r'''<span [^>]*(?<= )data-mention-user-id=['"](\d+)['"][^>]*>''', 
                 data['payload']['message']
             )
-            mentions = self.plenary.associated_users().filter(id__in=user_ids)
+            mentions = plenary.associated_users().filter(id__in=user_ids)
             chat_message.mentions.set(mentions)
 
             data = chat_message.serialize()
-            broadcast(self.plenary.channel_group_name, type='chat', payload=data)
-            track("plenary_chat", self.scope['user'], data, plenary=self.plenary)
+            broadcast(plenary.channel_group_name, type='chat', payload=data)
+            track("plenary_chat", self.scope['user'], data, plenary=plenary)
 
     #@require_payload_keys(['message_ids'])
-    def handle_archive_chat(self, data):
-        plenary = self.plenary
+    def handle_archive_chat(self, data, plenary):
         if not plenary.has_admin(self.scope['user']):
             return self.handle_error("Must be an admin to archive chat messages")
 
@@ -140,8 +146,7 @@ class PlenaryConsumer(WebsocketConsumer):
                 payload=[m.serialize() for m in chat_messages])
 
     #@require_payload_keys(['action'])
-    def handle_breakout(self, data):
-        plenary = self.plenary
+    def handle_breakout(self, data, plenary):
         is_admin = plenary.has_admin(self.scope['user'])
         admin_required_error = lambda: self.handle_error("Must be an admin to do that.")
 
@@ -263,8 +268,7 @@ class PlenaryConsumer(WebsocketConsumer):
             return respond_with_breakouts()
 
     #@require_payload_keys(['embeds'])
-    def handle_embeds(self, data):
-        plenary = self.plenary
+    def handle_embeds(self, data, plenary):
         if not plenary.has_admin(self.scope['user']):
             return self.handle_error("Must be an admin to set embeds")
 
@@ -311,8 +315,7 @@ class PlenaryConsumer(WebsocketConsumer):
         track("change_embeds", self.scope['user'], plenary.embeds, plenary=plenary)
 
 
-    def handle_plenary(self, data):
-        plenary = self.plenary
+    def handle_plenary(self, data, plenary):
         if not plenary.has_admin(self.scope['user']):
             return self.handle_error("Must be an admin to do that.")
 
@@ -429,8 +432,7 @@ class PlenaryConsumer(WebsocketConsumer):
     #        payload=payload
     #    )
 
-    def handle_contact_card(self, data):
-        plenary = self.plenary
+    def handle_contact_card(self, data, plenary):
         payload = data['payload']
 
         user = self.scope['user']
@@ -466,8 +468,7 @@ class PlenaryConsumer(WebsocketConsumer):
 
 
     #@require_payload_keys(['action'])
-    def handle_video_sync(self, data):
-        plenary = self.plenary
+    def handle_video_sync(self, data, plenary):
         if not plenary.has_admin(self.scope['user']):
             return self.handle_error("Must be an admin to control video sync")
 
@@ -497,8 +498,7 @@ class PlenaryConsumer(WebsocketConsumer):
             )
 
     #@require_payload_keys(['message'])
-    def handle_message_breakouts(self, data):
-        plenary = self.plenary
+    def handle_message_breakouts(self, data, plenary):
         if not plenary.has_admin(self.scope['user']):
             return self.handle_error("Must be an admin to message breakouts")
 
@@ -509,8 +509,7 @@ class PlenaryConsumer(WebsocketConsumer):
         track("message_breakouts", self.scope['user'], {'message': msg_text}, plenary=plenary)
 
     #@require_payload_keys(['requestSpeakerStats'])
-    def handle_request_speaker_stats(self, data):
-        plenary = self.plenary
+    def handle_request_speaker_stats(self, data, plenary):
         if not plenary.has_admin(self.scope['user']):
             return self.handle_error("Must be an admin to request speaker stats")
 
