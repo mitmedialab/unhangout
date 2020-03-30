@@ -1,14 +1,12 @@
 import functools
 import json
 
-#from channels import Group, Channel
 from analytics.models import track
 from reunhangout.utils import json_dumps
 
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
-# TODO: messages broadcasted to the group always need to have 'type' defined
 def prepare_message(payload=None, error=None, type=None):
     obj = {}
     if payload is not None:
@@ -17,19 +15,17 @@ def prepare_message(payload=None, error=None, type=None):
         obj['error'] = error
     if type:
         obj['type'] = type
-    return {'type': type, 'text': json_dumps(obj)}
+    return {'text': json_dumps(obj)}
 
 def broadcast(group_name, **kwargs):
-    async_to_sync(get_channel_layer().group_send)(group_name, prepare_message(**kwargs))
+    msg = prepare_message(**kwargs)
+    msg['type'] = 'forward_to_client'
+    async_to_sync(get_channel_layer().group_send)(group_name, msg)
 
 def send_to_channel(channel_name, **kwargs):
-    raise Exception('Need to port to channels v 2.x')
-    #Channel(channel_name).send(prepare_message(**kwargs))
-
-def handle_error(message, error):
-    data = prepare_message(type='error', error=error)
-    message.reply_channel.send(data)
-    track("error", message.user, data)
+    msg = prepare_message(**kwargs)
+    msg['type'] = 'forward_to_client'
+    async_to_sync(get_channel_layer().send)(channel_name, msg)
 
 def require_payload_keys(keylist):
     """
@@ -49,25 +45,6 @@ def require_payload_keys(keylist):
             return fn(message, data, *args, **kwargs)
         return inner
     return decorator
-
-def send_over_capacity_error(message, channel_name):
-    return _join_error(message, channel_name, "over-capacity", "Over capacity")
-
-def send_already_connected_error(message, channel_name):
-    return _join_error(message, channel_name, "already-connected", "Already connected")
-
-def _join_error(message, channel_name, error_code, error_msg):
-    data = {
-        'channel_name': channel_name,
-        'members': [],
-        'error': error_msg,
-        "error_code": error_code,
-    }
-    message.reply_channel.send(prepare_message(
-        type='presence',
-        payload=data
-    ))
-    track("error", message.user, data)
 
 def serialize_room(room):
     return {
