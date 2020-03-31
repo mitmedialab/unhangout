@@ -18,8 +18,9 @@ django-gravatar2
 django-mjml
 django-webpack-loader
 pytest
-pytest-selenium
+pytest-asyncio
 pytest-django
+pytest-selenium
 pytest-xdist
 lxml
 pillow<3.7
