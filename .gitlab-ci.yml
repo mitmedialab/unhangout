@@ -1,4 +1,5 @@
 variables:
+  POSTGRES_HOST: 'db'
   POSTGRES_DB: "my_custom_db"
   POSTGRES_USER: "postgres"
   POSTGRES_PASSWORD: "example"
@@ -27,6 +28,7 @@ before_script:
         git-core
 - python3 -m venv /opt/app-venv/
 - /opt/app-venv/bin/pip install -r requirements.txt
+- cd reunhangout && npm i && npm run build
 
 test:
   script:
