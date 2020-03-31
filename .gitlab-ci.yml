@@ -33,4 +33,4 @@ before_script:
 
 test:
   script:
-  - /opt/app-venv/bin/pytest reunhangout
+  - cd reunhangout && /opt/app-venv/bin/pytest
