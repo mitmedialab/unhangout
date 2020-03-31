@@ -11,6 +11,7 @@ from plenaries.routing import websocket_urlpatterns
 from plenaries.models import Plenary
 
 import datetime
+from .fixtures import *
 
 User = get_user_model()
 
@@ -29,12 +30,12 @@ class TestAuthMiddleware:
         self.user = AnonymousUser()
 
 
-
 @pytest.mark.asyncio
 @pytest.mark.django_db(transaction=True)
-async def test_anonymous_connect():
+async def test_plenary_404(user_with_plenary):
+    user, plenary = user_with_plenary
     application = TestAuthMiddleware(URLRouter(websocket_urlpatterns))
-    communicator = WebsocketCommunicator(application, "/event/test-hangout/")
+    communicator = WebsocketCommunicator(application, "/event/non-existent-plenary/")
     connected, subprotocol = await communicator.connect()
     assert connected
     # Test sending text
@@ -47,7 +48,24 @@ async def test_anonymous_connect():
 
 @pytest.mark.asyncio
 @pytest.mark.django_db(transaction=True)
-async def test_connect(django_user_model):
+async def test_connect(user_with_plenary):
+    user, plenary = user_with_plenary
+    assert User.objects.get(username='u1').display_name == 'User Oneypants'
+
+    application = TestAuthMiddleware(URLRouter(websocket_urlpatterns))
+    application.login(user)
+    communicator = WebsocketCommunicator(application, "/event/test-plenary/")
+    connected, subprotocol = await communicator.connect()
+    assert connected
+    response = await communicator.receive_json_from()
+    assert response.get('type') == 'presence'
+    assert set(response.get('payload').keys()) == set(['channel_name', 'lurkers', 'members'])
+    await communicator.disconnect()
+
+
+@pytest.mark.asyncio
+@pytest.mark.django_db(transaction=True)
+async def test_connect_TODO(django_user_model):
     u1 = django_user_model.objects.create_user(
             username='u1',
             display_name='User Oneypants',
@@ -78,3 +96,80 @@ async def test_connect(django_user_model):
     assert response.get('type') == 'presence'
     assert set(response.get('payload').keys()) == set(['channel_name', 'lurkers', 'members'])
     await communicator.disconnect()
+
+
+@pytest.fixture
+async def admin_connected(request, user_with_plenary):
+    user, plenary = user_with_plenary
+    application = TestAuthMiddleware(URLRouter(websocket_urlpatterns))
+    application.login(user)
+    communicator = WebsocketCommunicator(application, "/event/test-plenary/")
+    connected, subprotocol = await communicator.connect()
+    async def fin():
+        await communicator.disconnect()
+    request.addfinalizer(fin)
+    return communicator
+
+
+class TestTwoUsers():
+    @pytest.mark.django_db(transaction=True)
+    @pytest.mark.asyncio
+    async def test_presence(self, user_with_plenary, rand_user):
+        user, plenary = user_with_plenary
+        application = TestAuthMiddleware(URLRouter(websocket_urlpatterns))
+        application.login(user)
+        communicator = WebsocketCommunicator(application, "/event/test-plenary/")
+        connected, subprotocol = await communicator.connect()
+        response = await communicator.receive_json_from()
+        assert response.get('type') == 'presence'
+        assert set(response.get('payload').keys()) == set(['channel_name', 'lurkers', 'members'])
+
+        user2 = rand_user
+        application2 = TestAuthMiddleware(URLRouter(websocket_urlpatterns))
+        application2.login(rand_user)
+        communicator2 = WebsocketCommunicator(application2, "/event/test-plenary/")
+        connected, subprotocol = await communicator2.connect()
+        response = await communicator2.receive_json_from()
+        assert response.get('type') == 'presence'
+        assert set(response.get('payload').keys()) == set(['channel_name', 'lurkers', 'members'])
+        assert len(response.get('payload').get('members')) == 2
+        assert response.get('payload',{}).get('members')[0].get('username') == user.username
+        assert response.get('payload',{}).get('members')[1].get('username') == user2.username
+
+        await communicator.disconnect()
+        await communicator2.disconnect()
+
+
+class TestAdminFunctions():
+
+    @pytest.mark.django_db(transaction=True)
+    @pytest.mark.asyncio
+    async def test_admin_features(self, admin_connected):
+        communicator = admin_connected
+        response = await communicator.receive_json_from()
+        assert response.get('type') == 'presence'
+        assert set(response.get('payload').keys()) == set(['channel_name', 'lurkers', 'members'])
+
+        # TODO
+        # - add embed
+        # - create breakout
+        # - set breakout state
+        # - open breakouts
+        # - send message to breakouts
+
+        # Update plenary
+        await communicator.send_json_to({"type": "plenary", "payload": {
+            "name": "New name of plenary"
+        }})
+        response = await communicator.receive_json_from()
+        assert response.get('type') == 'plenary'
+        PLENARY_KEYS = (
+            'random_max_attendees', 'breakout_mode', 'name', 'organizer', 'start_date',
+            'end_date', 'doors_open', 'doors_close', 'breakouts_open', 'canceled',
+            'slug', 'public', 'jitsi_server', 'wrapup_emails', 'etherpad_initial_text'
+        )
+        keys = set(response.get('payload').get('plenary').keys()) & set(PLENARY_KEYS)
+        assert keys == set(PLENARY_KEYS)
+        assert Plenary.objects.last().name == 'New name of plenary'
+
+
