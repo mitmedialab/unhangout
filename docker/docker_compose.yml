@@ -1,0 +1,21 @@
+version: '3'
+services:
+  email:
+    image: djfarrelly/maildev
+    ports:
+    - "1080:80"
+    - "1025:25"
+  redis:
+    image: redis
+    ports:
+    - 6379:6379
+  etherpad:
+    image: etherpad/etherpad
+    ports:
+    - 9001:9001
+    environment:
+    - ADMIN_PASSWORD=password
+  postgres:
+    image: postgres:11
+    ports:
+    - "5432:5432"
