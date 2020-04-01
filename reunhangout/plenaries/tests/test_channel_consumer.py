@@ -3,7 +3,6 @@ from channels.testing import WebsocketCommunicator
 from channels.routing import URLRouter
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AnonymousUser
 from django.db import close_old_connections
 from django.utils import timezone
 
@@ -12,22 +11,9 @@ from plenaries.models import Plenary
 
 import datetime
 from .fixtures import *
+from .utils import *
 
 User = get_user_model()
-
-class TestAuthMiddleware:
-    def __init__(self, inner):
-        self.inner = inner
-        self.user = AnonymousUser()
-
-    def __call__(self, scope):
-        return self.inner(dict(scope, user=self.user))
-
-    def login(self, user):
-        self.user = user
-
-    def logout(self, user):
-        self.user = AnonymousUser()
 
 
 @pytest.mark.asyncio
@@ -171,5 +157,3 @@ class TestAdminFunctions():
         keys = set(response.get('payload').get('plenary').keys()) & set(PLENARY_KEYS)
         assert keys == set(PLENARY_KEYS)
         assert Plenary.objects.last().name == 'New name of plenary'
-
-
