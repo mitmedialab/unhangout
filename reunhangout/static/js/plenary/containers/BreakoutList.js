@@ -175,7 +175,42 @@ class BreakoutList extends React.Component {
                 { breakouts.length === 0 ? "Group me" : "Regroup me" }
               </BS.Button>
             : "" }
-          { this.props.auth.is_admin ?
+          { this.props.auth.is_admin && !this.props.auth.is_superuser ?
+              <BS.OverlayTrigger placement='left' overlay={
+                <BS.Tooltip id='configure-breakouts-tooltip'>
+                  Breakout settings
+                </BS.Tooltip>
+              }>
+                <BS.Dropdown
+                  id="breakout-settings-button"
+                  pullRight>
+                  <BS.Dropdown.Toggle
+                    noCaret>
+                    <i className='fa fa-wrench' />
+                  </BS.Dropdown.Toggle>
+                  <BS.Dropdown.Menu>
+                    <li className='menu-item'>
+                      <LabeledSwitch
+                          on={this.props.plenary.breakouts_open}
+                          onLabel='Breakouts Open'
+                          offLabel='Breakouts Closed'
+                          onClick={() => this.toggleBreakoutsOpen()} />
+                    </li>
+                    <BS.MenuItem
+                      onClick={() => this.setState({"breakout-mode-dialog": true})}
+                      className='menu-item'>
+                      <span><i className='fa fa-sliders' /> Breakout Mode</span>
+                    </BS.MenuItem>
+                    <BS.MenuItem
+                      onClick={() => this.setState({"message-breakouts-dialog": true})}
+                      className='menu-item'>
+                      <span><i className='fa fa-paper-plane' /> Message Breakouts</span>
+                    </BS.MenuItem>
+                  </BS.Dropdown.Menu>
+                </BS.Dropdown>
+              </BS.OverlayTrigger>
+            : "" }
+            { this.props.auth.is_superuser ?
               <BS.OverlayTrigger placement='left' overlay={
                 <BS.Tooltip id='configure-breakouts-tooltip'>
                   Breakout settings
