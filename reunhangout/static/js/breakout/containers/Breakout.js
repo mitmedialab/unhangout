@@ -73,21 +73,10 @@ class Breakout extends React.Component {
       splitBasis: "50%",
       handleWidth: "20px",
       dragging: false,
-      "facilitation-tips-dialog": false,
     }
   }
 
   componentDidMount() {
-    let visited = window.localStorage["alreadyVisitedBreakout"];
-    if(visited) {
-         this.setState({ "facilitation-tips-dialog": false })
-         //do not view facilitation tips
-    } else {
-         //this is the first time
-         window.localStorage["alreadyVisitedBreakout"] = true;
-         this.setState({ "facilitation-tips-dialog": true });
-    }
-
     this.boundResizeOnMouseUp = this.resizeOnMouseUp.bind(this);
     this.boundResizeOnMouseMove = this.resizeOnMouseMove.bind(this);
     document.addEventListener('mouseup', this.boundResizeOnMouseUp, false);
@@ -129,29 +118,6 @@ class Breakout extends React.Component {
     }
   }
 
-  renderModalForm(name, title, body, actionName, handler) {
-    return <div className={name}>
-      <BS.Modal show={this.state[name]}
-                onHide={() => this.setState({[name]: false})}>
-        <BS.Form onSubmit={handler}>
-          <BS.Modal.Header closeButton>
-            <BS.Modal.Title>{title}</BS.Modal.Title>
-          </BS.Modal.Header>
-          <BS.Modal.Body className='form-horizontal'>
-            {body}
-          </BS.Modal.Body>
-          <BS.Modal.Footer>
-            <BS.Button bsStyle='primary' type='submit'>{actionName}</BS.Button>
-          </BS.Modal.Footer>
-        </BS.Form>
-      </BS.Modal>
-    </div>
-  }
-
-  handleCloseFacilitationTips(event) {
-    event.preventDefault();
-    this.setState({"facilitation-tips-dialog": false});
-  }
   render() {
     let errorMessage;
     if (!this.props.presence || !this.props.presence.channel_name) {
@@ -231,24 +197,6 @@ class Breakout extends React.Component {
           ] : null}
         </div>
       </div>
-      { this.renderModalForm(
-            "facilitation-tips-dialog",
-            "Welcome to the breakout room!",
-            <div>
-              <p>Here are some tips to help you have a great conversation</p>
-              <p>
-                <ul>
-                  <li>Use a headset if you have one available</li>
-                  <li>Share airtime with your fellow breakouters and try to give everyone time to speak</li>
-                  <li>Take a look at the icons at the top of the screen - if someone's icon is less transparent then they haven't spoken in a while</li>
-                  <li>Mute yourself when you're not speaking</li>
-                  <li>You can click on the hand icon at the bottom left to "raise your hand" when you have something to say</li>
-                  </ul>
-                </p>
-            </div>,
-            "Done",
-            (e) => this.handleCloseFacilitationTips(e)
-          ) }
     </div>;
   }
 
