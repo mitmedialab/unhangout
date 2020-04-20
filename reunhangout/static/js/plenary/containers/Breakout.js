@@ -101,7 +101,8 @@ export default class Breakout extends React.Component {
                     return <Avatar user={member}
                                    key={`${this.props.breakout.id}${i}`}
                                    idPart={`assignees-${this.props.breakout.id}`}
-                                   breakoutView={false} />
+                                   breakoutView={false}
+                                   enableSpeakerStats={false} />
                   })}
                 </div>
               </div>
@@ -116,7 +117,8 @@ export default class Breakout extends React.Component {
                 <span><small>proposed<br/>by:</small></span>
                 <Avatar user={this.props.breakout.proposed_by}
                         idPart={`proposed-by-${this.props.breakout.id}`}
-                        breakoutView={false} />
+                        breakoutView={false}
+                        enableSpeakerStats={false} />
               </div>
             : "" 
           }
@@ -217,7 +219,8 @@ class BreakoutPresence extends React.Component {
                 ""
              : <Avatar user={user}
                        idPart={`breakout-presence-${this.props.breakout.id}-${user.id}`} 
-                       breakoutView={false}/>
+                       breakoutView={false}
+                       enableSpeakerStats={false}/>
             }
           </span>
         ))

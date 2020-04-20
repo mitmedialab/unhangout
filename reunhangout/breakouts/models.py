@@ -68,6 +68,8 @@ class Breakout(models.Model):
 
     CHANNEL_GROUP_NAME_PREFIX = "breakout-"
 
+    enable_speaker_stats = models.BooleanField(default=False)
+
     @property
     def channel_group_name(self):
         return self.channel_group_name_from_id(self.pk)
@@ -184,6 +186,7 @@ class Breakout(models.Model):
             'votes': votes,
             'members': members,
             'jitsi_server': jitsi_server,
+            'enable_speaker_stats': self.enable_speaker_stats
         }
 
     def save(self, *args, **kwargs):

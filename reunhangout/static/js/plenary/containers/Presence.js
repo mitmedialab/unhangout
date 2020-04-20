@@ -62,7 +62,8 @@ export class Presence extends React.Component {
                              className={className}
                              key={`presence-${user.username}`}
                              idPart={`presence-${user.username}`} 
-                             breakoutView={false}/>
+                             breakoutView={false}
+                             enableSpeakerStats={false}/>
             })
           }
         </div>

@@ -242,6 +242,11 @@ class BreakoutList extends React.Component {
                       <span><i className='fa fa-paper-plane' /> Message Breakouts</span>
                     </BS.MenuItem>
                     <BS.MenuItem
+                      onClick={() => this.props.onEnableSpeakerStats({enableSpeakerStats: true})}
+                      className='menu-item'>
+                      <span><i className='fa fa-flask' /> Enable Speaker Stats</span>
+                    </BS.MenuItem>
+                    <BS.MenuItem
                       onClick={() => this.props.onRequestSpeakerStats({requestSpeakerStats: true})}
                       className='menu-item'>
                       <span><i className='fa fa-microphone' /> Record Speaker Stats</span>
@@ -438,5 +443,6 @@ export default connect(
     onMessageBreakouts: (payload) => dispatch(A.messageBreakouts(payload)),
     onAdminSendPlenaryDetails: (payload) => dispatch(A.adminSendPlenaryDetails(payload)),
     onRequestSpeakerStats: (payload) => dispatch(A.requestSpeakerStats(payload)),
+    onEnableSpeakerStats: (payload) => dispatch(A.enableSpeakerStats(payload)),
   })
 )(BreakoutList);
