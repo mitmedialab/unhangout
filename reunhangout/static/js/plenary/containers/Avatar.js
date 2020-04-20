@@ -23,7 +23,8 @@ export class Avatar extends React.Component {
       })
     ]),
     idPart: PropTypes.string.isRequired,
-    breakoutView: PropTypes.bool
+    breakoutView: PropTypes.bool,
+    enableSpeakerStats: PropTypes.bool
   }
 
   state = {'imageError': false};
@@ -33,7 +34,9 @@ export class Avatar extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    if (this.props.breakoutView && !_.isEqual(nextProps.speakerStats, this.props.speakerStats)) {
+    if (this.props.enableSpeakerStats 
+      && this.props.breakoutView 
+      && !_.isEqual(nextProps.speakerStats, this.props.speakerStats)) {
       let user;
       if (_.isNumber(this.props.user)) {
         user = this.props.users[this.props.user];

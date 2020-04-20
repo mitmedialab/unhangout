@@ -149,6 +149,12 @@ export const requestSpeakerStats = (payload) => {
   }
 }
 
+export const enableSpeakerStats = (payload) => {
+  return (dispatch) => {
+    sendSocketMessage({type: "enable_speaker_stats", payload});
+  }
+}
+
 export const SET_BREAKOUT_PRESENCE = 'SET_BREAKOUT_PRESENCE';
 export const setBreakoutPresence = (payload) => ({type: SET_BREAKOUT_PRESENCE, payload});
 
