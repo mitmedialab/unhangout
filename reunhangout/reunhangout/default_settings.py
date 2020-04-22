@@ -182,8 +182,7 @@ CELERYBEAT_SCHEDULE = {
     },
 }
 CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
-# TODO BROKER_URL = "redis://localhost:6379/0"
-BROKER_URL = f'redis://{env("REDIS_HOST", '127.0.0.1')}:{env("REDIS_PORT", 6379)}/0'
+BROKER_URL = env("BROKER_URL", "redis://localhost:6379/0")
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
