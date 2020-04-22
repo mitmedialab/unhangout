@@ -12,7 +12,7 @@ bleach
 bleach-whitelist
 django-allauth
 django-bootstrap-form
-git+https://github.com/ml-learning/django-channels-presence.git@channels-2
+django-channels-presence
 django-debug-toolbar
 django-gravatar2
 django-mjml
@@ -30,3 +30,4 @@ requests
 selenium>3
 sorl-thumbnail
 iso8601
+async-timeout<3.0

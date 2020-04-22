@@ -1,33 +1,37 @@
-FROM ubuntu:18.04
+FROM node:carbon-alpine AS frontend
+WORKDIR /opt/app/
+COPY reunhangout/package.json /opt/app/
+RUN apk --no-cache add --virtual native-deps \
+  g++ make python && \
+  npm install --quiet --production && \
+  apk del native-deps
+COPY reunhangout/ /opt/app/
+RUN npm run build:prod
+
+FROM debian:buster-slim
 WORKDIR /opt/app
-
-# TODO
-# curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
-# echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
-
 RUN apt-get update \
     && apt-get install -y \
         build-essential \
         libjpeg-dev \
         libmemcached-dev \
+        libpq-dev \
         nodejs \
+        npm \
         python3-dev \
         python3-venv \
         redis \
         virtualenv \
-        yarn \
-        zlib1g-dev
-
-#   virtualenv --no-site-packages --python "`which python3`" $VENV
-COPY shrinkwrap.txt /opt/app/
+        zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+RUN npm i mjml
+COPY requirements.txt /opt/app/
 RUN python3 -m venv /opt/app-venv/ \
-    && /opt/app-venv/bin/pip install -r shrinkwrap.txt
-
-#   yarn install
-#   yarn run build:dev
-
-#   cp "$DIR/$PROJECT_NAME/$PROJECT_NAME/example.settings.py" "$DIR/$PROJECT_NAME/$PROJECT_NAME/settings.py"
-
-COPY . /opt/app
-ENTRYPOINT opt/app/docker/entry.sh
-CMD /opt/app-venv/bin/python manage.py runserver
+    && /opt/app-venv/bin/pip install -r requirements.txt
+COPY reunhangout/ /opt/app
+COPY --from=frontend /opt/app/static/dist static/dist
+# TODO
+RUN cp reunhangout/default_settings.py reunhangout/settings.py
+COPY docker/entry.sh /entry.sh
+ENTRYPOINT ["/entry.sh"]
+CMD ["/opt/app-venv/bin/daphne", "reunhangout.asgi:application", "-b", "0.0.0.0", "-p", "80"]

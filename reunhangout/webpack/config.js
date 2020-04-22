@@ -25,30 +25,31 @@ module.exports.buildConfig = (isProd) => ({
   devtool: isProd ? 'cheap-module-source-map' : 'cheap-source-map',
   entry: {
     'main': clearNulls([
-      isProd ? null : 'webpack-dev-server/client?http://localhost:3000',
+      isProd ? null : 'webpack-dev-server/client?http://localhost:8000',
       isProd ? null : 'webpack/hot/only-dev-server',
       path.join(root, 'static', 'scss', 'index.scss'),
       path.join(root, 'static', 'js', 'index.js'),
     ]),
     'editor': clearNulls([
-      isProd ? null : 'webpack-dev-server/client?http://localhost:3000',
+      isProd ? null : 'webpack-dev-server/client?http://localhost:8000',
       isProd ? null : 'webpack/hot/only-dev-server',
       path.join(root, 'richtext', 'static', 'richtext', 'editor.scss'),
       path.join(root, 'richtext', 'static', 'richtext', 'editor.js'),
     ]),
     'frontend': clearNulls([
-      isProd ? null : 'webpack-dev-server/client?http://localhost:3000',
+      isProd ? null : 'webpack-dev-server/client?http://localhost:8000',
       isProd ? null : 'webpack/hot/only-dev-server',
       path.join(root, 'static', 'scss', 'frontend.scss'),
       path.join(root, 'static', 'js', 'frontend.js'),
     ]),
   },
   output: {
-    path: path.join(root, 'static', isProd ? 'tmp' : 'dev'),
+    path: path.join(root, 'static', isProd ? 'dist' : 'dev'),
     filename: '[name]-[hash].js',
     sourceMapFilename: '[name]-[hash].js.map',
     publicPath: (
-      isProd ?  '/static/dist/' : 'http://localhost:3000/static/dev/'
+      //isProd ?  '/static/dist/' : 'http://localhost:8000/static/dev/'
+      isProd ?  '/static/dist/' : '/static/dev/'
     )
   },
   plugins: clearNulls([
@@ -63,7 +64,7 @@ module.exports.buildConfig = (isProd) => ({
     isProd ? null : new webpack.NoEmitOnErrorsPlugin(),
     // Export stats bundle for Django to track for recompilation.
     new BundleTracker({
-      path: path.join(root, 'static', isProd ? 'tmp' : 'dev'),
+      path: path.join(root, 'static', isProd ? 'dist' : 'dev'),
       filename: 'webpack-stats.json'
     }),
     // Extract css in prod.

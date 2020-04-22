@@ -2,9 +2,7 @@ from django.contrib.sites.models import Site
 from django.core.mail import mail_admins
 
 from reunhangout.channels_utils import prepare_message, send_to_channel
-from reunhangout.utils import json_dumps
 from analytics.models import track
-from plenaries.models import Plenary
 from breakouts.models import Breakout
 from breakouts.models import ErrorReport
 
@@ -12,8 +10,6 @@ from channels.generic.websocket import WebsocketConsumer
 from channels_presence.models import Room, Presence
 from channels_presence.decorators import touch_presence, remove_presence
 
-from urllib.parse import urlparse
-import re
 import json
 import logging
 
@@ -47,13 +43,12 @@ class BreakoutConsumer(WebsocketConsumer):
     def connect(self):
         self.accept()
         self.breakout_id = self.scope['url_route']['kwargs']['breakout_id']
-        breakout_id = self.breakout_id
         if not self.scope['user'].is_authenticated:
             return self.handle_error("Authentication required")
         try:
-            breakout = Breakout.objects.active().get(pk=breakout_id)
+            breakout = Breakout.objects.active().get(pk=self.breakout_id)
         except Breakout.DoesNotExist:
-            return self.handle_error( 'Breakout not found')
+            return self.handle_error('Breakout not found')
 
         self.connect_to_breakout(breakout)
 
@@ -61,11 +56,10 @@ class BreakoutConsumer(WebsocketConsumer):
     def disconnect(self, close_code):
         if self.breakout_id:
             try:
-                breakout = Breakout.objects.get(pk=breakout_id)
+                breakout = Breakout.objects.get(pk=self.breakout_id)
             except Breakout.DoesNotExist:
                 breakout = None
             track("leave_breakout", self.scope['user'], breakout=breakout)
-
 
     @touch_presence
     def receive(self, text_data):
@@ -101,12 +95,11 @@ class BreakoutConsumer(WebsocketConsumer):
 
         elif self.scope['user'].is_authenticated and Presence.objects.filter(
                 room__channel_name__startswith=Breakout.CHANNEL_GROUP_NAME_PREFIX,
-                user=self.scope['user']
-            ).exists():
+                user=self.scope['user']).exists():
             # Only one connection per user.
             return self.send_already_connected_error()
 
-        room = Room.objects.add(
+        Room.objects.add(
             breakout.channel_group_name,
             self.channel_name,
             self.scope['user']
@@ -136,7 +129,7 @@ class BreakoutConsumer(WebsocketConsumer):
                 #    MessageProxy(presence.channel_name, user=self.scope['user']),
                 #)
 
-        connect_to_breakout(message, breakout)
+        self.connect_to_breakout(breakout)
 
     #@require_payload_keys(['collected_data', 'additional_info'])
     def handle_error_report(self, data, breakout):
@@ -170,10 +163,10 @@ class BreakoutConsumer(WebsocketConsumer):
 
     #@require_payload_keys(['speakerStats'])
     def handle_record_speaker_stats(self, data, breakout):
-        track("record_speaker_stats", self.scope['user'], {'speakerStats': data['payload']['speakerStats']}, breakout=breakout) 
+        track("record_speaker_stats", self.scope['user'], {'speakerStats': data['payload']['speakerStats']}, breakout=breakout)
 
 
-class MessageProxy(object):
-    def __init__(self, channel_name, user):
-        self.reply_channel = Channel(channel_name)
-        self.user = user
+#class MessageProxy(object):
+#    def __init__(self, channel_name, user):
+#        self.reply_channel = Channel(channel_name)
+#        self.user = user

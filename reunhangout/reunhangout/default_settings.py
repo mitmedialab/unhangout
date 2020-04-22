@@ -7,6 +7,7 @@ from datetime import timedelta
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+env = lambda key, default: os.environ.get(key, default)
 
 
 # Quick-start development settings - unsuitable for production
@@ -90,17 +91,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'reunhangout.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
-
+# TODO use dj_database_url
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': env('POSTGRES_DB', 'unhangout'),
+        'USER': env('POSTGRES_USER', 'unhangout'),
+        'PASSWORD': env('POSTGRES_PASSWORD', 'password'),
+        'HOST': env('POSTGRES_HOST', '127.0.0.1'),
+        'PORT': env('POSTGRES_PORT', '5432'),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
@@ -123,7 +126,6 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 )
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
@@ -156,7 +158,9 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
+            "hosts": [
+                (env("REDIS_HOST", '127.0.0.1'), env("REDIS_PORT", 6379) )
+            ],
         },
     },
 }
@@ -219,7 +223,7 @@ ALLAUTH_APP_KEYS = {
 # API keys for 3rd party services.  Don't put auth API keys here; put them in
 # ALLAUTH_APP_KEYS.
 PUBLIC_API_KEYS = {
-    'youtube': '', # Define in settings.py
+    'youtube': env('YOUTUBE_API_KEY', ''), # Define in settings.py
 }
 PLENARY_SERVER = "http://localhost:8000" # Override in settings.py
 BRANDING = {
@@ -234,10 +238,19 @@ JITSI_SERVERS = [
     'meet.jit.si',
     'jitsi.unhangout.io',
 ]
-ETHERPAD_SERVER = "etherpad.unhangout.io"
-ETHERPAD_API_KEY = "... override me ..."
+ETHERPAD_SERVER = env('ETHERPAD_SERVER', "etherpad.unhangout.io")
+ETHERPAD_API_KEY = env('ETHERPAD_API_KEY', "... override me ...")
 ETHERPAD_DEFAULT_TEXT = "Welcome to the breakout! Use this space for notes or ideas."
 
 MJML_EXEC_CMD = os.path.join(BASE_DIR, "node_modules", ".bin", "mjml")
 
 MAILGUN_ACTIVE_API_KEY = "..."
+
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'BUNDLE_DIR_NAME': 'dist/',
+        'STATS_FILE': os.path.join(BASE_DIR, 'static', 'dist', 'webpack-stats.json')
+    }
+}
+
+
