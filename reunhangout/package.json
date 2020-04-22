@@ -8,7 +8,8 @@
     "clean": "rimraf static/dist static/tmp",
     "clean:dev": "rimraf static/dev",
     "build": "./build_prod_assets.sh",
-    "build:dev": "yarn run clean:dev && NODE_ENV=development webpack --config webpack/config.dev.js"
+    "build:prod": "webpack --config webpack/config.prod.js",
+    "build:dev": "npm run clean:dev && NODE_ENV=development webpack --config webpack/config.dev.js"
   },
   "author": "Charlie DeTar",
   "license": "MIT",
@@ -55,6 +56,7 @@
     "react-spinkit": "^3.0.0",
     "react-toggle-switch": "^3.0.3",
     "redux": "^3.5.2",
+    "redux-logger": "^3.0.6",
     "redux-thunk": "^2.1.0",
     "rimraf": "^2.5.2",
     "sass-loader": "~6.0.6",
@@ -68,6 +70,5 @@
     "youtube-player": "^5.4.0"
   },
   "devDependencies": {
-    "redux-logger": "^3.0.6"
   }
 }
