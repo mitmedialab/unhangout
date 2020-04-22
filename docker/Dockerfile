@@ -35,4 +35,4 @@ RUN cp reunhangout/default_settings.py reunhangout/settings.py
 COPY docker/entry.sh /entry.sh
 EXPOSE 80
 ENTRYPOINT ["/entry.sh"]
-CMD ["/opt/app-venv/bin/daphne", "reunhangout.asgi:application", "-b", "0.0.0.0", "-p", "80"]
+CMD ["/opt/app-venv/bin/daphne", "reunhangout.asgi:application", "-b", "0.0.0.0", "-p", "80", "--proxy-headers"]
