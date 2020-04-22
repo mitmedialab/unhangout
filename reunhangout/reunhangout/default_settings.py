@@ -21,7 +21,7 @@ DEBUG = THUMBNAIL_DEBUG = True
 
 ALLOWED_HOSTS = []
 if env('DOMAIN', False):
-    ALLOWED_HOSTS = env('DOMAIN')
+    ALLOWED_HOSTS = env('DOMAIN', '')
 
 # Application definition
 
