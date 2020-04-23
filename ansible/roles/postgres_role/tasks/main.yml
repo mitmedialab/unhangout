@@ -1,0 +1,18 @@
+---
+- name: Check if db user exists
+  command: docker exec postgres psql -U postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='{{DB_USER}}'"
+  register: check_user
+
+- name: Create postgres user
+  command: docker exec postgres psql -U postgres -c "CREATE USER {{DB_USER}} WITH PASSWORD '{{DB_PASSWORD}}'"
+  when: check_user.stdout == ""
+
+- name: Check if db exists
+  command: docker exec postgres psql -U postgres -tAc "SELECT 1 FROM pg_database WHERE datname='{{DB_NAME}}'"
+  register: check_db
+
+- name: Create postgres db
+  command: docker exec postgres psql -U postgres -c "CREATE DATABASE {{DB_NAME}} WITH OWNER {{DB_USER}}"
+  when: check_db.stdout == ""
+
+

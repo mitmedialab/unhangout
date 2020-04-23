@@ -6,5 +6,4 @@
   systemd: name=disable-thp state=restarted
 
 - name: restart redis
-  service: name=redis state=restarted
- 
+  command: docker restart redis

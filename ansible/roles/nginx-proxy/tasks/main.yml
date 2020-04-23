@@ -1,0 +1,33 @@
+---
+- name: Run docker container for jwilder/nginx-proxy
+  docker_container:
+    name: nginx-proxy
+    image: jwilder/nginx-proxy
+    pull: true
+    state: started
+    restart: yes
+    restart_policy: always
+    volumes:
+    - /var/run/docker.sock:/tmp/docker.sock:ro
+    - /var/docker-volumes/nginx/certs:/etc/nginx/certs:ro
+    - /var/docker-volumes/nginx/vhosts.d:/etc/nginx/vhost.d
+    - /var/docker-volumes/nginx/static:/var/www/extra/
+    - /usr/share/nginx/html
+    labels: 
+      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
+    ports:
+    - 80:80
+    - 443:443
+
+- name: Nginx letsencrypt companion container
+  docker_container:
+    name: nginx-letsencrypt-companion
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    pull: true
+    restart: yes
+    restart_policy: always
+    volumes:
+    - /var/docker-volumes/nginx/certs/:/etc/nginx/certs:rw
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+    volumes_from: 
+    - nginx-proxy

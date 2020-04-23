@@ -1,0 +1,64 @@
+---
+#- name: create postgres user
+#  postgresql_user:
+#    name: "{{etherpad_db_username}}"
+#    password: "{{etherpad_db_password}}"
+#    login_host: "127.0.0.1"
+#    login_user: "{{PG_ADMIN_USER}}"
+#    login_password: "{{PG_ADMIN_PASSWORD}}"
+
+#- name: create postgres db
+#  postgresql_db:
+#    name: "{{etherpad_db_name}}"
+#    encoding: UTF-8
+#    login_host: "127.0.0.1"
+#    login_user: "{{PG_ADMIN_USER}}"
+#    login_password: "{{PG_ADMIN_PASSWORD}}"
+#    owner: "{{etherpad_db_user}}"
+
+#- name: create etherpad user to reserver uid
+
+
+- name: create dir for etherpad
+  file: path=/var/docker-volumes/etherpad state=directory
+
+# uh_etherpad_session_key
+- name: create session key
+  copy:
+    dest: /var/docker-volumes/etherpad/SESSIONKEY.txt
+    content: "{{uh_etherpad_session_key}}"
+    mode: "640"
+    owner: 5001
+
+# uh_etherpad_api_key
+- name: create api key
+  copy:
+    dest: /var/docker-volumes/etherpad/APIKEY.txt
+    content: "{{uh_etherpad_api_key}}"
+    mode: "640"
+    owner: 5001
+
+- name: start docker container
+  docker_container:
+    name: "{{etherpad_domain}}"
+    image: "etherpad/etherpad"
+    state: started
+    pull: yes
+    restart: yes
+    restart_policy: always
+    links:
+    - "postgres:postpres"
+    volumes:
+    - /var/docker-volumes/etherpad/APIKEY.txt:/opt/etherpad-lite/APIKEY.txt
+    - /var/docker-volumes/etherpad/SESSIONKEY.txt:/opt/etherpad-lite/SESSIONKEY.txt
+    env:
+      VIRTUAL_HOST: "{{etherpad_domain}}"
+      LETSENCRYPT_HOST: "{{etherpad_domain}}"
+      LETSENCRYPT_EMAIL: "admin@code27.co.za" #TODO
+      DOMAIN: "{{etherpad_domain}}"
+      ETHERPAD_TITLE: "Etherpad server" # TODO
+      DB_TYPE: postgres
+      DB_HOST: postgres
+      DB_NAME: "{{etherpad_db_name}}"
+      DB_USER: "{{etherpad_db_username}}"
+      DB_PASS: "{{etherpad_db_password}}"

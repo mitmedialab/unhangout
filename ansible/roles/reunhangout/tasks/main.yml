@@ -1,92 +1,180 @@
 ---
-- name: Increase open file descriptor limit for nginx
-  lineinfile:
-    name: /etc/nginx/nginx.conf
-    regexp: '^worker_rlimit_nofile'
-    line: 'worker_rlimit_nofile 65535;'
-    insertafter: '^worker_processes'
-    state: present
-  tags: ['reunhangout', 'reunhangout-post']
+#- name: Install pg_trgm extension
+#  vars:
+#    ansible_ssh_pipelining: yes
+#  become: yes
+#  become_user: postgres
+#  postgresql_ext: name=pg_trgm db={{django_postgres_db}}
+#  tags:
+#   - django
+#   - django-postgres
 
-#- block:
-#  # TODO: Remove this block once deployed everywhere
-#  - name: Stop old services
-#    service: name={{item}} state=stopped
-#    with_items: ['reunhangout-worker-websocket', 'reunhangout', 'reunhangout-interface']
-#    ignore_errors: yes
-#
-#  - name: Disable old websocket worker systemd
-#    command: systemctl disable {{item}}.service
-#    with_items: ['reunhangout-worker-websocket', 'reunhangout', 'reunhangout-interface']
-#    ignore_errors: yes
-#
-#  - name: Remove old service files
-#    file:
-#      path: "/usr/lib/systemd/system/{{item}}.service"
-#      state: absent
-#    with_items: ['reunhangout-worker-websocket', 'reunhangout', 'reunhangout-interface']
-#  tags: ['reunhangout', 'reunhangout-post', 'reunhangout-systemd']
+#- name: Copy django nginx config
+#  template: >
+#    src={{django_nginx_template}}
+#    dest=/etc/nginx/sites-available/{{django_init_name}}.conf
+#  when: django_nginx
+#  notify: restart nginx
+#  tags:
+#   - django
+#   - django-nginx
+#   - django-config
 
-# Systemd config for asgi/workers
-- block:
-  - name: Copy reunhangout service templates
-    template:
-      src: "{{item}}"
-      dest: "/usr/lib/systemd/system/{{item}}"
-    with_items:
-      - reunhangout-worker-websocket@.service
-      - reunhangout-worker-http@.service
-      - reunhangout-interface.service
-      - reunhangout-workers.target
-    notify: restart reunhangout services
+#- name: Copy max file size nginx config
+#  template: >
+#    src=etc_nginx_conf.d_max_file_size.conf
+#    dest=/etc/nginx/conf.d/max_file_size.conf
+#  when: django_nginx
+#  notify: restart nginx
+#  tags:
+#   - django
+#   - django-nginx
+#   - django-config
 
-  - name: Enable websocket workers
-    systemd:
-      name: "reunhangout-worker-websocket@{{item}}"
-      enabled: yes
-    with_sequence: start=1 end={{reunhangout_worker_processes}}
-    notify: restart reunhangout services
+#- name: Increase open file descriptor limit for nginx
+#  lineinfile:
+#    name: /etc/nginx/nginx.conf
+#    regexp: '^worker_rlimit_nofile'
+#    line: 'worker_rlimit_nofile 65535;'
+#    insertafter: '^worker_processes'
+#    state: present
+#  tags: ['reunhangout', 'reunhangout-post']
 
-  - name: Enable http workers
-    systemd:
-      name: "reunhangout-worker-http@{{item}}"
-      enabled: yes
-    with_sequence: start=1 end={{reunhangout_worker_processes}}
-    notify: restart reunhangout services
+- name: setup static and media file hosting through nginx-proxy
+  template: src=static.j2 dest=/var/docker-volumes/nginx/vhosts.d/{{django_domain}}
 
-  - name: Enable interface
-    systemd:
-      name: "reunhangout-interface"
-      enabled: yes
-    notify: restart reunhangout services
+- set_fact:
+    proxy_vars:
+      VIRTUAL_HOST: "{{django_domain}}"
+      LETSENCRYPT_HOST: "{{django_domain}}"
+      LETSENCRYPT_EMAIL: "admin@code27.org"
 
-  - name: Enable target
-    systemd:
-      name: "reunhangout-workers.target"
-      enabled: yes
-    notify: restart reunhangout services
+- set_fact:
+    app_vars:
+      DOMAIN: "{{django_domain}}"
+      POSTGRES_HOST: postgres 
+      POSTGRES_DB: "{{django_postgres_db}}"
+      POSTGRES_USER: "{{django_postgres_user}}"
+      POSTGRES_PASSWORD: "{{django_postgres_password}}"
+      POSTGRES_PORT: "5432"
+      MEMCACHED_HOST: memcached
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      BROKER_URL: redis://redis:6379/0
+      YOUTUBE_API_KEY: "{{youtube_api_key}}"
+      ETHERPAD_SERVER: "https://{{uh_etherpad_domain}}"
+      EMAIL_HOST: "{{mailgun_smtp_hostname}}"
+      EMAIL_HOST_USER: "{{mailgun_smtp_login}}"
+      EMAIL_HOST_PASSWORD: "{{mailgun_smtp_password}}"
+      MAILGUN_ACTIVE_API_KEY: "{{mailgun_active_api_key}}"
 
-  tags: ['reunhangout', 'reunhangout-post', 'reunhangout-systemd']
-  
-- name: Build prod assets
-  become: yes
-  become_user: "{{main_user_name}}" 
-  command: "{{django_project_dir}}build_prod_assets.sh"
-  register: build_prod_assets
-  changed_when: build_prod_assets.stdout.find("Changed") != -1
-  notify: restart reunhangout services
-  tags: ['reunhangout', 'reunhangout-post', 'djangocode']
 
-- name: Sync auth providers
-  command: "{{django_venv_dir}}bin/python {{django_project_dir}}manage.py sync_auth_providers"
-  register: sync_auth_providers
-  changed_when: sync_auth_providers.stdout.find("changed") != -1
-  tags: ['reunhangout', 'reunhangout-post']
+- name: Run docker image for django http & ws service
+  docker_container:
+    name: "{{django_domain}}"
+    image: dirkcuys/unhangout:latest
+    state: started
+    #pull: yes # TODO
+    recreate: true
+    restart: yes
+    restart_policy: always
+    volumes:
+    - "/var/docker-volumes/nginx/static/{{django_domain}}/static:/opt/app/public"
+    - "/var/docker-volumes/nginx/static/{{django_domain}}/media:/opt/app/media"
+    - "/var/docker-volumes/{{django_domain}}/celery:/var/lib/celery"
+    - "/var/docker-volumes/{{django_domain}}/log:/var/log"
+    links:
+    - postgres
+    - redis
+    - memcached
+    env: "{{ proxy_vars | combine(app_vars) }}"
 
-- name: Collect static again
-  become: yes
-  become_user: "{{main_user_name}}" 
-  register: collectstatic_output
-  changed_when: 'not collectstatic_output.stdout.startswith("\n0 static files copied")'
-  command: "{{django_venv_dir}}bin/python {{django_project_dir}}manage.py collectstatic --noinput"
-  tags: ['reunhangout', 'reunhangout-post', 'djangocode']
+#   # Systemd config for asgi/workers
+#   - block:
+#     - name: Copy reunhangout service templates
+#       template:
+#         src: "{{item}}"
+#         dest: "/usr/lib/systemd/system/{{item}}"
+#       with_items:
+#         #- reunhangout-worker-websocket@.service
+#         #- reunhangout-worker-http@.service
+#         - reunhangout-interface.service
+#         - reunhangout-workers.target
+#       notify: restart reunhangout services
+
+#     - name: Enable interface
+#       systemd:
+#         name: "reunhangout-interface"
+#         enabled: yes
+#       notify: restart reunhangout services
+
+#     - name: Enable target
+#       systemd:
+#         name: "reunhangout-workers.target"
+#         enabled: yes
+#       notify: restart reunhangout services
+
+#     tags: ['reunhangout', 'reunhangout-post', 'reunhangout-systemd']
+
+#     # celery worker
+#     - block:
+#       - name: Copy celery config
+#         template: >
+#           src={{django_celery_template}}
+#           dest=/usr/lib/systemd/system/{{django_init_name}}-celery.service
+#         notify:
+#          - systemctl daemon-reload
+#          - restart {{django_init_name}}-celery
+
+#       - name: Enable celery
+#         command: systemctl enable {{django_init_name}}-celery.service
+#         register: systemd_enable
+#         changed_when: systemd_enable.stdout.find("Created") != -1
+
+#       when: django_celery
+
+#     # celery beat
+#     - block:
+#       - name: Copy celery beat config
+#         template: >
+#           src={{django_celery_beat_template}}
+#           dest=/usr/lib/systemd/system/{{django_init_name}}-celery-beat.service
+#         notify:
+#          - systemctl daemon-reload
+#          - restart {{django_init_name}}-celery-beat
+
+#       - name: Enable celery beat
+#         command: systemctl enable {{django_init_name}}-celery-beat.service
+#         register: systemd_enable
+#         changed_when: systemd_enable.stdout.find("Created") != -1
+
+#       when: django_celery_beat
+
+#     tags:
+#      - django
+#      - django-systemd
+#      - django-config
+#     when: django_systemd
+#     
+#   - name: Build prod assets
+#     become: yes
+#     become_user: "{{main_user_name}}" 
+#     command: "{{django_project_dir}}build_prod_assets.sh"
+#     register: build_prod_assets
+#     changed_when: build_prod_assets.stdout.find("Changed") != -1
+#     notify: restart reunhangout services
+#     tags: ['reunhangout', 'reunhangout-post', 'djangocode']
+
+#   - name: Sync auth providers
+#     command: "{{django_venv_dir}}bin/python {{django_project_dir}}manage.py sync_auth_providers"
+#     register: sync_auth_providers
+#     changed_when: sync_auth_providers.stdout.find("changed") != -1
+#     tags: ['reunhangout', 'reunhangout-post']
+
+#   - name: Collect static again
+#     become: yes
+#     become_user: "{{main_user_name}}" 
+#     register: collectstatic_output
+#     changed_when: 'not collectstatic_output.stdout.startswith("\n0 static files copied")'
+#     command: "{{django_venv_dir}}bin/python {{django_project_dir}}manage.py collectstatic --noinput"
+#     tags: ['reunhangout', 'reunhangout-post', 'djangocode']
