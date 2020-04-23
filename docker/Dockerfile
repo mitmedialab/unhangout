@@ -10,6 +10,10 @@ RUN npm run build:prod
 
 FROM debian:buster-slim
 WORKDIR /opt/app
+RUN mkdir -p /var/lib/celery && \
+    addgroup --gid 5313 celery && \
+    adduser --uid 5313 --gid 5313 celery && \
+    chown celery:celery /var/lib/celery/
 RUN apt-get update \
     && apt-get install -y \
         build-essential \
