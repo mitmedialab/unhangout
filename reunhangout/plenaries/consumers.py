@@ -69,14 +69,6 @@ class PlenaryConsumer(WebsocketConsumer):
             return self.handle_error('Plenary not found')
         track("leave_plenary", self.scope['user'], plenary=plenary)
 
-        # TODO - remove live participant code if only related to live video button
-        # Remove live participant record if any, so that participants who close
-        # their tab or refresh have to explicitly reconnect. Issue #44.
-        #   if plenary:
-        #       if plenary.live_participants.filter(id=self.scope['user'].id).exists():
-        #           payload = {'payload': {'username': self.scope['user'].username}}
-        #           handle_remove_live_participant(message, payload, plenary)
-
     @touch_presence
     def receive(self, text_data):
         print(text_data)
@@ -103,10 +95,6 @@ class PlenaryConsumer(WebsocketConsumer):
             self.handle_video_sync(data, plenary)
         elif data['type'] == "message_breakouts":
             self.handle_message_breakouts(data, plenary)
-        #elif data['type'] == "add_live_participant":
-        #    handle_add_live_participant(message, data, plenary)
-        #elif data['type'] == "remove_live_participant":
-        #    handle_remove_live_participant(message, data, plenary)
         elif data['type'] == "request_speaker_stats":
             self.handle_request_speaker_stats(data, plenary)
         else:
@@ -283,9 +271,6 @@ class PlenaryConsumer(WebsocketConsumer):
         for embed in data.get('payload', {}).get('embeds', []):
             if not isinstance(embed, dict):
                 error = "Malformed embed"
-            elif embed['type'] == 'live':
-                clean.append({'type': 'live'})
-                continue
             elif not isinstance(embed.get('props'), dict):
                 error = "Malformed embed: missing props"
             elif embed.get('type') not in ("youtube", "url"):
@@ -389,54 +374,6 @@ class PlenaryConsumer(WebsocketConsumer):
             for breakout, serialized in breakouts_serialized:
                 broadcast(breakout.channel_group_name, type='breakout', payload=serialized)
 
-    #@require_payload_keys(['id'])
-    #def handle_add_live_participant(message, data, plenary):
-    #    if not plenary.has_admin(self.scope['user']):
-    #        return self.handle_error("Must be an admin to do add live participants.")
-    #
-    #    try:
-    #        user = User.objects.get(id=data['payload']['id'])
-    #    except User.DoesNotExist:
-    #        return self.handle_error("User not found.")
-    #
-    #    plenary.live_participants.add(user)
-    #    payload = {
-    #        'live_participants': list(
-    #            plenary.live_participants.values_list('id', flat=True)
-    #        )
-    #    }
-    #    broadcast(
-    #        plenary.channel_group_name,
-    #        type='live_participants',
-    #        payload=payload
-    #    )
-    #    
-    #
-    #@require_payload_keys(['id'])
-    #def handle_remove_live_participant(message, data, plenary):
-    #    authorized = (
-    #        (data['payload']['id'] == self.scope['user'].id) or
-    #        plenary.has_admin(self.scope['user'])
-    #    )
-    #    if not authorized:
-    #        return self.handle_error("Must be an admin to remove live participants other than yourself")
-    #
-    #    try:
-    #        user = User.objects.get(id=data['payload']['id'])
-    #    except User.DoesNotExist:
-    #        return self.handle_error("User not found")
-    #
-    #    plenary.live_participants.remove(user)
-    #    payload = {
-    #        'live_participants': list(
-    #            plenary.live_participants.values_list('id', flat=True)
-    #        )
-    #    }
-    #    broadcast(
-    #        plenary.channel_group_name,
-    #        type='live_participants',
-    #        payload=payload
-    #    )
 
     def handle_contact_card(self, data, plenary):
         payload = data['payload']

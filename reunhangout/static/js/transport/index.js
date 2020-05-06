@@ -89,9 +89,6 @@ export class SocketClient {
       case "breakout_presence":
         this.store.dispatch(PLENARY_ACTIONS.setBreakoutPresence(data.payload));
         break;
-      case "live_participants":
-        this.store.dispatch(PLENARY_ACTIONS.setLiveParticipants(data.payload));
-        break;
       case "users":
         this.store.dispatch(PLENARY_ACTIONS.setUsers(data.payload));
         break;
