@@ -94,16 +94,12 @@ services:
     depends_on:
     - postgres
     - redis
-    - email
     - memcached
     - selenium
-    volumes:
-    - ../reunhangout:/opt/app/
     env_file: .env
     environment:
     - DOMAIN=localhost
     - POSTGRES_HOST=postgres
-    - EMAIL_HOST=email
     - REDIS_HOST=redis
     - ETHERPAD_SERVER=http://etherpad:9001
     - BROKER_URL=redis://redis:6379/0

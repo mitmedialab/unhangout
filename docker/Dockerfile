@@ -15,7 +15,7 @@ RUN mkdir -p /var/lib/celery && \
     adduser --uid 5313 --gid 5313 celery && \
     chown celery:celery /var/lib/celery/
 RUN apt-get update \
-    && apt-get install -y \
+    && apt-get install --no-install-recommends -y \
         build-essential \
         libjpeg-dev \
         libmemcached-dev \
@@ -31,10 +31,9 @@ RUN apt-get update \
 RUN npm i mjml
 COPY requirements.txt /opt/app/
 RUN python3 -m venv /opt/app-venv/ \
-    && /opt/app-venv/bin/pip install -r requirements.txt
+    && /opt/app-venv/bin/pip --no-cache-dir install -r requirements.txt
 COPY reunhangout/ /opt/app
 COPY --from=frontend /opt/app/static/dist static/dist
-# TODO
 RUN cp reunhangout/default_settings.py reunhangout/settings.py
 COPY docker/entry.sh /entry.sh
 EXPOSE 80
