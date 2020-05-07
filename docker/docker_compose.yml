@@ -5,17 +5,110 @@ services:
     ports:
     - "1080:80"
     - "1025:25"
+    networks:
+    - unhangout
   redis:
     image: redis
     ports:
     - 6379:6379
-  etherpad:
-    image: etherpad/etherpad
-    ports:
-    - 9001:9001
-    environment:
-    - ADMIN_PASSWORD=password
+    networks:
+    - unhangout
   postgres:
     image: postgres:11
     ports:
     - "5432:5432"
+    networks:
+    - unhangout
+  memcached:
+    image: memcached
+    networks:
+    - unhangout
+  etherpad:
+    image: etherpad/etherpad
+    depends_on:
+    - postgres
+    ports:
+    - 9001:9001
+    environment:
+    - ADMIN_PASSWORD=password
+    - NODE_ENV=production
+    - DB_TYPE=postgres
+    - DB_HOST=postgres
+    - DB_NAME=etherpad
+    - DB_USER=etherpad
+    - DB_PASS=password
+    - BROKER_URL=redis://redis:6379/0
+    networks:
+    - unhangout
+  unhangout:
+    image: dirkcuys/unhangout:latest
+    depends_on:
+    - postgres
+    - redis
+    - email
+    - memcached
+    - etherpad
+    volumes:
+    - ../reunhangout:/opt/app/
+    ports:
+    - 8000:8000
+    env_file: .env
+    environment:
+    - DOMAIN=localhost
+    - POSTGRES_HOST=postgres
+    - EMAIL_HOST=email
+    - REDIS_HOST=redis
+    - ETHERPAD_SERVER=http://etherpad:9001
+    - BROKER_URL=redis://redis:6379/0
+    - MEMCACHED_HOST=memcached
+    networks:
+    - unhangout
+    command: /opt/app-venv/bin/python manage.py runserver 0.0.0.0:8000
+  celery:
+    image: dirkcuys/unhangout:latest
+    depends_on:
+    - postgres
+    - redis
+    - email
+    - memcached
+    user: celery
+    env_file: .env
+    environment:
+    - DOMAIN=localhost
+    - POSTGRES_HOST=postgres
+    - EMAIL_HOST=email
+    - REDIS_HOST=redis
+    - ETHERPAD_SERVER=http://etherpad:9001
+    - BROKER_URL=redis://redis:6379/0
+    - MEMCACHED_HOST=memcached
+    networks:
+    - unhangout
+    command: /opt/app-venv/bin/celery worker -A reunhangout --loglevel=debug
+  selenium:
+    image: selenium/standalone-chrome
+    networks:
+    - unhangout
+  test:
+    image: dirkcuys/unhangout:latest
+    command: /opt/app-venv/bin/pytest -vv
+    depends_on:
+    - postgres
+    - redis
+    - email
+    - memcached
+    - selenium
+    volumes:
+    - ../reunhangout:/opt/app/
+    env_file: .env
+    environment:
+    - DOMAIN=localhost
+    - POSTGRES_HOST=postgres
+    - EMAIL_HOST=email
+    - REDIS_HOST=redis
+    - ETHERPAD_SERVER=http://etherpad:9001
+    - BROKER_URL=redis://redis:6379/0
+    - MEMCACHED_HOST=memcached
+    networks:
+    - unhangout
+networks:
+  unhangout:
