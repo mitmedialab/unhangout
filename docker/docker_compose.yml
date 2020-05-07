@@ -1,4 +1,7 @@
 version: '3'
+networks:
+  unhangout:
+    driver: bridge
 services:
   email:
     image: djfarrelly/maildev
@@ -90,7 +93,7 @@ services:
     - unhangout
   test:
     image: dirkcuys/unhangout:latest
-    command: /opt/app-venv/bin/pytest -vv
+    command: bash -c "dockerize -wait tcp://postgres:5432 && /opt/app-venv/bin/pytest -vv"
     depends_on:
     - postgres
     - redis
@@ -106,5 +109,4 @@ services:
     - MEMCACHED_HOST=memcached
     networks:
     - unhangout
-networks:
-  unhangout:
+
