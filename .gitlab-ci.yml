@@ -12,6 +12,7 @@ image:
     name: ubuntu:18.04
 
 before_script:
+- docker info
 - apt-get update
 - apt-get install -y
         build-essential
