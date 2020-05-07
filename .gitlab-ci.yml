@@ -1,4 +1,4 @@
-image: docker/compose:19.03.8
+image: docker:19.03.8
 
 variables:
   DOCKER_HOST: tcp://docker:2375/
@@ -14,6 +14,7 @@ services:
 
 before_script:
 - docker version
+- apk add --no-cache docker-compose
 - docker-compose version
 
 build:
