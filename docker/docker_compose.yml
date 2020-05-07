@@ -28,7 +28,6 @@ services:
     depends_on:
     - postgres
     - redis
-    - email
     - memcached
     user: celery
     env_file: .env
