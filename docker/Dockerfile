@@ -26,15 +26,20 @@ RUN apt-get update \
         python3-venv \
         redis \
         virtualenv \
+        wget \
         zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
-RUN npm i mjml
+RUN npm i mjml@^3.3.5
 COPY requirements.txt /opt/app/
 RUN python3 -m venv /opt/app-venv/ \
     && /opt/app-venv/bin/pip --no-cache-dir install -r requirements.txt
 COPY reunhangout/ /opt/app
 COPY --from=frontend /opt/app/static/dist static/dist
 RUN cp reunhangout/default_settings.py reunhangout/settings.py
+ENV DOCKERIZE_VERSION v0.6.1
+RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+    && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+    && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 COPY docker/entry.sh /entry.sh
 EXPOSE 80
 ENTRYPOINT ["/entry.sh"]
