@@ -20,4 +20,4 @@ build:
   script:
     - docker build -f docker/Dockerfile -t dirkcuys/unhangout .
     - echo "ETHERPAD_API_KEY=123123123" >> docker/.env
-    - docker-compose -f docker/docker_compose.yml run test
+    - docker-compose -f docker/docker_compose.yml up test
