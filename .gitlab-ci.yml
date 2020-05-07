@@ -1,37 +1,20 @@
+image: docker:19.03.8
+
 variables:
+  DOCKER_TLS_CERTDIR: "/certs"
   POSTGRES_HOST: 'db'
   POSTGRES_DB: "my_custom_db"
   POSTGRES_USER: "postgres"
   POSTGRES_PASSWORD: "example"
 
 services:
-- name: postgres:11
-  alias: db
-
-image:
-    name: ubuntu:18.04
+  - docker:19.03.8-dind
 
 before_script:
 - docker info
-- apt-get update
-- apt-get install -y
-        build-essential
-        libjpeg-dev
-        libmemcached-dev
-        libpq-dev
-        nodejs
-        npm
-        python3-dev
-        python3-venv
-        redis
-        virtualenv
-        yarn
-        zlib1g-dev
-        git-core
-- python3 -m venv /opt/app-venv/
-- /opt/app-venv/bin/pip install -r requirements.txt
-- cd reunhangout && npm i && npm run build
 
-test:
+build:
+  stage: build
   script:
-  - cd reunhangout && /opt/app-venv/bin/pytest -vv
+    - docker build -f docker/Dockerfile -t dirkcuys/unhangout .
+    - docker-compose -f docker/docker_compose.yml run test
