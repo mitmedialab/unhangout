@@ -1,6 +1,8 @@
-image: docker:19.03.8
+image: docker/compose:19.03.8
 
 variables:
+  DOCKER_HOST: tcp://docker:2375/
+  DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: "/certs"
   POSTGRES_HOST: 'db'
   POSTGRES_DB: "my_custom_db"
@@ -11,8 +13,8 @@ services:
 - docker:19.03.8-dind
 
 before_script:
-- docker info
-- apk add --no-cache docker-compose
+- docker version
+- docker-compose version
 
 build:
   stage: build
