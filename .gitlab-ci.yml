@@ -7,8 +7,8 @@ variables:
   POSTGRES_USER: "postgres"
   POSTGRES_PASSWORD: "example"
 
-#services:
-#- docker:19.03.8-dind
+services:
+- docker:19.03.8-dind
 
 before_script:
 - docker info
