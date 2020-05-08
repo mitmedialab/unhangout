@@ -3,11 +3,11 @@ from django.conf import settings
 from richtext.utils import sanitize
 
 def test_sanitize():
-    assert sanitize("<p>Yes</p><script type='text/javascript'>alert('no');</script>") == \
+    assert sanitize("""<p>Yes</p><script type="text/javascript">alert('no');</script>""") == \
             """<p>Yes</p>&lt;script type="text/javascript"&gt;alert('no');&lt;/script&gt;"""
 
     # target blank, noreferrer for external links
-    assert sanitize("<a href='http://google.com/'>OK</a>") == \
+    assert sanitize('<a href="http://google.com/">OK</a>') == \
             '<a href="http://google.com/" rel="nofollow noopener noreferrer" target="_blank">OK</a>'
 
     # linkify
