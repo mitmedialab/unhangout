@@ -69,7 +69,7 @@
       MAILGUN_ACTIVE_API_KEY: "{{mailgun_active_api_key}}"
 
 
-- name: Run docker image for django http & ws service
+- name: Run docker container for django http & ws service
   docker_container:
     name: "{{django_domain}}"
     image: dirkcuys/unhangout:latest
@@ -88,6 +88,51 @@
     - redis
     - memcached
     env: "{{ proxy_vars | combine(app_vars) }}"
+
+- name: Run docker container for celery worker
+  docker_container:
+    name: "{{django_domain}}-celery"
+    image: dirkcuys/unhangout:latest
+    command: /opt/app-venv/bin/celery worker -A reunhangout
+    user: celery
+    state: started
+    #pull: yes # TODO
+    recreate: true
+    restart: yes
+    restart_policy: always
+    volumes:
+    - "/var/docker-volumes/nginx/static/{{django_domain}}/static:/opt/app/public"
+    - "/var/docker-volumes/nginx/static/{{django_domain}}/media:/opt/app/media"
+    - "/var/docker-volumes/{{django_domain}}/celery:/var/lib/celery"
+    - "/var/docker-volumes/{{django_domain}}/log:/var/log"
+    links:
+    - postgres
+    - redis
+    - memcached
+    env: "{{app_vars}}"
+
+
+- name: Run docker container for celery beat worker
+  docker_container:
+    name: "{{django_domain}}-celerybeat"
+    image: dirkcuys/unhangout:latest
+    command: /opt/app-venv/bin/celery beat -A reunhangout --schedule=/var/lib/celery/celerybeat-schedule --pidfile=/var/lib/celery/celerybeat.pid
+    user: celery
+    state: started
+    #pull: yes # TODO
+    recreate: true
+    restart: yes
+    restart_policy: always
+    volumes:
+    - "/var/docker-volumes/nginx/static/{{django_domain}}/static:/opt/app/public"
+    - "/var/docker-volumes/nginx/static/{{django_domain}}/media:/opt/app/media"
+    - "/var/docker-volumes/{{django_domain}}/celery:/var/lib/celery"
+    - "/var/docker-volumes/{{django_domain}}/log:/var/log"
+    links:
+    - postgres
+    - redis
+    - memcached
+    env: "{{app_vars}}"
 
 #   # Systemd config for asgi/workers
 #   - block:
