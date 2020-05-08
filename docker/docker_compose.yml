@@ -6,6 +6,8 @@ services:
     - 6379:6379
   postgres:
     image: postgres:11
+    environment:
+    - POSTGRES_PASSWORD=password
   memcached:
     image: memcached
   etherpad:
@@ -55,6 +57,8 @@ services:
     environment:
     - DOMAIN=localhost
     - POSTGRES_HOST=postgres
+    - POSTGRES_USER=postgres
+    - POSTGRES_PASSWORD=password
     - REDIS_HOST=redis
     - ETHERPAD_SERVER=http://etherpad:9001
     - BROKER_URL=redis://redis:6379/0
