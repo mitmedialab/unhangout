@@ -62,3 +62,5 @@
       DB_NAME: "{{etherpad_db_name}}"
       DB_USER: "{{etherpad_db_username}}"
       DB_PASS: "{{etherpad_db_password}}"
+      IMPORT_EXPORT_RATE_LIMIT_WINDOW: "15000"
+      IMPORT_EXPORT_MAX_REQ_PER_IP: "100"
