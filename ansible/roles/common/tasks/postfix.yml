@@ -1,0 +1,19 @@
+- name: Install Postfix for outbound mail only
+  apt: pkg={{ item }} state=present
+  with_items:
+    - postfix
+  tags: postfix
+
+- name: Copy mailname file
+  copy: content="{{mailname}}" dest=/etc/mailname owner=root group=root mode=0644
+  notify: restart postfix
+  tags: postfix
+
+- name: Copy /etc/postfix/main.cf
+  template: src=etc_postfix_main.cf.j2 dest=/etc/postfix/main.cf owner=root group=root mode=0644
+  tags: postfix
+
+- name: Copy /etc/aliases
+  template: src=etc_aliases.j2 dest=/etc/aliases owner=root group=root mode=0644
+  notify: newaliases
+  tags: postfix

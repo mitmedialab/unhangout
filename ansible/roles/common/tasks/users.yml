@@ -1,0 +1,20 @@
+- name: Create main user account
+  user: name={{ main_user_name }} password={{ansible_become_pass|password_hash('sha512', main_user_salt)}} shell=/bin/bash state=present groups=sudo append=yes
+  tags: ['users']
+
+- name: Create .ssh dir
+  file: >
+    state=directory
+    path=/home/{{ main_user_name }}/.ssh
+    mode=700 owner={{main_user_name}}
+    group={{main_user_name}}
+  tags: ['users']
+
+- name: Add authorized_keys
+  template: >
+    src=authorized_keys.j2
+    dest=/home/{{main_user_name}}/.ssh/authorized_keys
+    group={{main_user_name}}
+    owner={{main_user_name}}
+    mode=0600
+  tags: ['users']

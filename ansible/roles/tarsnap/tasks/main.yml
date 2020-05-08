@@ -1,0 +1,48 @@
+---
+- name: Check if tarsnap {{ tarsnap_version }} is installed
+  shell: tarsnap --version | grep {{ tarsnap_version }} --color=never
+  register: tarsnap_installed
+  changed_when: "tarsnap_installed.stderr != ''"
+  ignore_errors: yes
+  tags: ['tarsnap']
+
+# Installation
+
+- name: Install tarsnap
+  include_tasks: install.yml
+  when: tarsnap_installed|failed
+  tags: ['tarsnap']
+
+# Configuration
+
+- name: Tarsnap key
+  copy:
+    content="{{tarsnap_key}}"
+    dest="{{tarsnap_key_path}}"
+    owner=root
+    group=root
+    mode=0600
+    force=no
+  tags: ['tarsnap']
+
+- name: Tarsnap cache directory
+  file: state=directory path="{{tarsnap_cache}}"
+  tags: ['tarsnap']
+
+- name: Tarsnap backup script
+  template: src=tarsnap.py dest="{{tarsnap_script_path}}"
+  tags:
+   - tarsnap
+   - tarsnap-script
+
+- name: Tarsnap cron
+  cron:
+    name="Tarsnap backup"
+    month="{{tarsnap_cron_month}}"
+    day="{{tarsnap_cron_day}}"
+    hour="{{tarsnap_cron_hour}}"
+    minute="{{tarsnap_cron_minute}}"
+    job="/usr/bin/python2.7 {{tarsnap_script_path}} > /dev/null"
+    state=present
+    disabled="{{tarsnap_cron_disabled}}"
+  tags: ['tarsnap']

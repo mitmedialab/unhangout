@@ -85,16 +85,14 @@ async def test_connect_TODO(django_user_model):
 
 
 @pytest.fixture
-async def admin_connected(request, user_with_plenary):
+async def admin_connected(user_with_plenary):
     user, plenary = user_with_plenary
     application = TestAuthMiddleware(URLRouter(websocket_urlpatterns))
     application.login(user)
     communicator = WebsocketCommunicator(application, "/event/test-plenary/")
     connected, subprotocol = await communicator.connect()
-    async def fin():
-        await communicator.disconnect()
-    request.addfinalizer(fin)
-    return communicator
+    yield communicator
+    await communicator.disconnect()
 
 
 class TestTwoUsers():
@@ -130,8 +128,12 @@ class TestAdminFunctions():
 
     @pytest.mark.django_db(transaction=True)
     @pytest.mark.asyncio
-    async def test_admin_features(self, admin_connected):
-        communicator = admin_connected
+    async def test_admin_features(self, user_with_plenary):
+        user, plenary = user_with_plenary
+        application = TestAuthMiddleware(URLRouter(websocket_urlpatterns))
+        application.login(user)
+        communicator = WebsocketCommunicator(application, "/event/test-plenary/")
+        connected, subprotocol = await communicator.connect()
         response = await communicator.receive_json_from()
         assert response.get('type') == 'presence'
         assert set(response.get('payload').keys()) == set(['channel_name', 'lurkers', 'members'])
@@ -157,3 +159,30 @@ class TestAdminFunctions():
         keys = set(response.get('payload').get('plenary').keys()) & set(PLENARY_KEYS)
         assert keys == set(PLENARY_KEYS)
         assert Plenary.objects.last().name == 'New name of plenary'
+
+        await communicator.disconnect()
+
+
+@pytest.mark.asyncio
+@pytest.mark.django_db(transaction=True)
+async def test_admin_features_2(admin_connected):
+    communicator = admin_connected
+    response = await communicator.receive_json_from()
+    assert response.get('type') == 'presence'
+    assert set(response.get('payload').keys()) == set(['channel_name', 'lurkers', 'members'])
+
+    # Update plenary
+    await communicator.send_json_to({"type": "plenary", "payload": {
+        "name": "New name of plenary"
+    }})
+    response = await communicator.receive_json_from()
+    assert response.get('type') == 'plenary'
+    PLENARY_KEYS = (
+        'random_max_attendees', 'breakout_mode', 'name', 'organizer', 'start_date',
+        'end_date', 'doors_open', 'doors_close', 'breakouts_open', 'canceled',
+        'slug', 'public', 'jitsi_server', 'wrapup_emails', 'etherpad_initial_text'
+    )
+    keys = set(response.get('payload').get('plenary').keys()) & set(PLENARY_KEYS)
+    assert keys == set(PLENARY_KEYS)
+    assert Plenary.objects.last().name == 'New name of plenary'
+

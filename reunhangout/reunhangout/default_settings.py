@@ -244,7 +244,7 @@ JITSI_SERVERS = [
     'meet.jit.si',
     'jitsi.unhangout.io',
 ]
-ETHERPAD_SERVER = env('ETHERPAD_SERVER', "etherpad.unhangout.io")
+ETHERPAD_SERVER = env('ETHERPAD_SERVER', "etherpad.unhangout.io") # TODO rename to ETHERPAD_SERVER_URL or API
 ETHERPAD_API_KEY = env('ETHERPAD_API_KEY', "... override me ...")
 ETHERPAD_DEFAULT_TEXT = "Welcome to the breakout! Use this space for notes or ideas."
 
