@@ -2,10 +2,6 @@ image: docker:19.03.8
 
 variables:
   DOCKER_TLS_CERTDIR: "/certs"
-  POSTGRES_HOST: 'db'
-  POSTGRES_DB: "my_custom_db"
-  POSTGRES_USER: "postgres"
-  POSTGRES_PASSWORD: "example"
 
 services:
 - docker:19.03.8-dind
