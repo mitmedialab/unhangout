@@ -1,0 +1,57 @@
+---
+- hosts: throwaway
+  become: yes
+  become_user: root
+  gather_facts: true
+  vars_files:
+    - vars/throwaway.yml
+  roles:
+    #- common TODO add back what's needed
+    - users
+    #- swap TODO add back what's needed
+    - angstwad.docker_ubuntu
+    - role: docker-network
+      vars:
+        network: 'etherpad'
+    - role: docker-network
+      vars:
+        network: 'unhangout'
+    - nginx-proxy
+    - postgres
+    - redis
+    - role: postgres_role
+      vars:
+          DB_NAME: "{{uh_etherpad_db_name}}"
+          DB_USER: "{{uh_etherpad_db_username}}"
+          DB_PASSWORD: "{{uh_etherpad_db_password}}"
+    - etherpad
+    #- monitored TODO add back what's needed
+    #- tarsnap TODO add back
+    - role: postgres_role
+      vars:
+          DB_NAME: "{{uh_postgres_db}}"
+          DB_USER: "{{uh_postgres_user}}"
+          DB_PASSWORD: "{{uh_postgres_password}}"
+    - build-docker-image
+    - memcached
+    - reunhangout
+  vars:
+    domain: "{{uh_domain}}"
+    letsencrypt_domains: "{{ [uh_domain, uh_etherpad_domain] + uh_domain_aliases }}"
+    swap_file_size_kb: 4000000 # 4GiB
+    swap_file_path: "/swapfile2"
+    uh_repo_dir: "/var/local/reunhangout/"
+    reunhangout_worker_processes: 2 # number of worker processes for each of http/websocket
+    django_domain: "{{uh_domain}}"
+    django_repo_version: "channels-v2" # TODO remove
+    django_postgres_db: "{{uh_postgres_db}}"
+    django_postgres_user: "{{uh_postgres_user}}"
+    django_postgres_password: "{{uh_postgres_password}}"
+    django_nginx_template: "roles/reunhangout/templates/reunhangout_nginx.conf" # TODO remove
+    etherpad_domain: "{{uh_etherpad_domain}}"
+    etherpad_path: "{{uh_etherpad_path}}"
+    etherpad_db_name: "{{uh_etherpad_db_name}}"
+    etherpad_db_username: "{{uh_etherpad_db_username}}"
+    etherpad_db_password: "{{uh_etherpad_db_password}}"
+    etherpad_session_key: "{{uh_etherpad_session_key}}"
+    etherpad_api_key: "{{uh_etherpad_api_key}}"
