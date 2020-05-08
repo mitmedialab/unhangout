@@ -1,7 +1,7 @@
 ---
 - block:
   - name: Install base dependencies
-    apt: pkg={{item}} state=installed
+    apt: pkg={{item}} state=present
     with_items:
       - build-essential
       - libssl-dev
