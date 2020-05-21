@@ -18,3 +18,5 @@
     owner={{main_user_name}}
     mode=0600
   tags: ['users']
+
+# Root login is disabled in common/tasks/security.yml
