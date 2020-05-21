@@ -1,0 +1,6 @@
+---
+monitoring_disk_critical: '10%'
+monitoring_disk_warning: '20%'
+monitoring_procs_critical: 300
+monitoring_procs_warning: 200
+monitoring_nrpe_template: "etc_nagios_nrpe_local.cfg"
