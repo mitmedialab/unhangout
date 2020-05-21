@@ -1,47 +1,16 @@
 ---
-#- name: Install pg_trgm extension
-#  vars:
-#    ansible_ssh_pipelining: yes
-#  become: yes
-#  become_user: postgres
-#  postgresql_ext: name=pg_trgm db={{django_postgres_db}}
+- name: Create postgres user
+  command: docker exec postgres psql -U postgres {{django_postgres_db}} -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
 #  tags:
 #   - django
 #   - django-postgres
 
-#- name: Copy django nginx config
-#  template: >
-#    src={{django_nginx_template}}
-#    dest=/etc/nginx/sites-available/{{django_init_name}}.conf
-#  when: django_nginx
-#  notify: restart nginx
-#  tags:
-#   - django
-#   - django-nginx
-#   - django-config
-
-#- name: Copy max file size nginx config
-#  template: >
-#    src=etc_nginx_conf.d_max_file_size.conf
-#    dest=/etc/nginx/conf.d/max_file_size.conf
-#  when: django_nginx
-#  notify: restart nginx
-#  tags:
-#   - django
-#   - django-nginx
-#   - django-config
-
-#- name: Increase open file descriptor limit for nginx
-#  lineinfile:
-#    name: /etc/nginx/nginx.conf
-#    regexp: '^worker_rlimit_nofile'
-#    line: 'worker_rlimit_nofile 65535;'
-#    insertafter: '^worker_processes'
-#    state: present
-#  tags: ['reunhangout', 'reunhangout-post']
-
 - name: setup static and media file hosting through nginx-proxy
   template: src=static.j2 dest=/var/docker-volumes/nginx/vhosts.d/{{django_domain}}
+#  tags:
+#   - django
+#   - django-nginx
+#   - django-config
 
 - set_fact:
     proxy_vars:
@@ -134,73 +103,6 @@
     - memcached
     env: "{{app_vars}}"
 
-#   # Systemd config for asgi/workers
-#   - block:
-#     - name: Copy reunhangout service templates
-#       template:
-#         src: "{{item}}"
-#         dest: "/usr/lib/systemd/system/{{item}}"
-#       with_items:
-#         #- reunhangout-worker-websocket@.service
-#         #- reunhangout-worker-http@.service
-#         - reunhangout-interface.service
-#         - reunhangout-workers.target
-#       notify: restart reunhangout services
-
-#     - name: Enable interface
-#       systemd:
-#         name: "reunhangout-interface"
-#         enabled: yes
-#       notify: restart reunhangout services
-
-#     - name: Enable target
-#       systemd:
-#         name: "reunhangout-workers.target"
-#         enabled: yes
-#       notify: restart reunhangout services
-
-#     tags: ['reunhangout', 'reunhangout-post', 'reunhangout-systemd']
-
-#     # celery worker
-#     - block:
-#       - name: Copy celery config
-#         template: >
-#           src={{django_celery_template}}
-#           dest=/usr/lib/systemd/system/{{django_init_name}}-celery.service
-#         notify:
-#          - systemctl daemon-reload
-#          - restart {{django_init_name}}-celery
-
-#       - name: Enable celery
-#         command: systemctl enable {{django_init_name}}-celery.service
-#         register: systemd_enable
-#         changed_when: systemd_enable.stdout.find("Created") != -1
-
-#       when: django_celery
-
-#     # celery beat
-#     - block:
-#       - name: Copy celery beat config
-#         template: >
-#           src={{django_celery_beat_template}}
-#           dest=/usr/lib/systemd/system/{{django_init_name}}-celery-beat.service
-#         notify:
-#          - systemctl daemon-reload
-#          - restart {{django_init_name}}-celery-beat
-
-#       - name: Enable celery beat
-#         command: systemctl enable {{django_init_name}}-celery-beat.service
-#         register: systemd_enable
-#         changed_when: systemd_enable.stdout.find("Created") != -1
-
-#       when: django_celery_beat
-
-#     tags:
-#      - django
-#      - django-systemd
-#      - django-config
-#     when: django_systemd
-#     
 #   - name: Build prod assets
 #     become: yes
 #     become_user: "{{main_user_name}}" 
