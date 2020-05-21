@@ -6,18 +6,25 @@ gzip_proxied any;
 gzip_comp_level 6;
 gzip_buffers 16 8k;
 gzip_http_version 1.1;
-gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
+
+gzip_types text/plain text/css application/json application/x-javascript application/javascript text/xml application/xml application/xml+rss text/javascript application/vnd.ms-fontobject application/x-font-ttf font/opentype image/svg+xml image/x-icon;
 
 location = /favicon.ico {
     alias  /var/www/extra/{{django_domain}}/static/images/favicon.ico;
 }
 
-location /static/ {    
+location /static/ {
+    expires 30d;
+    add_header Pragma public;
+    add_header Cache-Control "public";
     autoindex on;
     root   /var/www/extra/{{django_domain}};
 }
 
 location /media/ {    
+    expires 30d;
+    add_header Pragma public;
+    add_header Cache-Control "public";
     autoindex on;    
     root   /var/www/extra/{{django_domain}};
 }
