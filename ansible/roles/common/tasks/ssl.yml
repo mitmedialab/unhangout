@@ -1,5 +1,0 @@
-- name: Create DHPARAM
-  shell: openssl dhparam 2048 > /etc/ssl/private/dhparam.pem
-  args:
-    creates: /etc/ssl/private/dhparam.pem
-  tags: ssl

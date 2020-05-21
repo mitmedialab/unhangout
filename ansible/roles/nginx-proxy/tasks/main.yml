@@ -1,4 +1,14 @@
 ---
+
+- name: create docker-volumes for nginx
+  file: path=/var/docker-volumes/nginx/ state=directory
+
+- name: Copy nginx conf (to set vars in the events section
+  copy: dest=/var/docker-volumes/nginx/nginx.conf src=nginx.conf
+
+- name: Create proxy wide vars
+  template: src=extra.j2 dest=/var/docker-volumes/nginx/extra.conf
+
 - name: Run docker container for jwilder/nginx-proxy
   docker_container:
     name: nginx-proxy
@@ -9,7 +19,9 @@
     restart_policy: always
     volumes:
     - /var/run/docker.sock:/tmp/docker.sock:ro
+    - /var/docker-volumes/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     - /var/docker-volumes/nginx/certs:/etc/nginx/certs:ro
+    - /var/docker-volumes/nginx/extra.conf:/etc/nginx/conf.d/extra.conf:ro
     - /var/docker-volumes/nginx/vhosts.d:/etc/nginx/vhost.d
     - /var/docker-volumes/nginx/static:/var/www/extra/
     - /usr/share/nginx/html
