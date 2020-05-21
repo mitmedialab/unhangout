@@ -60,10 +60,15 @@
 - name: Set system timezone
   file: src=/usr/share/zoneinfo/{{ timezone }} dest=/etc/localtime state=link force=yes
 
+#- include: ssl.yml
+- name: Create DHPARAM
+  shell: openssl dhparam 2048 > /etc/ssl/private/dhparam.pem
+  args:
+    creates: /etc/ssl/private/dhparam.pem
+  tags: ssl
+
 - include: postfix.yml
-- include: users.yml
 - include: logwatch.yml
-- include: ssl.yml
 - include: ufw.yml
 - include: security.yml
 - include: ntp.yml

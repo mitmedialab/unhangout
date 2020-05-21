@@ -1,6 +1,7 @@
 - name: Install security-related packages
-  apt: pkg={{ item }} state=present
-  with_items:
+  apt:
+    state: present
+    pkg:
     - fail2ban
     - rkhunter
     - lynis
