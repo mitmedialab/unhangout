@@ -328,7 +328,7 @@ CACHES = {
 # ansible settings template
 # =========================
 
-DEFAULT_FROM_EMAIL = SERVER_EMAIL = "Unhangout Team <noreply@{{ django_domain }}>"
+DEFAULT_FROM_EMAIL = SERVER_EMAIL = f"Unhangout Team <noreply@{env('DOMAIN', localhost)}>"
 ADMINS = MANAGERS = [("Charlie DeTar", "cfd@media.mit.edu")]
 
 
