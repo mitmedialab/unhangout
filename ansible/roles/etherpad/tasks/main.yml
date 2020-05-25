@@ -38,12 +38,12 @@
       LETSENCRYPT_HOST: "{{etherpad_domain}}"
       LETSENCRYPT_EMAIL: "{{admin_email}}"
       DOMAIN: "{{etherpad_domain}}"
-      ETHERPAD_TITLE: "Unhangout"
+      TITLE: "Unhangout"
       DB_TYPE: postgres
       DB_HOST: postgres
       DB_NAME: "{{etherpad_db_name}}"
       DB_USER: "{{etherpad_db_username}}"
       DB_PASS: "{{etherpad_db_password}}"
-      TRUST_PROXY: true
+      TRUST_PROXY: "true"
       IMPORT_EXPORT_RATE_LIMIT_WINDOW: "15000"
       IMPORT_EXPORT_MAX_REQ_PER_IP: "100"
