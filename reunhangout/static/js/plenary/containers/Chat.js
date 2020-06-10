@@ -28,7 +28,8 @@ class ChatMessage extends React.Component {
     return <div className={`chat-message${firstMsg.highlight ? " highlight" : ""}`}>
       <Avatar user={firstMsg.user} 
               idPart={`chat-message-author-${firstMsg.id}`}
-              breakoutView={false}/>
+              breakoutView={false}
+              enableSpeakerStats={false}/>
       <div className="chat-message-text" ref={(el) => this.el = el}>
         <div className='userName'>{user.display_name}</div>
         <div className='message'>

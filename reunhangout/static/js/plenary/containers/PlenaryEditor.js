@@ -90,7 +90,8 @@ class AdminListEditor extends React.Component {
             <div className='admin-row' key={admin.id}>
               <Avatar user={admin} idPart={`admin-${admin.id}`}
                       detailView={true} 
-                      breakoutView={false}/>
+                      breakoutView={false}
+                      enableSpeakerStats={false}/>
               <span className='remove-btn'
                     onClick={(e) => this.removeAdmin(e, admin)}>
                 <i className='fa fa-minus-circle' /> remove
@@ -114,7 +115,8 @@ class AdminListEditor extends React.Component {
             <div className='add-detail'>
               <Avatar user={this.state.searchUser} detailView={true}
                       idPart='searchUser' 
-                      breakoutView={false}/>
+                      breakoutView={false}
+                      enableSpeakerStats={false}/>
               { _.find(this.props.admins, a => a.id === this.state.searchUser.id) ?
                 <em><b>Already an admin.</b></em>
               :

@@ -39,6 +39,7 @@ class Presence extends React.Component {
   static propTypes = {
     presence: PropTypes.object.isRequired,
     auth: PropTypes.object.isRequired,
+    enableSpeakerStats: PropTypes.bool.isRequired,
   }
 
   render() {
@@ -54,7 +55,8 @@ class Presence extends React.Component {
               <Avatar user={user}
                       detailView={false}
                       idPart={`breakout-presence-${user.username}`}
-                      breakoutView={true} />
+                      breakoutView={true} 
+                      enableSpeakerStats={this.props.enableSpeakerStats}/>
               <span className='name'>{user.display_name}</span>
             </div>
           )))
@@ -72,6 +74,7 @@ class Breakout extends React.Component {
       splitBasis: "50%",
       handleWidth: "20px",
       dragging: false,
+      enableSpeakerStats: props.breakout.enable_speaker_stats
     }
   }
 
@@ -166,7 +169,7 @@ class Breakout extends React.Component {
       <div className='breakout-layout'>
         <div className='titlebar'>
           <span className='title'><span>{this.props.breakout.title}</span></span>
-          <Presence presence={this.props.presence} auth={this.props.auth} />
+          <Presence presence={this.props.presence} auth={this.props.auth} enableSpeakerStats={this.state.enableSpeakerStats}/>
           <span className='logo'>
             <a href="/" target="_blank">
               <img src={`${this.props.settings.MEDIA_URL}${this.props.settings.BRANDING.logo}`} alt="Unhangout logo"></img>

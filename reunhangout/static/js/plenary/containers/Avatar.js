@@ -23,7 +23,8 @@ export class Avatar extends React.Component {
       })
     ]),
     idPart: PropTypes.string.isRequired,
-    breakoutView: PropTypes.bool
+    breakoutView: PropTypes.bool,
+    enableSpeakerStats: PropTypes.bool
   }
 
   state = {'imageError': false};
@@ -33,7 +34,9 @@ export class Avatar extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    if (this.props.breakoutView && !_.isEqual(nextProps.speakerStats, this.props.speakerStats)) {
+    if (this.props.enableSpeakerStats 
+      && this.props.breakoutView 
+      && !_.isEqual(nextProps.speakerStats, this.props.speakerStats)) {
       let user;
       if (_.isNumber(this.props.user)) {
         user = this.props.users[this.props.user];
@@ -41,30 +44,37 @@ export class Avatar extends React.Component {
         user = this.props.user;
       }
       var speaking_time = -1;
-      for (const display_name in nextProps.speakerStats) {
-        if (display_name === user.display_name) {
-          speaking_time = nextProps.speakerStats[user.display_name];
+      for (const username in nextProps.speakerStats) {
+        if (username === user.username) {
+          speaking_time = nextProps.speakerStats[user.username];
           break;
         }
       }
-      if (speaking_time < 0) {
-        console.log("User not found in speaking stats object");
-        return false;
-      }
 
-      let total_speaking_time = _.reduce(Object.values(nextProps.speakerStats), (memo, num) => (memo + num), 0);
+      let total_speaking_time = 0;
+      for (var key of Object.keys(nextProps.users)) {
+        let user = nextProps.users[key]
+        if (nextProps.speakerStats.hasOwnProperty(user.username)) {
+          total_speaking_time += nextProps.speakerStats[user.username];
+        }
+      }
       if (total_speaking_time === 0) {
         return false;
       }
 
-      let new_opacity = speaking_time / total_speaking_time
+      let new_opacity = 1 - speaking_time / total_speaking_time
 
-      var element = document.getElementById(`breakout-user-avatar-${user.display_name}`);
+      var element = document.getElementById(`breakout-user-avatar-${user.username}`);
       if (element === null) {
-        console.log("Element got by id was null for user", user.display_name);
+        console.log("Element got by id was null for user", user.username);
         return false;
       }
-      element.style.opacity = Math.min(new_opacity, .2);
+      if (new_opacity < 0) {
+        console.log("User not found in speaking stats object - assume speaking time is 0", user.username);
+        element.style.opacity = 1
+        return false;
+      }
+      element.style.opacity = Math.max(new_opacity, .2);
       return false;
     } 
     return true;
@@ -86,7 +96,7 @@ export class Avatar extends React.Component {
     }
     let u = encodeURIComponent(user.username).replace(/\%/g, '::');
     let popoverId = `avatar-${u}-${this.props.idPart}`;
-    let breakout_avatar_id = `breakout-user-avatar-${user.display_name}`;
+    let breakout_avatar_id = `breakout-user-avatar-${user.username}`;
     let classes = [];
     if (this.props.className) {
       classes.push(this.props.className);
