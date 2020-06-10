@@ -27,8 +27,10 @@
           DB_NAME: "{{uh_postgres_db}}"
           DB_USER: "{{uh_postgres_user}}"
           DB_PASSWORD: "{{uh_postgres_password}}"
-    - build-docker-image
-    - reunhangout
+    - role: build-docker-image
+      tags: ['update-app']
+    - role: reunhangout
+      tags: ['update-app']
   vars:
     domain: "{{uh_domain}}"
     letsencrypt_domains: "{{ [uh_domain, uh_etherpad_domain] + uh_domain_aliases }}"

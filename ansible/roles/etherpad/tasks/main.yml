@@ -1,6 +1,8 @@
 ---
-#- name: create etherpad user to reserver uid
+- name: setup cache for assets in nginx-proxy
+  template: src=cache.j2 dest=/var/docker-volumes/nginx/vhosts.d/{{etherpad_domain}}
 
+#- name: create etherpad user to reserver uid
 - name: create dir for etherpad
   file: path=/var/docker-volumes/etherpad state=directory
 
@@ -23,7 +25,7 @@
 - name: start docker container
   docker_container:
     name: "{{etherpad_domain}}"
-    image: "etherpad/etherpad"
+    image: "etherpad/etherpad:1.8.4"
     state: started
     pull: yes
     restart: yes
@@ -44,6 +46,10 @@
       DB_NAME: "{{etherpad_db_name}}"
       DB_USER: "{{etherpad_db_username}}"
       DB_PASS: "{{etherpad_db_password}}"
+      DB_CHARSET: "utf8mb4"
       TRUST_PROXY: "true"
+      SKIN_NAME: "no-skin"
+      PAD_OPTIONS_LANG: "en-us"
+      PAD_OPTIONS_SHOW_CHAT: "false"
       IMPORT_EXPORT_RATE_LIMIT_WINDOW: "15000"
       IMPORT_EXPORT_MAX_REQ_PER_IP: "100"

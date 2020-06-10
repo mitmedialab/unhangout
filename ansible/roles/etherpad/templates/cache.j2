@@ -1,0 +1,17 @@
+location /static/ {
+    proxy_buffering on;
+    proxy_cache etherpad_cache;
+    add_header X-Cache-Status $upstream_cache_status;
+    proxy_ignore_headers Cache-Control;
+    proxy_cache_valid any 30m;
+    proxy_pass http://{{etherpad_domain}};
+}
+
+location /javascripts/ {
+    proxy_buffering on;
+    proxy_cache etherpad_cache;
+    add_header X-Cache-Status $upstream_cache_status;
+    proxy_ignore_headers Cache-Control;
+    proxy_cache_valid any 30m;
+    proxy_pass http://{{etherpad_domain}};
+}

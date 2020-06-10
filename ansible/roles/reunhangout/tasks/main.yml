@@ -37,6 +37,8 @@
       EMAIL_HOST_PASSWORD: "{{mailgun_smtp_password}}"
       MAILGUN_ACTIVE_API_KEY: "{{mailgun_active_api_key}}"
 
+- name: Create folder for celery with correct permissions
+  file: path=/var/docker-volumes/{{django_domain}}/celery owner=5313 group=5313 state=directory
 
 - name: Run docker container for django http & ws service
   docker_container:

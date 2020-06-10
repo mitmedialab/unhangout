@@ -1,4 +1,9 @@
 ---
+#- name: Remove old docker images & containers
+#  docker_prune:
+#    images: yes
+#    containers: yes
+
 - name: get code from gitlab
   git: 
     dest: /usr/local/src/reunhangout
