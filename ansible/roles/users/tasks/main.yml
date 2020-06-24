@@ -11,12 +11,12 @@
   tags: ['users']
 
 - name: Add authorized_keys
-  template: >
-    src=authorized_keys.j2
-    dest=/home/{{main_user_name}}/.ssh/authorized_keys
-    group={{main_user_name}}
-    owner={{main_user_name}}
-    mode=0600
+  copy:
+    content: "{{main_user_authorized_keys}}"
+    dest: "/home/{{main_user_name}}/.ssh/authorized_keys"
+    group: "{{main_user_name}}"
+    owner: "{{main_user_name}}"
+    mode: "0600"
   tags: ['users']
 
 # Root login is disabled in common/tasks/security.yml
