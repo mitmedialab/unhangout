@@ -97,9 +97,8 @@ class PlenaryConsumer(WebsocketConsumer):
             self.handle_message_breakouts(data, plenary)
         elif data['type'] == "request_speaker_stats":
             self.handle_request_speaker_stats(data, plenary)
-        #elif data['type'] == "enable_speaker_stats":
-        #    handle_enable_speaker_stats(message, data, plenary)
-
+        elif data['type'] == "enable_speaker_stats":
+            self.handle_enable_speaker_stats(data, plenary)
         else:
             self.handle_error(f"Type {data['type']} not understood")
 
@@ -462,7 +461,6 @@ class PlenaryConsumer(WebsocketConsumer):
         for breakout in plenary.breakout_set.active():
             broadcast(breakout.channel_group_name, type='request_speaker_stats',
                     payload=data['payload'])
-
 
     #@require_payload_keys(['enableSpeakerStats'])
     def handle_enable_speaker_stats(self, data, plenary):
