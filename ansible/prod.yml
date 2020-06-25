@@ -42,6 +42,7 @@
     uh_repo_dir: "/var/local/reunhangout/"
     reunhangout_worker_processes: 2 # number of worker processes for each of http/websocket
     django_domain: "{{uh_domain}}"
+    django_secret_key: "{{uh_secret_key}}"
     django_repo_version: "channels-v2" # TODO remove
     django_postgres_db: "{{uh_postgres_db}}"
     django_postgres_user: "{{uh_postgres_user}}"
