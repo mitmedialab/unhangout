@@ -2,7 +2,6 @@
 - name: setup cache for assets in nginx-proxy
   template: src=cache.j2 dest=/var/docker-volumes/nginx/vhosts.d/{{etherpad_domain}}
 
-#- name: create etherpad user to reserver uid
 - name: create dir for etherpad
   file: path=/var/docker-volumes/etherpad state=directory
 
@@ -22,10 +21,15 @@
     mode: "640"
     owner: "5001"
 
+# TODO Add config for old etherpad 
+- name: Configure etherpad
+  template: src=etherpad_settings.json dest=/var/docker-volumes/etherpad/settings.json
+
 - name: start docker container
   docker_container:
     name: "{{etherpad_domain}}"
-    image: "etherpad/etherpad:1.8.4"
+    #TODO image: "etherpad/etherpad:1.8.4"
+    image: "dirkcuys/hangpad:latest"
     state: started
     pull: yes
     restart: yes
@@ -35,6 +39,7 @@
     volumes:
     - /var/docker-volumes/etherpad/APIKEY.txt:/opt/etherpad-lite/APIKEY.txt
     - /var/docker-volumes/etherpad/SESSIONKEY.txt:/opt/etherpad-lite/SESSIONKEY.txt
+    - /var/docker-volumes/etherpad/settings.json:/opt/etherpad-lite/settings.json
     env:
       VIRTUAL_HOST: "{{etherpad_domain}}"
       LETSENCRYPT_HOST: "{{etherpad_domain}}"
