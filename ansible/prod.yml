@@ -1,5 +1,5 @@
 ---
-- hosts: reunhangout-new
+- hosts: reunhangout
   become: yes
   become_user: root
   gather_facts: true
