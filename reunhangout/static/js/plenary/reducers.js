@@ -52,12 +52,6 @@ export const plenary = (state=null, action) => {
         window.location.href = `/event/${newstate.slug}/`;
       }
       return newstate
-    case A.SET_LIVE_PARTICIPANTS:
-      newstate = {
-        ...state,
-        live_participants: action.payload.live_participants
-      }
-      return newstate
   }
   return state;
 };

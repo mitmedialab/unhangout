@@ -1,0 +1,65 @@
+version: '3'
+services:
+  redis:
+    image: redis
+    ports:
+    - 6379:6379
+  postgres:
+    image: postgres:11
+    environment:
+    - POSTGRES_PASSWORD=password
+  memcached:
+    image: memcached
+  etherpad:
+    image: etherpad/etherpad
+    depends_on:
+    - postgres
+    ports:
+    - 9001:9001
+    environment:
+    - ADMIN_PASSWORD=password
+    - NODE_ENV=production
+    - DB_TYPE=postgres
+    - DB_HOST=postgres
+    - DB_NAME=etherpad
+    - DB_USER=etherpad
+    - DB_PASS=password
+    - BROKER_URL=redis://redis:6379/0
+  celery:
+    image: dirkcuys/unhangout:latest
+    depends_on:
+    - postgres
+    - redis
+    - memcached
+    user: celery
+    env_file: .env
+    environment:
+    - DOMAIN=localhost
+    - POSTGRES_HOST=postgres
+    - EMAIL_HOST=email
+    - REDIS_HOST=redis
+    - ETHERPAD_SERVER=http://etherpad:9001
+    - BROKER_URL=redis://redis:6379/0
+    - MEMCACHED_HOST=memcached
+    command: /opt/app-venv/bin/celery worker -A reunhangout --loglevel=debug
+  selenium:
+    image: selenium/standalone-chrome
+  test:
+    image: dirkcuys/unhangout:latest
+    command: bash -c "dockerize -wait tcp://postgres:5432 && /opt/app-venv/bin/pytest -vv"
+    depends_on:
+    - postgres
+    - etherpad
+    - redis
+    - memcached
+    - selenium
+    env_file: .env
+    environment:
+    - DOMAIN=localhost
+    - POSTGRES_HOST=postgres
+    - POSTGRES_USER=postgres
+    - POSTGRES_PASSWORD=password
+    - REDIS_HOST=redis
+    - ETHERPAD_SERVER=http://etherpad:9001
+    - BROKER_URL=redis://redis:6379/0
+    - MEMCACHED_HOST=memcached

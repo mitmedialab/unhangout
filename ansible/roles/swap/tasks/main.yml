@@ -1,0 +1,31 @@
+---
+- block:
+  - name: Create swap file
+    command: dd if=/dev/zero of={{swap_file_path}} bs=1024 count={{swap_file_size_kb}} creates={{swap_file_path}}
+  
+  - name: Change perms
+    file: path="{{swap_file_path}}" owner=root group=root mode=0600
+  
+  - name: Check swap type
+    command: "file {{swap_file_path}}"
+    register: swapfile
+    changed_when: False  # never report as "changed"
+  
+  - name: Format as swap
+    command: mkswap {{swap_file_path}}
+    when: swapfile.stdout.find("swap file") == -1
+  
+  - name: Add swapfile to fstab
+    mount: >
+      name=none
+      src={{swap_file_path}}
+      fstype=swap
+      opts=sw
+      passno=0
+      dump=0
+      state=present
+       
+  - name: Mount swap
+    command: "swapon {{swap_file_path}}"
+    when: ansible_swaptotal_mb < 1
+  tags: swap

@@ -1,0 +1,10 @@
+---
+- name: Run docker image memcached
+  docker_container:
+    name: memcached
+    image: memcached
+    state: started
+    pull: yes
+    recreate: true
+    restart: yes
+    restart_policy: always

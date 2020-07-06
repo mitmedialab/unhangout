@@ -1,0 +1,60 @@
+---
+- name: setup cache for assets in nginx-proxy
+  template: src=cache.j2 dest=/var/docker-volumes/nginx/vhosts.d/{{etherpad_domain}}
+
+- name: create dir for etherpad
+  file: path=/var/docker-volumes/etherpad state=directory
+
+# uh_etherpad_session_key
+- name: create session key
+  copy:
+    dest: /var/docker-volumes/etherpad/SESSIONKEY.txt
+    content: "{{uh_etherpad_session_key}}"
+    mode: "640"
+    owner: "5001"
+
+# uh_etherpad_api_key
+- name: create api key
+  copy:
+    dest: /var/docker-volumes/etherpad/APIKEY.txt
+    content: "{{uh_etherpad_api_key}}"
+    mode: "640"
+    owner: "5001"
+
+# TODO Add config for old etherpad 
+- name: Configure etherpad
+  template: src=etherpad_settings.json dest=/var/docker-volumes/etherpad/settings.json
+
+- name: start docker container
+  docker_container:
+    name: "{{etherpad_domain}}"
+    #TODO image: "etherpad/etherpad:1.8.4"
+    image: "dirkcuys/hangpad:latest"
+    state: started
+    pull: yes
+    restart: yes
+    restart_policy: always
+    links:
+    - "postgres:postgres"
+    volumes:
+    - /var/docker-volumes/etherpad/APIKEY.txt:/opt/etherpad-lite/APIKEY.txt
+    - /var/docker-volumes/etherpad/SESSIONKEY.txt:/opt/etherpad-lite/SESSIONKEY.txt
+    - /var/docker-volumes/etherpad/settings.json:/opt/etherpad-lite/settings.json
+    env:
+      VIRTUAL_HOST: "{{etherpad_domain}}"
+      LETSENCRYPT_HOST: "{{etherpad_domain}}"
+      LETSENCRYPT_EMAIL: "{{admin_email}}"
+      DOMAIN: "{{etherpad_domain}}"
+      TITLE: "Unhangout"
+      DB_TYPE: postgres
+      DB_HOST: postgres
+      DB_NAME: "{{etherpad_db_name}}"
+      DB_USER: "{{etherpad_db_username}}"
+      DB_PASS: "{{etherpad_db_password}}"
+      DB_CHARSET: "utf8mb4"
+      TRUST_PROXY: "true"
+      SKIN_NAME: "no-skin"
+      PAD_OPTIONS_LANG: "en-us"
+      PAD_OPTIONS_SHOW_CHAT: "false"
+      IMPORT_EXPORT_RATE_LIMIT_WINDOW: "15000"
+      IMPORT_EXPORT_MAX_REQ_PER_IP: "100"

@@ -1,0 +1,25 @@
+# This role install a docker image to run a postgres server. The postgres port is exposed locally so that it can be accesses using psql. Dependancies for using other ansible postgresql commands are also present
+
+---
+- name: start postgres docker image
+  docker_container:
+    name: postgres
+    image: postgres:11
+    state: started
+    pull: yes
+    restart: yes
+    restart_policy: always
+    ports:
+    - 127.0.0.1:5432:5432
+    volumes:
+    - "/var/docker-volumes/postgres-11/data:/var/lib/postgresql/data"
+    env:
+      POSTGRES_PASSWORD: "{{postgres_admin_password}}"
+
+- name: wait for postgres startup
+  shell: docker run --rm --link postgres:postgres postgres:11 pg_isready -h postgres
+  register: result
+  until: result.stdout.find("accepting connections") != -1
+  retries: 10
+  delay: 10
+

@@ -1,0 +1,19 @@
+image: docker:19.03.8
+
+variables:
+  DOCKER_TLS_CERTDIR: "/certs"
+
+services:
+- docker:19.03.8-dind
+
+before_script:
+- docker version
+- apk add --no-cache docker-compose
+- docker-compose version
+
+build:
+  stage: build
+  script:
+    - docker build -f docker/Dockerfile -t dirkcuys/unhangout .
+    - echo "ETHERPAD_API_KEY=123123123" >> docker/.env
+    - docker-compose -f docker/docker_compose.yml run test

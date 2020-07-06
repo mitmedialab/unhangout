@@ -115,7 +115,7 @@ class Breakout(models.Model):
             'padID': self.etherpad_id,
             'text': self.get_initial_etherpad_text()
         }
-        url = "https://{server}/api/1/createPad".format(
+        url = "{server}/api/1/createPad".format(
             server=settings.ETHERPAD_SERVER,
         )
         res = requests.get(url, data)

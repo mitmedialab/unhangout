@@ -18,7 +18,7 @@ class AccountSettingsForm(forms.ModelForm):
         # We have to do this here because we don't get access to the user
         # instance once we're inside the widget.
         current_image = self.instance.get_profile_image_nocache()
-        def render_profile_image(self, name, value, attrs=None):
+        def render_profile_image(self, name, value, attrs=None, renderer=None):
             template = (
                 '<a href="%(initial_url)s" target="_blank" rel="noopener noreferrer">'
                   '<img src="%(initial_url)s" alt="Profile image"'

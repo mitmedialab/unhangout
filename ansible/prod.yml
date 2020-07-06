@@ -6,59 +6,52 @@
   vars_files:
     - vars/secrets.yml
   roles:
+    - users
     - common
-    - mosh
-    - nginx
-    - letsencrypt-nginx
-    - letsencrypt
-    - postgresql
-    - role: nodesource.node
-      tags: ['node']
-      nodejs_version: "6"
-      debian_repo_version: "6.x"
-    - monitored
-    - tarsnap
+    - swap
+    - angstwad.docker_ubuntu
+    - role: nginx-proxy
+      tags: ['nginx']
+    - postgres
     - redis
-    - {role: django, tags: ['reunhangout']}
-    - reunhangout
-    - etherpad-lite
+    - memcached
+      #- monitored TODO add back what's needed
+      #- tarsnap TODO add back
+    - role: postgres_role
+      vars:
+          DB_NAME: "{{uh_etherpad_db_name}}"
+          DB_USER: "{{uh_etherpad_db_username}}"
+          DB_PASSWORD: "{{uh_etherpad_db_password}}"
+    - role: etherpad
+      tags: ['etherpad']
+    - role: postgres_role
+      vars:
+          DB_NAME: "{{uh_postgres_db}}"
+          DB_USER: "{{uh_postgres_user}}"
+          DB_PASSWORD: "{{uh_postgres_password}}"
+    - role: build-docker-image
+      tags: ['update-app']
+    - role: reunhangout
+      tags: ['update-app']
+
   vars:
     domain: "{{uh_domain}}"
     letsencrypt_domains: "{{ [uh_domain, uh_etherpad_domain] + uh_domain_aliases }}"
+    swap_file_size_kb: 4000000 # 4GiB
+    swap_file_path: "/swapfile2"
     uh_repo_dir: "/var/local/reunhangout/"
-    postgresql_version: 9.5
-    reunhangout_worker_processes: 6 # number of worker processes for each of http/websocket
-    django_asgi: no
-    django_systemd: yes # for celery and celery-beat services
-    django_celery: yes
-    django_celery_beat: yes
-    django_id_rsa: no
-    django_uwsgi: no
-    django_python_version: "python3.5"
+    reunhangout_worker_processes: 2 # number of worker processes for each of http/websocket
     django_domain: "{{uh_domain}}"
-    django_project_name: "reunhangout"
-    django_repo_url: "https://gitlab.com/unhangout/reunhangout.git"
-    django_repo_dir: "{{uh_repo_dir}}"
-    django_requirements_file: "{{uh_repo_dir}}shrinkwrap.txt"
-    django_project_dir: "{{uh_repo_dir}}reunhangout/"
-    django_venv_dir: "{{uh_repo_dir}}venv/"
-    django_static_dir: "{{django_project_dir}}public/"
-    django_media_dir: "{{django_project_dir}}media/"
-    django_wsgi_port: 3040
+    django_secret_key: "{{uh_secret_key}}"
+    django_repo_version: "channels-v2" # TODO remove
     django_postgres_db: "{{uh_postgres_db}}"
     django_postgres_user: "{{uh_postgres_user}}"
     django_postgres_password: "{{uh_postgres_password}}"
-    django_settings_template: "roles/reunhangout/templates/reunhangout_settings.py"
-    django_nginx_template: "roles/reunhangout/templates/reunhangout_nginx.conf"
-    tarsnap_dirs:
-      - "{{django_media_dir | regex_replace('^/', '')}}"
-    tarsnap_postgres_databases:
-      - "{{uh_postgres_db}}"
     etherpad_domain: "{{uh_etherpad_domain}}"
     etherpad_path: "{{uh_etherpad_path}}"
     etherpad_db_name: "{{uh_etherpad_db_name}}"
+    etherpad_db_host: "postgres"
     etherpad_db_username: "{{uh_etherpad_db_username}}"
     etherpad_db_password: "{{uh_etherpad_db_password}}"
     etherpad_session_key: "{{uh_etherpad_session_key}}"
     etherpad_api_key: "{{uh_etherpad_api_key}}"
-

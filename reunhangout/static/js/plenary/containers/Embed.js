@@ -161,29 +161,11 @@ class Embed extends React.Component {
     }
   }
 
-  addLiveVideo(event) {
-    let live = {type: 'live'};
-    let embeds = uniqueEmbeds([...this.props.embeds.embeds, live]);
-    this.props.onAdminSendEmbeds({
-      embeds: embeds,
-      current: embeds.length - 1
-    });
-  }
-
   setCurrent(event, index) {
     this.props.onAdminSendEmbeds({
       embeds: this.props.embeds.embeds,
       current: index
     });
-  }
-
-  isLiveParticipant() {
-    return this.props.plenary.live_participants.indexOf(this.props.auth.id) != -1;
-  }
-
-  isCurrentLive() {
-    let current = this.getCurrentEmbed();
-    return (!!current) && current.type === "live";
   }
 
   getCurrentEmbed() {
@@ -192,28 +174,9 @@ class Embed extends React.Component {
     }
   }
 
-  toggleLiveParticipation(event) {
-    event.preventDefault();
-    if (this.isLiveParticipant()) {
-      this.props.onLeaveLiveBroadcast({id: this.props.auth.id});
-    } else {
-      this.props.onAdminJoinLiveBroadcast({id: this.props.auth.id});
-    }
-  }
-
   render() {
     let chosen = this.getCurrentEmbed();
 
-    // "Live" type is special, since we need to choose between the participate
-    // and listen endpoints depending on the user's status.
-    if (chosen && chosen.type === 'live') {
-      let url = [
-        this.props.settings.PLENARY_SERVER,
-        this.isLiveParticipant() ? "participate" : "listen",
-        this.props.plenary.webrtc_id,
-      ].join('/');
-      chosen = {...chosen, props: {src: url}}
-    }
     return <div className='plenary-embed'>
       { chosen ?
         (
@@ -227,19 +190,6 @@ class Embed extends React.Component {
         )
         : ""
       }
-      {
-        this.isLiveParticipant() ?
-          <BS.Button className='toggle-live-participation-button'
-                     onClick={(e) => this.toggleLiveParticipation(e)}>
-            <i className='fa fa-video-camera'></i> Leave live broadcast
-          </BS.Button>
-        : this.props.auth.is_admin && this.isCurrentLive() ?
-          <BS.Button className='toggle-live-participation-button'
-                     onClick={(e) => this.toggleLiveParticipation(e)}>
-            <i className='fa fa-video-camera'></i> Join live broadcast
-          </BS.Button>
-        : ""
-      }
       { this.props.auth.is_admin ? this.renderAdminControls(chosen) : "" }
     </div>;
   }
@@ -251,8 +201,6 @@ class Embed extends React.Component {
     let embedDisplay = [];
     this.props.embeds.embeds.forEach((embed, i) => {
       if (i === this.props.embeds.current) {
-        return;
-      } else if (embed.type === "live") {
         return;
       } else {
         let details = this.props.embedDetails[embed.props.src];
@@ -329,12 +277,6 @@ class Embed extends React.Component {
           <div className='alert alert-error'><i className='fa fa-exclamation-triangle' />{this.props.embedsSending.error}</div>
           : "" }
         <div className="button-flex-container">
-          {!chosen || chosen.type !== "live" ?
-            <BS.Button className="add-live-video-button"
-                       onClick={(e) => this.addLiveVideo(e)}>
-              <i className='fa fa-video-camera'></i> Add Live Video
-            </BS.Button>
-          : null}
           {chosen ?
             <BS.Button bsStyle='danger' className="remove-button"
                 onClick={(e) => this.removeEmbed(e, null)}>
@@ -363,11 +305,9 @@ export default connect(
     // admin -- youtube only
     onAdminSendEmbeds: (payload) => dispatch(A.adminSendEmbeds(payload)),
     onAdminEmbedsError: (payload) => dispatch(A.adminEmbedsError(payload)),
-    onAdminJoinLiveBroadcast: (payload) => dispatch(A.adminJoinLiveBroadcast(payload)),
 
     // user
     fetchEmbedDetails: (embed, settings) => dispatch(A.fetchEmbedDetails(embed, settings)),
-    onLeaveLiveBroadcast: (payload) => dispatch(A.leaveLiveBroadcast(payload)),
   })
 )(Embed);
 

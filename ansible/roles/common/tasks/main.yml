@@ -1,0 +1,74 @@
+---
+- name: Check required variables
+  fail: msg="Variable '{{item}}' is not defined"
+  when: item is not defined
+  with_items:
+   - "main_user_name"
+   - "main_user_salt"
+   - "main_user_authorized_keys"
+   - "ansible_become_pass"
+  tags: users
+
+- name: Update apt cache
+  apt: update_cache=yes
+  tags: apt
+
+- name: Upgrade all safe packages
+  apt: upgrade=safe
+  tags: apt
+
+- name: Install necessities and nice-to-haves
+  apt: pkg={{ item }} state=present
+  with_items:
+    - sudo
+    - vim
+    - htop
+    - iftop
+    - iotop
+    - sysstat
+    - byobu
+    - silversearcher-ag
+    - python-passlib # required by htaccess
+  tags: apt
+
+# update-notifier-common isn't present in debian jessie, but
+# unattended-upgrades replaces it with a workaround.
+# https://serverfault.com/questions/92932/how-does-ubuntu-keep-track-of-the-system-restart-required-flag-in-motd#comment941989_92939
+- name: Install update-notifier-common
+  apt: pkg=update-notifier-common state=present
+  ignore_errors: yes
+  tags: apt
+
+- name: Remove apticron
+  apt: pkg={{ item }} state=absent autoremove=yes
+  with_items:
+    - apticron
+  tags: apt
+
+- name: Set host name
+  copy: content="{{hostname}}" dest=/etc/hostname owner=root group=root
+
+- name: Install unattended upgrades
+  apt: pkg=unattended-upgrades state=present
+  when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
+  tags: apt
+
+#- name: Apticron email configuration
+#  template: src=apticron.conf.j2 dest=/etc/apticron/apticron.conf
+#  tags: apt
+
+- name: Set system timezone
+  file: src=/usr/share/zoneinfo/{{ timezone }} dest=/etc/localtime state=link force=yes
+
+#- include: ssl.yml
+- name: Create DHPARAM
+  shell: openssl dhparam 2048 > /etc/ssl/private/dhparam.pem
+  args:
+    creates: /etc/ssl/private/dhparam.pem
+  tags: ssl
+
+- include: postfix.yml
+- include: logwatch.yml
+- include: ufw.yml
+- include: security.yml
+- include: ntp.yml

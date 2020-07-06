@@ -1,0 +1,61 @@
+---
+- name: Tarsnap dependencies
+  apt: pkg={{item}} state=present
+  with_items:
+   - e2fslibs-dev
+   - libssl-dev
+   - zlib1g-dev
+   - build-essential
+  tags: ['tarsnap']
+
+- name: Download the current tarsnap code signing key
+  get_url: url="{{tarsnap_signing_key_url}}" dest="{{tarsnap_signing_key_path}}"
+  tags: ['tarsnap']
+
+- name: Add the tarsnap code signing key to gpg keyring
+  command:
+    gpg --import {{tarsnap_signing_key_path}}
+    chdir=/root/
+  tags: ['tarsnap']
+
+- name: Download the SHA file for the desired tarsnap version
+  get_url: url="{{tarsnap_sigs_url}}" dest="{{tarsnap_sigs_path}}"
+  tags: ['tarsnap']
+
+- name: Read shasum from sha file
+  shell: gpg --decrypt "{{tarsnap_sigs_path}}" | sed '1 s/^SHA256 (tarsnap-autoconf-{{tarsnap_version}}.tgz) = //'
+  register: tarsnap_sha256sum
+  tags: ['tarsnap']
+
+- debug: var=tarsnap_sha256sum
+  tags: ['tarsnap']
+
+- name: Download tarsnap source
+  get_url:
+    url="{{tarsnap_tgz_url}}"
+    dest="{{tarsnap_tgz_path}}"
+    checksum="sha256:{{tarsnap_sha256sum.stdout}}"
+  tags: ['tarsnap']
+
+- name: Unpack tgz
+  unarchive: src="{{tarsnap_tgz_path}}" dest="{{tarsnap_unpacked_path|dirname}}" copy=no
+  tags: ['tarsnap']
+
+- name: ./configure tarsnap
+  command: ./configure chdir="{{tarsnap_unpacked_path}}"
+  tags: ['tarsnap']
+
+- name: make and install
+  command:
+    make all install clean
+    chdir="{{tarsnap_unpacked_path}}"
+  tags: ['tarsnap']
+
+- name: Clean up
+  file: path="{{item}}" state=absent
+  with_items:
+   - "{{tarsnap_signing_key_path}}"
+   - "{{tarsnap_sigs_path}}"
+   - "{{tarsnap_tgz_path}}"
+   - "{{tarsnap_unpacked_path}}"
+  tags: ['tarsnap']

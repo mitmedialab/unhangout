@@ -1,0 +1,34 @@
+- name: Install security-related packages
+  apt:
+    state: present
+    pkg:
+    - fail2ban
+    - rkhunter
+    - lynis
+
+- name: Copy fail2ban configuration into place
+  template: src=etc_fail2ban_jail.local.j2 dest=/etc/fail2ban/jail.local
+  notify: restart fail2ban
+  tags: ['fail2ban']
+
+- name: Update sshd config to disallow root logins
+  lineinfile: dest=/etc/ssh/sshd_config regexp=^PermitRootLogin line="PermitRootLogin no" state=present
+  notify: restart ssh
+
+- name: Update sshd config to disallow password logins
+  lineinfile: dest=/etc/ssh/sshd_config regexp=^#?PasswordAuthentication line="PasswordAuthentication no" state=present
+  notify: restart ssh
+
+- name: Disable roaming (CVE-2016-0777)
+  lineinfile: dest=/etc/ssh/ssh_config line="UseRoaming no" state=present
+  notify: restart ssh
+
+- name: Configure apt periodic
+  template: src=etc_apt_apt.conf.d_10periodic.j2 dest=/etc/apt/apt.conf.d/10periodic
+
+# Even if ImageMagick is not used, drop the policy in place in case it gets installed.
+- name: ImageMagick policy (CVE-2016-3714) -- directory
+  file: path=/etc/ImageMagick state=directory
+
+- name: ImageMagick policy (CVE-2016-3714) -- policy.xml
+  template: src=etc_ImageMagick_policy.xml dest=/etc/ImageMagick/policy.xml

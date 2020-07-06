@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import {connect} from "react-redux";
-import _ from 'lodash';
 import * as BS from "react-bootstrap";
 import {ConnectionStatus} from '../../transport';
 import * as A from '../actions';
@@ -22,7 +21,7 @@ class Etherpad extends React.Component {
   }
 
   getUrl(props) {
-    return `https://${this.props.server}/p/${this.props.id}?userName=${this.props.auth.display_name}&showChat=false`;
+    return `${this.props.server}/p/${this.props.id}?userName=${this.props.auth.display_name}&showChat=false`;
   }
 
   shouldComponentUpdate(nextProps, nextState) {

@@ -5,7 +5,7 @@ import logging
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.views import logout
+from django.contrib.auth import logout
 from django.contrib import messages
 from django.db import transaction
 from django.http import Http404, HttpResponse, HttpResponseBadRequest

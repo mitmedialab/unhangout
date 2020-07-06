@@ -1,9 +1,0 @@
----
-- name: restart reunhangout services
-  shell: "systemctl {{item}}"
-  with_items:
-     - daemon-reload
-     - restart reunhangout-workers.target
-     - restart reunhangout-interface.service
-     - restart reunhangout-celery.service
-     - restart reunhangout-celery-beat.service

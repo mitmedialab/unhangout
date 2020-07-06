@@ -1,0 +1,8 @@
+.git/
+assets/
+**/node_modules
+**/*.pyc
+static_serve/
+.envrc
+docker/Dockerfile
+venv/

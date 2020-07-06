@@ -1,0 +1,19 @@
+location = /favicon.ico {
+    alias  /var/www/extra/{{django_domain}}/static/images/favicon.ico;
+}
+
+location /static/ {
+    expires 30d;
+    add_header Pragma public;
+    add_header Cache-Control "public";
+    autoindex on;
+    root   /var/www/extra/{{django_domain}};
+}
+
+location /media/ {    
+    expires 30d;
+    add_header Pragma public;
+    add_header Cache-Control "public";
+    autoindex on;    
+    root   /var/www/extra/{{django_domain}};
+}

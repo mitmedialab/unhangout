@@ -1,0 +1,23 @@
+---
+#- name: Remove old docker images & containers
+#  docker_prune:
+#    images: yes
+#    containers: yes
+
+- name: get code from gitlab
+  git: 
+    dest: /usr/local/src/reunhangout
+    repo: https://gitlab.com/dirkcuys/reunhangout.git
+    version: channels-v2
+
+- name: Build docker iamge
+  docker_image:
+    name: dirkcuys/unhangout
+    build:
+      path: /usr/local/src/reunhangout
+      dockerfile: ./docker/Dockerfile
+      pull: yes
+    tag: latest
+    source: build
+    force_source: yes
+    state: present

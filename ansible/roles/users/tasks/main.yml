@@ -1,0 +1,22 @@
+- name: Create main user account
+  user: name={{ main_user_name }} password={{main_user_pass|password_hash('sha512', main_user_salt)}} shell=/bin/bash state=present groups=sudo append=yes
+  tags: ['users']
+
+- name: Create .ssh dir
+  file: >
+    state=directory
+    path=/home/{{ main_user_name }}/.ssh
+    mode=700 owner={{main_user_name}}
+    group={{main_user_name}}
+  tags: ['users']
+
+- name: Add authorized_keys
+  copy:
+    content: "{{main_user_authorized_keys}}"
+    dest: "/home/{{main_user_name}}/.ssh/authorized_keys"
+    group: "{{main_user_name}}"
+    owner: "{{main_user_name}}"
+    mode: "0600"
+  tags: ['users']
+
+# Root login is disabled in common/tasks/security.yml
