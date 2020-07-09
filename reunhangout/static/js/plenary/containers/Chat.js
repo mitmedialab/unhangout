@@ -232,6 +232,7 @@ class ChatInput extends React.Component {
           plugins={plugins}
           suggestions={this.state.suggestions}
           onAddMention={this.onAddMention}
+          stripPastedStyles={true}
           handleKeyCommand={this.handleKeyCommand}
           keyBindingFn={this.submitOnEnterKeyBinding}
           placeholder={this.props.placeholder}
