@@ -44,13 +44,10 @@ module.exports.buildConfig = (isProd) => ({
     ]),
   },
   output: {
-    path: path.join(root, 'static', isProd ? 'dist' : 'dev'),
+    path: path.join(root, 'static', 'dist'),
     filename: '[name]-[hash].js',
     sourceMapFilename: '[name]-[hash].js.map',
-    publicPath: (
-      //isProd ?  '/static/dist/' : 'http://localhost:8000/static/dev/'
-      isProd ?  '/static/dist/' : '/static/dev/'
-    )
+    publicPath: '/static/dist/',
   },
   plugins: clearNulls([
     // Set NODE_ENV=production on prod.
@@ -64,7 +61,7 @@ module.exports.buildConfig = (isProd) => ({
     isProd ? null : new webpack.NoEmitOnErrorsPlugin(),
     // Export stats bundle for Django to track for recompilation.
     new BundleTracker({
-      path: path.join(root, 'static', isProd ? 'dist' : 'dev'),
+      path: path.join(root, 'static', 'dist'),
       filename: 'webpack-stats.json'
     }),
     // Extract css in prod.

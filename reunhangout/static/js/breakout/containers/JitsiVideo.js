@@ -31,12 +31,10 @@ class JitsiVideo extends React.Component {
         parentNode: div,
         roomName: props.breakout.webrtc_id,
         configOverwrite: {
-          disableStats: true,
+          subject: props.breakout.title,
           enableWelcomePage: false,
-          callStatsID: "",
-          callStatsSecret: "",
-          disableThirdPartyRequests: true,
-          logStats: false
+          gatherStats: false,
+          disableThirdPartyRequests: true
         }, 
         interfaceConfigOverwrite: {
           APP_NAME: props.settings.BRANDING.name,
@@ -45,11 +43,12 @@ class JitsiVideo extends React.Component {
           DEFAULT_LOCAL_DISPLAY_NAME: props.auth.username,
           DEFAULT_REMOTE_DISPLAY_NAME: "Fellow breakouter",
           SHOW_POWERED_BY: false,
+          MOBILE_APP_PROMO: false,
           TOOLBAR_BUTTONS: [
             "microphone", "camera", "desktop",
             "chat", "filmstrip",
             "sharedvideo","settings",
-            "recording", "raisehand", 'tileview',
+            "recording", "raisehand", 'videoquality', 'tileview',
           ],
           MAIN_TOOLBAR_BUTTONS: ['microphone', 'camera', 'desktop'],
         }
