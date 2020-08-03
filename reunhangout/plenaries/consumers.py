@@ -31,6 +31,7 @@ import datetime
 
 User = get_user_model()
 
+
 class PlenaryConsumer(WebsocketConsumer):
 
     def handle_error(self, error):
@@ -71,7 +72,6 @@ class PlenaryConsumer(WebsocketConsumer):
 
     @touch_presence
     def receive(self, text_data):
-        print(text_data)
         try:
             plenary = Plenary.objects.get(slug=self.slug)
         except Plenary.DoesNotExist:
@@ -103,7 +103,6 @@ class PlenaryConsumer(WebsocketConsumer):
             self.handle_error(f"Type {data['type']} not understood")
 
     def forward_to_client(self, event):
-        print(event)
         self.send(text_data=event['text'])
 
     def handle_chat(self, data, plenary):
