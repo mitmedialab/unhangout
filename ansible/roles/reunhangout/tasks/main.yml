@@ -22,6 +22,7 @@
     app_vars:
       DOMAIN: "{{django_domain}}"
       SECRET_KEY: "{{django_secret_key}}"
+      ADMIN_EMAIL: "{{admin_email}}"
       POSTGRES_HOST: postgres 
       POSTGRES_DB: "{{django_postgres_db}}"
       POSTGRES_USER: "{{django_postgres_user}}"
