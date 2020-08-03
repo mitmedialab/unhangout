@@ -329,7 +329,7 @@ CACHES = {
 # =========================
 
 DEFAULT_FROM_EMAIL = SERVER_EMAIL = f"Unhangout Team <noreply@{env('DOMAIN', 'localhost')}>"
-ADMINS = MANAGERS = [("Charlie DeTar", "cfd@media.mit.edu")]
+ADMINS = MANAGERS = [("Unhangout Admin", env("ADMIN_EMAIL", "admin@localhost") )]
 
 
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
