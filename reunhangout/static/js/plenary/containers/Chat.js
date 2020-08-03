@@ -117,9 +117,6 @@ class ChatInput extends React.Component {
     onChange: PropTypes.func.isRequired,
     onSubmit: PropTypes.func.isRequired,
     mentionable: PropTypes.array.isRequired,
-    onFocus: PropTypes.func,
-    onBlur: PropTypes.func,
-    autoFocus: PropTypes.bool,
     disabled: PropTypes.bool,
     placeholder: PropTypes.string,
   }
@@ -133,6 +130,7 @@ class ChatInput extends React.Component {
       editorState: EditorState.createEmpty(),
       suggestions: props.mentionable,
     }
+    this.editorRef = React.createRef();
   }
 
   clear() {
@@ -212,6 +210,10 @@ class ChatInput extends React.Component {
     });
   }
 
+  focus = () => {
+    this.editorRef.current.focus();
+  }
+
   render() {
     const { MentionSuggestions } = this.mentionPlugin;
     const plugins = [this.mentionPlugin];
@@ -223,15 +225,14 @@ class ChatInput extends React.Component {
           onAddMention={this.onAddMention}
         />
         <Editor
+          ref={this.editorRef} 
           editorState={this.state.editorState}
           onChange={this.onChange}
-          onFocus={this.props.onFocus}
-          onBlur={this.props.onBlur}
-          autoFocus={this.props.autoFocus}
           readOnly={this.props.disabled}
           plugins={plugins}
           suggestions={this.state.suggestions}
           onAddMention={this.onAddMention}
+          stripPastedStyles={true}
           handleKeyCommand={this.handleKeyCommand}
           keyBindingFn={this.submitOnEnterKeyBinding}
           placeholder={this.props.placeholder}
@@ -266,26 +267,30 @@ class Chat extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {highlight: false, focus: false}
+    this.state = {highlight: false}
+    this.chatInput = React.createRef();
   }
   componentDidMount() {
     let chatBox = this.refs.chatBox;
     chatBox.scrollTop = chatBox.scrollHeight
   }
-  componentWillUpdate() {
+  getSnapshotBeforeUpdate() {
     let chatBox = this.refs.chatBox;
     let latestMessage = this.props.chat_messages[this.props.chat_messages.length - 1];
     this.shouldScrollBottom = (
       ((chatBox.scrollTop + chatBox.offsetHeight + 15) >= chatBox.scrollHeight) ||
       latestMessage && latestMessage.user === this.props.auth.id
     );
+    return null;
   }
-  componentDidUpdate() {
+  componentDidUpdate(prevProps) {
+    // Refocus the editor if we just sent a message
+    if (prevProps.plenary.chat.state === "sending" && this.props.plenary.chat.state !== "sending"){
+      this.chatInput.current.focus();
+    }
+
     if (this.shouldScrollBottom) {
       this.refs.chatBox.scrollTop = this.refs.chatBox.scrollHeight
-    }
-    if (this.state.focusOnUpdate && !this.state.focus) {
-      this.setState({focus: true, focusOnUpdate: false});
     }
   }
   onSubmit = (event) => {
@@ -302,7 +307,6 @@ class Chat extends React.Component {
       this.setState({
         value: "",
         highlight: false,
-        focusOnUpdate: true,
       });
     }
   }
@@ -313,11 +317,12 @@ class Chat extends React.Component {
     }));
 
     let chatInput = <ChatInput
+      ref={this.chatInput}
       onChange={(html) => this.setState({value: html})}
       onSubmit={this.onSubmit}
       mentionable={mentionable}
       placeholder='Type a message&hellip;'
-      disabled={this.props.plenary.chat.state === "sending"}
+      disabled={this.props.plenary.chat.state === "sending" || false}
     />;
 
     // Group messages by author.

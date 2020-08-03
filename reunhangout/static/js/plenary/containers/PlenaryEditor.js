@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import * as BS from "react-bootstrap";
 import moment from 'moment-timezone';
 import _ from 'lodash';
-import {InPlaceRichTextEditor} from './InPlaceRichTextEditor';
+import {RichTextInput} from './RichTextInput';
 import {DateTimePicker} from './DateTimePicker';
 import {RelativeTime} from './RelativeTime';
 import {ImageInput} from './ImageInput';
@@ -279,9 +279,9 @@ export class PlenaryEditor extends React.Component {
 
           : type === "richtext" ?
 
-            <InPlaceRichTextEditor
+            <RichTextInput
               value={this.state[stateName] || ""}
-              onChange={(e) => this.setState({[stateName]: e.target.value})}
+              onChange={(value) => this.setState({[stateName]: value})}
               {...props} />
 
           : type === "datetime" ?
@@ -506,7 +506,7 @@ export class PlenaryEditor extends React.Component {
                 "to set contact preferences. Emails can only be sent by " +
                 "Unhangout staff."
             })}
-            {this.renderControl("Description", "description", "richtext")}
+            {this.renderControl("Description", "description", "textarea")}
             {this.renderControl("Public calendar", "public", "checkbox",
                                 {help: "List event on the public events calendar"})}
             {this.renderControl("URL", "slug", "slug")}

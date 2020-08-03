@@ -30,9 +30,9 @@ RUN apt-get update \
         zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 RUN npm i mjml@^3.3.5
-COPY requirements.txt /opt/app/
+COPY shrinkwrap.txt /opt/app/
 RUN python3 -m venv /opt/app-venv/ \
-    && /opt/app-venv/bin/pip --no-cache-dir install -r requirements.txt
+    && /opt/app-venv/bin/pip --no-cache-dir install -r shrinkwrap.txt
 COPY reunhangout/ /opt/app
 COPY --from=frontend /opt/app/static/dist static/dist
 RUN cp reunhangout/default_settings.py reunhangout/settings.py
