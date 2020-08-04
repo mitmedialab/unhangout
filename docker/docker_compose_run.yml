@@ -87,12 +87,16 @@ services:
     environment:
     - DOMAIN=localhost
     - POSTGRES_HOST=postgres
+    - POSTGRES_DB=reunhangout
+    - POSTGRES_USER=reunhangout
     - POSTGRES_PASSWORD=password
     - EMAIL_HOST=email
     - REDIS_HOST=redis
     - ETHERPAD_SERVER=http://etherpad:9001
     - BROKER_URL=redis://redis:6379/0
     - MEMCACHED_HOST=memcached
+    volumes:
+    - ../reunhangout:/opt/app/
     networks:
     - unhangout
     command: /opt/app-venv/bin/celery worker -A reunhangout --loglevel=debug
