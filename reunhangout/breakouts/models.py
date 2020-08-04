@@ -131,7 +131,7 @@ class Breakout(models.Model):
             'apikey': settings.ETHERPAD_API_KEY,
             'padID': self.etherpad_id,
         }
-        url = "https://{server}/api/1/getReadOnlyID?".format(
+        url = "{server}/api/1/getReadOnlyID?".format(
             server=settings.ETHERPAD_SERVER,
         )
         res = requests.get(url, data)
@@ -141,9 +141,9 @@ class Breakout(models.Model):
                 res.status_code,
                 res.text
             ))
-        return "https://{server}/p/{readOnlyID}".format(
+        return "{server}/p/{readOnlyID}".format(
             server=settings.ETHERPAD_SERVER,
-            readOnlyID=res.json()['data']['readOnlyID']
+            readOnlyID=res.json().get('data', {}).get('readOnlyID')
         )
 
     def serialize(self):
