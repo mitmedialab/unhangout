@@ -251,3 +251,8 @@
     background-color: darken(#9DE0FC,10%);
   }
 }
+
+// FIX styling of date inputs in mozilla
+input[type=date].form-control,input[type=datetime-local].form-control,input[type=month].form-control,input[type=time].form-control {
+  line-height:normal;
+}

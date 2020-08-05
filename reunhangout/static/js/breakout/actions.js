@@ -18,9 +18,3 @@ export const message = (payload) => {
 
 export const SET_BREAKOUT = 'SET_BREAKOUT';
 export const setBreakout = (payload) => ({type: SET_BREAKOUT, payload});
-
-export const ERROR_REPORT = 'ERROR_REPORT';
-export const errorReport = payload => dispatch => {
-  sendSocketMessage({type: ERROR_REPORT, payload: payload});
-}
-  
