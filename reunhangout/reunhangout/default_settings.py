@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'frontend',
     'plenaries',
     'videosync',
+    'google_analytics',
 
     'allauth',
     'allauth.account',
@@ -346,3 +347,6 @@ ALLAUTH_APP_KEYS['google']['secret'] = env('GOOGLE_SECRET', '')
 for name, keys in ALLAUTH_APP_KEYS.items():
     if keys['client_id']:
         INSTALLED_APPS.append('allauth.socialaccount.providers.%s' % name)
+
+# Google analytics tracking ID
+GA_TRACKING_ID = env('GA_TRACKING_ID', '')

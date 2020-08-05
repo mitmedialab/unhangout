@@ -45,6 +45,7 @@
       FACEBOOK_SECRET: "{{facebook_secret}}"
       GOOGLE_CLIENT_ID: "{{google_client_id}}"
       GOOGLE_SECRET: "{{google_secret}}"
+      GA_TRACKING_ID: "{{ga_tracking_id}}"
 
 - name: Create folder for celery with correct permissions
   file: path=/var/docker-volumes/{{django_domain}}/celery owner=5313 group=5313 state=directory

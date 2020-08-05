@@ -2,9 +2,11 @@
 {% load thumbnail %}
 {% load static %}
 {% load escapejson %}
+{% load google_analytics %}
 <!DOCTYPE html>
 <html>
 <head>
+  {% gtag %}
   <meta http-equiv="X-UA-Compatible" content="IE=EDGE">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block head_title %}{% endblock %}{% block title %}{% endblock %}{% block site_title %} - {{request.site.name}}{% endblock %}</title>
