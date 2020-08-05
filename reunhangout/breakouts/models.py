@@ -27,7 +27,7 @@ class Breakout(models.Model):
     description = models.TextField(blank=True, default="")
     max_attendees = models.IntegerField(default=6, validators=[
         MinValueValidator(2),
-        MaxValueValidator(10),
+        MaxValueValidator(25),
     ])
     activities = JSONField(blank=True, null=True)
     history = JSONField(blank=True, null=True)

@@ -6,6 +6,8 @@ import * as BS from "react-bootstrap";
 import * as A from "../actions";
 import Breakout from './Breakout';
 
+const MAX_BREAKOUT_SIZE = 25;
+
 class BreakoutList extends React.Component {
   constructor(props) {
     super(props);
@@ -37,8 +39,8 @@ class BreakoutList extends React.Component {
       this.setState({"title-error": ""});
     }
     let maxAttendees = parseInt(this.state.max_attendees);
-    if (isNaN(maxAttendees) || maxAttendees < 2 || maxAttendees > 10) {
-      this.setState({"max_attendees-error": "Must be a number between 2 and 10."});
+    if (isNaN(maxAttendees) || maxAttendees < 2 || maxAttendees > MAX_BREAKOUT_SIZE) {
+      this.setState({"max_attendees-error": `Must be a number between 2 and ${MAX_BREAKOUT_SIZE}.`});
       return;
     } else {
       this.setState({"max_attendees-error": ""});
@@ -61,9 +63,9 @@ class BreakoutList extends React.Component {
     let update = {breakout_mode: this.state.breakout_mode};
     if (update.breakout_mode === "random") {
       let maxAttendees = parseInt(this.state.random_max_attendees);
-      if (isNaN(maxAttendees) || maxAttendees < 2 || maxAttendees > 10) {
+      if (isNaN(maxAttendees) || maxAttendees < 2 || maxAttendees > MAX_BREAKOUT_SIZE) {
         this.setState({
-          "random_max_attendees-error": "Must be a number between 2 and 10."
+          "random_max_attendees-error": `Must be a number between 2 and ${MAX_BREAKOUT_SIZE}.`
         });
         return;
       } else {
@@ -304,15 +306,15 @@ class BreakoutList extends React.Component {
               >
                 <BS.ControlLabel>Participant Limit</BS.ControlLabel>
                 <BS.FormControl type="text"
-                  placeholder="Max 10, Min 2"
+                  placeholder={`Max ${MAX_BREAKOUT_SIZE}, Min 2`}
                   min={2}
-                  max={10}
+                  max={MAX_BREAKOUT_SIZE}
                   value={this.state.max_attendees || ""}
                   onChange={(e) => this.setState({max_attendees: e.target.value})} />
                 <BS.HelpBlock>
                   { this.state['max_attendees-error'] ?
                       this.state['max_attendees-error']
-                    : "Minimum 2, Maximum 10" }
+                    : `Minimum 2, Maximum ${MAX_BREAKOUT_SIZE}` }
                 </BS.HelpBlock>
               </BS.FormGroup>
             : null}
@@ -406,7 +408,7 @@ class BreakoutList extends React.Component {
                   </BS.ControlLabel>
                   <BS.FormControl
                     type="text"
-                    placeholder="Max 10, Min 2"
+                    placeholder={`Max ${MAX_BREAKOUT_SIZE}, Min 2`}
                     value={this.state.random_max_attendees}
                     onChange={
                       (e) => this.setState({random_max_attendees: e.target.value})
