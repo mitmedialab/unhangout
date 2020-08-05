@@ -44,6 +44,7 @@ class JitsiVideo extends React.Component {
           DEFAULT_REMOTE_DISPLAY_NAME: "Fellow breakouter",
           SHOW_POWERED_BY: false,
           MOBILE_APP_PROMO: false,
+          SHOW_CHROME_EXTENSION_BANNER: false,
           TOOLBAR_BUTTONS: [
             "microphone", "camera", "desktop",
             "chat", "filmstrip",
