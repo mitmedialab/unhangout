@@ -293,7 +293,7 @@ class Plenary(models.Model):
         return (not self.canceled) and (n < self.doors_close) and (n >= self.doors_open)
 
     def safe_description(self):
-        return sanitize(self.description) if self.description else ""
+        return sanitize(self.description, False) if self.description else ""
 
     def safe_whiteboard(self):
         return sanitize(self.whiteboard) if self.whiteboard else ""

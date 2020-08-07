@@ -3,39 +3,35 @@ import Select from 'react-select';
 import 'react-select/dist/react-select.css';
 import moment from 'moment-timezone';
 
+
+/* Select a date and time and pass to onChange in ISO 8601 format */
+
 export class DateTimePicker extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    let zone = moment.tz.guess();
+    let datetime = moment(this.props.value || undefined).tz(zone);
+    this.state = {
+      zone,
+      date: datetime.format('YYYY-MM-DD'),
+      time: datetime.format('h:mm a'),
+      parsedTime: datetime.format('HH:mm'),
+    };
   }
-  componentWillMount() {
-    this.parseValueToState(this.props.value);
-  }
-  componentWillReceiveProps(newProps) {
-    this.parseValueToState(newProps.value);
-  }
+
   sendOnChange() {
-    this.props.onChange && this.props.onChange(this.interpretStateAsDate().format());
+    let datetime = this.interpretStateAsDate();
+    console.log(`sendOnChange datetime=${datetime}`);
+    if (this.props.onChange) {
+      this.props.onChange(datetime.isValid() ? datetime.format() : '');
+    }
   }
-  parseValueToState(value) {
-    // zone to interpret the date by. Default to guess.
-    let zone = this.state.zone || moment.tz.guess();
-    let m = moment(value || undefined).tz(zone);
-    this.setState({
-      date: new Date(m.year(), m.month(), m.date()),
-      time: this.state.time === undefined ? m.format('h:mm a') : this.state.time,
-      parsedTime: m.format('HH:mm'),
-      // Reset the zone to default if it is strictly undefined, otherwise use
-      // the state zone. We need to allow an empty value so that the select box
-      // will be cleared -- in which case we use moment.tz.guess in date
-      // interpretation, but not set to state.
-      zone: this.state.zone === undefined ? zone : this.state.zone,
-    });
-  }
+
   onDateChange(v) {
-    let date = moment(v).toDate();
-    this.setState({date: date}, () => this.sendOnChange())
+    console.log(`onDateChange(${v})`);
+    this.setState({date: v}, () => this.sendOnChange())
   }
+
   onTimeChange(v) {
     let match = /^(\d+)(?::(\d+))?\s*(am?|pm?)?$/i.exec(v.trim());
     if (match) {
@@ -60,27 +56,35 @@ export class DateTimePicker extends React.Component {
       this.setState({
         time: v,
         parsedTime: parsedTime,
-        "time-error": false,
+        timeError: false,
       }, () => this.sendOnChange());
     } else {
-      this.setState({"time-error": true});
-      this.setState({time: v});
+      this.setState({timeError: true, time: v, parsedTime: ''});
     }
   }
+
   onZoneChange(v) {
-    let zone = v ? v.value : "";
+    let zone = v ? v.value : null;
     this.setState({zone: zone}, () => this.sendOnChange());
   }
+
   interpretStateAsDate() {
+    let date = moment(this.state.date).toDate();
+    if (this.state.parsedTime.indexOf(':') != 2){
+      return moment('');
+    }
+    let hours = parseInt(this.state.parsedTime.split(":")[0], 10);
+    let minutes = parseInt(this.state.parsedTime.split(":")[1], 10);
     let m = moment.tz({
-      year: this.state.date.getFullYear(),
-      month: this.state.date.getMonth(),
-      date: this.state.date.getDate(),
-      hours: parseInt(this.state.parsedTime.split(":")[0], 10),
-      minutes: parseInt(this.state.parsedTime.split(":")[1], 10),
+      year: date.getFullYear(),
+      month: date.getMonth(),
+      date: date.getDate(),
+      hours, 
+      minutes,
     }, this.state.zone || moment.tz.guess());
     return m;
   }
+
   render() {
     let selectProps = {
       placeholder: "Time zone",
@@ -93,12 +97,14 @@ export class DateTimePicker extends React.Component {
     if (this.state.zone) {
       selectProps.value = {label: this.state.zone, value: this.state.zone};
     }
+    let datetime = moment(this.props.value).tz(this.state.zone || moment.tz.guess());
+
     return (
       <div className='control-group'>
         <div className='form-inline'>
           <input className='form-control'
                  type='date'
-                 value={moment(this.state.date).format('YYYY-MM-DD')}
+                 value={this.state.date}
                  onChange={(e) => this.onDateChange(e.target.value)} />
           <span className={this.state['time-error'] ? 'has-error' : ''}>
             <input type='text' value={this.state.time}
@@ -111,7 +117,7 @@ export class DateTimePicker extends React.Component {
           <Select
             placeholder="Time zone"
             value={this.state.zone}
-            onChange={(opt) => this.setState({zone: opt ? opt.value : null})}
+            onChange={this.onZoneChange.bind(this)}
             options={moment.tz.names().map(n => ({
               value: n,
               label: n.replace(/_/g, ' ')
@@ -119,7 +125,7 @@ export class DateTimePicker extends React.Component {
           />
         </div>
         <div className='help-block'>
-          {this.interpretStateAsDate().format('LLLL z (Z)')}
+          {datetime.format('LLLL z (Z)')}
         </div>
       </div>
     )

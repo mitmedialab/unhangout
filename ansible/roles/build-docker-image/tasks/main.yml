@@ -8,7 +8,7 @@
   git: 
     dest: /usr/local/src/reunhangout
     repo: https://gitlab.com/unhangout/reunhangout.git
-    version: master
+    version: "{{django_repo_version}}"
 
 - name: Build docker iamge
   docker_image:

@@ -148,9 +148,7 @@ class PlenaryConsumer(WebsocketConsumer):
         payload = data['payload']
         action = payload['action']
 
-        if not is_admin and not (
-                plenary.breakout_mode == "user" or
-                (plenary.breakout_mode == "random" and action == "group_me")):
+        if not is_admin and plenary.breakout_mode != "user":
             return admin_required_error()
 
         def respond_with_breakouts():
@@ -182,36 +180,6 @@ class PlenaryConsumer(WebsocketConsumer):
             breakout.save()
             if breakout.is_proposal:
                 track("propose_breakout", self.scope['user'], breakout=breakout)
-            return respond_with_breakouts()
-
-        elif action == 'group_me':
-            if plenary.breakout_mode != "random":
-                return self.handle_error("Must be in random mode to do that.")
-            blacklist = set()
-            # Remove membership, if any, from current breakouts
-            for breakout in plenary.breakout_set.filter(members=self.scope['user']):
-                breakout.members.remove(self.scope['user'])
-                # Add to blacklist so we don't just rejoin this group.
-                blacklist.add(breakout.id)
-
-            # Place in an existing breakout, if available
-            available_random_breakouts = plenary.breakout_set.active().exclude(
-                id__in=blacklist
-            ).annotate(
-                member_count=Count('members')
-            ).filter(
-                is_random=True,
-                member_count__lt=F('max_attendees')
-            )
-            try:
-                breakout = available_random_breakouts[0]
-            except IndexError:
-                breakout = Breakout.objects.create(
-                        plenary=plenary,
-                        title='Breakout',
-                        max_attendees=plenary.random_max_attendees,
-                        is_random=True)
-            breakout.members.add(self.scope['user'])
             return respond_with_breakouts()
 
         # For all actions other than create, we expect payload['id'] to contain the
@@ -326,18 +294,6 @@ class PlenaryConsumer(WebsocketConsumer):
         try:
             with transaction.atomic():
                 plenary.save()
-                if 'random_max_attendees' in payload:
-                    # Not using queryset.update here, because we want to be able to
-                    # rely on signals for eventual use of django-channels data
-                    # binding:
-                    # http://channels.readthedocs.io/en/latest/binding.html
-                    for breakout in plenary.breakout_set.active().filter(
-                            is_random=True):
-                        if breakout.max_attendees != plenary.random_max_attendees:
-                            breakout.max_attendees = plenary.random_max_attendees
-                            breakout.full_clean()
-                            breakout.save()
-                            breakouts_changed = True
         except ValidationError as e:
             return self.handle_error(json_dumps(e.message_dict))
 

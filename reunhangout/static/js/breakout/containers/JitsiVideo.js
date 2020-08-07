@@ -10,8 +10,6 @@ class JitsiVideo extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      jitsiTimeout: false,
-      showReportModal: false,
       speakerStats: {}, // in seconds
       lastDominantSpeaker: null,
       startTimeLastSpeaker: null
@@ -34,16 +32,19 @@ class JitsiVideo extends React.Component {
           subject: props.breakout.title,
           enableWelcomePage: false,
           gatherStats: false,
-          disableThirdPartyRequests: true
+          //prejoinPageEnabled: false,
+          disableThirdPartyRequests: true,
         }, 
         interfaceConfigOverwrite: {
           APP_NAME: props.settings.BRANDING.name,
+          DISPLAY_WELCOME_PAGE_CONTENT: false,
           SHOW_JITSI_WATERMARK: false,
           SHOW_WATERMARK_FOR_GUESTS: false,
           DEFAULT_LOCAL_DISPLAY_NAME: props.auth.username,
           DEFAULT_REMOTE_DISPLAY_NAME: "Fellow breakouter",
           SHOW_POWERED_BY: false,
           MOBILE_APP_PROMO: false,
+          SHOW_CHROME_EXTENSION_BANNER: false,
           TOOLBAR_BUTTONS: [
             "microphone", "camera", "desktop",
             "chat", "filmstrip",
@@ -71,20 +72,9 @@ class JitsiVideo extends React.Component {
       this.api.addEventListener(evt, (obj) => this.jitsiEvent(evt, obj))
     });
     window.__jitsiApi = this.api;
-    this.jitsiLoadTimeout = setTimeout(
-      () => {
-        this.setState({jitsiTimeout: true});
-        this.props.jitsiEvent && this.props.jitsiEvent("error", "timeout");
-      },
-      10000
-    );
   }
   jitsiEvent(eventType, object) {
     console.log("JITSI-EVENT", eventType, object);
-    if (this.jitsiLoadTimeout) {
-      clearTimeout(this.jitsiLoadTimeout);
-      this.setState({jitsiTimeout: false});
-    }
     if (eventType === 'dominantSpeakerChanged') {
       this.handleDominantSpeakerChange(object);
     }
@@ -143,9 +133,6 @@ class JitsiVideo extends React.Component {
     if (this.iframeHolder) {
       this.iframeHolder.className = this.getJitsiClasses(nextProps.hide);
     }
-    if (this.errorHolder) {
-      this.errorHolder.className = this.getErrorClasses(nextProps.hide);
-    }
     if (nextProps.hide && !this.props.hide) {
       if (this.api) {
         this.api.dispose();
@@ -159,7 +146,7 @@ class JitsiVideo extends React.Component {
   }
 
   /**
-   * Only auto-render based on changes in props/state if jitsi load times out.
+   * Stop react from updating
    * If requestSpeakerStats props have changed to true, then dispatch the speakerStats.
    */
   shouldComponentUpdate(nextProps, nextState) {
@@ -169,10 +156,7 @@ class JitsiVideo extends React.Component {
       this.props.onRequestSpeakerStats({requestSpeakerStats: false})
     }
 
-    return (
-      !!nextState.jitsiTimeout !== !!this.state.jitsiTimeout ||
-      !!nextState.showReportModal !== !!this.state.showReportModal
-    );
+    return false;
   }
 
   getJitsiClasses(hide) {
@@ -183,100 +167,12 @@ class JitsiVideo extends React.Component {
     return classes.join(" ");
   }
 
-  getErrorClasses(hide) {
-    let classes = ['jitsi-error'];
-    if (hide || !this.state.jitsiTimeout) {
-      classes.push('hide');
-    }
-    return classes.join(" ");
-  }
-
-  showErrorModal(event) {
-    event && event.preventDefault();
-    getErrorData().then(errorData => {
-      this.setState({
-        reportErrorJson: JSON.stringify(errorData, null, 2),
-        showReportModal: true,
-      });
-    });
-  }
-
-  submitErrorReport(event) {
-    event && event.preventDefault();
-    this.setState({showReportModal: false});
-    this.props.errorReport({
-      collected_data: this.state.reportErrorJson || "{}",
-      additional_info: this.state.reportExtraInfo || "",
-    });
-    alert("Thanks! Report submitted.");
-  }
-
   render() {
     return <div className='jitsi-video-holder'>
-      <div className={this.getErrorClasses(this.props.hide)}
-           ref={(el) => this.errorHolder = el}>
-        <h2>Video conference connection problem</h2>
-        <p>Hmmm, it appears that the breakout conference is having trouble loading.</p>
-        <ul>
-          <li>
-            Are you using a recent version of Firefox or Chrome?  Video
-            conferencing is currently <b>not available in Safari</b>, Internet
-            Explorer, iPads or iPhones.
-          </li>
-          <li>
-            Did you grant permission for your browser to use the camera and microphone?
-          </li>
-          <li>
-            Think it should work, but it still doesn't?
-            <div className='form-group'>
-              <button className='btn btn-default'
-                      onClick={this.showErrorModal.bind(this)}>
-                Submit a report
-              </button>
-            </div>
-          </li>
-        </ul>
-      </div>
-      <BS.Modal show={this.state.showReportModal}
-                onHide={() => this.setState({showReportModal: false})}>
-        <BS.Modal.Header closeButton>
-          <BS.Modal.Title>Submit report</BS.Modal.Title>
-        </BS.Modal.Header>
-        <BS.Form onSubmit={this.submitErrorReport.bind(this)}>
-          <BS.Modal.Body className='form'>
-            <BS.FormGroup>
-              <BS.ControlLabel>Automatically collected data</BS.ControlLabel>
-              <BS.FormControl
-                componentClass='textarea'
-                placeholder='Error info'
-                value={this.state.reportErrorJson}
-                onChange={(e) => this.setState({reportErrorJson: e.target.value})} />
-            </BS.FormGroup>
-            <BS.FormGroup>
-              <BS.ControlLabel>Additional info</BS.ControlLabel>
-              <BS.FormControl
-                componentClass='textarea'
-                placeholder='Additional info'
-                value={this.state.reportExtraInfo}
-                onChange={(e) => this.setState({reportExtraInfo: e.target.value})} />
-              <BS.HelpBlock>
-                Please include any extra info you can about your system, setup
-                and internet connection. If you know how to paste errors from
-                your browser's javascript console, that is <b>especially</b>{' '}
-                helpful.
-              </BS.HelpBlock>
-            </BS.FormGroup>
-          </BS.Modal.Body>
-          <BS.Modal.Footer>
-            <BS.Button onClick={() => this.setState({showReportModal: false})}>
-              Cancel
-            </BS.Button>
-            <BS.Button bsStyle='primary' type='submit'>Submit report</BS.Button>
-          </BS.Modal.Footer>
-        </BS.Form>
-      </BS.Modal>
-      <div ref={(el) => this.iframeHolder = el}
-           className={this.getJitsiClasses(this.props.hide)} />
+      <div 
+        ref={(el) => this.iframeHolder = el}
+        className={this.getJitsiClasses(this.props.hide)} 
+      />
     </div>
   }
 }

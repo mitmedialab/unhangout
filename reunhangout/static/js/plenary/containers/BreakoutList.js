@@ -6,6 +6,8 @@ import * as BS from "react-bootstrap";
 import * as A from "../actions";
 import Breakout from './Breakout';
 
+const MAX_BREAKOUT_SIZE = 25;
+
 class BreakoutList extends React.Component {
   constructor(props) {
     super(props);
@@ -15,7 +17,6 @@ class BreakoutList extends React.Component {
       "breakout-mode-dialog": false,
       "breakout_mode": this.props.plenary.breakout_mode,
       "max_attendees": 10,
-      "random_max_attendees": this.props.plenary.random_max_attendees || 10,
       "etherpad_initial_text": this.props.plenary.etherpad_initial_text,
     }
   }
@@ -37,8 +38,8 @@ class BreakoutList extends React.Component {
       this.setState({"title-error": ""});
     }
     let maxAttendees = parseInt(this.state.max_attendees);
-    if (isNaN(maxAttendees) || maxAttendees < 2 || maxAttendees > 10) {
-      this.setState({"max_attendees-error": "Must be a number between 2 and 10."});
+    if (isNaN(maxAttendees) || maxAttendees < 2 || maxAttendees > MAX_BREAKOUT_SIZE) {
+      this.setState({"max_attendees-error": `Must be a number between 2 and ${MAX_BREAKOUT_SIZE}.`});
       return;
     } else {
       this.setState({"max_attendees-error": ""});
@@ -59,18 +60,6 @@ class BreakoutList extends React.Component {
   handleModeChange(event) {
     event.preventDefault();
     let update = {breakout_mode: this.state.breakout_mode};
-    if (update.breakout_mode === "random") {
-      let maxAttendees = parseInt(this.state.random_max_attendees);
-      if (isNaN(maxAttendees) || maxAttendees < 2 || maxAttendees > 10) {
-        this.setState({
-          "random_max_attendees-error": "Must be a number between 2 and 10."
-        });
-        return;
-      } else {
-        this.setState({"random_max_attendees-error": ""});
-      }
-      update.random_max_attendees = this.state.random_max_attendees;
-    }
     this.props.onChangeBreakoutMode({breakout_mode: this.state.breakout_mode})
     this.setState({"breakout-mode-dialog": false})
   }
@@ -83,11 +72,6 @@ class BreakoutList extends React.Component {
       })
       this.setState({"message-breakouts-dialog": false});
     }
-  }
-
-  handleGroupMe(event) {
-    event.preventDefault();
-    this.props.onChangeBreakouts({action: 'group_me'});
   }
 
   toggleBreakoutsOpen() {
@@ -130,26 +114,13 @@ class BreakoutList extends React.Component {
 
   render() {
     let breakout_mode = this.props.plenary.breakout_mode
-    let breakoutFilter;
-    switch (breakout_mode) {
-      case "admin":
-        breakoutFilter = (b) => !b.is_proposal && !b.is_random;
-        break;
-      case "user":
-        breakoutFilter = (b) => !b.is_random;
-        break;
-      case "random":
-        breakoutFilter = (b) => b.is_random && (
-          this.props.auth.is_superuser ||
-          !!_.find(b.members, (m) => m.username === this.props.auth.username)
-        );
-        break;
+    let breakouts = this.props.breakouts;
+    if (breakout_mode === "admin") {
+      breakouts = breakouts.filter(breakout => !breakout.is_proposal)
     }
-    let breakouts = this.props.breakouts.filter(breakoutFilter);
     if (breakout_mode === "user") {
       breakouts = this.sortBreakouts(breakouts)
     }
-
     let showCreateSession = (
       breakout_mode === "user" ||
       (this.props.auth.is_admin && breakout_mode === "admin")
@@ -169,11 +140,6 @@ class BreakoutList extends React.Component {
                   <i className='fa fa-plus' />
                 </BS.Button>
               </BS.OverlayTrigger>
-            : "" }
-          { breakout_mode === "random" ?
-              <BS.Button onClick={(e) => this.handleGroupMe(e)}>
-                { breakouts.length === 0 ? "Group me" : "Regroup me" }
-              </BS.Button>
             : "" }
           { this.props.auth.is_admin && !this.props.auth.is_superuser ?
               <BS.OverlayTrigger placement='left' overlay={
@@ -304,15 +270,15 @@ class BreakoutList extends React.Component {
               >
                 <BS.ControlLabel>Participant Limit</BS.ControlLabel>
                 <BS.FormControl type="text"
-                  placeholder="Max 10, Min 2"
+                  placeholder={`Max ${MAX_BREAKOUT_SIZE}, Min 2`}
                   min={2}
-                  max={10}
+                  max={MAX_BREAKOUT_SIZE}
                   value={this.state.max_attendees || ""}
                   onChange={(e) => this.setState({max_attendees: e.target.value})} />
                 <BS.HelpBlock>
                   { this.state['max_attendees-error'] ?
                       this.state['max_attendees-error']
-                    : "Minimum 2, Maximum 10" }
+                    : `Minimum 2, Maximum ${MAX_BREAKOUT_SIZE}` }
                 </BS.HelpBlock>
               </BS.FormGroup>
             : null}
@@ -380,45 +346,7 @@ class BreakoutList extends React.Component {
                 <BS.HelpBlock>
                   Unconference mode. All participants can propose and vote on breakouts.
                 </BS.HelpBlock>
-                {/* Hiding random mode for now.. Issue #33.
-                <BS.Radio checked={this.state.breakout_mode==="random"}
-                    onChange={() => this.setState({"breakout_mode": "random"})}>
-                  Randomly Assigned Sessions
-                </BS.Radio>
-                <BS.HelpBlock>
-                  Users are randomly assigned to breakout sessions and will
-                  always be in the same breakout session.  Users are given the
-                  option of leaving their group and joining a new one with the
-                  "Regroup Me" button.
-                </BS.HelpBlock>
-                */}
               </BS.FormGroup>
-              { this.state.breakout_mode === "random" ?
-                <BS.FormGroup
-                  className='non-margined'
-                  controlId="participant-limit"
-                  validationState={
-                    this.state['random_max_attendees-error'] ? 'error' : undefined
-                  }
-                >
-                  <BS.ControlLabel>
-                    Maximum number of participants per breakout
-                  </BS.ControlLabel>
-                  <BS.FormControl
-                    type="text"
-                    placeholder="Max 10, Min 2"
-                    value={this.state.random_max_attendees}
-                    onChange={
-                      (e) => this.setState({random_max_attendees: e.target.value})
-                    } />
-                  { this.state['random_max_attendees-error'] ?
-                      <BS.HelpBlock>
-                        {this.state['random_max_attendees-error']}
-                      </BS.HelpBlock>
-                    : "" }
-                </BS.FormGroup>
-                : ""
-              }
             </div>,
             "Set",
             (e) => this.handleModeChange(e)

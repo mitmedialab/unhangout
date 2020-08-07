@@ -227,6 +227,5 @@ export default connect(
   // map dispatch to props
   (dispatch, ownProps) => ({
     disconnectOthers: (payload) => dispatch(PRESENCE_ACTIONS.disconnectOthers(payload)),
-    errorReport: (payload) => dispatch(A.errorReport(payload))
   })
 )(Breakout);

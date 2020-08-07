@@ -18,4 +18,9 @@
 {% block content %}
   <div id='plenary-add'></div>
 {% endblock %}
-{% block scripts %}{% render_bundle 'main' 'js' %}{% endblock %}
+{% block scripts %}
+  <script type='text/javascript'>
+    window.NO_SOCKET = true;
+  </script>
+  {% render_bundle 'main' 'js' %}
+{% endblock %}
