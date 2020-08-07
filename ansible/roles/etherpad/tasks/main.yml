@@ -34,6 +34,7 @@
     pull: yes
     restart: yes
     restart_policy: always
+    recreate: true
     links:
     - "postgres:postgres"
     volumes:
