@@ -10,7 +10,13 @@
     - users
     - common
     - swap
-    - angstwad.docker_ubuntu
+    - role: angstwad.docker_ubuntu
+      vars:
+        daemon_json:
+          log-driver: json-file
+          log-opts:
+            max-file: "10"
+            max-size: "10m"
     - role: nginx-proxy
       tags: ['nginx']
     - postgres
@@ -20,16 +26,16 @@
       #- tarsnap TODO add back
     - role: postgres_role
       vars:
-          DB_NAME: "{{uh_etherpad_db_name}}"
-          DB_USER: "{{uh_etherpad_db_username}}"
-          DB_PASSWORD: "{{uh_etherpad_db_password}}"
+        DB_NAME: "{{uh_etherpad_db_name}}"
+        DB_USER: "{{uh_etherpad_db_username}}"
+        DB_PASSWORD: "{{uh_etherpad_db_password}}"
     - role: etherpad
       tags: ['etherpad']
     - role: postgres_role
       vars:
-          DB_NAME: "{{uh_postgres_db}}"
-          DB_USER: "{{uh_postgres_user}}"
-          DB_PASSWORD: "{{uh_postgres_password}}"
+        DB_NAME: "{{uh_postgres_db}}"
+        DB_USER: "{{uh_postgres_user}}"
+        DB_PASSWORD: "{{uh_postgres_password}}"
     - role: build-docker-image
       tags: ['update-app']
     - role: reunhangout

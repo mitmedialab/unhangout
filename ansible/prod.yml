@@ -9,7 +9,13 @@
     - users
     - common
     - swap
-    - angstwad.docker_ubuntu
+    - role: angstwad.docker_ubuntu
+      vars:
+        daemon_json:
+          log-driver: json-file
+          log-opts:
+            max-file: "10"
+            max-size: "10m"
     - role: nginx-proxy
       tags: ['nginx']
     - postgres
