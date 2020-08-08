@@ -47,6 +47,11 @@
       GOOGLE_SECRET: "{{google_secret}}"
       GA_TRACKING_ID: "{{ga_tracking_id}}"
 
+- set_fact:
+    uvicorn_vars:
+      FORWARDED_ALLOW_IPS: "nginx-proxy"
+      WEB_CONCURRENCY: "3"
+
 - name: Create folder for celery with correct permissions
   file: path=/var/docker-volumes/{{django_domain}}/celery owner=5313 group=5313 state=directory
 
@@ -68,7 +73,7 @@
     - postgres
     - redis
     - memcached
-    env: "{{ proxy_vars | combine(app_vars) }}"
+    env: "{{ proxy_vars | combine(app_vars) | combine(uvicorn_vars) }}"
 
 - name: Run docker container for celery worker
   docker_container:

@@ -7,7 +7,6 @@ dump.rdb
 .cache
 venv
 node_modules
-settings.py
 db.sqlite3
 reunhangout/public
 webpack-stats.json
@@ -15,8 +14,10 @@ reunhangout/static/dev
 reunhangout/static/tmp
 reunhangout/static/dist
 reunhangout/media/*
+reunhangout/package-lock.json
 !reunhangout/media/assets
 logs/*
 !logs/.keepdir
 loadtest/cache.json
 .vagrant/
+docker/.env

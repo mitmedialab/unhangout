@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-if [ "$1" = '/opt/app-venv/bin/daphne' ]; then
+if [ "$1" = '/opt/app-venv/bin/uvicorn' ]; then
     dockerize -wait tcp://postgres:5432 # TODO
     /opt/app-venv/bin/python /opt/app/manage.py migrate --noinput
     /opt/app-venv/bin/python /opt/app/manage.py sync_auth_providers
