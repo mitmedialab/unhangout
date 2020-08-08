@@ -49,8 +49,8 @@
 
 - set_fact:
     uvicorn_vars:
-      FORWARDED_ALLOW_IPS: nginx-proxy
-      WEB_CONCURRENCY: 3
+      FORWARDED_ALLOW_IPS: "nginx-proxy"
+      WEB_CONCURRENCY: "3"
 
 - name: Create folder for celery with correct permissions
   file: path=/var/docker-volumes/{{django_domain}}/celery owner=5313 group=5313 state=directory
