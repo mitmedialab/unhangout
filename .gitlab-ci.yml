@@ -14,6 +14,6 @@ before_script:
 build:
   stage: build
   script:
-    - docker build -f docker/Dockerfile -t local/unhangout .
+    - docker build -t local/unhangout .
     - echo "ETHERPAD_API_KEY=123123123" >> docker/.env
     - docker-compose -f docker/docker_compose.yml run test
