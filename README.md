@@ -16,6 +16,7 @@ docker-compose up -d postgres
 docker-compose exec postgres psql -U postgres -c "create user unhangout WITH PASSWORD 'password';"
 docker-compose exec postgres psql -U postgres -c "create database unhangout with owner unhangout";
 docker-compose exec postgres psql -U postgres -c "create database test_unhangout with owner unhangout";
+docker-compose exec postgres psql -U postgres -c "create database etherpad with owner postgres";
 docker-compose run --rm unhangout /opt/app-venv/bin/python3 manage.py migrate
 ```
 

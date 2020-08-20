@@ -77,6 +77,7 @@ services:
     - EMAIL_HOST=email
     - REDIS_HOST=redis
     - ETHERPAD_SERVER=http://etherpad:9001
+    - ETHERPAD_API_KEY=thisreallydoesntmattermuch
     - BROKER_URL=redis://redis:6379/0
     - MEMCACHED_HOST=memcached
     networks:
