@@ -6,6 +6,7 @@ Install docker and docker-compose. Then run
 
 ```
 docker-compose build unhangout
+docker-compose run --rm frontend
 ```
 
 Setup the database and run Django migrations:
