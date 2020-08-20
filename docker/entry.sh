@@ -13,7 +13,7 @@ then
     then
         CMD="$CMD --forwarded-allow-ips $PROXY_IP"
     fi
-    exec "$CMD"
+    exec $CMD
 else
     exec "$@"
 fi
