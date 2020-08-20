@@ -1,0 +1,5 @@
+FROM node:carbon-alpine AS frontend
+WORKDIR /opt/app/
+COPY reunhangout/package.json /opt/app/
+RUN apk --no-cache add g++ make python
+CMD npm run watch
