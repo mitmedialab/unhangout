@@ -7,13 +7,14 @@ then
     /opt/app-venv/bin/python /opt/app/manage.py migrate --noinput
     /opt/app-venv/bin/python /opt/app/manage.py sync_auth_providers
     /opt/app-venv/bin/python /opt/app/manage.py collectstatic --noinput
-    PROXY_IP=`getent hosts nginx-proxy | awk '{ print $1 ; exit}'`
-    CMD="$@"
-    if [ -n "$PROXY_IP" ];
-    then
-        CMD="$CMD --forwarded-allow-ips $PROXY_IP"
-    fi
-    exec $CMD
+    #PROXY_IP=`getent hosts nginx-proxy | awk '{ print $1 ; exit}'`
+    #CMD="$@"
+    #if [ -n "$PROXY_IP" ];
+    #then
+    #    CMD="$CMD --forwarded-allow-ips $PROXY_IP"
+    #fi
+    #exec $CMD
+    exec "$@"
 else
     exec "$@"
 fi
