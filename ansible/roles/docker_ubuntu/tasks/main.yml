@@ -1,0 +1,91 @@
+---
+# Following instructions at https://docs.docker.com/engine/install/ubuntu/
+# sudo apt-get install \
+#    apt-transport-https \
+#    ca-certificates \
+#    curl \
+#    gnupg-agent \
+#    software-properties-common
+- name: Install needed packages for docker
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg-agent
+      - software-properties-common
+    state: latest
+
+# curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+- name: Add Docker apt key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    id: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
+    state: present
+
+# sudo add-apt-repository \
+#    "deb [arch=armhf] https://download.docker.com/linux/ubuntu \
+#    $(lsb_release -cs) \
+#    stable"
+- name: Add docker repository
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ansible_distribution_release}} stable"
+    state: present
+
+# sudo apt-get update
+# sudo apt-get install docker-ce docker-ce-cli containerd.io
+- name: Install Docker apt package
+  apt:
+    pkg: [docker-ce, docker-ce-cli, containerd.io]
+    state: latest
+    update_cache: yes
+    install_recommends: no
+
+- name: Ensure /etc/docker is present
+  file:
+    path: /etc/docker
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Set /etc/docker/daemon.json
+  copy:
+    content: "{{ daemon_json | to_nice_json }}"
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Restart docker
+  when: daemon_json is defined
+
+- name: 'Enable and start the docker service'
+  service:
+    name: 'docker'
+    state: 'started'
+    enabled: 'yes'
+
+#- name: Change ufw default forward policy from drop to accept
+#  lineinfile:
+#    dest: /etc/default/ufw
+#    regexp: "^DEFAULT_FORWARD_POLICY="
+#    line: "DEFAULT_FORWARD_POLICY=\"ACCEPT\""
+#  when: ufw_default_exists.stat.exists
+
+- name: Allow forwarded traffic
+  ufw:
+    direction: routed
+    default: allow
+    route: yes
+
+# Install requirements for ansible docker_container module
+- name: Install pip
+  apt:
+    name:
+      - python3-pip
+    state: latest
+
+- name: Install docker python library
+  pip:
+    name: docker
