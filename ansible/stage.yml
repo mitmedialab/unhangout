@@ -10,7 +10,7 @@
     - users
     - common
     - swap
-    - role: angstwad.docker_ubuntu
+    - role: docker_ubuntu
       vars:
         daemon_json:
           log-driver: json-file
@@ -22,8 +22,7 @@
     - postgres
     - redis
     - memcached
-      #- monitored TODO add back what's needed
-      #- tarsnap TODO add back
+    #- tarsnap TODO add back
     - role: postgres_role
       vars:
         DB_NAME: "{{uh_etherpad_db_name}}"
