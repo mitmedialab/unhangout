@@ -86,6 +86,12 @@ class BreakoutConsumer(WebsocketConsumer):
         self.send(text_data=event['text'])
 
     def connect_to_breakout(self, breakout):
+        # delete previous presences that a user might have had for this channel
+        Presence.objects.filter(
+            room__channel_name=breakout.channel_group_name,
+            user=self.scope['user']
+        ).delete()
+
         num_connections = Presence.objects.filter(
             room__channel_name=breakout.channel_group_name).count()
 
@@ -124,15 +130,15 @@ class BreakoutConsumer(WebsocketConsumer):
                     'error': 'Already connected',
                     "error_code": 'already-connected',
                 }
-                send_to_channel(presence.room.channel_name, **data)
-                #send_already_connected_error(
-                #    MessageProxy(presence.channel_name, user=self.scope['user']),
-                #)
-
+                send_to_channel(
+                    presence.channel_name,
+                    type='presence',
+                    payload=data
+                )
         self.connect_to_breakout(breakout)
 
-    #@require_payload_keys(['collected_data', 'additional_info'])
     def handle_error_report(self, data, breakout):
+        # Note: this is not used anymore, consider removing
         report = ErrorReport.objects.create(
             user=self.scope['user'],
             breakout=breakout,

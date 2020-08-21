@@ -32,8 +32,8 @@ services:
     depends_on:
     - postgres
     volumes:
-    - ./settings.json:/opt/etherpad-lite/settings.json
-    - ./APIKEY.txt:/opt/etherpad-lite/APIKEY.txt
+    - ./docker/settings.json:/opt/etherpad-lite/settings.json
+    - ./docker/APIKEY.txt:/opt/etherpad-lite/APIKEY.txt
     ports:
     - 9001:9001
     environment:
@@ -46,50 +46,57 @@ services:
     - DB_NAME=etherpad
     networks:
     - unhangout
-  unhangout:
+  frontend:
     build:
-      context: ../
-      dockerfile: ./docker/Dockerfile
+      dockerfile: docker/Dockerfile.frontend
+      context: .
+    volumes:
+    - ./reunhangout:/opt/app/
+  unhangout:
+    build: .
+    image: local/unhangout:latest
     depends_on:
     - postgres
     - redis
     - email
     - memcached
     - etherpad
+    - frontend
     volumes:
-    - ../reunhangout:/opt/app/
+    - ./reunhangout:/opt/app/
     ports:
     - 8000:8000
-    env_file: .env
+    env_file: ./docker/env
     environment:
-    - DEBUG="true"
+    - DEBUG=true
     - DOMAIN=localhost
     - POSTGRES_HOST=postgres
-    - POSTGRES_DB=reunhangout
-    - POSTGRES_USER=reunhangout
+    - POSTGRES_DB=unhangout
+    - POSTGRES_USER=unhangout
     - POSTGRES_PASSWORD=password
     - EMAIL_HOST=email
     - REDIS_HOST=redis
     - ETHERPAD_SERVER=http://etherpad:9001
+    - ETHERPAD_API_KEY=thisreallydoesntmattermuch
     - BROKER_URL=redis://redis:6379/0
     - MEMCACHED_HOST=memcached
     networks:
     - unhangout
     command: /opt/app-venv/bin/python manage.py runserver 0.0.0.0:8000
   celery:
-    image: dirkcuys/unhangout:latest
+    image: local/unhangout:latest
     depends_on:
     - postgres
     - redis
     - email
     - memcached
     user: celery
-    env_file: .env
+    env_file: ./docker/env
     environment:
     - DOMAIN=localhost
     - POSTGRES_HOST=postgres
-    - POSTGRES_DB=reunhangout
-    - POSTGRES_USER=reunhangout
+    - POSTGRES_DB=unhangout
+    - POSTGRES_USER=unhangout
     - POSTGRES_PASSWORD=password
     - EMAIL_HOST=email
     - REDIS_HOST=redis
@@ -106,7 +113,7 @@ services:
     networks:
     - unhangout
   test:
-    image: dirkcuys/unhangout:latest
+    image: local/unhangout:latest
     command: /opt/app-venv/bin/pytest -vv
     depends_on:
     - postgres
@@ -116,7 +123,7 @@ services:
     - selenium
     volumes:
     - ../reunhangout:/opt/app/
-    env_file: .env
+    env_file: ./docker/env
     environment:
     - DOMAIN=localhost
     - POSTGRES_HOST=postgres

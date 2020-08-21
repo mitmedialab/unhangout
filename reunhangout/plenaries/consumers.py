@@ -46,6 +46,12 @@ class PlenaryConsumer(WebsocketConsumer):
         except Plenary.DoesNotExist:
             return self.handle_error('Plenary not found')
 
+        # Remove previous presence if the user is reconnecting
+        Presence.objects.filter(
+            room__channel_name=plenary.channel_group_name,
+            user=self.scope['user']
+        ).delete()
+
         # Handle max connections
         if plenary.max_participants > 0 and not plenary.has_admin(self.scope['user']):
             num_present = Presence.objects.filter(

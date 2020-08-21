@@ -31,3 +31,5 @@ selenium>3
 sorl-thumbnail
 iso8601
 async-timeout<3.0
+uvicorn
+gunicorn

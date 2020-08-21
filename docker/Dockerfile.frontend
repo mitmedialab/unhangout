@@ -1,0 +1,5 @@
+# This is a small Dockerfile to setup an frontend builder. It expects the application code to be a volume mount at /opt/app with a package.json
+FROM node:carbon-alpine AS frontend
+WORKDIR /opt/app/
+RUN apk --no-cache add g++ make python
+CMD npm i && npm run watch

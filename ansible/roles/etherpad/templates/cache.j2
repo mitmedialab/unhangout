@@ -1,3 +1,5 @@
+proxy_cookie_path / "/; SameSite=None; Secure";
+
 location /static/ {
     proxy_buffering on;
     proxy_cache etherpad_cache;

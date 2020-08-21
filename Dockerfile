@@ -35,13 +35,11 @@ RUN python3 -m venv /opt/app-venv/ \
     && /opt/app-venv/bin/pip --no-cache-dir install -r shrinkwrap.txt
 COPY reunhangout/ /opt/app
 COPY --from=frontend /opt/app/static/dist static/dist
-RUN cp reunhangout/default_settings.py reunhangout/settings.py
 ENV DOCKERIZE_VERSION v0.6.1
 RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
-RUN /opt/app-venv/bin/pip --no-cache-dir install uvicorn
 COPY docker/entry.sh /entry.sh
 EXPOSE 80
 ENTRYPOINT ["/entry.sh"]
-CMD ["/opt/app-venv/bin/uvicorn", "reunhangout.asgi:application", "--host", "0.0.0.0", "--port", "80", "--proxy-headers"]
+CMD ["/opt/app-venv/bin/gunicorn", "reunhangout.asgi:application", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:80", "--forwarded-allow-ips=\"*\""]

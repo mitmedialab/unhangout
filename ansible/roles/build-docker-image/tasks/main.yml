@@ -1,8 +1,8 @@
 ---
-#- name: Remove old docker images & containers
-#  docker_prune:
-#    images: yes
-#    containers: yes
+- name: Remove old docker images & containers
+  docker_prune:
+    images: yes
+    containers: yes
 
 - name: get code from gitlab
   git: 
@@ -15,7 +15,6 @@
     name: dirkcuys/unhangout
     build:
       path: /usr/local/src/reunhangout
-      dockerfile: ./docker/Dockerfile
       pull: yes
     tag: latest
     source: build

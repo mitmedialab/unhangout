@@ -4,12 +4,11 @@
 # write nagios monitoring config and add to ``munin_domains``.
 
 - name: "Install base packages"
-  apt: pkg={{item}} state=installed
-  with_items:
-   - nagios-nrpe-server
-   - nagios-plugins
-   - munin-node
-   - munin-plugins-extra
+  apt: 
+    state: present
+    pkg:
+    - nagios-nrpe-server
+    - monitoring-plugins-basic
   tags: monitored
 
 - name: "Install nagios-nrpe local config"
@@ -22,28 +21,17 @@
   notify: restart nagios-nrpe-server
   tags: monitored
 
-- name: "Install munin-node.conf"
-  template: >
-    src=etc_munin_munin-node.conf
-    dest=/etc/nagios/munin-node.conf
-    owner=root
-    group=root
-    mode=0644
-  notify: restart munin-node
-  tags: monitored
-
-- name: "Open munin/nagios ports"
-  command: ufw allow proto tcp from {{monitoring_server_ip}} to any port 4949,5666
+- name: "Open nagios ports"
+  command: ufw allow proto tcp from {{monitoring_server_ip}} to any port 5666
   register: ufw_result
   changed_when: "ufw_result.stdout.startswith('Rule')"
   tags: monitored
 
-- name: "Copy check-reboot-required script"
-  copy: >
-    src=usr_local_bin_check-reboot-required
-    dest=/usr/local/bin/check-reboot-required
-    mode=0755
-    owner=root
-    group=root
-  tags: monitored
-
+#   - name: "Copy check-reboot-required script"
+#     copy: >
+#       src=usr_local_bin_check-reboot-required
+#       dest=/usr/local/bin/check-reboot-required
+#       mode=0755
+#       owner=root
+#       group=root
+#     tags: monitored
