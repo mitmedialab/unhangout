@@ -9,67 +9,34 @@ tarsnap_key: ""
 
 # Version of tarsnap to target
 tarsnap_version: "1.0.36.1"
+
 # Directories to back up, relative to '/', e.g. 
 #  - "home/user"
 #  - "var/lib/mailboxes"
 tarsnap_dirs: []
+
 # Names of postgres databases to dump then backup.
 tarsnap_postgres_databases: []
-# Names of mysql databases to dump then backup.
-tarsnap_mysql_databases: []
+
 # Cron settings for when to execute backups.
 tarsnap_cron_disabled: no
 tarsnap_cron_month: "*"
 tarsnap_cron_day: "*"
 tarsnap_cron_hour: "23"
 tarsnap_cron_minute: "11"
-# Name of postgres user to execute dumps as. Should be able to run pg_dump on
-# all backed up databases without password.
-tarsnap_postgres_user: "postgres"
-# Name of mysql user to execute dumps as. Should be able to run mysqldump on
-# all backed up databases without password.
-tarsnap_mysql_user: "root"
-# Number of daily backups to keep
-tarsnap_num_daily: 7
-# Number of weekly backups to keep
-tarsnap_num_weekly: 3
-# Number of monthly backups to keep
-tarsnap_num_monthly: 3
-# Day of week to execute weekly backups (Monday is 0, Sunday is 6)
-tarsnap_weekly_day: 5
-# Day of month to execute monthly backups (1 is first day of month)
-tarsnap_monthly_day: 1
-# Path to tarsnap binary
-tarsnap_bin: "/usr/local/bin/tarsnap"
+
 # Path to tarsnap cache
 tarsnap_cache: "/usr/local/tarsnap-cache"
+
 # Path to file to store tarsnap key in
 tarsnap_key_path: "/root/tarsnap.key"
+
 # Path to file to store tarsnap script in
 tarsnap_script_path: "/root/tarsnap.py"
+
 # Extra flags to invoke tarsnap with (array)
 tarsnap_extra_flags: ["--verylowmem"]
+
 # Absolute path to temporary directory into which to dump postgres dumps prior
 # to backup. This directory will be the path they are restored to as well.
 tarsnap_postgres_tmp_dir: "/tmp/postgres_backups/"
-# Absolute path to temporary directory into which to dump mysql.
-tarsnap_mysql_tmp_dir: "/tmp/mysql_backups/"
-# Path to pg_dump executable (install separately if used)
-tarsnap_pg_dump_path: "/usr/bin/pg_dump"
-# Path to psql executable for restores (install separately if used)
-tarsnap_psql_path: "/usr/bin/psql"
-# Path to mysqldump executable (install separately if used)
-tarsnap_mysqldump_path: "/usr/bin/mysqldump"
-# Path to mysql executable for restores (install separately if used)
-tarsnap_mysql_path: "/usr/bin/mysql"
-# Extra command line flags to invoke pg_dump with.
-tarsnap_pg_dump_extra_flags: []
-
-# Installation vars
-tarsnap_signing_key_url: "https://www.tarsnap.com/tarsnap-signing-key.asc"
-tarsnap_sigs_url: "https://tarsnap.com/download/tarsnap-sigs-{{tarsnap_version}}.asc"
-tarsnap_tgz_url: "https://tarsnap.com/download/tarsnap-autoconf-{{tarsnap_version}}.tgz"
-tarsnap_signing_key_path: "/tmp/tarsnap-signing-key.asc"
-tarsnap_sigs_path: "/tmp/tarsnap-sigs-{{tarsnap_version}}.asc"
-tarsnap_tgz_path: "/tmp/tarsnap-autoconf-{{tarsnap_version}}.tgz"
-tarsnap_unpacked_path: "/tmp/tarsnap-autoconf-{{tarsnap_version}}"

@@ -22,7 +22,10 @@
     - redis
     - memcached
     - monitored
-      #- tarsnap TODO add back
+    - role: tarsnap
+      vars:
+          tarsnap_postgres_databases: ["{{uh_postgres_db}}"]
+      tags: ['tarsnap']
     - role: postgres_role
       vars:
           DB_NAME: "{{uh_etherpad_db_name}}"
