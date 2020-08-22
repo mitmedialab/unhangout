@@ -1,48 +1,58 @@
 ---
-- name: Check if tarsnap {{ tarsnap_version }} is installed
-  shell: tarsnap --version | grep {{ tarsnap_version }} --color=never
-  register: tarsnap_installed
-  changed_when: "tarsnap_installed.stderr != ''"
-  ignore_errors: yes
-  tags: ['tarsnap']
+- name: Tarsnap src dir
+  file: state=directory path=/usr/local/src/tarsnap
 
-# Installation
+- name: Tarsnap backup script
+  template: src=tarsnap.py dest=/usr/local/src/tarsnap
 
-- name: Install tarsnap
-  include_tasks: install.yml
-  when: tarsnap_installed|failed
-  tags: ['tarsnap']
+- name: copy Dockerfile for tarnsap
+  copy:
+    src: Dockerfile
+    dest: /usr/local/src/tarsnap
+
+- name: build docker image to run tarsnap
+  docker_image:
+    name: unhangout/tarsnap
+    build:
+      path: /usr/local/src/tarsnap
+      pull: yes
+    tag: latest
+    source: build
+    force_source: yes
+    state: present
 
 # Configuration
+- name: Create env file
+  template:
+    src: tarsnap.env
+    dest: /root/tarsnap.env
+    owner: root
+    group: root
+    mode: 0600
 
 - name: Tarsnap key
   copy:
     content="{{tarsnap_key}}"
-    dest="{{tarsnap_key_path}}"
+    dest="/root/tarsnap.key"
     owner=root
     group=root
     mode=0600
     force=no
-  tags: ['tarsnap']
 
-- name: Tarsnap cache directory
-  file: state=directory path="{{tarsnap_cache}}"
-  tags: ['tarsnap']
-
-- name: Tarsnap backup script
-  template: src=tarsnap.py dest="{{tarsnap_script_path}}"
-  tags:
-   - tarsnap
-   - tarsnap-script
+#- name: Tarsnap cache directory
+#file: state=directory path="{{tarsnap_cache}}"
+#tags: ['tarsnap']
 
 - name: Tarsnap cron
   cron:
-    name="Tarsnap backup"
-    month="{{tarsnap_cron_month}}"
-    day="{{tarsnap_cron_day}}"
-    hour="{{tarsnap_cron_hour}}"
-    minute="{{tarsnap_cron_minute}}"
-    job="/usr/bin/python2.7 {{tarsnap_script_path}} > /dev/null"
-    state=present
-    disabled="{{tarsnap_cron_disabled}}"
-  tags: ['tarsnap']
+    name: "Tarsnap backup"
+    minute: "11"
+    hour: "23"
+    job: >
+        docker run --rm --env-file /root/tarsnap.env 
+        -v /root/tarsnap.key:/root/tarsnap.key
+        -v /var/docker-volumes/nginx/static/{{django_domain}}/media:/unhangout/media:ro
+        -v /var/docker-volumes/tarsnap/cache:/tarsnap/cache
+        --link postgres:postres
+        unhangout/tarsnap
+    state: present
