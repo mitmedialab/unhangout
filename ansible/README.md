@@ -2,19 +2,15 @@
 
 This is an ansible configuration for automating the provisioning and deployment
 of a fully functional reunhangout server.  It can be deployed against targets
-like a cheap Digital Ocean, Linode or AWS server.
+like a Digital Ocean, Linode or AWS server.
 
 As of now, this is a somewhat opinionated and un-flexible configuration; but it
 can act as a starting point for broader use.
 
-NOTE: This configuration uses submodules, so be sure to run
-`git submodule init` followed by `git submodule update` within this repository
-before use.
-
 ## Installation
 
 1. Register a domain name or establish a subdomain and point it to the server you'd like to use.
-2. Provision the server with a base operating system.  Ubuntu 16.04 is the only tested OS.
+2. Provision the server with a base operating system.  Ubuntu 20.04 is the only tested OS.
 3. Edit `hosts.cfg` and change the hostname in the `[reunhangout]` group to
    your desired hostname.
 4. Replace the file `vars/secrets.yml` with a file for containing your secrets.
@@ -65,9 +61,6 @@ before use.
     * `make prodapp`: Only run the tasks pertaining to the reunhangout application
       (skipping the OS/user setup, firewall, webserver, letsencrypt, etc).
       Faster for rebuilding after code changes.
-    * `make prodcode`: Minimal set of tasks for a normal application code
-      update that doesn't touch configuration or dependencies.  Faster for
-      rebuilding after simple code changes.
     * `make reboot`: Reboot the server if it thinks it needs it (e.g. after kernel upgrades)
     * `make upgrades`: Run `apt-get update && apt-get upgrade`.
 
