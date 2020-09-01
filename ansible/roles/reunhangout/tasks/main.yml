@@ -1,16 +1,9 @@
 ---
-- name: Create postgres user
+- name: Create postgres pg_trgm extension
   command: docker exec postgres psql -U postgres {{django_postgres_db}} -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
-#  tags:
-#   - django
-#   - django-postgres
 
 - name: setup static and media file hosting through nginx-proxy
   template: src=static.j2 dest=/var/docker-volumes/nginx/vhosts.d/{{django_domain}}
-#  tags:
-#   - django
-#   - django-nginx
-#   - django-config
 
 - set_fact:
     proxy_vars:
@@ -33,7 +26,7 @@
       REDIS_PORT: "6379"
       BROKER_URL: redis://redis:6379/0
       YOUTUBE_API_KEY: "{{youtube_api_key}}"
-      ETHERPAD_SERVER: "https://{{uh_etherpad_domain}}"
+      ETHERPAD_SERVER: "https://{{django_domain}}/{{uh_etherpad_domain}}"
       EMAIL_HOST: "{{mailgun_smtp_hostname}}"
       EMAIL_HOST_USER: "{{mailgun_smtp_login}}"
       EMAIL_HOST_PASSWORD: "{{mailgun_smtp_password}}"

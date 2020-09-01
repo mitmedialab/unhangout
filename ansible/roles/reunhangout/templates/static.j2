@@ -1,3 +1,29 @@
+location /{{uh_etherpad_domain}}/static/ {
+    rewrite /{{uh_etherpad_domain}}/(.*) /$1 break;
+    proxy_buffering on;
+    proxy_cache etherpad_cache;
+    add_header X-Cache-Status $upstream_cache_status;
+    proxy_ignore_headers Cache-Control;
+    proxy_cache_valid any 30m;
+    proxy_pass http://{{etherpad_domain}};
+}
+
+location /{{uh_etherpad_domain}}/javascripts/ {
+    rewrite /{{uh_etherpad_domain}}/(.*) /$1 break;
+    proxy_buffering on;
+    proxy_cache etherpad_cache;
+    add_header X-Cache-Status $upstream_cache_status;
+    proxy_ignore_headers Cache-Control;
+    proxy_cache_valid any 30m;
+    proxy_pass http://{{etherpad_domain}};
+}
+
+location /{{uh_etherpad_domain}} {
+    rewrite     /{{uh_etherpad_domain}}/(.*) /$1 break;
+    rewrite     ^/{{uh_etherpad_domain}}$ /{{uh_etherpad_domain}}/ permanent; 
+    proxy_pass  http://{{uh_etherpad_domain}};
+}
+
 location = /favicon.ico {
     alias  /var/www/extra/{{django_domain}}/static/images/favicon.ico;
 }
