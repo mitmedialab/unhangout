@@ -136,8 +136,8 @@ class Plenary extends React.Component {
                       this.props.auth.is_authenticated ? "" :
                         <li>
                           <div className='alert alert-success'>
-                            <a href='/accounts/login'>Login</a> or{' '}
-                            <a href='/accounts/signup'>sign up</a>. You must be
+                            <a href={`/accounts/login?next=${encodeURIComponent(document.location.pathname)}`}>Login</a> or{' '}
+                            <a href={`/accounts/signup?next=${encodeURIComponent(document.location.pathname)}`}>sign up</a>. You must be
                             signed in to attend this event.
                           </div>
                         </li>
