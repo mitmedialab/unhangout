@@ -152,7 +152,7 @@ class TestAdminFunctions():
         response = await communicator.receive_json_from()
         assert response.get('type') == 'plenary'
         PLENARY_KEYS = (
-            'random_max_attendees', 'breakout_mode', 'name', 'organizer', 'start_date',
+            'breakout_mode', 'name', 'organizer', 'start_date',
             'end_date', 'doors_open', 'doors_close', 'breakouts_open', 'canceled',
             'slug', 'public', 'jitsi_server', 'wrapup_emails', 'etherpad_initial_text'
         )
@@ -178,7 +178,7 @@ async def test_admin_features_2(admin_connected):
     response = await communicator.receive_json_from()
     assert response.get('type') == 'plenary'
     PLENARY_KEYS = (
-        'random_max_attendees', 'breakout_mode', 'name', 'organizer', 'start_date',
+        'breakout_mode', 'name', 'organizer', 'start_date',
         'end_date', 'doors_open', 'doors_close', 'breakouts_open', 'canceled',
         'slug', 'public', 'jitsi_server', 'wrapup_emails', 'etherpad_initial_text'
     )
