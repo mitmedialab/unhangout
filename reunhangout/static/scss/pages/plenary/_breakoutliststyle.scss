@@ -55,6 +55,11 @@
   flex-direction: column;
   width: 100%;
 
+  .add-slot-btn{
+    min-width: 32px;
+    min-height: 32px;
+  }
+
   .breakout-list-item{
     background-color: #f5f5f5;
     border-radius: 7px;
