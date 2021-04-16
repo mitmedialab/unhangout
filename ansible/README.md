@@ -14,7 +14,7 @@ before use.
 ## Installation
 
 1. Register a domain name or establish a subdomain and point it to the server you'd like to use.
-2. Provision the server with a base operating system.  Ubuntu 16.04 is the only tested OS.
+2. Provision the server with a base operating system.  Ubuntu 20.04 is the only tested OS.
 3. Edit `hosts.cfg` and change the hostname in the `[reunhangout]` group to
    your desired hostname.
 4. Replace the file `vars/secrets.yml` with a file for containing your secrets.
