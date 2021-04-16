@@ -27,3 +27,8 @@ docker-compose up unhangout
 ```
 
 Go to http://localhost:8000/ to access the application. You can access the maildev server at http://localhost:1080 to look at email activity.
+
+
+# Production deploy
+
+See [ansible/README.md](https://github.com/mitmedialab/unhangout/blob/master/ansible/README.md)
