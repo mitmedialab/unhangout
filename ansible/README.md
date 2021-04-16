@@ -25,9 +25,11 @@ setup, but it serves as a starting point for other scenarios.
   This will create a superuser with username `admin` and email address
   `admin_email` from `vars/secrets.yml`.  To log in, you'll need to request a
   password reset by going to `https://<domain>/accounts/password/reset/`.
+  
 7. Log in as an admin user. Set the value for the `Site` domain and name at
    `https://<domain>/admin/sites/site/1/change/`.  Create initial Plenaries as
    needed.
+   
 8. For subsequent builds/runs of the playbook (e.g. after changes to variables or code), run:
     ```
     make prod
