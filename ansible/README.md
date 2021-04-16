@@ -32,10 +32,11 @@ setup, but it serves as a starting point for other scenarios.
     ```
     make prod
     ```
-  Other useful make targets:
-    * `make prodapp`: Only run the tasks pertaining to the reunhangout application
-      (skipping the OS/user setup, firewall, webserver, letsencrypt, etc).
-      Faster for rebuilding after code changes.
-    * `make reboot`: Reboot the server if it thinks it needs it (e.g. after kernel upgrades)
+    
+Other useful make targets:
+- `make prodapp`: Only run the tasks pertaining to the reunhangout application
+   (skipping the OS/user setup, firewall, webserver, letsencrypt, etc).
+   Faster for rebuilding after code changes.
+- `make reboot`: Reboot the server if it thinks it needs it (e.g. after kernel upgrades)
 
 If you have a staging server in addition to a production server, use the "stage" variants of the make targets to build that. (See `Makefile`).  Populate `vars/staging-secrets.yml` with any secrets that are different on the staging server (e.g. `uh_domain`, passwords, etc).
