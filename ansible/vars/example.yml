@@ -54,7 +54,8 @@ uh_postgres_user: unhangout
 # a long random string
 uh_postgres_password: 
 
-uh_etherpad_domain: etherpad.unhangout.io
+# domain where etherpad should live
+uh_etherpad_domain:
 uh_etherpad_path: "/"
 uh_etherpad_db_name: etherpad
 uh_etherpad_db_username: etherpad
