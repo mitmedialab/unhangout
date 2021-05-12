@@ -1,53 +1,75 @@
 ---
 uh_domain:
+# user name for linux user
 main_user_name:
+# password used by the main user
 main_user_pass:
+# pick any long random string
 main_user_salt:
+
 ansible_ssh_user: "{{main_user_name}}"
 ansible_become_pass: "{{main_user_pass}}"
+
+# email where some errors will be sent
 admin_email:
+
+# only needed if server monitoring is also set up
 monitoring_server_ip:
 
+# a long random password
 postgres_admin_password:
+
 #
 # API keys
 #
-# Manage at https://apps.twitter.com
+# Used for social login. Manage at https://apps.twitter.com
 twitter_client_id:
 twitter_secret:
 
-# Manage at https://developers.facebook.com
+# Used for social login. Manage at https://developers.facebook.com
 facebook_client_id:
 facebook_secret:
 
-youtube_api_key:
+# Used for social login. 
 google_client_id:
 google_secret:
 
+# used for embedding youtube videos
+youtube_api_key:
+
+# used for google analytics if you want to track traffic
 ga_tracking_id: 
 
+# used to send emails
 mailgun_active_api_key: 
 mailgun_smtp_hostname: 
 mailgun_smtp_login: 
 mailgun_smtp_password: 
 
+# a long random string
 uh_secret_key: 
 
 uh_postgres_db: unhangout
 uh_postgres_user: unhangout
+# a long random string
 uh_postgres_password: 
 
 uh_etherpad_domain: etherpad.unhangout.io
 uh_etherpad_path: "/"
 uh_etherpad_db_name: etherpad
 uh_etherpad_db_username: etherpad
+# a long random string
 uh_etherpad_db_password: 
+# a long random string
 uh_etherpad_session_key: 
+# a long random string
 uh_etherpad_api_key: 
 
+# all ssh public keys that should have access to the server
 main_user_authorized_keys: |
   ssh-rsa XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX== xxxxxxxx@xxxxx.com
 
+# used for backup, register at https://www.tarsnap.com/ 
 tarsnap_key: | 
   # START OF TARSNAP KEY FILE
   # END OF TARSNAP KEY FILE
