@@ -13,7 +13,7 @@ setup, but it serves as a starting point for other scenarios.
 2. Provision the server with a base operating system.  Ubuntu 20.04 is the only tested OS.
 3. Edit `hosts.cfg` and change the hostname in the `[reunhangout]` group to
    your desired hostname.
-4. Copy `vars/example.yml` to `vars/secrets.yml`. Encrypt it using [`ansible-vault`](https://docs.ansible.com/ansible/playbooks_vault.html) and then define all the variables therein. Some variables imply that you would need to setup an account.
+4. Copy `vars/example.yml` to `vars/secrets.yml`. Encrypt it using [`ansible-vault`](https://docs.ansible.com/ansible/latest/user_guide/vault.html) and then define all the variables therein. Some variables imply that you would need to setup an account.
 5. Run the first deployment:
   ```
   make firstrunprod
