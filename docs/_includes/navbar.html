@@ -13,7 +13,7 @@
       {% assign page_url = page.url|split:"."|first %}
       {% for item in site.topnav %}
         <li class="nav-item{% if page_url == item.link %} active{% endif %}">
-          <a class="nav-link" href="{{ item.link }}">{{item.text}}{% if page_url == item.link %}<span class="sr-only">(current)</span>{% endif %}</a>
+          <a class="nav-link" href="{{ site.baseurl }}{{ item.link }}">{{item.text}}{% if page_url == item.link %}<span class="sr-only">(current)</span>{% endif %}</a>
         </li>
       {% endfor %}
     </ul>

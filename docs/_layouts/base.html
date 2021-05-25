@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=EDGE">
-    <title>{{page.title}}</title>
+    <title>{% if page.title %}{{page.title}}{% else %}Unhangout{% endif %}</title>
 
     <link rel='icon' href="assets/img/unhangout-logo-UN-seafoam.png" />
     <link rel='apple-touch-icon' sizes="60x60" href='{{ thumb.url }}' />
