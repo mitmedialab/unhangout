@@ -1,0 +1,258 @@
+// Allow forms with buttons-as-links in dropdown menus to enable POST-ing
+
+.dropdown-menu > li > form {
+  width: 100%;
+  .btn-link {
+    width: 100%;
+    text-align: left;
+    padding: 3px 20px;
+    color: $dropdown-link-color;
+    background-color: $dropdown-bg;
+    &:hover {
+      color: $dropdown-link-hover-color;
+      background-color: $dropdown-link-hover-bg;
+      text-decoration: none;
+    }
+  }
+}
+
+.form-group.non-margined {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hr-break {
+  padding-top: 2em;
+  padding-bottom: 1.5em;
+  & div {
+    width: 100%;
+    text-align: center;
+    border-bottom: 1px solid #000;
+    line-height: 0.1em;
+    margin: 10px 0 20px;
+    & span {
+      font-style: italic;
+      background: #fff;
+      padding: 0 10px;
+    }
+  }
+}
+
+// navbar styles
+.navbar-right{
+  .navbar-btn{
+    margin-top: 17px;
+    margin-bottom: 17px;
+    .btn-login{
+      margin-right: 5px;
+    }
+  }
+  .navbar-avatar{
+    border-radius: 5px;
+    margin-right: 3px;
+  }
+  .navbar-username > i{
+    margin-left: 3px;
+  }
+}
+.navbar-nav > li > a {
+  line-height: 40px;
+}
+.navbar-brand{
+  height: 100%;
+  > img{
+    height: 40px;
+  }
+  &:hover{
+    opacity: 0.85;
+  }
+}
+.navbar-inverse .navbar-toggle{
+  border-color: #fff;
+  margin-top: 17px;
+  margin-bottom: 17px;
+}
+
+
+// homepage styles
+
+.homepage-container{
+  margin: auto;
+  .front-page-blurb{
+    font-size: 1.35em;
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+  .homepage-add-event-btn{
+    text-align: center;
+    margin-bottom: 70px;
+    i{
+      margin-right: 3px;
+    }
+  }
+}
+
+// footer styles 
+
+.footer {
+  margin-top: 4em;
+  width: 100%;
+  padding: 1em 0em;
+  background-color: $brand-primary;
+  color: white;
+  text-align: center;
+  a, a:visited, a:hover, a:active { color: white; }
+  .links {
+    ul {
+      display: inline-block;
+      vertical-align: top;
+      text-align: left;
+    }
+  }
+}
+
+// about page styles
+
+.team-container{
+  display: flex;
+  flex-wrap: wrap;
+  .team-member{
+    max-width: 98px;
+    margin-right: 15px;
+    img {
+      border-radius: 5px;
+      border: 2px solid #222;
+      height: 98px;
+      width: 98px;
+    }
+    > p {
+      margin-top: 5px;
+      line-height: 1.2em;
+    }
+  }
+  .mit-ml-logo{
+    height: 98px;
+    > img{
+      height: 100%;
+    }
+  }
+}
+
+
+
+.edit-region {
+  position: relative;
+  .admin-edit-link {
+    font-size: 14px;
+    font-style: normal;
+    text-decoration: underline;
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 0;
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 5px;
+    color: rgba(0, 128, 255, 1);
+    border-radius: 2px;
+    box-shadow: 0px 1px 1px #999;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    z-index: 10000;
+  }
+}
+.edit-region.editable:hover {
+  outline: 2px dashed rgba(0, 128, 255, 0.4);
+  & > a.admin-edit-link {
+    display: inline;
+  }
+}
+
+.connection {
+  position: absolute;
+  z-index: 1000000;
+  left: 0;
+  top: 1em;
+  width: 100%;
+  text-align: center;
+  &.open {
+    pointer-events: none;
+  }
+  & > div {
+    display: inline-block;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.9);
+    box-shadow: 2px 2px 10px #000;
+    border-radius: 5px;
+    padding: 0.2em 1em;
+    text-align: center;
+    opacity: 1;
+  }
+  &.open > div {
+    opacity: 0;
+    transition: opacity 0.5s ease-out;
+  }
+}
+
+// button styles
+
+.btn{
+  &:focus, &:active, &.active, &:focus:active {
+  outline: none;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  }
+}
+
+.btn-default{
+  border-width: 2px; 
+  &:focus{
+    background-color: #fff;
+  }
+  &:hover{
+    background-color: #f5f5f5;
+    box-shadow: 2px 2px 0 #222;
+  }
+}
+
+.btn-danger{
+  border: 2px solid #222;
+  &:hover{
+    border: 2px solid #222;
+    box-shadow: 2px 2px 0 #222;
+  }
+  &:focus,&:active{
+    border: 2px solid #222;
+  }
+}
+
+.btn-primary{
+  border: 2px solid #222; 
+  &:hover{
+    box-shadow: 2px 2px 0 #222;
+    background-color: darken(#3652d3,2%);
+    border: 2px solid #222; 
+  }
+  &:focus,&:active{
+      background-color: #3652d3;
+      border: 2px solid #222;
+  }
+}
+
+.btn-success{
+  border-width: 2px; 
+  box-shadow: 2px 2px 0 #222;
+  &:focus{
+    color: #222;
+    background-color: darken(#9DE0FC,10%);
+  }
+  &:hover{
+    background-color: darken(#9DE0FC,10%);
+  }
+}
+
+// FIX styling of date inputs in mozilla
+input[type=date].form-control,input[type=datetime-local].form-control,input[type=month].form-control,input[type=time].form-control {
+  line-height:normal;
+}

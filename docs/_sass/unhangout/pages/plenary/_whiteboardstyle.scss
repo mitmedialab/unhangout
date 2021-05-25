@@ -1,0 +1,56 @@
+.whiteboard {
+  position: relative;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #9b9b9b;
+  .whiteboard-input {
+    margin: 15px 15px 0 15px;
+    max-height: 40vh;
+    overflow: auto;
+    & a{
+      color: #3652d3;
+    }
+  }
+  .whiteboard-button {
+    position: absolute;
+    top: calc(100%);
+    right: 0;
+    color: #555;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border: 2px solid #9b9b9b;
+    border-top: none;
+    padding: 2px 8px 2px 9px;
+    margin-right: 10px;
+    border-top-right-radius: 0px;
+    border-top-left-radius: 0px;
+    &:hover{
+      border: 2px solid #9b9b9b;
+      border-top: none;
+      box-shadow: 2px 2px 0 #9b9b9b;
+      background-color: #fff;
+    }
+  }
+  .panel {
+    margin: 0px;
+    box-shadow: none;
+    border: none;
+  }
+  .panel-body {
+    border: none;
+    padding: 0;
+  }
+  .panel {
+    position: relative;
+    height: 100%;
+  }
+  .panel-collapse, .panel-body {
+    height: 100%;
+  }
+  p {
+    padding: 0;
+    margin: 0;
+  }
+  .whiteboard-spinner{
+    max-height: 10px;
+  }
+}

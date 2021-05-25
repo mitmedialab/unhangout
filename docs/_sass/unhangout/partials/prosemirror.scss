@@ -1,0 +1,24 @@
+@import "../theme/variables";
+
+.rich-text-editor {
+  //border: 1px solid orange;
+  display: inline-block;
+  height: auto;
+  font-family: $font-family-serif;
+  &:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+  &.form-control {
+    border: none;
+    padding: 0;
+  }
+  .ProseMirror-content {
+    min-height: 10em;
+  }
+}
+
+.submit-row a.deletelink { height: auto; }
+.inline-group .tabular td.original p { height: auto; }
+

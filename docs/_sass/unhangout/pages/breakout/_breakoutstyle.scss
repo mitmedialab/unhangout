@@ -1,0 +1,138 @@
+.breakout-layout {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  .titlebar {
+    display: none;
+    height: 8rem;
+    display: flex;
+    flex-direction: row;
+    .title {
+      color: #fff;
+      background-color: #3652d3;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0 10px;
+      & > span {
+        font-size: 1.3em;
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+    .logo {
+      display: none;
+      height: calc(100% - 10px);
+      img {
+        height: 100%;
+        &:hover {
+          opacity: 0.8;
+        }
+      }
+    }
+    .breakout-presence {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      overflow-x: scroll;
+      .count {
+        padding: 0 10px;
+      }
+      .present {
+        display: inline-block;
+        text-align: center;
+        & + .present {
+          margin-left: 1rem;
+        }
+      }
+      .user-avatar {
+        $size: 48px;
+        width: $size;
+        height: $size;
+        img { max-width: $size; max-height: $size; }
+      }
+      .name {
+        display: block;
+        font-size: 1rem;
+        max-width: 64px;
+        max-height: 28px;
+        overflow-wrap: break-word;
+        overflow: hidden;
+      }
+    }
+  }
+
+  .interaction {
+    flex-grow: 1;
+    width: 100vw;
+    display: flex;
+    flex-direction: row;
+    position: relative;
+    & > div {
+      flex-grow: 0;
+    }
+    .handle {
+      cursor: ew-resize;
+    }
+  }
+  .etherpad-holder {
+    &, iframe {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .jitsi-video-holder {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  .jitsi-error {
+    position: absolute;
+    left: 2em;
+    top: 2em;
+    margin-right: 2em;
+    box-shadow: 0px 0px 5px 5px rgba(0,0,0,0.15);
+    padding: 1em;
+    background-color: rgba(255,255,255,0.8);
+    z-index: 1000;
+    border-radius: 1em;
+  }
+  .jitsi-video {
+    width: 100%;
+    height: 100%;
+    & > div {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  }
+}
+
+.breakout-messages {
+  position: absolute;
+  z-index: 10000000;
+  max-width: 300px;
+  top: 1em;
+  left: 1em;
+  background-color: #83ffcd;
+  padding: 1em;
+  border-radius: 5px;
+  border: 2px solid #222;
+  li {
+    list-style-type: none;
+  }
+  box-shadow: 0px 0px 5px #666;
+}

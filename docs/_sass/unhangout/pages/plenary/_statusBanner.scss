@@ -1,0 +1,11 @@
+.webrtc-status-banner {
+  background-color: #fffda0;
+  text-align: center;
+  padding: 0.7em;
+
+  p{
+    max-width: 900px;
+    margin: auto;
+    color: darken(#fcf3af,60%);
+  }
+}
