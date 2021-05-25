@@ -1,6 +1,4 @@
 topnav:
- - text: Home
-   link: /
  - text: Setup
    link: /setup
  - text: Use
