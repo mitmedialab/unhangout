@@ -1,0 +1,22 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+
+  <a class="navbar-brand" href="#">
+    <img src='{{ site.baseurl }}/assets/img/unhangout-logo-UN-seafoam.svg' class="img-responsive" alt='Unhangout logo' />
+  </a>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      {% assign page_url = page.url|split:"."|first %}
+      {% for item in site.topnav %}
+        <li class="nav-item{% if page_url == item.link %} active{% endif %}">
+          <a class="nav-link" href="{{ item.link }}">{{item.text}}{% if page_url == item.link %}<span class="sr-only">(current)</span>{% endif %}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+</nav>

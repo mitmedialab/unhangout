@@ -1,0 +1,23 @@
+---
+---
+@import "unhangout/partials/_web-fonts";
+@import url(web-fonts-url(("Lato": ("400", "700","900"))));
+
+$font-family-sans-serif:  "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif !default;
+
+@import "unhangout/theme/variables";
+@import "bootstrap/scss/bootstrap";
+@import "unhangout/partials/sticky-footer";
+
+.navbar-brand > img {
+  height: 40px;
+}
+
+.btn-primary {
+  border: 2px solid #222;
+}
+
+// above is theme
+
+
+

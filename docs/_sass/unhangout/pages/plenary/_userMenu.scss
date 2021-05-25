@@ -1,0 +1,101 @@
+.user-button {
+  background-color: #70A4D8;
+  color: #fff;
+  width: 100%;
+  cursor: pointer;
+  padding: 12px;
+  &:hover, &:active, &:focus {
+    background-color: lighten(#70A4D8,5%);
+  }
+  .user {
+    font-weight: bold;
+    i{
+      font-weight: bold;
+    }
+  }
+  img{
+    width: 32px;
+    height: 32px;
+    border-radius: 5px;
+    margin-right: 5px;
+  }
+}
+
+.user-menu-overlay {
+  position: absolute;
+  z-index: 1000;
+  background-color: #fff;
+  box-shadow: 0px 2px 5px 0px rgba(0,0,0,0.27), 0px 1px 1px 0px rgba(0,0,0,0.15);
+  border: 1px solid #c3c3c3;
+  top: 10px;
+  width: 240px;
+  max-width: 100%;
+  border-radius: 3px;
+  
+  .user-menu-items{
+    padding: 10px;
+    & > .user {
+      img {
+        width: 32px;
+        height: 32px;
+        border-radius: 5px;
+        margin-right: 5px;
+        float: left;
+      }
+    }
+    & > .menu-title {
+      & > i {
+        margin-left: 5px;
+      }
+    }
+  }
+  .menu-title{
+    margin-bottom: 8px;
+    font-weight: 700;
+    color: #3652D3;
+  }
+
+  div.menu-item > .btn-default{
+    background-color: #9DE0FC;
+    &:hover, &:focus{
+      background-color: darken(#9DE0FC,5%);
+      color: #222;
+    }
+  }
+
+  div.menu-item {
+    i {
+      padding-right: 3px;
+    }
+    a {
+      display: block;
+      color: black;
+      margin-top: 5px;
+      text-decoration: none;
+      &:hover {
+        background-color: #f5f5f5;
+      }
+    }
+  }
+
+  div.menu-item.inline {
+    margin-top: 5px;
+    a {
+      display: inline;
+      color: blue;
+    }
+  }
+
+
+  .admin-menu-items{
+    border-top: 1px solid #c3c3c3;
+    background-color: #f5f5f5;
+    padding: 10px;
+    div.menu-item a {
+      &:hover{
+        color: black;
+        background-color: #83FFCD;
+      }
+    }
+  }
+}
