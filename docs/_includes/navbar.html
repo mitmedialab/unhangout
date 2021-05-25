@@ -10,12 +10,12 @@
 
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav mr-auto">
-      <li class="nav-item active">
-        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Link</a>
-      </li>
+      {% assign page_url = page.url|split:"."|first %}
+      {% for item in site.topnav %}
+        <li class="nav-item{% if page_url == item.link %} active{% endif %}">
+          <a class="nav-link" href="{{ item.link }}">{{item.text}}{% if page_url == item.link %}<span class="sr-only">(current)</span>{% endif %}</a>
+        </li>
+      {% endfor %}
     </ul>
   </div>
 

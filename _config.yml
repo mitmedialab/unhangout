@@ -1,1 +1,10 @@
 source: ./docs
+topnav:
+ - text: Home
+   link: /
+ - text: Setup
+   link: /setup
+ - text: Use
+   link: /use
+ - text: Develop
+   link: /develop
