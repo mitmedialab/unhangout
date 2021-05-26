@@ -7,15 +7,20 @@ layout: doc
 
 To use unhangout, you need to setup and configure a server to run the software.
 
-This guide will require you to check out code from GitHub, install some software on your computer and interact with it through the Command Line Interface (CLI).
+This guide will require you to
+- use the command line interface (CLI) on your computer
+- install some software on your computer
+- check out code from GitHub, 
 
-If this seems too intimidating and you still wish to use unhangout, see our list of hosted instances that might be able to accommodate your events [here]({{site.baseurl}}/hosted-instances/), or have a look at [this brief job template]({{site.baseurl}}/job-template/) that could help you find someone that can set it up for you.
+If that seems too intimidating and you still wish to use unhangout, see our list of hosted instances that might be able to accommodate your events [here]({{site.baseurl}}/hosted-instances/), or have a look at [this brief job template]({{site.baseurl}}/job-template/) that could help you find someone that can set it up for you.
 
 ## Get the code from GitHub
 
 Everything required to run Unhangout is stored in the [GitHub repository](https://github.com/mitmedialab/unhangout), including a copy of this and other documentation. Start by getting the code from GitHub. In your CLI run:
 
-```git clone https://github.com/mitmedialab/unhangout.git```
+```
+$ git clone https://github.com/mitmedialab/unhangout.git
+```
 
 Before we can start setting some configuration values, you need to sign up for a few 3rd party servers.
 
@@ -27,7 +32,7 @@ You need something with at least 2GB RAM, 20 odd GB hard drive space and a decen
 
 ## Register a domain
 
-Next you need to register a domain name or use an existing domain you can configure. A service like [ghandi.net(https://www.gandi.net/) will work. You need to configure 2 subdomains and point them both to the IP address of your server using an DNS A record.
+Next you need to register a domain name or use an existing domain you can configure. A service like [ghandi.net](https://www.gandi.net/) will work. You need to configure 2 subdomains and point them both to the IP address of your server using an DNS A record.
 
 ## Create an account on Mailgun
 
@@ -43,15 +48,21 @@ Now that the infrastructure is ready, you need to set a few configuration values
 
 Make a copy of the template file 
 
-```cp ansible/vars/example.yml ansible/vars/secrets.yml```
+```
+$ cp ansible/vars/example.yml ansible/vars/secrets.yml
+```
 
 Encrypt it using ansible vault
 
-```ansible-vault encrypt ansible/vars/secrets.yml```
+```
+$ ansible-vault encrypt ansible/vars/secrets.yml
+```
 
 Edit the values:
 
-```ansible-vault edit ansible/vars/secrets.yml```
+```
+$ ansible-vault edit ansible/vars/secrets.yml
+```
 
 You could also setup a vault password file for the 2 steps above to avoid entering a password all the time.
 
@@ -93,12 +104,12 @@ ga_tracking_id:
 
 You are now ready to deploy unhangout to your server! To run the first deployment, change in the ansible directory and run:
 ```
-make firstrunprod
+$ make firstrunprod
 ```
 
 Create an initial Django superuser:
 ```
-make createsuperuserprod
+$ make createsuperuserprod
 ```
 
 This will create a superuser with username `admin` and email address `admin_email` from `vars/secrets.yml`.  To log in, you'll need to request a password reset by going to `https://<domain>/accounts/password/reset/`.
