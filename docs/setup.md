@@ -1,5 +1,5 @@
 ---
-title: Install unhangout
+title: Setup unhangout
 layout: doc
 ---
 
@@ -44,9 +44,7 @@ To run the deployment process, you will need to install Ansible on your local wo
 
 ## Configure unhangout
 
-Now that the infrastructure is ready, you need to set a few configuration values. There is a detailed set of instructions on what you should configure at `[ansible/README.md](https://github.com/mitmedialab/unhangout/blob/master/ansible/README.md)`, but in short:
-
-Make a copy of the template file 
+Now that the infrastructure is ready, you need to set a few configuration values. Make a copy of the template file 
 
 ```
 $ cp ansible/vars/example.yml ansible/vars/secrets.yml
@@ -66,39 +64,31 @@ $ ansible-vault edit ansible/vars/secrets.yml
 
 You could also setup a vault password file for the 2 steps above to avoid entering a password all the time.
 
-You will need to set at least the following values:
+The template YAML file has some comments about the values you need to define, but in short here is a list of the required values:
 
-```yaml
-uh_domain: 
-main_user_pass: 
-main_user_salt: 
-admin_email:
-postgres_admin_password: 
-youtube_api_key: 
-mailgun_active_api_key: 
-mailgun_smtp_hostname: 
-mailgun_smtp_login: 
-mailgun_smtp_password: 
-uh_secret_key: 
-uh_postgres_password: 
-uh_etherpad_domain: 
-uh_etherpad_db_password: 
-uh_etherpad_session_key: 
-uh_etherpad_api_key: 
-main_user_authorized_keys:
-```
+ - `uh_domain`: the subdomain where users will find and join events
+ - `main_user_pass`: a unique password
+ - `main_user_salt`: 
+ - `admin_email`: your email address
+ - `postgres_admin_password`: a random long password
+ - `youtube_api_key`: Youtube API key used for embedding videos
+ - `mailgun_active_api_key`: Mailgun config for sending email
+ - `mailgun_smtp_hostname`: probably smtp.mailgun.org
+ - `mailgun_smtp_login`: Mailgun credentials for SMTP user (not your mailgun account login)
+ - `mailgun_smtp_password`: Mailgun credetials for SMTP user (not your mailgun account password)
+ - `uh_secret_key`: a long (>64 characters) randomly generated key. This is used to sign and encrypt things.
+ - `uh_postgres_password`: A long random password
+ - `uh_etherpad_domain`: The subdomain where etherpad will be running
+ - `uh_etherpad_db_password`: A long random password
+ - `uh_etherpad_session_key`: Another long random string
+ - `uh_etherpad_api_key`: Yet another long random string
+ - `main_user_authorized_keys`: public SSH keys for anyone who will be deploying/updating the code on your unhangout instance. You can usually find a public key at `~/.ssh/id_rsa.pub`. You can add multiple ssh keys here, just use YAML multi-line syntax.
 
-You can optionally set the following variables for social login, google analytics and backups.
-```
-twitter_client_id: 
-twitter_secret: 
-facebook_client_id: 
-facebook_secret: 
-google_client_id: 
-google_secret: 
-tarsnap_key:
-ga_tracking_id: 
-```
+If you want to enable social login, you can set the twitter, facebook and google variables that are named `twitter_client_id`, `twitter_secret`, `google_client_id`, etc.
+
+If you want to run backups, you will need to sign up for a [tarsnap](https://www.tarsnap.com/) account and set the `tarsnap_key` variable.
+
+And if you wish to use Google Analytics to track web traffic, you can set `ga_tracking_id`.
 
 ## Deploy unhangout to your server
 
@@ -116,8 +106,4 @@ This will create a superuser with username `admin` and email address `admin_emai
    
 ## Final touches
 
-Log in as an admin user. Set the value for the `Site` domain and name at `https://<domain>/admin/sites/site/1/change/`.  Create initial Plenaries as needed.
-
-- Adding terms of service and privacy policy
-- Logo?
-
+You are almost done! Log in as an admin user and set the value for the `Site` domain and name at `https://<domain>/admin/sites/site/1/change/`. You can now start using your instance of Unhangout!
