@@ -12,7 +12,7 @@ This guide will require you to
 - install some software on your computer
 - check out code from GitHub, 
 
-If that seems too intimidating and you still wish to use unhangout, send us an email at unhangout@media.mit.edu and we'll try to help you find someone that can do it for you.
+If that seems too intimidating and you still wish to use unhangout, send us an email at [unhangout@media.mit.edu](mailto:unhangout@media.mit.edu) and we'll try to help you find someone that can do it for you.
 
 ## Get the code from GitHub
 
