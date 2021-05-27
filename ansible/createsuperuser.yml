@@ -4,4 +4,4 @@
    - vars/secrets.yml
   tasks:
     - name: Create superuser
-      command: "/var/local/reunhangout/venv/bin/python /var/local/reunhangout/reunhangout/manage.py createsuperuser --username admin --email {{admin_email}} --noinput"
+      command: "docker exec {{uh_domain}} /opt/app-venv/bin/python /opt/app/manage.py createsuperuser --username admin --email {{admin_email}} --noinput"
