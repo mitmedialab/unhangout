@@ -22,7 +22,6 @@
     - postgres
     - redis
     - memcached
-    #- tarsnap TODO add back
     - role: postgres_role
       vars:
         DB_NAME: "{{uh_etherpad_db_name}}"
