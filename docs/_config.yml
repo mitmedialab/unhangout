@@ -1,5 +1,7 @@
 repository: mitmedialab/unhangout
 topnav:
+ - text: About
+   link: /about
  - text: Setup
    link: /setup
  - text: Use
