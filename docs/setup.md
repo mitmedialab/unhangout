@@ -12,7 +12,7 @@ This guide will require you to
 - install some software on your computer
 - check out code from GitHub, 
 
-If that seems too intimidating and you still wish to use unhangout, see our list of hosted instances that might be able to accommodate your events [here]({{site.baseurl}}/hosted-instances/), or have a look at [this brief job template]({{site.baseurl}}/job-template/) that could help you find someone that can set it up for you.
+If that seems too intimidating and you still wish to use unhangout, send us an email at unhangout@media.mit.edu and we'll try to help you find someone that can do it for you.
 
 ## Get the code from GitHub
 
