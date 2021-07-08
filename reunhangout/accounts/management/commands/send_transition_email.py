@@ -15,7 +15,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         User = get_user_model()
         admins = User.objects.filter(plenary__start_date__gte=timezone.now() - datetime.timedelta(days=256), plenary__canceled=False)
-        print(f'About to send email to {admins.count()} users')
 
         site = Site.objects.get_current()
         protocol ="http" if site.domain.startswith("localhost") else "https",
@@ -28,14 +27,17 @@ class Command(BaseCommand):
         subject = render_to_string("emails/transition_subject.txt", context).strip('\n')
         body_html = render_to_string("emails/transition_body.html", context)
 
+        bcc = list(set([user.email for user in admins if user.email]))
+        print(f'About to send email to {len(bcc)} users')
+
         batch_size = 500
-        for index in range(0, admins.count(), batch_size):
+        for index in range(0, len(bcc), batch_size):
             mail = EmailMultiAlternatives(
                 subject=subject,
                 body="",
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 to=[settings.DEFAULT_FROM_EMAIL], # not ideal
-                bcc=[user.email for user in admins[index:index+batch_size]],
+                bcc=bcc[index:index+batch_size],
             )
             mail.attach_alternative(body_html, "text/html")
             mail.send()
