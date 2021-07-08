@@ -1,0 +1,38 @@
+.video-sync-controls{
+  padding: 0 10px 0 10px;
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  .sync-status-indicator {
+    align-self:center;
+    margin: 3px 0 5px 0;
+  }
+  .play-button{
+    flex-grow: 0;
+    margin-left: 0;
+    margin-bottom: 7px;
+  }
+  .sync-intent{
+    min-width: 25px;
+    margin-left: 3px;
+  }
+}
+
+.sync-indicator {
+  display: inline-block;
+  vertical-align: middle;
+  margin-top: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 6px;
+  background-color: #aaa;
+  box-shadow: 0px 0px 5px rgba(200, 200, 200, 1);
+  &.synced {
+    background-color: #0f0;
+    box-shadow: 0px 0px 5px rgba(0, 200, 0, 1);
+  }
+  &.unsynced {
+    background-color: #f00;
+    box-shadow: 0px 0px 5px rgba(200, 0, 0, 1);
+  }
+}

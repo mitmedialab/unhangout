@@ -1,0 +1,101 @@
+.chat-container {
+  overflow: auto; // Needed for firefox. Not redundant.
+  width: 100%;
+  background-color: #f5f5f5;
+  // as child
+  flex-grow: 2;
+  // as parent
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  .chat-box {
+    overflow: auto;
+    width: 100%;
+  }
+  .chat-input {
+    .form-group { margin: 5px 10px; };
+    input[type="text"]{
+      border: 2px solid #9b9b9b;
+    }
+    .input-group-addon { 
+      padding: 0px; 
+      border: 2px solid #9b9b9b;
+      background-color: #9b9b9b;
+    }
+    label { margin-bottom: 0px; }
+    input[type="checkbox"] { display: none; }
+    input[type="checkbox"] ~ label i {
+      display: inline-block;
+      cursor: pointer;
+      font-size: 1.3em;
+      vertical-align: middle;
+      margin: 6px 10px 5px 8px;
+    }
+    input[type="checkbox"]:checked ~ label i {
+      color: darken(#83ffcd,10%);
+    }
+  }
+}
+
+.chat-input-draft-js {
+  position: relative;
+  height: auto;
+  min-height: 34px;
+}
+
+.chat-message {
+  padding: 2px 10px 2px 0;
+  width: 100%;
+  // as parent
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  &:nth-child(even) {
+    background-color: #f5f5f5;
+  }
+  &:nth-child(odd) {
+    background-color: darken(#f5f5f5,2%);
+  }
+  &.highlight {
+    background-color: lighten(#83ffcd,5%);
+  }
+
+  .user-avatar {
+    flex-shrink: 0;
+    width: 2.4em;
+    height: 2.4em;
+    margin: 2px 10px;
+    position: relative;
+    img {
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 5px;
+    }
+  }
+
+  .chat-message-text {
+    // TRICKY: http://stackoverflow.com/a/36150764
+    min-width: 10%;
+    word-wrap: break-word;
+    .userName {
+      font-weight: 900;
+      color: #2c2d30
+    }
+    .atname, [data-mention-user-id] {
+      font-weight: bold;
+      &.self {
+        background-color: #FFFDA0;
+      }
+    }
+  }
+  p {
+    margin: 0;
+  }
+}
+.chat-input-draft-js.form-control {
+  padding: 0;
+  .DraftEditor-editorContainer, .public-DraftEditorPlaceholder-root {
+    padding: 6px 12px;
+  }
+}

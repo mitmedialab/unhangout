@@ -47,10 +47,11 @@ class PlenaryConsumer(WebsocketConsumer):
             return self.handle_error('Plenary not found')
 
         # Remove previous presence if the user is reconnecting
-        Presence.objects.filter(
-            room__channel_name=plenary.channel_group_name,
-            user=self.scope['user']
-        ).delete()
+        if self.scope['user'].is_authenticated:
+            Presence.objects.filter(
+                room__channel_name=plenary.channel_group_name,
+                user=self.scope['user']
+            ).delete()
 
         # Handle max connections
         if plenary.max_participants > 0 and not plenary.has_admin(self.scope['user']):
@@ -214,6 +215,8 @@ class PlenaryConsumer(WebsocketConsumer):
                 return admin_required_error()
             if 'title' in payload:
                 breakout.title = payload['title']
+            if is_admin and 'max_attendees' in payload:
+                breakout.max_attendees = payload['max_attendees']
             breakout.save()
             return respond_with_breakouts()
 
@@ -449,7 +452,7 @@ def _b64_image_to_uploaded_file(b64data):
     return SimpleUploadedFile(filename, image_bytes, content_type)
 
 PLENARY_SIMPLE_UPDATE_KEYS = (
-    'random_max_attendees', 'breakout_mode', 'name', 'organizer', 'start_date',
+    'breakout_mode', 'name', 'organizer', 'start_date',
     'end_date', 'doors_open', 'doors_close', 'breakouts_open', 'canceled',
     'slug', 'public', 'jitsi_server', 'wrapup_emails', 'etherpad_initial_text'
 )

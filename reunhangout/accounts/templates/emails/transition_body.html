@@ -1,0 +1,29 @@
+{% extends "emails/base.html" %}
+{% load email_tags %}
+{% load thumbnail %}
+
+{% block body %}
+{% filter dollars_entities %}
+<mj-text>
+
+  <p>Hi there,</p>
+
+  <p>We are writing to you because you have hosted an event on unhangout.media.mit.edu during the past 12 month. We are making some changes to the project that we want to let you know about.</p>
+
+  <p>Starting 1 August 2021, Unhangout will transition to an open-source project for people who want to host their own Unhangout server. You can find the source code and documentation at <a href="https://github.com/mitmedialab/unhangout">https://github.com/mitmedialab/unhangout</a>.</p>
+
+  <p>We will stop hosting a public event server. This means that after 31 July you won’t be able to access your account on unhangout.media.mit.edu anymore and you won't be able to create new events or access old events.</p>
+
+  <p>We will not retain any user data and we will delete all data that is currently stored in the database. As a result we will also not be able to share any of your event data with you after the server is shut down.</p>
+
+  <p>If you would like to continue using unhangout, you can find instructions for setting up your own server at <a href="https://mitmedialab.github.io/unhangout/setup">https://mitmedialab.github.io/unhangout/setup</a>.</p>
+
+  <p>We know that not everyone will want to host their own server and we’re hoping that community members will step up and host public instances of unhangout. If you do please let us know so we can maintain a list of public servers for people to use. And if you are looking for developers who have worked on Unhangout, please send us an email and we will forward it to some of the people we have worked with in the past.</p>
+
+  <p>We will publish a longer post about the project, why we started it, how it went, and what we learned in the process at a later point. For now, we’d like to say “so long, and thanks for all the fish.”</p>
+
+  <p>Cheers,<br>The Unhangout Team</p>
+
+</mj-text>
+{% endfilter %}
+{% endblock %}

@@ -1,0 +1,40 @@
+@import "../theme/variables.scss";
+
+.in-place-editor {
+  padding: 2px 8px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  word-wrap: break-word;
+
+  &.editable {
+    &:hover {
+      border-color: #ccc;
+    }
+  }
+  &.editing {
+    border-color: #66afe9;
+    background-color: white;
+    input {
+      border: none;
+      width: 100%;
+    }
+  }
+
+  // Hacks to remove the react-rte empty toolbar and text styles
+  & > div > div:first-child {
+    display: none;
+  }
+  // Hack to unset react-rte styles
+  & > div, & > div > div {
+    font-family: inherit;
+    font-size: inherit;
+    border: none;
+    background: inherit;
+  }
+  .public-DraftEditor-content {
+    padding: 0 !important;
+    [data-block='true'] {
+      margin: 0;
+    }
+  }
+}

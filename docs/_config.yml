@@ -1,0 +1,10 @@
+repository: mitmedialab/unhangout
+topnav:
+ - text: About
+   link: /about
+ - text: Setup
+   link: /setup
+ - text: Use
+   link: /use
+ - text: Develop
+   link: /develop

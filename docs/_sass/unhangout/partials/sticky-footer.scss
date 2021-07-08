@@ -1,0 +1,19 @@
+html, body {
+  height: 100%;
+  margin: 0; padding: 0;
+}
+#wrapper {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+}
+#body {
+  // relation to parent
+  flex: 1;
+  // relation to children
+  display: flex;
+  flex-direction: column;
+}
+footer {
+  width: 100%;
+}

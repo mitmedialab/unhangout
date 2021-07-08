@@ -22,7 +22,6 @@
     - postgres
     - redis
     - memcached
-    #- tarsnap TODO add back
     - role: postgres_role
       vars:
         DB_NAME: "{{uh_etherpad_db_name}}"
@@ -42,7 +41,6 @@
 
   vars:
     domain: "{{uh_domain}}"
-    letsencrypt_domains: "{{ [uh_domain, uh_etherpad_domain] + uh_domain_aliases }}"
     swap_file_size_kb: 4000000 # 4GiB
     swap_file_path: "/swapfile2"
     uh_repo_dir: "/var/local/reunhangout/"

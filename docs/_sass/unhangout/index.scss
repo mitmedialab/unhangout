@@ -1,0 +1,8 @@
+// Bundle target for client-dynamic pages (plenaries, breakouts, etc).
+
+@import "./theme/bootstrap";
+$fa-font-path: "~font-awesome/fonts";
+@import "~font-awesome/scss/font-awesome";
+@import "./partials/sticky-footer";
+@import "./partials/_web-fonts";
+@import url(web-fonts-url(("Lato": ("400", "700","900"))));

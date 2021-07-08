@@ -68,11 +68,7 @@ class Plenary(models.Model):
         ("user", _("Participant proposed")),
         ("random", _("Random breakouts"))
     ), default="admin")
-    random_max_attendees = models.IntegerField(default=10, validators=[
-        MinValueValidator(2),
-        MaxValueValidator(10),
-    ])
-
+    
     embeds = JSONField(blank=True, null=True)
     history = JSONField(blank=True, null=True)
 

@@ -239,7 +239,9 @@ class BreakoutList extends React.Component {
               auth={this.props.auth}
               users={this.props.users}
               key={`${i}`}
-              onChangeBreakouts={this.props.onChangeBreakouts} />
+              onChangeBreakouts={this.props.onChangeBreakouts}
+              MAX_BREAKOUT_SIZE={MAX_BREAKOUT_SIZE}
+            />
           })
         }
       </div>

@@ -17,6 +17,14 @@ export default class Breakout extends React.Component {
     });
   }
 
+  handleAddSlot(){
+    this.props.onChangeBreakouts({
+      action: "modify",
+      id: this.props.breakout.id,
+      max_attendees: this.props.breakout.max_attendees + 1,
+    });
+  }
+
   handleDelete(event) {
     event.preventDefault();
     this.props.onChangeBreakouts({
@@ -44,7 +52,6 @@ export default class Breakout extends React.Component {
   render() {
     let showProposer = (
       this.props.plenary.breakout_mode === "user" &&
-      !this.props.breakout.is_random &&
       !!this.props.breakout.proposed_by
     );
     let showApprove = (
@@ -62,9 +69,7 @@ export default class Breakout extends React.Component {
       this.props.breakout.proposed_by &&
       this.props.breakout.proposed_by === this.props.auth.id
     );
-    let titleReadOnly = this.props.breakout.is_random || !(
-      this.props.auth.is_admin || isProposer
-    );
+    let titleReadOnly = !this.props.auth.is_admin && !isProposer;
 
     let showVote = this.props.breakout.is_proposal;
     let showJoin = (
@@ -77,8 +82,6 @@ export default class Breakout extends React.Component {
       return vote === this.props.auth.id
     });
     let showPresence = this.props.plenary.breakouts_open && !this.props.breakout.is_proposal;
-    let showAssignees = this.props.breakout.is_random;
-
     let classes = ['breakout-list-item'];
     if (this.props.breakout.is_proposal) {
       classes.push('proposal');
@@ -91,25 +94,9 @@ export default class Breakout extends React.Component {
                          readOnly={titleReadOnly}
                          className='breakout-title in-place-editor' 
                          value={this.props.breakout.title}
-                         onChange={(e) => this.handleChangeTitle(e)} />
-
-          { showAssignees ?
-              <div className="breakout-assignees-container">
-                <span>Assigned Participants:</span>
-                <div className="members-avatars-container">
-                  {this.props.breakout.members.map((member, i) => {
-                    return <Avatar user={member}
-                                   key={`${this.props.breakout.id}${i}`}
-                                   idPart={`assignees-${this.props.breakout.id}`}
-                                   breakoutView={false}
-                                   enableSpeakerStats={false} />
-                  })}
-                </div>
-              </div>
-            : ""
-          }
-
-          { showPresence ?  <BreakoutPresence {...this.props} /> : "" }  
+                         onChange={(e) => this.handleChangeTitle(e)} 
+          />
+          { showPresence && <BreakoutPresence {...this.props} onAddSlot={this.handleAddSlot.bind(this)}/>}  
         </div>
         <div className='breakout-list-item-middle-col'>
           { showProposer ? 
@@ -204,33 +191,36 @@ Breakout.propTypes = {
   'onChangeBreakouts': PropTypes.func.isRequired
 }
 
-class BreakoutPresence extends React.Component {
-  render() {
-    let members = sortPresence(this.props.presence, this.props.auth);
-    let numSlots = this.props.breakout.max_attendees;
-    let empties = numSlots - members.length;
-    for (let i = 0; i < empties; i++) {
-      members.push(null);
-    }
-    return <div className='breakout-presence'>
+const BreakoutPresence = props => {
+  let members = sortPresence(props.presence, props.auth);
+  let numSlots = props.breakout.max_attendees;
+  let empties = numSlots - members.length;
+  for (let i = 0; i < empties; i++) {
+    members.push(null);
+  }
+  return ( 
+    <div className='breakout-presence'>
       { members.map((user, i) => (
-          <span className={`slot${user === null ? " empty" : ""}`} key={`user-${i}`}>
-            { user === null ?
-                ""
-             : <Avatar user={user}
-                       idPart={`breakout-presence-${this.props.breakout.id}-${user.id}`} 
-                       breakoutView={false}
-                       enableSpeakerStats={false}/>
-            }
-          </span>
-        ))
+        <span className={`slot${user === null ? " empty" : ""}`} key={`user-${i}`}>
+          { user === null ?
+            ""
+            : <Avatar user={user}
+              idPart={`breakout-presence-${props.breakout.id}-${user.id}`} 
+              breakoutView={false}
+              enableSpeakerStats={false}/>
+          }
+        </span>
+      ))}
+      { props.auth.is_admin && props.breakout.max_attendees < props.MAX_BREAKOUT_SIZE &&
+        <BS.OverlayTrigger placement='top' overlay={
+          <BS.Tooltip id='add-slot-list-item'>Add slot</BS.Tooltip>
+        }>
+          <BS.Button bsStyle="primary" className='add-slot-btn' bsSize="xsmall"
+            onClick={props.onAddSlot.bind(props.breakout.id)}>
+            <i className="fa fa-plus"> </i>
+          </BS.Button>
+        </BS.OverlayTrigger>
       }
     </div>
-  }
+  );
 }
-BreakoutPresence.propTypes = {
-  'breakout': PropTypes.object.isRequired,
-  'presence': PropTypes.object.isRequired,
-  'auth': PropTypes.object.isRequired,
-}
-
