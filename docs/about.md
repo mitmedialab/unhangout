@@ -1,15 +1,18 @@
 ---
 layout: doc
-title: About
 ---
-<h1>{{page.title}}</h1>
+# About
 
-<p> Unhangout is an open source platform for running large-scale, participant-driven events online.</p>
-<p>Each event has a landing page, which we call the lobby. When participants arrive, they can see who else is there and chat with each other. Hosts can welcome their community and do introductions in a video window that gets streamed into the lobby. Participants can then join breakouts, which are small group video chats, for in-depth conversations, peer-to-peer learning, and collaboration on projects.</p>
-<strong><p> Unhangout facilitates participant-driven, community-based learning, rather than top-down information transfer.</p></strong>
+Unhangout is an open source platform for running large-scale, participant-driven events online.
 
-<h1>The Team</h1>
-<p>Our small design and development team is (mostly) based at the MIT Media Lab in Cambridge, MA, USA.</p>
+Each event has a landing page, which we call the lobby. When participants arrive, they can see who else is there and chat with each other. Hosts can welcome their community and do introductions in a video window that gets streamed into the lobby. Participants can then join breakouts, which are small group video chats, for in-depth conversations, peer-to-peer learning, and collaboration on projects.
+
+**Unhangout facilitates participant-driven, community-based learning, rather than top-down information transfer.**
+
+# The Team
+
+Our small design and development team is (mostly) based at the MIT Media Lab in Cambridge, MA, USA.
+
 <div class='team-container'>
   <div class='team-member'>
     <a href='https://www.media.mit.edu/people/kamcco/overview/' target='_blank'>
@@ -46,7 +49,10 @@ title: About
   </div>
 </div>
 
-<h1> Etc. </h1>
-<p>Unhangout is an open source project. You can find the code on <a href='https://github.com/mitmedialab/unhangout'>GitHub</a>.</p>
-<p>Questions? Say hello at <a href='mailto:unhangout@media.mit.edu' target='_blank'>unhangout@media.mit.edu</a>.</p>
+# Etc.
+
+Unhangout is an open source project. You can find the code on [GitHub](https://github.com/mitmedialab/unhangout).
+
+
+Questions? Say hello at [unhangout@media.mit.edu](mailto:unhangout@media.mit.edu)
 
