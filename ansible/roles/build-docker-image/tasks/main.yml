@@ -4,10 +4,10 @@
     images: yes
     containers: yes
 
-- name: get code from gitlab
+- name: get code from GitHub
   git: 
     dest: /usr/local/src/reunhangout
-    repo: https://gitlab.com/unhangout/reunhangout.git
+    repo: https://github.com/mitmedialab/unhangout.git
     version: "{{django_repo_version}}"
 
 - name: Build docker iamge
