@@ -28,6 +28,13 @@ docker-compose up unhangout
 
 Go to http://localhost:8000/ to access the application. You can access the maildev server at http://localhost:1080 to look at email activity.
 
+Create a Django admin user:
+```
+docker-compose run --rm unhangout /opt/app-venv/bin/python3 manage.py createsuperuser
+```
+
+You'll be prompted for credentials and afterwards you should be able to access the Django admin interface at http://localhost:8000/admin
+
 
 # Production deploy
 
