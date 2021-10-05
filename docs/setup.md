@@ -3,7 +3,7 @@ title: Setup unhangout
 layout: doc
 ---
 
-# Setting up unhagout
+# Setting up unhangout
 
 To use unhangout, you need to setup and configure a server to run the software.
 
@@ -28,11 +28,11 @@ Before we can start setting some configuration values, you need to sign up for a
 
 First you need to get a server running Ubuntu 20.04 somewhere on the internet. The easiest way to getis to use a Virtual Private Server (VPS) provider like DigitalOcean or Linode. You can sign up and get a server for ~$20 per month.
 
-You need something with at least 2GB RAM, 20 odd GB hard drive space and a decent CPU core or more. If you're using a VPS you can probablyincrease the server specs at a later stage if performance becomes an issue.
+You need something with at least 2GB RAM, 20 odd GB hard drive space and a decent CPU core or more. If you're using a VPS you can probably increase the server specs at a later stage if performance becomes an issue.
 
 ## Register a domain
 
-Next you need to register a domain name or use an existing domain you can configure. A service like [ghandi.net](https://www.gandi.net/) will work. You need to configure 2 subdomains and point them both to the IP address of your server using an DNS A record.
+Next you need to register a domain name or use an existing domain you can configure. A service like [ghandi.net](https://www.gandi.net/) will work. You need to configure 2 subdomains and point them both to the IP address of your server using a DNS A record.
 
 ## Create an account on Mailgun
 
